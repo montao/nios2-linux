@@ -1,0 +1,152 @@
+##
+## Compiler flags to use when compiling libgcc2.c.
+##
+## LIB2FUNCS_EXTRA
+## A list of source file names to be compiled or assembled and inserted into libgcc.a.
+
+LIB2FUNCS_EXTRA=$(srcdir)/config/nios2/lib2-divmod.c \
+  $(srcdir)/config/nios2/lib2-divmod-hi.c \
+  $(srcdir)/config/nios2/lib2-divtable.c \
+  $(srcdir)/config/nios2/lib2-mul.c
+
+##
+## Floating Point Emulation
+## To have GCC include software floating point libraries in libgcc.a define FPBIT
+## and DPBIT along with a few rules as follows:
+##
+## # We want fine grained libraries, so use the new code
+## # to build the floating point emulation libraries.
+FPBIT=$(srcdir)/config/nios2/nios2-fp-bit.c
+DPBIT=$(srcdir)/config/nios2/nios2-dp-bit.c
+
+TARGET_LIBGCC2_CFLAGS = -O2
+
+# FLOAT_ONLY - no doubles
+# SMALL_MACHINE - QI/HI is faster than SI
+#     Actually SMALL_MACHINE uses chars and shorts instead of ints
+#     since ints (16-bit ones as they are today) are at least as fast
+#     as chars and shorts, don't define SMALL_MACHINE
+# CMPtype - type returned by FP compare, i.e. INT (hard coded in fp-bit - see code )
+
+$(FPBIT): $(srcdir)/config/fp-bit.c Makefile
+	echo '#define FLOAT'          >  ${FPBIT}
+	echo '#ifndef __nios2_big_endian__' >> ${FPBIT}
+	echo '#define FLOAT_BIT_ORDER_MISMATCH' >> ${FPBIT}
+	echo '#endif' >> ${FPBIT}
+	cat $(srcdir)/config/fp-bit.c >> ${FPBIT}
+
+$(DPBIT): $(srcdir)/config/fp-bit.c Makefile
+	echo ''          >  ${DPBIT}
+	echo '#ifndef __nios2_big_endian__' >> ${DPBIT}
+	echo '#define FLOAT_BIT_ORDER_MISMATCH' >> ${DPBIT}
+	echo '#endif' >> ${DPBIT}
+	cat $(srcdir)/config/fp-bit.c >> ${DPBIT}
+
+EXTRA_MULTILIB_PARTS = crtbegin.o crtend.o
+
+## You may need to provide additional #defines at the beginning of
+## fp-bit.c and dp-bit.c to control target endianness and other options
+##
+## CRTSTUFF_T_CFLAGS
+## Special flags used when compiling crtstuff.c.  See Initialization.
+##
+## CRTSTUFF_T_CFLAGS_S
+## Special flags used when compiling crtstuff.c for shared linking.  Used
+## if you use crtbeginS.o and crtendS.o in EXTRA-PARTS. See Initialization.
+##
+## MULTILIB_OPTIONS
+## For some targets, invoking GCC in different ways produces objects that
+## can not be linked together.  For example, for some targets GCC produces
+## both big and little endian code.  For these targets, you must arrange
+## for multiple versions of libgcc.a to be compiled, one for each set of
+## incompatible options.  When GCC invokes the linker, it arranges to link
+## in the right version of libgcc.a, based on the command line options
+## used.
+## The MULTILIB_OPTIONS macro lists the set of options for which special
+## versions of libgcc.a must be built.  Write options that are mutually
+## incompatible side by side, separated by a slash.  Write options that may
+## be used together separated by a space.  The build procedure will build
+## all combinations of compatible options.
+##
+## For example, if you set MULTILIB_OPTIONS to m68000/m68020 msoft-float,
+## Makefile will build special versions of libgcc.a using the following
+## sets of options: -m68000, -m68020, -msoft-float, -m68000 -msoft-float,
+## and -m68020 -msoft-float.
+
+
+## The BUILD_BE_MULTILIB and BUILD_PG_MULTILIB variables allow the
+## makefile user to enable/disable the generation of the precompiled
+## big endian and profiling libraries.
+
+# By default, avoid building big endian and profiling libraries
+BUILD_BE_MULTILIB ?= 0
+BUILD_PG_MULTILIB ?= 0
+BUILD_MULTILIB ?= 1
+
+ifeq ($(BUILD_MULTILIB), 1)
+
+MULTILIB_OPTIONS = mno-hw-mul mhw-mulx mstack-check mcustom-fpu-cfg=60-1 mcustom-fpu-cfg=60-2
+
+#Add the profiling flag to the multilib variable if required
+ifeq ($(BUILD_PG_MULTILIB), 1)
+MULTILIB_OPTIONS += pg
+endif
+
+#Add the big endian flag to the multilib variable if required
+ifeq ($(BUILD_BE_MULTILIB), 1)
+MULTILIB_OPTIONS += EB/EL
+endif
+
+endif
+
+## MULTILIB_DIRNAMES
+## If MULTILIB_OPTIONS is used, this variable specifies the directory names
+## that should be used to hold the various libraries.  Write one element in
+## MULTILIB_DIRNAMES for each element in MULTILIB_OPTIONS. If
+## MULTILIB_DIRNAMES is not used, the default value will be
+## MULTILIB_OPTIONS, with all slashes treated as spaces.
+## For example, if MULTILIB_OPTIONS is set to m68000/m68020 msoft-float,
+## then the default value of MULTILIB_DIRNAMES is m68000 m68020
+## msoft-float.  You may specify a different value if you desire a
+## different set of directory names.
+
+# MULTILIB_DIRNAMES =
+
+## MULTILIB_MATCHES
+## Sometimes the same option may be written in two different ways.  If an
+## option is listed in MULTILIB_OPTIONS, GCC needs to know about any
+## synonyms.  In that case, set MULTILIB_MATCHES to a list of items of the
+## form option=option to describe all relevant synonyms.  For example,
+## m68000=mc68000 m68020=mc68020.
+
+ifeq ($(BUILD_MULTILIB), 1)
+ifeq ($(BUILD_BE_MULTILIB), 1)
+MULTILIB_MATCHES = EL=mel EB=meb
+endif
+endif
+
+##
+## MULTILIB_EXCEPTIONS
+## Sometimes when there are multiple sets of MULTILIB_OPTIONS being
+## specified, there are combinations that should not be built.  In that
+## case, set MULTILIB_EXCEPTIONS to be all of the switch exceptions in
+## shell case syntax that should not be built.
+## For example, in the PowerPC embedded ABI support, it is not desirable to
+## build libraries compiled with the -mcall-aix option and either of the
+## -fleading-underscore or -mlittle options at the same time.  Therefore
+## MULTILIB_EXCEPTIONS is set to
+##
+## *mcall-aix/*fleading-underscore* *mlittle/*mcall-aix*
+##
+
+ifeq ($(BUILD_MULTILIB), 1)
+MULTILIB_EXCEPTIONS = *mno-hw-mul/*mhw-mulx* *mcustom-fpu-cfg=60-1/*mcustom-fpu-cfg=60-2*
+endif
+
+##
+## MULTILIB_EXTRA_OPTS Sometimes it is desirable that when building
+## multiple versions of libgcc.a certain options should always be passed on
+## to the compiler.  In that case, set MULTILIB_EXTRA_OPTS to be the list
+## of options to be used for all builds.
+##
+

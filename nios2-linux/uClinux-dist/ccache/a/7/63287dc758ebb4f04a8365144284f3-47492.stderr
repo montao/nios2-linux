@@ -1,0 +1,3 @@
+cgi.c: In function 'main':
+cgi.c:34: warning: implicit declaration of function 'exit'
+cgi.c:34: warning: incompatible implicit declaration of built-in function 'exit'

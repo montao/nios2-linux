@@ -1,0 +1,2 @@
+conftest.c: In function 'main':
+conftest.c:47: warning: unused variable 'address'

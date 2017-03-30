@@ -1,0 +1,140 @@
+#!/usr/bin/expect
+
+source  ../kernel_config.exp
+
+log_file [log_file_name "$argv0"]
+
+send_user "Starting $argv0\n"
+
+set TITLE [title "$argv0"]
+
+step "Spawn kermit"
+source ../spawn_kermit.exp
+
+step "Reboot the kernel."
+# To add following line here to indicate that if the bootargs is different,
+# it could be set here. If the bootargs value is 0, it needn't be stated,
+# for it is the default value.
+# set bootargs  $bootargs_param0
+source ../reboot_kernel.exp
+
+step "Start testing."
+
+set timeout 8
+set flag 0
+
+send "modprobe pcf8574_keypad\r"
+while 1 {
+   expect {
+      -re $kernel_prompt {
+         break
+      }
+
+      timeout {
+            break
+         }
+     }
+}
+send "lsmod\r"
+while 1 {
+   expect {
+      "pcf8574_keypad" {
+         puts "insert module success."
+         break
+      }
+
+      timeout {
+            break
+         }
+     }
+}
+
+
+send "twikeypad_test -r\r" 
+while 1 {
+   expect {
+     -re "TWI .* Test Application" {         
+         break
+      }
+
+      timeout {
+            break
+         }
+     }
+}
+
+puts "\nPlease input any character followed by 'D'."
+while 1 {
+   expect {
+     -re "Entry was" {
+         break
+      }
+
+      timeout {
+            break
+         }
+     }
+}
+
+puts "\nPlease input another character followed by 'D'."
+while 1 {
+   expect {
+     -re "Entry was" {
+         break
+      }
+
+      timeout {
+            break
+         }
+     }
+}
+
+send "\003"
+while 1 {
+   expect {
+     -re ">" {
+         break
+      }
+
+      timeout {
+            break
+         }
+     }
+}
+
+
+send "rmmod pcf8574_keypad\r" 
+while 1 {
+   expect {
+     -re ">" {         
+         break
+      }
+
+      timeout {
+            break
+         }
+     }
+}
+
+send "lsmod\r" 
+while 1 {
+   expect {
+     -re ">" {         
+         break
+      }
+
+      timeout {
+            break
+         }
+     }
+}
+
+send_log "\n"
+send_log "\n$TITLE ............\[PASS\]\n"
+
+send_user "Ending $argv0\n"
+
+log_file
+
+
+

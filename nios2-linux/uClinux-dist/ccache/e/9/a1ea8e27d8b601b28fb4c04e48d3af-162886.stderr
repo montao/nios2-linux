@@ -1,0 +1,4 @@
+/data/dwesterg/nios2-linux/nios2-linux/uClinux-dist/user/e2fsprogs/e2fsprogs-1.41.12/lib/ext2fs/bmap.c: In function 'ext2fs_bmap2':
+/data/dwesterg/nios2-linux/nios2-linux/uClinux-dist/user/e2fsprogs/e2fsprogs-1.41.12/lib/ext2fs/bmap.c:54: warning: 'b' is used uninitialized in this function
+/data/dwesterg/nios2-linux/nios2-linux/uClinux-dist/user/e2fsprogs/e2fsprogs-1.41.12/lib/ext2fs/bmap.c:54: warning: 'b' is used uninitialized in this function
+/data/dwesterg/nios2-linux/nios2-linux/uClinux-dist/user/e2fsprogs/e2fsprogs-1.41.12/lib/ext2fs/bmap.c:54: warning: 'b' is used uninitialized in this function

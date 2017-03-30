@@ -1,0 +1,2 @@
+login.c: In function 'main':
+login.c:69: warning: unused variable 'realpwd'

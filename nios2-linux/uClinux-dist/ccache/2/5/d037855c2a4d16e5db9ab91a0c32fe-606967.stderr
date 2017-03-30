@@ -1,0 +1,3 @@
+In file included from /data/dwesterg/nios2-linux/nios2-linux/linux-2.6/drivers/of/of_net.c:11:
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/include/linux/of_net.h:12: warning: type qualifiers ignored on function return type
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/drivers/of/of_net.c:41: warning: type qualifiers ignored on function return type

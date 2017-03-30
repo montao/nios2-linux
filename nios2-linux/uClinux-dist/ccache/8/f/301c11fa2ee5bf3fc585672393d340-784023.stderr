@@ -1,0 +1,3 @@
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/kernel/debug/debug_core.c: In function 'kgdb_cpu_enter':
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/kernel/debug/debug_core.c:497: warning: value computed is not used
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/kernel/debug/debug_core.c:512: warning: value computed is not used

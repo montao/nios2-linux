@@ -1,0 +1,46 @@
+--- /dev/null
++++ b/src/corelib/plugin/dlfcn.h
+@@ -0,0 +1,29 @@
++#define RTLD_LAZY   0
++#define RTLD_NOW    0
++#define RTLD_LOCAL  0
++#define RTLD_GLOBAL 0
++
++static inline void *dlopen(const char *file, int flag)
++{
++	return NULL;
++}
++
++static inline void *dlsym(void *handle, const char *sym)
++{
++	return NULL;
++}
++
++static inline char *dlerror(void)
++{
++	return NULL;
++}
++
++static inline int dlclose(void *handle)
++{
++	return 0;
++}
++
++static inline void *_dlsym(const char *sym)
++{
++	return NULL;
++}
+--- a/src/corelib/plugin/qlibrary_unix.cpp
++++ b/src/corelib/plugin/qlibrary_unix.cpp
+@@ -60,7 +60,11 @@
+ 
+ #if !defined(QT_HPUX_LD)
+ QT_BEGIN_INCLUDE_NAMESPACE
++#ifdef QT_STATIC_PLUGIN
++#include "dlfcn.h"
++#else
+ #include <dlfcn.h>
++#endif
+ QT_END_INCLUDE_NAMESPACE
+ #endif
+ 

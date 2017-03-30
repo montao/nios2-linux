@@ -1,0 +1,38 @@
+In file included from mount.c:54:
+mount_constants.h:1:1: warning: "MS_RDONLY" redefined
+In file included from mount.c:52:
+/data/dwesterg/nios2-linux/nios2-linux/toolchain-mmu/x86-linux2/bin/../nios2-linux-gnu/libc/usr/include/sys/mount.h:37:1: warning: this is the location of the previous definition
+In file included from mount.c:54:
+mount_constants.h:2:1: warning: "MS_NOSUID" redefined
+In file included from mount.c:52:
+/data/dwesterg/nios2-linux/nios2-linux/toolchain-mmu/x86-linux2/bin/../nios2-linux-gnu/libc/usr/include/sys/mount.h:39:1: warning: this is the location of the previous definition
+In file included from mount.c:54:
+mount_constants.h:3:1: warning: "MS_NODEV" redefined
+In file included from mount.c:52:
+/data/dwesterg/nios2-linux/nios2-linux/toolchain-mmu/x86-linux2/bin/../nios2-linux-gnu/libc/usr/include/sys/mount.h:41:1: warning: this is the location of the previous definition
+In file included from mount.c:54:
+mount_constants.h:4:1: warning: "MS_NOEXEC" redefined
+In file included from mount.c:52:
+/data/dwesterg/nios2-linux/nios2-linux/toolchain-mmu/x86-linux2/bin/../nios2-linux-gnu/libc/usr/include/sys/mount.h:43:1: warning: this is the location of the previous definition
+In file included from mount.c:54:
+mount_constants.h:5:1: warning: "MS_SYNCHRONOUS" redefined
+In file included from mount.c:52:
+/data/dwesterg/nios2-linux/nios2-linux/toolchain-mmu/x86-linux2/bin/../nios2-linux-gnu/libc/usr/include/sys/mount.h:45:1: warning: this is the location of the previous definition
+In file included from mount.c:54:
+mount_constants.h:6:1: warning: "MS_REMOUNT" redefined
+In file included from mount.c:52:
+/data/dwesterg/nios2-linux/nios2-linux/toolchain-mmu/x86-linux2/bin/../nios2-linux-gnu/libc/usr/include/sys/mount.h:47:1: warning: this is the location of the previous definition
+In file included from mount.c:54:
+mount_constants.h:7:1: warning: "MS_MANDLOCK" redefined
+In file included from mount.c:52:
+/data/dwesterg/nios2-linux/nios2-linux/toolchain-mmu/x86-linux2/bin/../nios2-linux-gnu/libc/usr/include/sys/mount.h:49:1: warning: this is the location of the previous definition
+In file included from mount.c:54:
+mount_constants.h:8:1: warning: "MS_NOATIME" redefined
+In file included from mount.c:52:
+/data/dwesterg/nios2-linux/nios2-linux/toolchain-mmu/x86-linux2/bin/../nios2-linux-gnu/libc/usr/include/sys/mount.h:57:1: warning: this is the location of the previous definition
+In file included from mount.c:54:
+mount_constants.h:9:1: warning: "MS_NODIRATIME" redefined
+In file included from mount.c:52:
+/data/dwesterg/nios2-linux/nios2-linux/toolchain-mmu/x86-linux2/bin/../nios2-linux-gnu/libc/usr/include/sys/mount.h:59:1: warning: this is the location of the previous definition
+In file included from mount.c:56:
+sundries.h:54: warning: type qualifiers ignored on function return type

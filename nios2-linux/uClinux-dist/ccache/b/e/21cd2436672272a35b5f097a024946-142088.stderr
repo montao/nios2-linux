@@ -1,0 +1,2 @@
+ether.c: In function 'in_ether':
+ether.c:59: warning: pointer targets in assignment differ in signedness

@@ -1,0 +1,2 @@
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/engine/devrgn.c: In function 'GdAllocBitmapRegion':
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/engine/devrgn.c:1512: warning: 'rect.left' may be used uninitialized in this function

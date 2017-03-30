@@ -1,0 +1,405 @@
+#!/usr/bin/expect
+
+#
+#Test program to test the irda driver.
+#
+
+source ../kernel_config.exp
+log_file [log_file_name "$argv0"]
+send_user "Starting $argv0\n"
+set TITLE [title "$argv0"]
+
+set ircomm	"/dev/ircomm0"
+
+if { $argc < 2} {
+    puts "Usage:  irda_test <host-irda-dev> <target-irda-dev>"
+        puts ""
+        exit
+}
+# grab the user specified parameters.
+set host_irdadev	    [lindex $argv 0]
+set target_irdadev	    [lindex $argv 1]
+
+step "Start kermit."
+source ../spawn_kermit.exp
+
+step "Reboot the kernel."
+source ../reboot_kernel.exp
+
+send_log "*********************************\r"
+send_log "Start $TITLE\r"
+send_log "*********************************\r"
+
+set case_num 0
+
+set timeout 30
+
+send -s "\r"
+while 1 {
+    expect {
+        "> " {
+            break
+        }
+        timeout {
+            send_log "Fail to boot into uClinux.\r"
+            case_fail $case_num
+        }
+    }
+}
+
+spawn sh
+# We need to save the id because resetting the board will overwrite it.
+set shell_spawn_id $spawn_id
+while 1 {
+    expect {
+        "# " {
+            break
+        }
+        timeout {
+            send_log "Fail to spawn sh.\r"
+            case_fail $case_num
+        }
+    }
+}
+
+send -s "ps -A | awk '/irattach/ {print \"pid=\", \$1}'\r\n"
+while 1 {
+    expect {
+        -re "pid= (.*)" {
+            set pid $expect_out(1,string)
+            send -s "kill -15 $pid\r"
+            break
+        }
+        timeout {
+            break
+        }
+    }
+}
+
+while 1 {
+    expect {
+        "# " {
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+send -s "irattach $host_irdadev -s\r\n"
+while 1 {
+    expect {
+        "irattach $host_irdadev -s" {
+            break
+        }
+        timeout {
+            send_log "Fail to enable irda on host.\r"
+            case_fail $case_num
+        }
+    }
+}
+
+while 1 {
+    expect {
+        "# " {
+            sleep 3
+            break
+        }
+        timeout {
+            send_log "Fail to enable irda on host.\r"
+            case_fail $case_num
+        }
+    }
+}
+
+send -s "ifconfig\r\n"
+
+while 1 {
+    expect {
+        "irda0" {
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+while 1 {
+    expect {
+        "# " {
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+
+set spawn_id $kermit_spawn_id
+incr case_num
+send -s "irattach $target_irdadev -s -b&\r\n"
+while 1 {
+    expect {
+        "> Invalid" {
+            case_fail $case_num
+        }
+        "> " {
+            sleep 3
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+send -s "ifconfig\r\n"
+
+while 1 {
+    expect {
+        "irda0" {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+while 1 {
+    expect {
+        "> " {
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+incr case_num
+send -s "cat $ircomm\r\n"
+while 1 {
+    expect {
+        "cat $ircomm" {
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+set spawn_id $shell_spawn_id
+send -s "irdadump\r\n"
+while 1 {
+    expect {
+        "blackfin" {
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+send -s "\3"
+while 1 {
+    expect {
+        "# " {
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+sleep 5
+send -s "cat /proc/slabinfo > $ircomm\r\n"
+while 1 {
+    expect {
+        "cat /proc/slabinfo > $ircomm" {
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+set spawn_id $kermit_spawn_id
+while 1 {
+    expect {
+        -re "slabinfo" {
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+while 1 {
+    expect {
+        -re "kmem_cache" {
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+while 1 {
+    expect {
+        -re "> " {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+sleep 2
+incr case_num
+set spawn_id $shell_spawn_id
+send -s "cat $ircomm\r\n"
+while 1 {
+    expect {
+        "cat $ircomm" {
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+set spawn_id $kermit_spawn_id
+send -s "cat /proc/slabinfo > $ircomm\r\n"
+while 1 {
+    expect {
+        "cat /proc/slabinfo > $ircomm" {
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+set spawn_id $shell_spawn_id
+while 1 {
+    expect {
+        "slabinfo" {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+while 1 {
+    expect {
+        "size" {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+while 1 {
+    expect {
+        "# " {
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+incr case_num
+set spawn_id $kermit_spawn_id
+send -s "ps | awk '/irattach/ {print \"pid=\", \$1}'\r\n"
+while 1 {
+    expect {
+        -re "pid= (.*)" {
+            set pid $expect_out(1,string)
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+send -s "kill -15 $pid\r\n"
+while 1 {
+    expect {
+        "> " {
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+send -s "stty -F $target_irdadev\r\n"
+while 1 {
+    expect {
+        "speed" {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+sleep 5
+set spawn_id $shell_spawn_id
+send -s "ps -A | awk '/irattach/ {print \"pid=\", \$1}'\r\n"
+while 1 {
+    expect {
+        -re "pid= (.*)" {
+            set pid $expect_out(1,string)
+            break
+        }
+        timeout {
+            break
+        }
+    }
+}
+
+send -s "kill -15 $pid\r\n"
+while 1 {
+    expect {
+        "# " {
+            break
+        }
+        timeout {
+            break
+        }
+    }
+}
+
+send_log "\n"
+send_log "\n$TITLE ............\[PASS\]\n"
+
+send_user "Ending $argv0\n"
+log_file

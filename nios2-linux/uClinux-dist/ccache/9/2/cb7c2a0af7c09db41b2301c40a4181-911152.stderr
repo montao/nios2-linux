@@ -1,0 +1,5 @@
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/drivers/net/ethernet/altera/altera_tse.c: In function 'altera_tse_probe':
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/drivers/net/ethernet/altera/altera_tse.c:1420: warning: unused variable 'fixed_link_defaults'
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/drivers/net/ethernet/altera/altera_tse.c:1419: warning: unused variable 'fixed_link'
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/drivers/net/ethernet/altera/altera_tse.c:1418: warning: unused variable 'status'
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/drivers/net/ethernet/altera/altera_tse.c:1414: warning: 'mdio' may be used uninitialized in this function

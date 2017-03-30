@@ -1,0 +1,150 @@
+#!/usr/bin/expect
+
+source ../kernel_config.exp
+source  ../board_info.exp
+
+if { $argc < 2} {
+    puts "Please input: board_type, port_type"
+    puts "port_type: serial_uart, sport_uart"
+    exit
+}
+
+set port_type [lindex $argv 1]
+log_file build_${port_type}_kernel_log
+send_user "Starting $argv0 to build $port_type\n"
+
+cd $uclinux_path/testsuites
+step "Make config."
+source  make_default_config.exp
+
+# Following make specific configuration for this case.
+cd $uclinux_path
+set timeout 300
+set baud_rate_done_flag 0
+spawn make config
+
+#puts "Begin the interactive process of configuration"
+while 1 {
+    expect {
+        -re "Customize Kernel Settings.*DEFAULTS_KERNEL.*\\\[.*]" {
+            send "y\r"
+        }
+
+        -re "Customize Application/Library Settings.*DEFAULTS_VENDOR.*\\\[.*]" {
+            send "y\r"
+        }
+
+        -re "Blackfin serial port support.*SERIAL_BFIN.*\\\[.*]" {
+            if { $port_type == "serial_uart" } {
+                send "Y\r"
+            } else {
+                send "\r"
+            }
+        }
+
+        -re "Console on Blackfin serial port.*SERIAL_BFIN_CONSOLE.*\\\[.*]" {
+            if { $port_type == "serial_uart" } {
+                send "Y\r"
+            } else {
+                send "\r"
+            }
+        }
+
+        -re "UART Mode.*DMA mode.*SERIAL_BFIN_DMA.*PIO mode.*SERIAL_BFIN_PIO.*choice.*\\\[.*]" {
+            if { $port_type == "serial_uart" } {
+                send "1\r"
+            } else {
+                send "\r"
+            }
+        }
+
+        -re "Enable UART0.*SERIAL_BFIN_UART0.*\\\[.*]" {
+            if { [string match "BF527-EZKIT*" $board_type] && $port_type == "serial_uart"  } {
+                send "Y\r"
+            } else {
+                send "\r"
+            }
+        }
+
+        -re "Enable UART1.*SERIAL_BFIN_UART1.*\\\[.*]" {
+            if { $board_type == "BF537-STAMP" && $port_type == "serial_uart" } {
+                send "Y\r"
+            } else {
+                send "\r"
+            }
+        }
+
+        -re "Enable UART3.*SERIAL_BFIN_UART3.*\\\[.*]" {
+            if { $board_type == "BF548-EZKIT" && $port_type == "serial_uart" } {
+                send "Y\r"
+            } else {
+                send "\r"
+            }
+        }
+
+        -re "NAND Device Support.*MTD_NAND.*\\\[.*]" {
+            if { $board_type == "BF537-STAMP" && $port_type == "serial_uart" } {
+                send "N\r"
+            } else {
+                send "\r"
+            }
+        }
+
+        -re "Blackfin SPORT emulate UART.*SERIAL_BFIN_SPORT.*\\\[.*]" {
+            if { $port_type == "sport_uart" } {
+                send "Y\r"
+            } else {
+                send "\r"
+            }
+        }
+
+        -re "Console on Blackfin sport emulated uart.*SERIAL_BFIN_SPORT_CONSOLE.*\\\[.*]" {
+            if { $port_type == "sport_uart" } {
+                send "Y\r"
+            } else {
+                send "\r"
+            }
+        }
+
+        -re "Enable UART over SPORT0 \\\(SERIAL_BFIN_SPORT0_UART\\\) \\\[.*]" {
+            if { $port_type == "sport_uart" } {
+                send "Y\r"
+            } else {
+                send "\r"
+            }
+        }
+
+        -nocase -re "\\\[\[^\r]*] (\[ymn])|choice\\\[.*]: \[0-9]+\r" {
+            continue
+        }
+
+        "\\\(*) \\\[*]" {
+            sleep .05
+            send "\r"
+        }
+
+        -re "\[cC]hoice\\\[.*]:" {
+            send "\r"
+        }
+
+        eof {
+            puts "End of configuration"
+            break
+        }
+        timeout {
+            puts "\n\nFATAL ERROR: config prompt timeout in make config"
+            break
+        }
+    }
+}
+
+cd $uclinux_path/testsuites
+step "Make"
+source make_kernel.exp
+
+cd $uclinux_path/testsuites
+step "Copy linux"
+source copy_image.exp
+
+send_user "Ending $argv0\n"
+log_file

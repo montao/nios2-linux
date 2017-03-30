@@ -1,0 +1,225 @@
+#!/usr/bin/expect --
+
+#
+# Build Kernel for LTP test
+#
+source ../kernel_config.exp
+source  ../board_info.exp
+log_file [log_file_name "$argv0"]
+send_user "Starting $argv0\n"
+
+# slab_slob = 1, enable slab
+# slab_slob = 2, enable slob 
+
+if { $argc == 4 } {
+    set uclinux_path [lindex $argv 1]
+    set wt_wb [lindex $argv 2]
+    set slab_slob [lindex $argv 3]
+    set high_res_timer_preempt 0
+    send_log "\n#### uclinux_path is $uclinux_path\n"
+} else {
+    if { $argc == 5 } {
+        set uclinux_path [lindex $argv 1]
+        set wt_wb [lindex $argv 2]
+        set slab_slob [lindex $argv 3]
+        set high_res_timer_preempt [lindex $argv 4]
+        send_log "\n#### uclinux_path is $uclinux_path\n"
+    }
+}
+
+
+cd $uclinux_path/testsuites
+step "Make config"
+source  make_default_config.exp
+
+cd $uclinux_path/testsuites
+source  make_config_reserve_mem.exp
+
+cd $uclinux_path/testsuites
+source  make_cut_busybox_config.exp
+
+cd $uclinux_path
+set timeout 300
+spawn make config
+
+#tee "Begin the interactive process of configuration"
+while 1 {
+    expect {
+        -re "Customize Kernel Settings.*DEFAULTS_KERNEL.*\\\[.*]" {
+            send "y\r"
+        }
+
+        -re "Customize Application/Library Settings.*DEFAULTS_VENDOR.*\\\[.*]" {
+            send "y\r"
+        }
+
+        -re "Enable timerfd\\\(\\\) system call.*TIMERFD.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Enable eventfd\\\(\\\) system call.*EVENTFD.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Write through \\\(BFIN_EXTMEM_WRITETHROUGH\\\).*choice\\\[1-2\\\]:" {
+            if { $high_res_timer_preempt == 0 } {
+                send "$wt_wb\r"
+            } else {
+                send "\r"
+            }
+        }
+
+        -re "Choose SLAB allocator.*SLAB.*SLOB.*choice\\\[1-3.\\\]" {
+            if { $high_res_timer_preempt == 0 } {
+                if { $slab_slob == 1 } {
+                    send "1\r"
+                }
+                if { $slab_slob == 2 } {
+                    send "3\r"
+                }
+            } else {
+                send "\r"
+            }
+        }
+
+        -re "Default Linux Capabilities.*SECURITY_CAPABILITIES.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "(\[0-9]+). Preemptible Kernel.*PREEMPT.*\[cC]hoice\\\[.*]:" {
+            if { $high_res_timer_preempt == 1 } {
+                send "$expect_out(1,string)\r"
+            } else {
+                send "\r"
+            }
+        }
+
+        -re "High Resolution Timer Support.*HIGH_RES_TIMERS.*\\\[.*]" {
+            if { $high_res_timer_preempt == 1 } {
+                send "Y\r"
+            } else {
+                send "N\r"
+            }
+        }
+
+        -re "hostid.*USER_BUSYBOX_HOSTID.*\\\[.*]" {
+            send "Y\r"
+        }
+
+#Need to reduce size for some platform, such as BF533-EZKIT
+        -re "IrDA \\\(infrared\\\) subsystem support.*IRDA.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "Direct char device access to MTD devices.*MTD_CHAR.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "Detect non-CFI AMD/JEDEC-compatible flash chips.*MTD_JEDECPROBE.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "Support for ROM chips in bus mapping.*MTD_ROM.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "Blackfin Userspace DMA Interface.*BFIN_DMA_INTERFACE.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "Blackfin JTAG Communication.*BFIN_JTAG_COMM.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "Journalling Flash File System v2 \\\(JFFS2\\\) support.*JFFS2_FS.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "Network File Systems.*NETWORK_FILESYSTEMS.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -nocase -re "Native language support.*NLS.*\\\[.*n.*]" {
+            send "N\r"
+        }
+
+#enable usb host related driver for bf548-ezkit
+        -re "USB support.*USB_SUPPORT.*\\\[.*]" {
+            if { $board_type == "BF548-EZKIT" } {
+                send "Y\r"
+            } else {
+                send "\r"
+            }
+        }
+
+        -re "Support for Host-side USB.*USB.*\\\[./././.]" {
+            send "Y\r"
+        }
+
+        -re "Inventra Highspeed Dual Role Controller.*USB_MUSB_HDRC.*\\\[./././.]" {
+            send "Y\r"
+        }
+
+        -re "Platform Glue Layer \\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "USB Mass Storage support.*USB_STORAGE.*\\\[./././.]" {
+            send "Y\r"
+        }
+
+        -re "Second extended fs support \\\(EXT2_FS\\\) \\\[.*]" {
+            if { $board_type == "BF548-EZKIT" } {
+                send "Y\r"
+            } else {
+                send "\r"
+            }
+        }
+
+        -re "mke2fs.*USER_E2FSPROGS_MISC_MKE2FS.*\\\[.*]" {
+            if { $board_type == "BF548-EZKIT" } {
+                send "Y\r"
+            } else {
+                send "\r"
+            }
+        }
+
+        -nocase -re "\\\[\[^\r]*] (\[ymn])|choice\\\[.*]: \[0-9]+\r" {
+            continue
+        }
+
+        "\\\(*) \\\[*]" {
+            sleep .01
+            send "\r"
+        }
+
+        -re "\[cC]hoice\\\[.*]:" {
+            send "\r"
+        }
+
+        eof {
+            puts "End of configuration"
+            break
+        }
+
+        timeout {
+            puts "\n\nFATAL ERROR: config prompt timeout in make config"
+            break
+        }
+    }
+}
+
+cd $uclinux_path/testsuites
+
+step "Make"
+
+source  make_kernel.exp
+
+cd $uclinux_path/testsuites
+
+step "Copy linux"
+
+source   copy_image.exp
+
+send_user "Ending $argv0\n"
+log_file

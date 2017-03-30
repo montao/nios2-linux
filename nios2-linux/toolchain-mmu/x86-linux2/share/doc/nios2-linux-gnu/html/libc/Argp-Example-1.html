@@ -1,0 +1,55 @@
+<html lang="en">
+<head>
+<title>Argp Example 1 - The GNU C Library</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="The GNU C Library">
+<meta name="generator" content="makeinfo 4.8">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="up" href="Argp-Examples.html#Argp-Examples" title="Argp Examples">
+<link rel="next" href="Argp-Example-2.html#Argp-Example-2" title="Argp Example 2">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<p>
+<a name="Argp-Example-1"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="Argp-Example-2.html#Argp-Example-2">Argp Example 2</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="Argp-Examples.html#Argp-Examples">Argp Examples</a>
+<hr>
+</div>
+
+<h5 class="subsubsection">25.3.11.1 A Minimal Program Using Argp</h5>
+
+<p>This is perhaps the smallest program possible that uses argp.  It won't
+do much except give an error messages and exit when there are any
+arguments, and prints a rather pointless message for `<samp><span class="samp">--help</span></samp>'.
+
+<pre class="smallexample">     /* <span class="roman">Argp example #1 -- a minimal program using argp</span> */
+     
+     /* <span class="roman">This is (probably) the smallest possible program that
+        uses argp.  It won't do much except give an error
+        messages and exit when there are any arguments, and print
+        a (rather pointless) messages for --help.</span> */
+     
+     #include &lt;argp.h&gt;
+     
+     int main (int argc, char **argv)
+     {
+       argp_parse (0, argc, argv, 0, 0, 0);
+       exit (0);
+     }
+</pre>
+   </body></html>
+

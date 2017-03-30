@@ -1,0 +1,22 @@
+ftpd.c: In function 'off_to_str':
+ftpd.c:188: warning: format '%qd' expects type 'long long int', but argument 3 has type 'off_t'
+ftpd.c:192: warning: format '%d' expects type 'int', but argument 3 has type 'off_t'
+ftpd.c: In function 'main':
+ftpd.c:456: warning: pointer targets in passing argument 3 of 'getpeername' differ in signedness
+ftpd.c:476: warning: pointer targets in passing argument 3 of 'getsockname' differ in signedness
+ftpd.c:548: warning: implicit declaration of function 'yyparse'
+ftpd.c: In function 'sigquit':
+ftpd.c:581: warning: implicit declaration of function 'strsignal'
+ftpd.c:581: warning: format '%s' expects type 'char *', but argument 3 has type 'int'
+ftpd.c: In function 'complete_login':
+ftpd.c:636: warning: implicit declaration of function 'logwtmp_keep_open'
+ftpd.c: In function 'dataconn':
+ftpd.c:1088: warning: pointer targets in passing argument 3 of 'accept' differ in signedness
+ftpd.c: In function 'passive':
+ftpd.c:1766: warning: pointer targets in passing argument 3 of 'getsockname' differ in signedness
+ftpd.c: At top level:
+ftpd.c:233: warning: 'authentication_setup' declared 'static' but never defined
+ftpd.c: In function 'send_data':
+ftpd.c:1166: warning: 'filesize' may be used uninitialized in this function
+ftpd.c:1165: warning: 'curpos' may be used uninitialized in this function
+ftpd.c:1164: warning: 'buf' may be used uninitialized in this function

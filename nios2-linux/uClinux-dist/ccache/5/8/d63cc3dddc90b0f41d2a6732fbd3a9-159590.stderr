@@ -1,0 +1,2 @@
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/mwin/winlib/edit.c:118: warning: 'GetSysCharHeight' defined but not used
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/mwin/winlib/edit.c:184: warning: 'edtGetStartDispPosAtEnd' defined but not used

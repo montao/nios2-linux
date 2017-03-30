@@ -1,0 +1,2 @@
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/drivers/net/ethernet/altera/altera_1588_be.c: In function 'alt_1588_be_get_timestamp':
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/drivers/net/ethernet/altera/altera_1588_be.c:56: warning: too many arguments for format

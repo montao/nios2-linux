@@ -1,0 +1,79 @@
+#!/usr/bin/expect
+
+cd $uclinux_path
+set timeout 300
+spawn make config
+
+while 1 {
+    expect {
+
+
+       -re "Customize Kernel Settings.*DEFAULTS_KERNEL.*\\\[.*]" {
+            send "y\r"
+        }
+
+        -re "Customize Application/Library Settings.*DEFAULTS_VENDOR.*\\\[.*]" {
+            send "y\r"
+        }
+
+        -re "Symmetric multi-processing support.*SMP.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "Enable ICACHE for L2 SRAM.*BFIN_L2_ICACHEABLE.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "Enable DCACHE for L2 SRAM.*BFIN_L2_DCACHEABLE.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "\[Pp]olicy.*Write back.*BFIN_EXTMEM_WRITEBACK.*Write through.*BFIN_EXTMEM_WRITETHROUGH.*choice.*\\\[.*]" {
+            send "2\r"
+        }
+
+        -re "\[^ \]Staging drivers.*STAGING.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Exclude Staging drivers from being built.*STAGING_EXCLUDE_BUILD.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "icc driver.*ICC_DRIVER.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "icc protocol.*ICC.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "icc debug.*ICC_DEBUG.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "BF561 ICC utils.*USER_BF561_ICC.*\\\[.*]" {
+            send "Y\r"
+        }
+
+
+        "\\\(*) \\\[*]" {
+            sleep .05
+            send "\r"
+        }
+
+        -re "\[cC]hoice\\\[.*]:" {
+            send "\r"
+        }
+
+        eof {
+            puts "End of configuration"
+            break
+        }
+
+        timeout {
+            puts "\n\nFATAL ERROR: config prompt timeout in make config"
+            break
+        }
+    }
+}

@@ -1,0 +1,10 @@
+--- ffmpeg/libavutil/internal.h
++++ ffmpeg/libavutil/internal.h
+@@ -275,6 +275,7 @@
+ #endif /* HAVE_LLRINT */
+ 
+ #if !HAVE_LOG2
++#define log2 _my_log2 /* avoid gcc log2 def */
+ static av_always_inline av_const double log2(double x)
+ {
+     return log(x) * 1.44269504088896340736;

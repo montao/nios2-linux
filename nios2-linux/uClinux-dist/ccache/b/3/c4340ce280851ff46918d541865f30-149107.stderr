@@ -1,0 +1,2 @@
+plipconfig.c: In function 'main':
+plipconfig.c:111: warning: dereferencing type-punned pointer will break strict-aliasing rules

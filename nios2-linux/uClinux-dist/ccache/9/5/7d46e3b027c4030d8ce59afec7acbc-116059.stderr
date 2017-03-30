@@ -1,0 +1,2 @@
+termcap.c: In function 'tgetent':
+termcap.c:485: warning: 'tcenv' may be used uninitialized in this function

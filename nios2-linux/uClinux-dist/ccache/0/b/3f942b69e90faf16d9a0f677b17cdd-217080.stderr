@@ -1,0 +1,4 @@
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/nanox/nxproto.c: In function 'nxAssignReqbuffer':
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/nanox/nxproto.c:78: warning: pointer targets in assignment differ in signedness
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/nanox/nxproto.c: In function 'nxFlushReq':
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/nanox/nxproto.c:119: warning: pointer targets in initialization differ in signedness

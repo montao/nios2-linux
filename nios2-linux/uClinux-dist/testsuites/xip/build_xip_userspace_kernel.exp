@@ -1,0 +1,130 @@
+#!/usr/bin/expect --
+
+#
+# Build Kernel for XIP test in userspace.
+# Test application is found only in additional file systems.
+# Root file system is initramfs.
+#
+
+source ../kernel_config.exp
+source  ../board_info.exp
+log_file [log_file_name "$argv0"]
+send_user "Starting $argv0\n"
+
+set format [lindex $argv 1]
+send_log "\n#### binary_format is $format\n"
+
+if { $argc < 2} {
+    puts "Please input: board_type, binary_format(fdpic or shared-flat)"
+    exit
+}
+
+cd $uclinux_path/testsuites
+step "Make clean."
+if { [source make_clean.exp] != 0 } {
+    send_user "\n\nFail to make clean. Exit!\n\n"
+    exit
+}
+
+cd $uclinux_path/testsuites
+step "Make config."
+source  make_default_config.exp
+
+cd $uclinux_path
+set timeout 300
+spawn make config
+while 1 {
+    expect {
+        -re "Customize Kernel Settings.*DEFAULTS_KERNEL.*\\\[.*]" {
+            send "y\r"
+        }
+
+        -re "Customize Application/Library Settings.*DEFAULTS_VENDOR.*\\\[.*]" {
+            send "y\r"
+        }
+
+        -re "Initial RAM filesystem and RAM disk.*BLK_DEV_INITRD.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Detect flash chips by Common Flash Interface.*MTD_CFI.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "Support for AMD.*flash chips.*MTD_CFI_AMDSTD.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "Support for ROM chips in bus mapping.*MTD_ROM.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Flash device in physical memory map.*MTD_PHYSMAP.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Miscellaneous filesystems \\\(MISC_FILESYSTEMS.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "ROM file system support.*ROMFS_FS.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "RomFS backing stores.* (\[0-9]+). MTD-backed ROM file system support.*choice.*\\\[.*]" {
+            send "$expect_out(1,string)\r"
+        }
+
+        -re "Enable shared FLAT support \\\(BINFMT_SHARED_FLAT\\\).*\\\[././.]" {
+            send "Y\r"
+        }
+
+        -re "xip test.*XIP_TEST.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Binary format.*FLAT.*Shared-FLAT.*FDPIC.*\\\[.*]" {
+            if { $format == "fdpic" } {
+                send  "4\r"
+            } elseif { $format == "shared-flat" } {
+                send  "3\r"
+            } else {
+                send "4\r"
+            }
+        }
+
+        -nocase -re "\\\[\[^\r]*] (\[ymn])|choice\\\[.*]: \[0-9]+\r" {
+            continue
+        }
+
+        "\\\(*) \\\[*]" {
+            sleep .05
+            send "\r"
+        }
+
+        -re "\[cC]hoice\\\[.*]:" {
+            send "\r"
+        }
+
+        eof {
+            puts "End of configuration"
+            break
+        }
+
+        timeout {
+            puts "\n\nFATAL ERROR: config prompt timeout in make config"
+            break
+        }
+    }
+}
+
+cd $uclinux_path/testsuites
+step "Make kernel"
+source   make_kernel.exp
+
+cd $uclinux_path/testsuites
+step "Copy linux image"
+source   copy_image.exp
+
+send_user "Ending $argv0\n"
+log_file

@@ -1,0 +1,33 @@
+dhry_1.c:80: warning: return type defaults to 'int'
+dhry_1.c: In function 'main':
+dhry_1.c:100: warning: implicit declaration of function 'strcpy'
+dhry_1.c:100: warning: incompatible implicit declaration of built-in function 'strcpy'
+dhry_1.c:159: warning: implicit declaration of function 'Proc_5'
+dhry_1.c:160: warning: implicit declaration of function 'Proc_4'
+dhry_1.c:166: warning: implicit declaration of function 'Func_2'
+dhry_1.c:172: warning: implicit declaration of function 'Proc_7'
+dhry_1.c:177: warning: implicit declaration of function 'Proc_8'
+dhry_1.c:179: warning: implicit declaration of function 'Proc_1'
+dhry_1.c:186: warning: implicit declaration of function 'Proc_6'
+dhry_1.c:197: warning: implicit declaration of function 'Proc_2'
+dhry_1.c: At top level:
+dhry_1.c:301: warning: return type defaults to 'int'
+dhry_1.c: In function 'Proc_1':
+dhry_1.c:314: warning: implicit declaration of function 'Proc_3'
+dhry_1.c: At top level:
+dhry_1.c:337: warning: return type defaults to 'int'
+dhry_1.c:360: warning: return type defaults to 'int'
+dhry_1.c:373: warning: return type defaults to 'int'
+dhry_1.c:385: warning: return type defaults to 'int'
+dhry_1.c: In function 'Proc_5':
+dhry_1.c:388: warning: control reaches end of non-void function
+dhry_1.c: In function 'Proc_4':
+dhry_1.c:379: warning: control reaches end of non-void function
+dhry_1.c: In function 'Proc_3':
+dhry_1.c:367: warning: control reaches end of non-void function
+dhry_1.c: In function 'Proc_2':
+dhry_1.c:352: warning: control reaches end of non-void function
+dhry_1.c: In function 'Proc_1':
+dhry_1.c:329: warning: control reaches end of non-void function
+dhry_1.c: In function 'main':
+dhry_1.c:82: warning: 'Int_2_Loc' may be used uninitialized in this function

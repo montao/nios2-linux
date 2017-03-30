@@ -1,0 +1,6 @@
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/drivers/net/ethernet/altera/altera_tse.c: In function 'tse_poll':
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/drivers/net/ethernet/altera/altera_tse.c:401: warning: ISO C90 forbids mixed declarations and code
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/drivers/net/ethernet/altera/altera_tse.c:405: warning: too many arguments for format
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/drivers/net/ethernet/altera/altera_tse.c:407: warning: format '%x' expects type 'unsigned int', but argument 2 has type 'unsigned char *'
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/drivers/net/ethernet/altera/altera_tse.c: In function 'tse_start_xmit':
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/drivers/net/ethernet/altera/altera_tse.c:674: warning: 'req_tx_shift_16' is used uninitialized in this function

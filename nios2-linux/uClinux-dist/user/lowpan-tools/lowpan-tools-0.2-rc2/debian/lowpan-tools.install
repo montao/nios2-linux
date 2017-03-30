@@ -1,0 +1,5 @@
+usr/bin
+usr/sbin
+usr/lib/ip
+usr/share/man/*/*
+/var/lib

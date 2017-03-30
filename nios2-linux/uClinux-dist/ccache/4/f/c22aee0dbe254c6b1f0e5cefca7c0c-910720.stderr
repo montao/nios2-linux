@@ -1,0 +1,3 @@
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/drivers/net/ethernet/altera/altera_tse.c: In function 'altera_tse_probe':
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/drivers/net/ethernet/altera/altera_tse.c:1609: warning: passing argument 3 of 'altera_tse_get_of_prop' from incompatible pointer type
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/drivers/net/ethernet/altera/altera_tse.c:1613: warning: passing argument 3 of 'altera_tse_get_of_prop' from incompatible pointer type

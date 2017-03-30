@@ -1,0 +1,214 @@
+#!/usr/bin/expect
+
+source ../kernel_config.exp
+log_file [log_file_name "$argv0"]
+send_user "Starting $argv0\n"
+set TITLE [title "$argv0"]
+
+step "Start kermit."
+source ../spawn_kermit.exp
+
+step "Reboot the kernel."
+source ../reboot_kernel.exp
+
+step "Start $TITLE\r"
+
+set timeout 10
+set case_num 0
+
+set timeout 8
+send "ifconfig eth0 $targetip\r"
+while 1 {
+    sleep 3
+    expect {
+        -nocase -re "(fail|error).*$kernel_prompt" {
+            break
+        }
+        -re $kernel_prompt {
+            break
+        }
+        timeout {
+            puts "Fail to run ifconfig"
+            break
+        }
+    }
+}
+
+send "route add -net default gw $serverip\r"
+while 1 {
+    sleep 3
+    expect {
+        -nocase -re "(fail|error).*$kernel_prompt" {
+            break
+        }
+        -re $kernel_prompt {
+            break
+        }
+        timeout {
+            puts "Fail to add route"
+            break
+        }
+    }
+}
+
+send "route\r"
+while 1 {
+    sleep 3
+    expect {
+        -nocase -re "(fail|error).*$kernel_prompt" {
+            break
+        }
+        -re "$serverip.*$kernel_prompt" {
+            puts "Add route success."
+            break
+        }
+        timeout {
+            puts "Fail to add route."
+            break
+        }
+    }
+}
+
+
+incr case_num
+spawn linphonec
+set host_linphonec_id $spawn_id
+while 1 {
+    expect {
+        "cannot find card" {
+            case_fail $case_num
+        }
+        -re "Ready.*linphonec>" {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+set spawn_id $kermit_spawn_id
+set timeout 10
+send "linphonec\r"
+while 1 {
+    expect {
+        -re "Ready.*linphonec>" {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+set timeout 10
+incr case_num
+send "call sip:test@$serverip\r"
+while 1 {
+    expect {
+        -nocase -re "contacting.*linphonec>" {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+
+set spawn_id $host_linphonec_id
+
+set timeout 10
+incr case_num
+while 1 {
+    expect {
+        -re "is (calling|contacting) you" {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+set timeout 10
+incr case_num
+send "answer\r"
+while 1 {
+    expect {
+        -re "Connected.*linphonec>" {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+set spawn_id $kermit_spawn_id
+
+while 1 {
+    expect {
+        "Connected" {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+set timeout 3000
+incr case_num
+while 1 {
+    expect {
+        -re "COMM.*PID" {
+            set underrun_test_status 1
+            break
+        }
+        -re "(Underrun happened)|(dma is already stopped)" {
+            set underrun_test_status 1
+            break
+        }
+        -re "Network is unreachable|Illegal instruction|Bus error" {
+            set underrun_test_status 1
+            break
+        }
+        -re "Trace:.*\r\n\r\n" {
+            expect -re "$kernel_prompt"
+            set underrun_test_status 1
+            break
+        }
+        timeout {
+            set underrun_test_status 0
+            break
+        }
+    }
+}
+
+set timeout 10
+send "\3"
+expect -re $kernel_prompt
+
+set spawn_id $host_linphonec_id
+sleep 2
+send "\3"
+expect -re $sh_prompt
+
+if { $underrun_test_status == "0" } {
+    send_user "No underrun happen\r"
+    case_pass $case_num
+} elseif { $underrun_test_status == "1" } {
+    send_user "Underrun happened\r"
+    case_fail $case_num
+}
+
+all_pass
+send_user "Ending $argv0\n"
+log_file

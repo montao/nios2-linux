@@ -1,0 +1,7 @@
+conftest.c: In function 'main':
+conftest.c:36: warning: unused variable 's'
+conftest.c:56: warning: unused variable 'foo'
+conftest.c:23: warning: unused variable 'zero'
+conftest.c:17: warning: unused variable 'x'
+conftest.c:38: warning: 't' is used uninitialized in this function
+conftest.c:53: warning: 'b' is used uninitialized in this function

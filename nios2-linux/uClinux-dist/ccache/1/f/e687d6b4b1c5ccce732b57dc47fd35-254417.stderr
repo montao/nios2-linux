@@ -1,0 +1,88 @@
+commands.c: In function 'makeargv':
+commands.c:159: warning: suggest parentheses around assignment used as truth value
+commands.c: At top level:
+commands.c:204: warning: return type defaults to 'int'
+commands.c: In function 'sendcmd':
+commands.c:392: warning: implicit declaration of function 'quit'
+commands.c:331: warning: unused variable 'question'
+commands.c: In function 'send_docmd':
+commands.c:419: warning: implicit declaration of function 'send_tncmd'
+commands.c: In function 'togdebug':
+commands.c:532: warning: implicit declaration of function 'SetSockOpt'
+commands.c: In function 'togbinary':
+commands.c:592: warning: implicit declaration of function 'tel_leave_binary'
+commands.c: In function 'display':
+commands.c:1301: warning: implicit declaration of function 'optionstatus'
+commands.c: In function 'suspend':
+commands.c:1362: warning: implicit declaration of function 'TerminalWindowSize'
+commands.c: In function 'shell':
+commands.c:1416: warning: missing sentinel in function call
+commands.c:1418: warning: missing sentinel in function call
+commands.c:1423: warning: implicit declaration of function 'wait'
+commands.c: At top level:
+commands.c:1440: warning: return type defaults to 'int'
+commands.c: In function 'bye':
+commands.c:1448: warning: implicit declaration of function 'NetClose'
+commands.c: At top level:
+commands.c:1469: warning: return type defaults to 'int'
+commands.c: In function 'quit':
+commands.c:1471: warning: implicit declaration of function 'Exit'
+commands.c: In function 'logout':
+commands.c:1480: warning: implicit declaration of function 'netflush'
+commands.c: At top level:
+commands.c:1535: warning: return type defaults to 'int'
+commands.c:1631: warning: return type defaults to 'int'
+commands.c: In function 'env_init':
+commands.c:1696: warning: suggest parentheses around assignment used as truth value
+commands.c:1719: warning: implicit declaration of function 'free'
+commands.c: In function 'env_define':
+commands.c:1741: warning: suggest parentheses around assignment used as truth value
+commands.c:1754: warning: implicit declaration of function 'opt_welldefined'
+commands.c: In function 'env_undefine':
+commands.c:1767: warning: suggest parentheses around assignment used as truth value
+commands.c: In function 'env_export':
+commands.c:1785: warning: suggest parentheses around assignment used as truth value
+commands.c: In function 'env_unexport':
+commands.c:1795: warning: suggest parentheses around assignment used as truth value
+commands.c: In function 'env_default':
+commands.c:1845: warning: 'return' with no value, in function returning non-void
+commands.c:1848: warning: suggest parentheses around assignment used as truth value
+commands.c: In function 'env_getvalue':
+commands.c:1862: warning: suggest parentheses around assignment used as truth value
+commands.c: At top level:
+commands.c:2021: warning: return type defaults to 'int'
+commands.c: In function 'status':
+commands.c:2027: warning: implicit declaration of function 'getconnmode'
+commands.c: In function 'tn':
+commands.c:2225: warning: implicit declaration of function 'atoi'
+commands.c:2310: warning: implicit declaration of function 'cmdrc'
+commands.c:2316: warning: suggest parentheses around && within ||
+commands.c:2317: warning: suggest parentheses around assignment used as truth value
+commands.c:2331: warning: implicit declaration of function 'ExitString'
+commands.c: At top level:
+commands.c:2402: warning: missing braces around initializer
+commands.c:2402: warning: (near initialization for 'cmdtab[17]')
+commands.c:2412: warning: missing braces around initializer
+commands.c:2412: warning: (near initialization for 'cmdtab2[3]')
+commands.c: In function 'getcmd':
+commands.c:2442: warning: suggest parentheses around assignment used as truth value
+commands.c: At top level:
+commands.c:2533: warning: return type defaults to 'int'
+commands.c: In function 'help':
+commands.c:2543: warning: field width should have type 'int', but argument 2 has type 'long unsigned int'
+commands.c: At top level:
+commands.c:2565: warning: return type defaults to 'int'
+commands.c: In function 'cmdrc':
+commands.c:2575: warning: 'return' with no value, in function returning non-void
+commands.c:2591: warning: 'return' with no value, in function returning non-void
+commands.c: In function 'sourceroute':
+commands.c:2757: warning: suggest parentheses around assignment used as truth value
+commands.c:2775: warning: suggest parentheses around assignment used as truth value
+commands.c: In function 'dokludgemode':
+commands.c:1095: warning: control reaches end of non-void function
+commands.c: In function 'tn':
+commands.c:2333: warning: control reaches end of non-void function
+commands.c: In function 'quit':
+commands.c:1473: warning: control reaches end of non-void function
+commands.c: At top level:
+commands.c:35: warning: 'sccsid' defined but not used

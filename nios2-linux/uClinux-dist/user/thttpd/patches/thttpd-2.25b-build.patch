@@ -1,0 +1,86 @@
+respect CPPFLAGS and DESTDIR and out-of-tree builds
+
+--- thttpd-2.25b/extras/Makefile.in
++++ thttpd-2.25b/extras/Makefile.in
+@@ -52,36 +52,36 @@
+ 
+ .c.o:
+ 	@rm -f $@
+-	$(CC) $(CFLAGS) -c $<
++	$(CC) $(CFLAGS) $(CPPFLAGS) -c $<
+ 
+ all:		makeweb htpasswd
+ 
+ makeweb:	makeweb.o
+-	$(CC) $(LDFLAGS) makeweb.o -o makeweb $(LIBS) $(NETLIBS)
++	$(CC) $(CFLAGS) $(LDFLAGS) makeweb.o -o makeweb $(LIBS) $(NETLIBS)
+ 
+ makeweb.o:	makeweb.c ../config.h
+-	$(CC) $(CFLAGS) -DWEBDIR=\"$(WEBDIR)\" -c $<
++	$(CC) $(CFLAGS) $(CPPFLAGS) -DWEBDIR=\"$(WEBDIR)\" -c $<
+ 
+ htpasswd:	htpasswd.o
+-	$(CC) $(LDFLAGS) $(STATICFLAG) htpasswd.o -o htpasswd $(LIBS)
++	$(CC) $(CFLAGS) $(LDFLAGS) $(STATICFLAG) htpasswd.o -o htpasswd $(LIBS)
+ 
+ htpasswd.o:	htpasswd.c ../config.h
+-	$(CC) $(CFLAGS) -DWEBDIR=\"$(WEBDIR)\" -c $<
++	$(CC) $(CFLAGS) $(CPPFLAGS) -DWEBDIR=\"$(WEBDIR)\" -c $<
+ 
+ 
+ install:	all
+-	rm -f $(BINDIR)/makeweb $(BINDIR)/htpasswd $(BINDIR)/syslogtocern
+-	cp makeweb $(BINDIR)/makeweb
+-	chgrp $(WEBGROUP) $(BINDIR)/makeweb
+-	chmod 2755 $(BINDIR)/makeweb
+-	cp htpasswd $(BINDIR)/htpasswd
+-	cp syslogtocern $(BINDIR)/syslogtocern
+-	rm -f $(MANDIR)/man1/makeweb.1
+-	cp makeweb.1 $(MANDIR)/man1/makeweb.1
+-	rm -f $(MANDIR)/man1/htpasswd.1
+-	cp htpasswd.1 $(MANDIR)/man1/htpasswd.1
+-	rm -f $(MANDIR)/man8/syslogtocern.8
+-	cp syslogtocern.8 $(MANDIR)/man8/syslogtocern.8
++	rm -f $(DESTDIR)$(BINDIR)/makeweb $(DESTDIR)$(BINDIR)/htpasswd $(DESTDIR)$(BINDIR)/syslogtocern
++	cp makeweb $(DESTDIR)$(BINDIR)/makeweb
++#	chgrp $(WEBGROUP) $(DESTDIR)$(BINDIR)/makeweb
++#	chmod 2755 $(DESTDIR)$(BINDIR)/makeweb
++	cp htpasswd $(DESTDIR)$(BINDIR)/htpasswd
++	cp $(srcdir)/syslogtocern $(DESTDIR)$(BINDIR)/syslogtocern
++	rm -f $(DESTDIR)$(MANDIR)/man1/makeweb.1
++	cp $(srcdir)/makeweb.1 $(DESTDIR)$(MANDIR)/man1/makeweb.1
++	rm -f $(DESTDIR)$(MANDIR)/man1/htpasswd.1
++	cp $(srcdir)/htpasswd.1 $(DESTDIR)$(MANDIR)/man1/htpasswd.1
++	rm -f $(DESTDIR)$(MANDIR)/man8/syslogtocern.8
++	cp $(srcdir)/syslogtocern.8 $(DESTDIR)$(MANDIR)/man8/syslogtocern.8
+ 
+ clean:
+ 	rm -f $(CLEANFILES)
+--- thttpd-2.25b/Makefile.in
++++ thttpd-2.25b/Makefile.in
+@@ -64,7 +64,7 @@
+ 
+ .c.o:
+ 	@rm -f $@
+-	$(CC) $(CFLAGS) -c $<
++	$(CC) $(CFLAGS) $(CPPFLAGS) -c $<
+ 
+ SRC =		thttpd.c libhttpd.c fdwatch.c mmc.c timers.c match.c tdate_parse.c
+ 
+@@ -112,13 +112,13 @@
+ 
+ install:	installthis install-man installsubdirs
+ 
+-installthis:
++installthis: thttpd
+ 	-mkdir -p $(DESTDIR)$(BINDIR)
+-	$(INSTALL) -m 555 -o bin -g bin thttpd $(DESTDIR)$(BINDIR)
++	$(INSTALL) -m 555 thttpd $(DESTDIR)$(BINDIR)
+ 
+ install-man:
+ 	-mkdir -p $(DESTDIR)$(MANDIR)/man8
+-	$(INSTALL) -m 444 -o bin -g bin thttpd.8 $(DESTDIR)$(MANDIR)/man8
++	$(INSTALL) -m 444 $(srcdir)/thttpd.8 $(DESTDIR)$(MANDIR)/man8
+ 
+ installsubdirs:
+ 	for i in $(SUBDIRS) ; do ( \

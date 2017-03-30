@@ -1,0 +1,50 @@
+fix libao cross-compile tests, and disable some support that exists
+only in newer versions of libao
+
+--- mpg321-0.2.12-1/ao.c
++++ mpg321-0.2.12-1/ao.c
+@@ -239,7 +239,7 @@
+         format.channels = (options.opt & MPG321_FORCE_STEREO) ? 2 : MAD_NCHANNELS(header);
+ 	
+ 	/* Add this element as an option to mpg321 */
+-	format.matrix = "L,R";
++//	format.matrix = "L,R";
+ 
+         /* mad gives us little-endian data; we swap it on big-endian targets, to
+           big-endian format, because that's what most drivers expect. */
+--- mpg321-0.2.12-1/aclocal.m4
++++ mpg321-0.2.12-1/aclocal.m4
+@@ -29,6 +29,7 @@
+ AC_ARG_ENABLE(aotest, [  --disable-aotest       Do not try to compile and run a test ao program],, enable_aotest=yes)
+ 
+ 
++if test "x$with_ao" = "xyes" ; then
+   if test "x$ao_libraries" != "x" ; then
+     AO_LIBS="-L$ao_libraries"
+   elif test "x$ao_prefix" != "x"; then
+@@ -44,6 +45,7 @@
+   elif test "x$prefix" != "xNONE"; then
+     AO_CFLAGS="-I$prefix/include"
+   fi
++fi
+ 
+   # see where dl* and friends live
+   AC_CHECK_FUNCS(dlopen, [AO_DL_LIBS=""], [
+--- mpg321-0.2.12-1/configure
++++ mpg321-0.2.12-1/configure
+@@ -3249,6 +3249,7 @@
+ fi;
+ 
+ 
++if test "x$with_ao" = "xyes" ; then
+   if test "x$ao_libraries" != "x" ; then
+     AO_LIBS="-L$ao_libraries"
+   elif test "x$ao_prefix" != "x"; then
+@@ -3264,6 +3265,7 @@
+   elif test "x$prefix" != "xNONE"; then
+     AO_CFLAGS="-I$prefix/include"
+   fi
++fi
+ 
+   # see where dl* and friends live
+ 

@@ -1,0 +1,2 @@
+ring.c:104: warning: return type defaults to 'int'
+ring.c:35: warning: 'sccsid' defined but not used

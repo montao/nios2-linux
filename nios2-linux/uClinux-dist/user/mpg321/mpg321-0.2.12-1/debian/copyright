@@ -1,0 +1,25 @@
+mpg321 is Copyright © 2001 Joe Drew, and placed under the GNU General
+Public License, version 2 or later.
+
+It is based on plaympeg, Copyright © 1999 Loki Entertainment Software.
+
+The full text of the GNU General Public License can be found in the
+file /usr/share/common-licenses/GPL-2.
+
+mpg321 source includes a copy of fft.c, which is part of the AlsaPlayer,
+Copyright  © 1998 - 2002 <andy@alsaplayer.org>. Here is the fft.c license:
+---------------------------------------------------------------------------
+
+AlsaPlayer is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 3 of the License, or
+(at your option) any later version.
+
+AlsaPlayer is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, see <http://www.gnu.org/licenses/>.
+--------------------------------------------------------------------------

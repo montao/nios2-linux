@@ -1,0 +1,78 @@
+<html lang="en">
+<head>
+<title>Breakpoint Menus - Debugging with GDB</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="Debugging with GDB">
+<meta name="generator" content="makeinfo 4.8">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="up" href="Breakpoints.html#Breakpoints" title="Breakpoints">
+<link rel="prev" href="Break-Commands.html#Break-Commands" title="Break Commands">
+<link rel="next" href="Error-in-Breakpoints.html#Error-in-Breakpoints" title="Error in Breakpoints">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<p>
+<a name="Breakpoint-Menus"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="Error-in-Breakpoints.html#Error-in-Breakpoints">Error in Breakpoints</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="Break-Commands.html#Break-Commands">Break Commands</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="Breakpoints.html#Breakpoints">Breakpoints</a>
+<hr>
+</div>
+
+<h4 class="subsection">5.1.8 Breakpoint Menus</h4>
+
+<p><a name="index-overloading-255"></a><a name="index-symbol-overloading-256"></a>
+Some programming languages (notably C<tt>++</tt> and Objective-C) permit a
+single function name
+to be defined several times, for application in different contexts. 
+This is called <dfn>overloading</dfn>.  When a function name is overloaded,
+`<samp><span class="samp">break </span><var>function</var></samp>' is not enough to tell <span class="sc">gdb</span> where you want
+a breakpoint.  If you realize this is a problem, you can use
+something like `<samp><span class="samp">break </span><var>function</var><span class="samp">(</span><var>types</var><span class="samp">)</span></samp>' to specify which
+particular version of the function you want.  Otherwise, <span class="sc">gdb</span> offers
+you a menu of numbered choices for different possible breakpoints, and
+waits for your selection with the prompt `<samp><span class="samp">&gt;</span></samp>'.  The first two
+options are always `<samp><span class="samp">[0] cancel</span></samp>' and `<samp><span class="samp">[1] all</span></samp>'.  Typing <kbd>1</kbd>
+sets a breakpoint at each definition of <var>function</var>, and typing
+<kbd>0</kbd> aborts the <code>break</code> command without setting any new
+breakpoints.
+
+   <p>For example, the following session excerpt shows an attempt to set a
+breakpoint at the overloaded symbol <code>String::after</code>. 
+We choose three particular definitions of that function name:
+
+<!-- FIXME! This is likely to change to show arg type lists, at least -->
+<pre class="smallexample">     (gdb) b String::after
+     [0] cancel
+     [1] all
+     [2] file:String.cc; line number:867
+     [3] file:String.cc; line number:860
+     [4] file:String.cc; line number:875
+     [5] file:String.cc; line number:853
+     [6] file:String.cc; line number:846
+     [7] file:String.cc; line number:735
+     &gt; 2 4 6
+     Breakpoint 1 at 0xb26c: file String.cc, line 867.
+     Breakpoint 2 at 0xb344: file String.cc, line 875.
+     Breakpoint 3 at 0xafcc: file String.cc, line 846.
+     Multiple breakpoints were set.
+     Use the "delete" command to delete unwanted
+      breakpoints.
+     (gdb)
+</pre>
+   <!-- @ifclear BARETARGET -->
+</body></html>
+

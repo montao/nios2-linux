@@ -1,0 +1,22 @@
+This module is used to test the ANOMALY_05000310 workaround.
+
+test:
+modprobe boundary_anomaly_test
+
+Test1 can run normally, test2 will make system panic and print oops. With the following log, tests pass:
+
+-----test 1: fetch instructions at the boundary-------
+boundary_anomaly_test: jump to boundary ffa0ff88
+boundary_anomaly_test: running at the boundary
+boundary_anomaly_test: exit from boundary ffa0ff88
+-----test 1: pass-------
+
+-----test 2: trigger a real external hardware error-------
+External Memory Addressing Error
+Kernel OOPS in progress
+HW Error context
+CURRENT PROCESS:
+COMM=modprobe PID=130 CPU=0
+TEXT = 0x02a00040-0x02a49920        DATA = 0x02a49924-0x02a5b894
+ BSS = 0x02a5b894-0x02a5d214  USER-STACK = 0x02a65f4c
+

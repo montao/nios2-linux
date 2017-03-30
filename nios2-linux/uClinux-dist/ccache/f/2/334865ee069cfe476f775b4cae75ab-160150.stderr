@@ -1,0 +1,16 @@
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/drivers/scr_fb.c: In function 'fb_setpalette':
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/drivers/scr_fb.c:384: warning: pointer targets in passing argument 3 of 'ioctl_setpalette' differ in signedness
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/drivers/scr_fb.c:384: warning: pointer targets in passing argument 4 of 'ioctl_setpalette' differ in signedness
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/drivers/scr_fb.c:384: warning: pointer targets in passing argument 5 of 'ioctl_setpalette' differ in signedness
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/drivers/scr_fb.c: In function 'ioctl_getpalette':
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/drivers/scr_fb.c:406: warning: pointer targets in assignment differ in signedness
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/drivers/scr_fb.c:407: warning: pointer targets in assignment differ in signedness
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/drivers/scr_fb.c:408: warning: pointer targets in assignment differ in signedness
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/drivers/scr_fb.c: In function 'ioctl_setpalette':
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/drivers/scr_fb.c:435: warning: pointer targets in assignment differ in signedness
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/drivers/scr_fb.c:436: warning: pointer targets in assignment differ in signedness
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/drivers/scr_fb.c:437: warning: pointer targets in assignment differ in signedness
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/drivers/scr_fb.c: In function 'setfadelevel':
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/drivers/scr_fb.c:463: warning: pointer targets in passing argument 3 of 'ioctl_setpalette' differ in signedness
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/drivers/scr_fb.c:463: warning: pointer targets in passing argument 4 of 'ioctl_setpalette' differ in signedness
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/drivers/scr_fb.c:463: warning: pointer targets in passing argument 5 of 'ioctl_setpalette' differ in signedness

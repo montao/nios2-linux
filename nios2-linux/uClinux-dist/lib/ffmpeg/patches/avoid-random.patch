@@ -1,0 +1,11 @@
+--- ffmpeg/libavutil/random_seed.c
++++ ffmpeg/libavutil/random_seed.c
+@@ -28,7 +28,7 @@
+     uint32_t seed;
+     int fd;
+ 
+-    if ((fd = open("/dev/random", O_RDONLY)) == -1)
++    /* if ((fd = open("/dev/random", O_RDONLY)) == -1) */
+         fd = open("/dev/urandom", O_RDONLY);
+     if (fd != -1){
+         read(fd, &seed, 4);

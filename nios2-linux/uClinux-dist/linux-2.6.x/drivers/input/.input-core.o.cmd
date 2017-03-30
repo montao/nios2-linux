@@ -1,0 +1,1 @@
+cmd_drivers/input/input-core.o := nios2-linux-gnu-ld  -mnios2elf   -r -o drivers/input/input-core.o drivers/input/input.o drivers/input/input-compat.o drivers/input/input-mt.o drivers/input/ff-core.o 

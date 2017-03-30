@@ -1,0 +1,2 @@
+/data/dwesterg/nios2-linux/nios2-linux/uClinux-dist/user/e2fsprogs/e2fsprogs-1.41.12/e2fsck/rehash.c: In function 'e2fsck_rehash_dir':
+/data/dwesterg/nios2-linux/nios2-linux/uClinux-dist/user/e2fsprogs/e2fsprogs-1.41.12/e2fsck/rehash.c:406: warning: 'rec_len' may be used uninitialized in this function

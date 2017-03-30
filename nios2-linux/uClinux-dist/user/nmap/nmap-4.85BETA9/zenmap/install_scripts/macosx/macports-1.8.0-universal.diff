@@ -1,0 +1,51 @@
+diff --unidirectional-new-file -ru -x 'PortIndex*' ports.orig/python/py25-py2app-devel/Portfile ports/python/py25-py2app-devel/Portfile
+--- ports.orig/python/py25-py2app-devel/Portfile	2009-01-16 14:09:14.000000000 -0700
++++ ports/python/py25-py2app-devel/Portfile	2009-04-05 11:13:35.000000000 -0600
+@@ -21,13 +21,14 @@
+ 
+ fetch.type          svn
+ svn.url             http://svn.pythonmac.org/py2app/py2app/trunk/
++svn.revision        72
+ worksrcdir          trunk
+ 
+ set apymacholibfile "/lib/python2.5/site-packages/macholib/__init__.py"
+ 
+ depends_lib-append  port:py25-setuptools \
+                     port:py25-altgraph \
+-                    path:${prefix}${apymacholibfile}:py25-macholib \
++                    port:py25-macholib-devel \
+                     port:py25-modulegraph-devel \
+                     port:py25-bdist_mpkg
+ 
+diff --unidirectional-new-file -ru -x 'PortIndex*' ports.orig/x11/gtk2/Portfile ports/x11/gtk2/Portfile
+--- ports.orig/x11/gtk2/Portfile	2009-03-27 13:35:45.000000000 -0600
++++ ports/x11/gtk2/Portfile	2009-04-04 10:37:05.000000000 -0600
+@@ -138,10 +138,11 @@
+         port:xorg-libXi \
+         port:xorg-libXrandr \
+         port:xorg-libXcursor \
+-        port:xorg-libXinerama \
+-        port:xorg-libXdamage \
+-        port:xorg-libXcomposite \
+-        port:xorg-libXfixes
++        port:xorg-libXinerama
++        # Remove libraries only present in 10.5.
++        # port:xorg-libXdamage \
++        # port:xorg-libXcomposite \
++        # port:xorg-libXfixes
+ 
+     configure.args-append      --with-xinput --enable-xinerama
+ 
+diff --unidirectional-new-file -ru -x 'PortIndex*' ports.orig/x11/pango/Portfile ports/x11/pango/Portfile
+--- ports.orig/x11/pango/Portfile	2009-03-29 03:26:00.000000000 -0600
++++ ports/x11/pango/Portfile	2009-04-04 10:37:05.000000000 -0600
+@@ -94,7 +94,8 @@
+ 
+ configure.ldflags-append \
+     -no-undefined \
+-    -bind_at_load
++    -bind_at_load \
++    "-Wl,-dylib_file,/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib:/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib"
+ 
+ configure.args \
+     --enable-static

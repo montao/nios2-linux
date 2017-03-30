@@ -1,0 +1,8 @@
+The rsh client in inetutils source is not the original one based on fork,
+but a reimplementation from rsh-redone-80 debian source package, which
+does not call fork() and can be built for uClinux without any changes. 
+
+The rsh-redone-80 tar ball can be found at
+http://packages.debian.org/source/sid/rsh-redone
+
+Don't forget to replace rsh when updating inetutils.

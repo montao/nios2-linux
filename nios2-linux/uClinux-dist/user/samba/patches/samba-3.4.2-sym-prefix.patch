@@ -1,0 +1,61 @@
+--- samba-3.4.2/source3/Makefile.in
++++ samba-3.4.2/source3/Makefile.in
+@@ -1676,7 +1676,7 @@
+ #
+ #####################################################################
+ 
+-MKSYMS_SH = $(srcdir)/script/mksyms.sh
++MKSYMS_SH = CPP="${CPP}" $(srcdir)/script/mksyms.sh
+ 
+ 
+ #-------------------------------------------------------------------
+--- samba-3.4.2/source3/script/mksyms.awk
++++ samba-3.4.2/source3/script/mksyms.awk
+@@ -42,7 +42,7 @@
+ /^extern[ \t]+[^()]+[;][ \t]*$/ {
+ 	gsub(/[^ \t]+[ \t]+/, "");
+ 	sub(/[;][ \t]*$/, "");
+-	printf "\t\t%s;\n", $0;
++	printf "\t\t%s%s;\n", sym_pfx, $0;
+ 	next;
+ }
+ 
+@@ -61,7 +61,7 @@
+ 	sub(/[(].*$/, "");
+ 	gsub(/[^ \t]+[ \t]+/, "");
+ 	gsub(/^[*]/, "");
+-	printf "\t\t%s;\n",$0;
++	printf "\t\t%s%s;\n", sym_pfx, $0;
+ 	next;
+ }
+ 
+@@ -70,7 +70,7 @@
+ 	sub(/[(].*$/, "");
+ 	gsub(/[^ \t]+[ \t]+/, "");
+ 	gsub(/^[*]/, "");
+-	printf "\t\t%s;\n",$0;
++	printf "\t\t%s%s;\n", sym_pfx, $0;
+ 	next;
+ }
+ 
+--- samba-3.4.2/source3/script/mksyms.sh
++++ samba-3.4.2/source3/script/mksyms.sh
+@@ -30,11 +30,17 @@
+ 
+ proto_src="`echo $@ | tr ' ' '\n' | sort | uniq `"
+ 
++if [ -n "${CPP}" ] ; then
++	sym_pfx=$(echo __USER_LABEL_PREFIX__ | ${CPP} - | tail -n 1 | grep -v __USER_LABEL_PREFIX__)
++else
++	sym_pfx=""
++fi
++
+ echo creating $symsfile
+ 
+ mkdir -p `dirname $symsfile`
+ 
+-${awk} -f `dirname $0`/mksyms.awk $proto_src > $symsfile_tmp
++${awk} -v sym_pfx="${sym_pfx}" -f `dirname $0`/mksyms.awk $proto_src > $symsfile_tmp
+ 
+ if cmp -s $symsfile $symsfile_tmp 2>/dev/null
+ then

@@ -1,0 +1,386 @@
+#!/usr/bin/expect
+
+#
+#Test program to test the audio driver and memory leak.
+#
+
+source ../kernel_config.exp
+
+if { $argc < 2} {
+    puts "Please input: board_type, audio_dev"
+    puts "Refer to build_audio_kernel.exp for audio_dev."
+    exit
+}
+set audio_dev [lindex $argv 1]
+set title ${audio_dev}_test_log
+
+log_file $title
+send_user "Starting $argv0\n"
+set TITLE [title "$argv0"]
+append TITLE " ($audio_dev)"
+
+
+step "Start kermit."
+source ../spawn_kermit.exp
+
+step "Reboot the kernel."
+source ../reboot_kernel.exp
+
+step "Start testing."
+
+set count_under_run 0
+set case_num 0
+set alsa_format "S32_LE S24_LE S16_LE"
+set sample_rate "48000 96000 44100 8000"
+set channel "Stereo Mono"
+set output_file_type "wav"
+
+proc alsa_rec_play {format rate channel file_type other_args} {
+    global case_num
+    global kernel_prompt
+    global count_under_run
+
+    if { $channel == "Mono" } {
+        set channel_num 1
+    } else {
+        set channel_num 2
+    }
+
+    sleep 1
+    incr case_num
+    set timeout 15
+    send -s "arecord $other_args -f $format -r $rate -c $channel_num -t $file_type -d 5 $file_type\n"
+    while 1 {
+        expect {
+            -re "TUV|UVF|TU|UV|VF|(Hardware Trace:)|dma" {
+                incr count_under_run
+                expect {
+                    -re $kernel_prompt {
+                        case_pass $case_num
+                        break
+                    }
+                    timeout {
+                        send_user "timeout!"
+                        case_fail $case_num
+                    }
+                }
+            }
+            -re "$channel\r\n$kernel_prompt" {
+                case_pass $case_num
+                break
+            }
+            timeout {
+                send_user "timeout in arecord!"
+                case_fail $case_num
+            }
+        }
+    }
+
+    sleep 1
+    send -s "aplay $other_args $file_type\n"
+    while 1 {
+        expect {
+            -re "TUV|UVF|TU|UV|VF|(Hardware Trace:)|dma" {
+                incr count_under_run
+                expect {
+                    -re $kernel_prompt {
+                        case_pass $case_num
+                        break
+                    }
+                    timeout {
+                        send_user "timeout!"
+                        case_fail $case_num
+                    }
+                }
+            }
+            -re "$channel\r\n$kernel_prompt" {
+                case_pass $case_num
+                break
+            }
+            timeout {
+                send_user "timeout in aplay!"
+                case_fail $case_num
+            }
+        }
+    }
+}
+
+proc alsa_rec2play {format rate channel file_type other_args} {
+    global case_num
+    global kernel_prompt
+    global count_under_run
+
+    if { $channel == "Mono" } {
+        set channel_num 1
+    } else {
+        set channel_num 2
+    }
+
+    sleep 1
+    incr case_num
+    set timeout 15
+    send -s "arecord $other_args -f $format -r $rate -c $channel_num -t $file_type -d 5|aplay $other_args\n"
+    while 1 {
+        expect {
+            -re "TUV|UVF|TU|UV|VF|(Hardware Trace:)|dma" {
+                incr count_under_run
+                expect {
+                    -re $kernel_prompt {
+                        case_pass $case_num
+                        break
+                    }
+                    timeout {
+                        case_fail $case_num
+                    }
+                }
+            }
+            -re "$channel\r\n$kernel_prompt" {
+                case_pass $case_num
+                break
+            }
+            timeout {
+                case_fail $case_num
+            }
+        }
+    }
+}
+
+# run test case "test_proc" for "total_count" times
+# each time, run it with different parametres
+proc repeat { test_proc total_count } {
+    global sample_rate
+    global alsa_format
+    global channel
+    global output_file_type
+    global audio_dev
+
+    set count 1
+    while {1} {
+        foreach RATE $sample_rate {
+            foreach FORMAT $alsa_format {
+                foreach CHANNEL $channel {
+                    send_user "\n$test_proc Round $count: format $FORMAT; rate $RATE; channel $CHANNEL\n\n"
+                    $test_proc $FORMAT $RATE $CHANNEL $output_file_type ""
+                    sleep 1
+                    set count [expr $count+1]
+                    if { $count > $total_count } {
+                        return
+                    }
+                }
+            }
+        }
+    }
+}
+
+spawn mpg123 -Z ./audiotest.mp3
+set plaympeg_id $spawn_id
+
+send_user "\nPlease listen to the earphone or amplifier.\n\n"
+set spawn_id $kermit_spawn_id 
+
+sleep 10
+set timeout 4
+send "\n"
+expect -re $kernel_prompt
+
+set repeat_count 20
+set mem_leak_valve [expr 64*$repeat_count*2]
+
+if { $audio_dev == "audio_ssm2603" } {
+    incr case_num
+    set timeout 5
+    send "amixer cget name='Capture Switch'\r"
+    while 1 {
+        expect {
+            -re "values=off.*$kernel_prompt" {
+                send "amixer cset name='Capture Switch' on\r"
+                continue
+            }
+            -re "values=on.*$kernel_prompt" {
+                case_pass $case_num
+                break
+            }
+            timeout {
+                case_fail $case_num
+            }
+        }
+    }
+}
+
+if { $audio_dev == "audio_adau1361" } {
+    incr case_num
+    set timeout 15
+    send "amixer cset name='Headphone Playback Switch' on; amixer cset name='Headphone Playback Volume' 40; amixer cset name='Left Playback Mixer Left DAC Switch' on; amixer cset name='Right Playback Mixer Left DAC Switch' on; amixer cset name='Lineout Playback Switch' on; amixer cset name='Lineout Playback Volume' 40; amixer cset name='Left LR Playback Mixer Left Volume' 2; amixer cset name='Right LR Playback Mixer Right Volume' 2; amixer cset name='Aux Capture Volume' 7; amixer cset name='Digital Capture Volume' 255; amixer cset name='Input 1 Capture Volume' 7; amixer cset name='Input 2 Capture Volume' 7; amixer cset name='Input 3 Capture Volume' 7; amixer cset name='Input 4 Capture Volume' 7\r"
+    while 1 {
+        expect {
+            -re $kernel_prompt {
+                case_pass $case_num
+                break
+            }
+            timeout {
+                case_fail $case_num
+            }
+        }
+    }
+}
+
+incr case_num
+set timeout 5
+send "free\n"
+while 1 {
+    expect {
+        -re "Mem: +\[0-9]+ +\[0-9]+ +(\[0-9]+) +.*$kernel_prompt" {
+            set free_mem_start $expect_out(1,string)
+            send_user "free_mem_start=$free_mem_start\n"
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+repeat alsa_rec_play $repeat_count
+
+incr case_num
+set timeout 5
+send "free\n"
+while 1 {
+    expect {
+        -re "Mem: +\[0-9]+ +\[0-9]+ +(\[0-9]+) +.*$kernel_prompt" {
+            set free_mem_end $expect_out(1,string)
+            set mem_leak [expr $free_mem_end-$free_mem_start]
+            send_user "free_mem_end=$free_mem_end, mem_leak=$mem_leak\n"
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+repeat alsa_rec2play $repeat_count
+
+while 1 {
+    send_user "Duplex testing\n"
+
+    sleep 1
+    incr case_num
+    set timeout 30
+    send -s "arecord -t $output_file_type -c 2 -f [lindex $alsa_format 0] -r [lindex $sample_rate 0] -d 15 aaa\n"
+    while 1 {
+        expect {
+            -re "TUV|UVF|TU|UV|VF|(Hardware Trace:)|dma" {
+                incr count_under_run
+                expect {
+                    -re $kernel_prompt {
+                        break
+                    }
+                    timeout {
+                        case_fail $case_num
+                    }
+                }
+            }
+            -re "Stereo\r\n$kernel_prompt" {
+                break
+            }
+            timeout {
+                case_fail $case_num
+            }
+        }
+    }
+
+    sleep 1
+    send -s "aplay aaa &\n"
+    while 1 {
+        expect {
+            -re "TUV|UVF|TU|UV|VF|(Hardware Trace:)|dma" {
+                incr count_under_run
+                expect {
+                    -re $kernel_prompt {
+                        break
+                    }
+                    timeout {
+                        case_fail $case_num
+                    }
+                }
+            }
+            -re "Playing WAVE" {
+                break
+            }
+            timeout {
+                case_fail $case_num
+            }
+        }
+    }
+    send -s "\n"
+    expect {
+        ">" {}
+        timeout {
+            case_fail $case_num
+        }
+    }
+
+    send -s "arecord -t $output_file_type -c 2 -f [lindex $alsa_format 0] -r [lindex $sample_rate 0] -d 5 bbb\n"
+    while 1 {
+        expect {
+            -re "TUV|UVF|TU|UV|VF|(Hardware Trace:)|dma" {
+                incr count_under_run
+                expect {
+                    -re $kernel_prompt {
+                        break
+                    }
+                    timeout {
+                        case_fail $case_num
+                    }
+                }
+            }
+            -re "Input/output error" {
+                case_fail $case_num
+            }
+            -re "Stereo\r\n$kernel_prompt" {
+                break
+            }
+            timeout {
+                case_fail $case_num
+            }
+        }
+    }
+
+    sleep 5
+    expect {
+        "Input/output error" {
+            case_fail $case_num
+	}
+        timeout {
+            send_user "ALSA lib test finish\n"
+            case_pass $case_num
+            break
+        }
+    }
+}
+
+incr case_num
+if { $count_under_run == 0 && $mem_leak >= $mem_leak_valve } {
+    send_user "No under run error, but memory leak $mem_leak\n"
+    case_fail $case_num
+} elseif { $count_under_run > 0 && $mem_leak < $mem_leak_valve } {
+    send_user "Under run happened $count_under_run times, no memory leak\n"
+    case_fail $case_num
+} elseif { $count_under_run > 0 && $mem_leak >= $mem_leak_valve } {
+    send_user "Under run happened $count_under_run times, and memory leak $mem_leak\n"
+    case_fail $case_num
+} else {
+    send_user "No under run and memory leak\n"
+    case_pass $case_num
+}
+
+set spawn_id $plaympeg_id
+send "\3\3"
+sleep 1
+
+all_pass
+send_user "Ending $argv0\n"
+log_file

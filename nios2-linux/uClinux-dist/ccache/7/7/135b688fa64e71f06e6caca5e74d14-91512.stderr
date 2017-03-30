@@ -1,0 +1,4 @@
+cgivars.c: In function 'getGETvars':
+cgivars.c:97: warning: suggest parentheses around assignment used as truth value
+cgivars.c: In function 'getPOSTvars':
+cgivars.c:156: warning: suggest parentheses around assignment used as truth value

@@ -1,0 +1,15 @@
+fix for build error with newer gcc:
+
+examples/cpp/encode/file/main.cpp: In function ‘int main(int, char**)’:
+1/examples/cpp/encode/file/main.cpp:75: error: ‘memcmp’ was not declared in this scope
+
+--- flac-1.2.1/examples/cpp/encode/file/main.cpp
++++ flac-1.2.1/examples/cpp/encode/file/main.cpp
+@@ -30,6 +30,7 @@
+ 
+ #include <stdio.h>
+ #include <stdlib.h>
++#include <string.h>
+ #include "FLAC++/metadata.h"
+ #include "FLAC++/encoder.h"
+ 

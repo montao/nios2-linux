@@ -1,0 +1,9 @@
+#Core: ddr3_top_phy - Instance: ghrd_4sgx230_sopc_inst|the_ddr3_top|ddr3_top_controller_phy_inst|ddr3_top_phy_inst
+#Path, Setup Margin, Hold Margin
+"Address Command (Slow 900mV 85C Model)",1.127,1.104
+"Half Rate Address/Command (Slow 900mV 85C Model)",3.970,1.455
+"Phy (Slow 900mV 85C Model)",0.433,0.115
+"Phy Reset (Slow 900mV 85C Model)",3.023,0.502
+"Read Capture (Slow 900mV 85C Model)",0.288,0.661
+"Read Resync (All Conditions)",1.002,1.031
+"Write (Slow 900mV 85C Model)",0.300,0.383

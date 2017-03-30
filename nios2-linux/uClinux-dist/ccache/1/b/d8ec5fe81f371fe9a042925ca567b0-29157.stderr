@@ -1,0 +1,2 @@
+conftest.c: In function 'main':
+conftest.c:219: warning: unused variable 's'

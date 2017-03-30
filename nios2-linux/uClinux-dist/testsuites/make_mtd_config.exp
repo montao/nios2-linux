@@ -1,0 +1,83 @@
+#!/usr/bin/expect
+
+cd $uclinux_path
+set timeout 300
+spawn make config
+
+while 1 {
+    expect {
+        -re "Customize Kernel Settings.*DEFAULTS_KERNEL.*\\\[.*]" {
+            send "y\r"
+        }
+
+        -re "Customize Application/Library Settings.*DEFAULTS_VENDOR.*\\\[.*]" {
+            send "y\r"
+        }
+
+        -nocase -re "\\\[\[^\r]*] (\[ymn])|choice\\\[.*]: \[0-9]+\r" {
+            continue
+        }
+
+        -re "Memory Technology Device .*MTD.* support.*MTD.*\\\[.*]" {
+            send -s "Y\r"
+        }
+
+        -re "MTD partitioning support.*MTD_PARTITIONS.*\\\[.*]" {
+            send -s "Y\r"
+        }
+
+        -re "Direct char device access to MTD devices.*MTD_CHAR.*\\\[.*]" {
+            send -s "Y\r"
+        }
+
+        -re "Caching block device access to MTD devices.*MTD_BLOCK.*\\\[.*]" {
+            send -s "Y\r"
+        }
+
+#################################################################################
+#################################################################################
+        # Disable this config to use copy command cp normally.
+        -re "Non-POSIX, but safer, copying to special nodes.*USER_BUSYBOX_FEATURE_NON_POSIX_CP.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "mtd-utils.*USER_MTDUTILS.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "erase.*USER_MTDUTILS_ERASE.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "lock.*USER_MTDUTILS_LOCK.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "unlock.*USER_MTDUTILS_UNLOCK.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "mkfs.jffs2.*USER_MTDUTILS_MKFSJFFS2.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        "\\\(*) \\\[*]" {
+            sleep .05
+            send "\r"
+        }
+
+        -re "\[cC]hoice\\\[.*]:" {
+            send "\r"
+        }
+
+        eof {
+            puts "End of configuration"
+            break
+        }
+
+        timeout {
+            puts "\n\nFATAL ERROR: config prompt timeout in make config"
+            break
+        }
+    }
+}

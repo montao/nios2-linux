@@ -1,0 +1,11 @@
+--- dnsmasq-2.50/src/config.h
++++ dnsmasq-2.50/src/config.h
+@@ -204,6 +204,8 @@
+ #  ifndef IPV6_V6ONLY
+ #    define IPV6_V6ONLY 26
+ #  endif
++#else
++#  define NO_IPV6
+ #endif
+ 
+ /* This is for glibc 2.x */

@@ -1,0 +1,96 @@
+This file contains any messages produced by compilers while
+running configure, to aid debugging if configure makes a mistake.
+
+configure:614: checking host system type
+configure:635: checking target system type
+configure:653: checking build system type
+configure:708: checking for a BSD compatible install
+configure:761: checking whether ln works
+configure:785: checking whether ln -s works
+configure:1850: checking for gcc
+configure:1963: checking whether the C compiler (gcc  ) works
+configure:1979: gcc -o conftest    conftest.c  1>&5
+configure:2005: checking whether the C compiler (gcc  ) is a cross-compiler
+configure:2010: checking whether we are using GNU C
+configure:2038: checking whether gcc accepts -g
+configure:2105: checking for gnatbind
+configure:2170: checking whether compiler driver understands Ada
+configure:2202: checking how to compare bootstrapped objects
+configure:2300: checking for correct version of gmp.h
+configure:2313: gcc -c -g -O2   conftest.c 1>&5
+configure:2303:17: error: gmp.h: No such file or directory
+configure: In function 'main':
+configure:2307: error: 'choke' undeclared (first use in this function)
+configure:2307: error: (Each undeclared identifier is reported only once
+configure:2307: error: for each function it appears in.)
+configure:2307: error: expected ';' before 'me'
+configure: failed program was:
+#line 2302 "configure"
+#include "confdefs.h"
+#include "gmp.h"
+int main() {
+
+#if __GNU_MP_VERSION < 4 || (__GNU_MP_VERSION == 4 && __GNU_MP_VERSION_MINOR < 1)
+choke me
+#endif
+
+; return 0; }
+configure:3449: checking for bison
+configure:3489: checking for bison
+configure:3528: checking for gm4
+configure:3567: checking for flex
+configure:3607: checking for flex
+configure:3646: checking for makeinfo
+configure:3699: checking for expect
+configure:3740: checking for runtest
+configure:3788: checking for x86_64-unknown-linux-gnu-ar
+configure:3863: checking for x86_64-unknown-linux-gnu-as
+configure:3938: checking for x86_64-unknown-linux-gnu-dlltool
+configure:3969: checking for dlltool
+configure:4013: checking for x86_64-unknown-linux-gnu-ld
+configure:4088: checking for x86_64-unknown-linux-gnu-lipo
+configure:4119: checking for lipo
+configure:4163: checking for x86_64-unknown-linux-gnu-nm
+configure:4238: checking for x86_64-unknown-linux-gnu-ranlib
+configure:4308: checking for x86_64-unknown-linux-gnu-strip
+configure:4378: checking for x86_64-unknown-linux-gnu-windres
+configure:4409: checking for windres
+configure:4453: checking for x86_64-unknown-linux-gnu-objcopy
+configure:4528: checking for x86_64-unknown-linux-gnu-objdump
+configure:4908: checking for x86_64-unknown-linux-gnu-gcj
+configure:4939: checking for gcj
+configure:5155: checking for ar
+configure:5308: checking for as
+configure:5461: checking for dlltool
+configure:5515: checking for x86_64-unknown-linux-gnu-dlltool
+configure:5546: checking for dlltool
+configure:5614: checking for ld
+configure:5767: checking for lipo
+configure:5821: checking for x86_64-unknown-linux-gnu-lipo
+configure:5852: checking for lipo
+configure:5920: checking for nm
+configure:6073: checking for objdump
+configure:6226: checking for ranlib
+configure:6379: checking for strip
+configure:6532: checking for windres
+configure:6586: checking for x86_64-unknown-linux-gnu-windres
+configure:6617: checking for windres
+configure:6665: checking where to find the target ar
+configure:6698: checking where to find the target as
+configure:6731: checking where to find the target cc
+configure:6764: checking where to find the target c++
+configure:6800: checking where to find the target c++ for libstdc++
+configure:6836: checking where to find the target dlltool
+configure:6869: checking where to find the target gcc
+configure:6902: checking where to find the target gcj
+configure:6938: checking where to find the target gfortran
+configure:6974: checking where to find the target ld
+configure:7007: checking where to find the target lipo
+configure:7030: checking where to find the target nm
+configure:7063: checking where to find the target objdump
+configure:7096: checking where to find the target ranlib
+configure:7129: checking where to find the target strip
+configure:7162: checking where to find the target windres
+configure:7223: checking whether to enable maintainer-specific portions of Makefiles
+configure:7272: checking whether -fkeep-inline-functions is supported
+configure:7281: gcc -c -g -O2 -fkeep-inline-functions  conftest.c 1>&5

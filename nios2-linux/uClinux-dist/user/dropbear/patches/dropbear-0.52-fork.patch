@@ -1,0 +1,16 @@
+Index: dropbear-0.52/svr-main.c
+===================================================================
+--- dropbear-0.52/svr-main.c	(revision 9061)
++++ dropbear-0.52/svr-main.c	(working copy)
+@@ -269,7 +269,11 @@
+ #ifdef DEBUG_NOFORK
+ 			fork_ret = 0;
+ #else
++# ifdef HAVE_FORK 
+ 			fork_ret = fork();
++# else
++			fork_ret = vfork();
++# endif
+ #endif
+ 			if (fork_ret < 0) {
+ 				dropbear_log(LOG_WARNING, "error forking: %s", strerror(errno));

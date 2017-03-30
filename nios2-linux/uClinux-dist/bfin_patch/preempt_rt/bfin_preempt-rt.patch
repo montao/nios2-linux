@@ -1,0 +1,268 @@
+diff -urp --exclude=.svn linux-kernel-rt.orig/arch/blackfin/kernel/bfin_dma_5xx.c linux-kernel-rt/arch/blackfin/kernel/bfin_dma_5xx.c
+--- linux-kernel-rt.orig/arch/blackfin/kernel/bfin_dma_5xx.c	2010-04-07 14:26:33.000000000 +0800
++++ linux-kernel-rt/arch/blackfin/kernel/bfin_dma_5xx.c	2010-04-07 15:24:59.000000000 +0800
+@@ -329,10 +329,10 @@ void __init early_dma_memcpy_done(void)
+  */
+ static void __dma_memcpy(u32 daddr, s16 dmod, u32 saddr, s16 smod, size_t cnt, u32 conf)
+ {
+-	static DEFINE_SPINLOCK(mdma_lock);
++	static DEFINE_RAW_SPINLOCK(mdma_lock);
+ 	unsigned long flags;
+ 
+-	spin_lock_irqsave(&mdma_lock, flags);
++	raw_spin_lock_irqsave(&mdma_lock, flags);
+ 
+ 	/* Force a sync in case a previous config reset on this channel
+ 	 * occurred.  This is needed so subsequent writes to DMA registers
+@@ -376,7 +376,7 @@ static void __dma_memcpy(u32 daddr, s16 
+ 	bfin_write_MDMA_S0_CONFIG(DMAEN | conf);
+ 	bfin_write_MDMA_D0_CONFIG(WNR | DI_EN | DMAEN | conf);
+ 
+-	spin_unlock_irqrestore(&mdma_lock, flags);
++	raw_spin_unlock_irqrestore(&mdma_lock, flags);
+ 
+ 	SSYNC();
+ 
+diff -urp --exclude=.svn linux-kernel-rt.orig/arch/blackfin/kernel/process.c linux-kernel-rt/arch/blackfin/kernel/process.c
+--- linux-kernel-rt.orig/arch/blackfin/kernel/process.c	2010-04-07 14:26:33.000000000 +0800
++++ linux-kernel-rt/arch/blackfin/kernel/process.c	2010-04-07 15:37:34.000000000 +0800
+@@ -92,9 +92,11 @@ void cpu_idle(void)
+ 		while (!need_resched())
+ 			idle();
+ 		tick_nohz_restart_sched_tick();
+-		preempt_enable_no_resched();
+-		schedule();
++		local_irq_disable();
++		__preempt_enable_no_resched();
++		__schedule();
+ 		preempt_disable();
++		local_irq_enable();
+ 	}
+ }
+ 
+diff -urp --exclude=.svn linux-kernel-rt.orig/arch/blackfin/mach-bf561/smp.c linux-kernel-rt/arch/blackfin/mach-bf561/smp.c
+--- linux-kernel-rt.orig/arch/blackfin/mach-bf561/smp.c	2010-04-07 14:26:33.000000000 +0800
++++ linux-kernel-rt/arch/blackfin/mach-bf561/smp.c	2010-04-07 17:45:55.000000000 +0800
+@@ -13,7 +13,7 @@
+ #include <asm/dma.h>
+ #include <asm/time.h>
+ 
+-static DEFINE_SPINLOCK(boot_lock);
++static DEFINE_RAW_SPINLOCK(boot_lock);
+ 
+ /*
+  * platform_init_cpus() - Tell the world about how many cores we
+@@ -74,8 +74,8 @@ void __cpuinit platform_secondary_init(u
+ 
+ 	/* We are done with local CPU inits, unblock the boot CPU. */
+ 	set_cpu_online(cpu, true);
+-	spin_lock(&boot_lock);
+-	spin_unlock(&boot_lock);
++	raw_spin_lock(&boot_lock);
++	raw_spin_unlock(&boot_lock);
+ }
+ 
+ int __cpuinit platform_boot_secondary(unsigned int cpu, struct task_struct *idle)
+@@ -84,7 +84,7 @@ int __cpuinit platform_boot_secondary(un
+ 
+ 	printk(KERN_INFO "Booting Core B.\n");
+ 
+-	spin_lock(&boot_lock);
++	raw_spin_lock(&boot_lock);
+ 
+ 	if ((bfin_read_SICA_SYSCR() & COREB_SRAM_INIT) == 0) {
+ 		/* CoreB already running, sending ipi to wakeup it */
+@@ -105,7 +105,7 @@ int __cpuinit platform_boot_secondary(un
+ 
+ 	if (cpu_online(cpu)) {
+ 		/* release the lock and let coreb run */
+-		spin_unlock(&boot_lock);
++		raw_spin_unlock(&boot_lock);
+ 		return 0;
+ 	} else
+ 		panic("CPU%u: processor failed to boot\n", cpu);
+diff -urp --exclude=.svn linux-kernel-rt.orig/arch/blackfin/mach-common/ints-priority.c linux-kernel-rt/arch/blackfin/mach-common/ints-priority.c
+--- linux-kernel-rt.orig/arch/blackfin/mach-common/ints-priority.c	2010-04-07 14:26:33.000000000 +0800
++++ linux-kernel-rt/arch/blackfin/mach-common/ints-priority.c	2010-04-07 18:06:16.000000000 +0800
+@@ -539,6 +539,10 @@ static inline void bfin_set_irq_handler(
+ 	struct irq_desc *desc = irq_desc + irq;
+ 	/* May not call generic set_irq_handler() due to spinlock
+ 	   recursion. */
++#ifdef CONFIG_PREEMPT_RT
++	/* To make threaded IRQ work properly */
++	handle = handle_level_irq;
++#endif
+ 	desc->handle_irq = handle;
+ #endif
+ }
+@@ -1207,15 +1211,15 @@ int __init init_arch_irq(void)
+ 			break;
+ #endif
+ 
+-#ifdef CONFIG_IPIPE
++#if defined(CONFIG_IPIPE) || defined(CONFIG_PREEMPT_RT)
+ 		default:
+ 			set_irq_handler(irq, handle_level_irq);
+ 			break;
+-#else /* !CONFIG_IPIPE */
++#else
+ 		default:
+ 			set_irq_handler(irq, handle_simple_irq);
+ 			break;
+-#endif /* !CONFIG_IPIPE */
++#endif /* CONFIG_IPIPE || CONFIG_PREEMT_RT */
+ 		}
+ 	}
+ 
+diff -urp --exclude=.svn linux-kernel-rt.orig/arch/blackfin/mach-common/smp.c linux-kernel-rt/arch/blackfin/mach-common/smp.c
+--- linux-kernel-rt.orig/arch/blackfin/mach-common/smp.c	2010-04-07 14:26:33.000000000 +0800
++++ linux-kernel-rt/arch/blackfin/mach-common/smp.c	2010-04-07 17:47:42.000000000 +0800
+@@ -78,7 +78,7 @@ struct ipi_message {
+ 
+ /* Simple FIFO buffer, overflow leads to panic */
+ struct ipi_message_queue {
+-	spinlock_t lock;
++	raw_spinlock_t lock;
+ 	unsigned long count;
+ 	unsigned long head; /* head of the queue */
+ 	struct ipi_message ipi_message[BFIN_IPI_MSGQ_LEN];
+@@ -88,10 +88,10 @@ static DEFINE_PER_CPU(struct ipi_message
+ 
+ static void ipi_cpu_stop(unsigned int cpu)
+ {
+-	spin_lock(&stop_lock);
++	raw_spin_lock(&stop_lock);
+ 	printk(KERN_CRIT "CPU%u: stopping\n", cpu);
+ 	dump_stack();
+-	spin_unlock(&stop_lock);
++	raw_spin_unlock(&stop_lock);
+ 
+ 	cpu_clear(cpu, cpu_online_map);
+ 
+@@ -156,20 +156,20 @@ static irqreturn_t ipi_handler_int1(int 
+ 
+ 	msg_queue = &__get_cpu_var(ipi_msg_queue);
+ 
+-	spin_lock_irqsave(&msg_queue->lock, flags);
++	raw_spin_lock_irqsave(&msg_queue->lock, flags);
+ 
+ 	while (msg_queue->count) {
+ 		msg = &msg_queue->ipi_message[msg_queue->head];
+ 		switch (msg->type) {
+ 		case BFIN_IPI_CALL_FUNC:
+-			spin_unlock_irqrestore(&msg_queue->lock, flags);
++			raw_spin_unlock_irqrestore(&msg_queue->lock, flags);
+ 			ipi_call_function(cpu, msg);
+-			spin_lock_irqsave(&msg_queue->lock, flags);
++			raw_spin_lock_irqsave(&msg_queue->lock, flags);
+ 			break;
+ 		case BFIN_IPI_CPU_STOP:
+-			spin_unlock_irqrestore(&msg_queue->lock, flags);
++			raw_spin_unlock_irqrestore(&msg_queue->lock, flags);
+ 			ipi_cpu_stop(cpu);
+-			spin_lock_irqsave(&msg_queue->lock, flags);
++			raw_spin_lock_irqsave(&msg_queue->lock, flags);
+ 			break;
+ 		default:
+ 			printk(KERN_CRIT "CPU%u: Unknown IPI message \
+@@ -180,7 +180,7 @@ static irqreturn_t ipi_handler_int1(int 
+ 		msg_queue->head %= BFIN_IPI_MSGQ_LEN;
+ 		msg_queue->count--;
+ 	}
+-	spin_unlock_irqrestore(&msg_queue->lock, flags);
++	raw_spin_unlock_irqrestore(&msg_queue->lock, flags);
+ 	return IRQ_HANDLED;
+ }
+ 
+@@ -190,7 +190,7 @@ static void ipi_queue_init(void)
+ 	struct ipi_message_queue *msg_queue;
+ 	for_each_possible_cpu(cpu) {
+ 		msg_queue = &per_cpu(ipi_msg_queue, cpu);
+-		spin_lock_init(&msg_queue->lock);
++		raw_spin_lock_init(&msg_queue->lock);
+ 		msg_queue->count = 0;
+ 		msg_queue->head = 0;
+ 	}
+@@ -207,7 +207,7 @@ static inline void smp_send_message(cpum
+ 
+ 	for_each_cpu_mask(cpu, callmap) {
+ 		msg_queue = &per_cpu(ipi_msg_queue, cpu);
+-		spin_lock_irqsave(&msg_queue->lock, flags);
++		raw_spin_lock_irqsave(&msg_queue->lock, flags);
+ 		if (msg_queue->count < BFIN_IPI_MSGQ_LEN) {
+ 			next_msg = (msg_queue->head + msg_queue->count)
+ 					% BFIN_IPI_MSGQ_LEN;
+@@ -222,7 +222,7 @@ static inline void smp_send_message(cpum
+ 			msg_queue->count++;
+ 		} else
+ 			panic("IPI message queue overflow\n");
+-		spin_unlock_irqrestore(&msg_queue->lock, flags);
++		raw_spin_unlock_irqrestore(&msg_queue->lock, flags);
+ 		platform_send_ipi_cpu(cpu, IRQ_SUPPLE_1);
+ 	}
+ 
+diff -urp --exclude=.svn linux-kernel-rt.orig/arch/blackfin/mm/isram-driver.c linux-kernel-rt/arch/blackfin/mm/isram-driver.c
+--- linux-kernel-rt.orig/arch/blackfin/mm/isram-driver.c	2010-04-07 14:26:33.000000000 +0800
++++ linux-kernel-rt/arch/blackfin/mm/isram-driver.c	2010-04-07 18:07:06.000000000 +0800
+@@ -37,7 +37,7 @@
+  * kernel, since they operate on 64-bit data, and need specific address alignment
+  */
+ 
+-static DEFINE_SPINLOCK(dtest_lock);
++static DEFINE_RAW_SPINLOCK(dtest_lock);
+ 
+ /* Takes a void pointer */
+ #define IADDR2DTEST(x) \
+@@ -71,7 +71,7 @@ static void isram_write(const void *addr
+ 	 * Writes to DTEST_DATA[0:1] need to be atomic with write to DTEST_COMMAND
+ 	 * While in exception context - atomicity is guaranteed or double fault
+ 	 */
+-	spin_lock_irqsave(&dtest_lock, flags);
++	raw_spin_lock_irqsave(&dtest_lock, flags);
+ 
+ 	bfin_write_DTEST_DATA0(data & 0xFFFFFFFF);
+ 	bfin_write_DTEST_DATA1(data >> 32);
+@@ -84,7 +84,7 @@ static void isram_write(const void *addr
+ 	bfin_write_DTEST_COMMAND(0);
+ 	__builtin_bfin_csync();
+ 
+-	spin_unlock_irqrestore(&dtest_lock, flags);
++	raw_spin_unlock_irqrestore(&dtest_lock, flags);
+ }
+ 
+ static uint64_t isram_read(const void *addr)
+@@ -102,7 +102,7 @@ static uint64_t isram_read(const void *a
+ 	 * Reads of DTEST_DATA[0:1] need to be atomic with write to DTEST_COMMAND
+ 	 * While in exception context - atomicity is guaranteed or double fault
+ 	 */
+-	spin_lock_irqsave(&dtest_lock, flags);
++	raw_spin_lock_irqsave(&dtest_lock, flags);
+ 	/* use the builtin, since interrupts are already turned off */
+ 	__builtin_bfin_csync();
+ 	bfin_write_DTEST_COMMAND(cmd);
+@@ -111,7 +111,7 @@ static uint64_t isram_read(const void *a
+ 
+ 	bfin_write_DTEST_COMMAND(0);
+ 	__builtin_bfin_csync();
+-	spin_unlock_irqrestore(&dtest_lock, flags);
++	raw_spin_unlock_irqrestore(&dtest_lock, flags);
+ 
+ 	return ret;
+ }
+diff -urp --exclude=.svn linux-kernel-rt.orig/include/linux/uaccess.h linux-kernel-rt/include/linux/uaccess.h
+--- linux-kernel-rt.orig/include/linux/uaccess.h	2010-04-07 14:23:11.000000000 +0800
++++ linux-kernel-rt/include/linux/uaccess.h	2010-04-08 12:21:35.000000000 +0800
+@@ -8,8 +8,13 @@
+  * These routines enable/disable the pagefault handler in that
+  * it will not take any MM locks and go straight to the fixup table.
+  */
++#ifdef CONFIG_MMU
+ extern void pagefault_disable(void);
+ extern void pagefault_enable(void);
++#else
++# define pagefault_disable() do { } while (0)
++# define pagefault_enable() do { } while (0)
++#endif
+ 
+ #ifndef ARCH_HAS_NOCACHE_UACCESS
+ 

@@ -1,0 +1,383 @@
+env_embedded.o: \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/common/env_embedded.c \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/include/config.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/include/config_cmd_defaults.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/include/config_defaults.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/include/configs/symm_ghrd_4s230gx.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/tools/../board/altera/nios2-generic/custom_fpga_symm.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/include/config_cmd_default.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/include/asm/config.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/include/environment.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/include/compiler.h \
+ /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stddef.h \
+ /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stdint.h \
+ /usr/include/stdint.h /usr/include/features.h /usr/include/sys/cdefs.h \
+ /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h \
+ /usr/include/gnu/stubs-64.h /usr/include/bits/wchar.h \
+ /usr/include/errno.h /usr/include/bits/errno.h \
+ /usr/include/linux/errno.h /usr/include/asm/errno.h \
+ /usr/include/asm-generic/errno.h /usr/include/asm-generic/errno-base.h \
+ /usr/include/stdlib.h /usr/include/bits/waitflags.h \
+ /usr/include/bits/waitstatus.h /usr/include/endian.h \
+ /usr/include/bits/endian.h /usr/include/bits/byteswap.h \
+ /usr/include/sys/types.h /usr/include/bits/types.h \
+ /usr/include/bits/typesizes.h /usr/include/time.h \
+ /usr/include/sys/select.h /usr/include/bits/select.h \
+ /usr/include/bits/sigset.h /usr/include/bits/time.h \
+ /usr/include/sys/sysmacros.h /usr/include/bits/pthreadtypes.h \
+ /usr/include/alloca.h /usr/include/stdio.h /usr/include/libio.h \
+ /usr/include/_G_config.h /usr/include/wchar.h \
+ /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stdarg.h \
+ /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h \
+ /usr/include/string.h /usr/include/xlocale.h /usr/include/sys/mman.h \
+ /usr/include/bits/mman.h /usr/include/fcntl.h /usr/include/bits/fcntl.h \
+ /usr/include/bits/stat.h /usr/include/byteswap.h /usr/include/search.h
+image.o: /data/dwesterg/nios2-linux/nios2-linux/u-boot/common/image.c \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/tools/mkimage.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/tools/os_support.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/include/compiler.h \
+ /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stddef.h \
+ /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stdint.h \
+ /usr/include/stdint.h /usr/include/features.h /usr/include/sys/cdefs.h \
+ /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h \
+ /usr/include/gnu/stubs-64.h /usr/include/bits/wchar.h \
+ /usr/include/errno.h /usr/include/bits/errno.h \
+ /usr/include/linux/errno.h /usr/include/asm/errno.h \
+ /usr/include/asm-generic/errno.h /usr/include/asm-generic/errno-base.h \
+ /usr/include/stdlib.h /usr/include/bits/waitflags.h \
+ /usr/include/bits/waitstatus.h /usr/include/endian.h \
+ /usr/include/bits/endian.h /usr/include/bits/byteswap.h \
+ /usr/include/sys/types.h /usr/include/bits/types.h \
+ /usr/include/bits/typesizes.h /usr/include/time.h \
+ /usr/include/sys/select.h /usr/include/bits/select.h \
+ /usr/include/bits/sigset.h /usr/include/bits/time.h \
+ /usr/include/sys/sysmacros.h /usr/include/bits/pthreadtypes.h \
+ /usr/include/alloca.h /usr/include/stdio.h /usr/include/libio.h \
+ /usr/include/_G_config.h /usr/include/wchar.h \
+ /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stdarg.h \
+ /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h \
+ /usr/include/string.h /usr/include/xlocale.h /usr/include/sys/mman.h \
+ /usr/include/bits/mman.h /usr/include/fcntl.h /usr/include/bits/fcntl.h \
+ /usr/include/bits/stat.h /usr/include/byteswap.h /usr/include/sys/stat.h \
+ /usr/include/unistd.h /usr/include/bits/posix_opt.h \
+ /usr/include/bits/environments.h /usr/include/bits/confname.h \
+ /usr/include/getopt.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/include/sha1.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/tools/fdt_host.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/tools/../include/fdt.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/tools/../include/libfdt.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/include/libfdt_env.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/include/compiler.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/include/fdt.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/tools/../include/fdt_support.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/include/u-boot/md5.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/include/image.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/include/libfdt.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/include/fdt_support.h
+crc32.o: /data/dwesterg/nios2-linux/nios2-linux/u-boot/lib/crc32.c \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/include/compiler.h \
+ /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stddef.h \
+ /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stdint.h \
+ /usr/include/stdint.h /usr/include/features.h /usr/include/sys/cdefs.h \
+ /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h \
+ /usr/include/gnu/stubs-64.h /usr/include/bits/wchar.h \
+ /usr/include/errno.h /usr/include/bits/errno.h \
+ /usr/include/linux/errno.h /usr/include/asm/errno.h \
+ /usr/include/asm-generic/errno.h /usr/include/asm-generic/errno-base.h \
+ /usr/include/stdlib.h /usr/include/bits/waitflags.h \
+ /usr/include/bits/waitstatus.h /usr/include/endian.h \
+ /usr/include/bits/endian.h /usr/include/bits/byteswap.h \
+ /usr/include/sys/types.h /usr/include/bits/types.h \
+ /usr/include/bits/typesizes.h /usr/include/time.h \
+ /usr/include/sys/select.h /usr/include/bits/select.h \
+ /usr/include/bits/sigset.h /usr/include/bits/time.h \
+ /usr/include/sys/sysmacros.h /usr/include/bits/pthreadtypes.h \
+ /usr/include/alloca.h /usr/include/stdio.h /usr/include/libio.h \
+ /usr/include/_G_config.h /usr/include/wchar.h \
+ /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stdarg.h \
+ /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h \
+ /usr/include/string.h /usr/include/xlocale.h /usr/include/sys/mman.h \
+ /usr/include/bits/mman.h /usr/include/fcntl.h /usr/include/bits/fcntl.h \
+ /usr/include/bits/stat.h /usr/include/byteswap.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/include/u-boot/crc.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/include/u-boot/zlib.h
+md5.o: /data/dwesterg/nios2-linux/nios2-linux/u-boot/lib/md5.c \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/include/compiler.h \
+ /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stddef.h \
+ /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stdint.h \
+ /usr/include/stdint.h /usr/include/features.h /usr/include/sys/cdefs.h \
+ /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h \
+ /usr/include/gnu/stubs-64.h /usr/include/bits/wchar.h \
+ /usr/include/errno.h /usr/include/bits/errno.h \
+ /usr/include/linux/errno.h /usr/include/asm/errno.h \
+ /usr/include/asm-generic/errno.h /usr/include/asm-generic/errno-base.h \
+ /usr/include/stdlib.h /usr/include/bits/waitflags.h \
+ /usr/include/bits/waitstatus.h /usr/include/endian.h \
+ /usr/include/bits/endian.h /usr/include/bits/byteswap.h \
+ /usr/include/sys/types.h /usr/include/bits/types.h \
+ /usr/include/bits/typesizes.h /usr/include/time.h \
+ /usr/include/sys/select.h /usr/include/bits/select.h \
+ /usr/include/bits/sigset.h /usr/include/bits/time.h \
+ /usr/include/sys/sysmacros.h /usr/include/bits/pthreadtypes.h \
+ /usr/include/alloca.h /usr/include/stdio.h /usr/include/libio.h \
+ /usr/include/_G_config.h /usr/include/wchar.h \
+ /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stdarg.h \
+ /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h \
+ /usr/include/string.h /usr/include/xlocale.h /usr/include/sys/mman.h \
+ /usr/include/bits/mman.h /usr/include/fcntl.h /usr/include/bits/fcntl.h \
+ /usr/include/bits/stat.h /usr/include/byteswap.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/include/u-boot/md5.h
+sha1.o: /data/dwesterg/nios2-linux/nios2-linux/u-boot/lib/sha1.c \
+ /usr/include/string.h /usr/include/features.h /usr/include/sys/cdefs.h \
+ /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h \
+ /usr/include/gnu/stubs-64.h \
+ /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stddef.h \
+ /usr/include/xlocale.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/include/watchdog.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/include/sha1.h
+envcrc.o: /data/dwesterg/nios2-linux/nios2-linux/u-boot/tools/envcrc.c \
+ /usr/include/errno.h /usr/include/features.h /usr/include/sys/cdefs.h \
+ /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h \
+ /usr/include/gnu/stubs-64.h /usr/include/bits/errno.h \
+ /usr/include/linux/errno.h /usr/include/asm/errno.h \
+ /usr/include/asm-generic/errno.h /usr/include/asm-generic/errno-base.h \
+ /usr/include/stdio.h \
+ /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stddef.h \
+ /usr/include/bits/types.h /usr/include/bits/typesizes.h \
+ /usr/include/libio.h /usr/include/_G_config.h /usr/include/wchar.h \
+ /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stdarg.h \
+ /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h \
+ /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stdint.h \
+ /usr/include/stdint.h /usr/include/bits/wchar.h /usr/include/stdlib.h \
+ /usr/include/bits/waitflags.h /usr/include/bits/waitstatus.h \
+ /usr/include/endian.h /usr/include/bits/endian.h \
+ /usr/include/bits/byteswap.h /usr/include/sys/types.h \
+ /usr/include/time.h /usr/include/sys/select.h /usr/include/bits/select.h \
+ /usr/include/bits/sigset.h /usr/include/bits/time.h \
+ /usr/include/sys/sysmacros.h /usr/include/bits/pthreadtypes.h \
+ /usr/include/alloca.h /usr/include/string.h /usr/include/xlocale.h \
+ /usr/include/unistd.h /usr/include/bits/posix_opt.h \
+ /usr/include/bits/environments.h /usr/include/bits/confname.h \
+ /usr/include/getopt.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/include/config.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/include/config_cmd_defaults.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/include/config_defaults.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/include/configs/symm_ghrd_4s230gx.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/tools/../board/altera/nios2-generic/custom_fpga_symm.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/include/config_cmd_default.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/include/asm/config.h
+gen_eth_addr.o: \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/tools/gen_eth_addr.c \
+ /usr/include/stdio.h /usr/include/features.h /usr/include/sys/cdefs.h \
+ /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h \
+ /usr/include/gnu/stubs-64.h \
+ /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stddef.h \
+ /usr/include/bits/types.h /usr/include/bits/typesizes.h \
+ /usr/include/libio.h /usr/include/_G_config.h /usr/include/wchar.h \
+ /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stdarg.h \
+ /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h \
+ /usr/include/stdlib.h /usr/include/bits/waitflags.h \
+ /usr/include/bits/waitstatus.h /usr/include/endian.h \
+ /usr/include/bits/endian.h /usr/include/bits/byteswap.h \
+ /usr/include/sys/types.h /usr/include/time.h /usr/include/sys/select.h \
+ /usr/include/bits/select.h /usr/include/bits/sigset.h \
+ /usr/include/bits/time.h /usr/include/sys/sysmacros.h \
+ /usr/include/bits/pthreadtypes.h /usr/include/alloca.h \
+ /usr/include/unistd.h /usr/include/bits/posix_opt.h \
+ /usr/include/bits/environments.h /usr/include/bits/confname.h \
+ /usr/include/getopt.h /usr/include/xlocale.h
+img2srec.o: \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/tools/img2srec.c \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/tools/os_support.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/include/compiler.h \
+ /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stddef.h \
+ /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stdint.h \
+ /usr/include/stdint.h /usr/include/features.h /usr/include/sys/cdefs.h \
+ /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h \
+ /usr/include/gnu/stubs-64.h /usr/include/bits/wchar.h \
+ /usr/include/errno.h /usr/include/bits/errno.h \
+ /usr/include/linux/errno.h /usr/include/asm/errno.h \
+ /usr/include/asm-generic/errno.h /usr/include/asm-generic/errno-base.h \
+ /usr/include/stdlib.h /usr/include/bits/waitflags.h \
+ /usr/include/bits/waitstatus.h /usr/include/endian.h \
+ /usr/include/bits/endian.h /usr/include/bits/byteswap.h \
+ /usr/include/sys/types.h /usr/include/bits/types.h \
+ /usr/include/bits/typesizes.h /usr/include/time.h \
+ /usr/include/sys/select.h /usr/include/bits/select.h \
+ /usr/include/bits/sigset.h /usr/include/bits/time.h \
+ /usr/include/sys/sysmacros.h /usr/include/bits/pthreadtypes.h \
+ /usr/include/alloca.h /usr/include/stdio.h /usr/include/libio.h \
+ /usr/include/_G_config.h /usr/include/wchar.h \
+ /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stdarg.h \
+ /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h \
+ /usr/include/string.h /usr/include/xlocale.h /usr/include/sys/mman.h \
+ /usr/include/bits/mman.h /usr/include/fcntl.h /usr/include/bits/fcntl.h \
+ /usr/include/bits/stat.h /usr/include/byteswap.h \
+ /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stdbool.h \
+ /usr/include/ctype.h /usr/include/elf.h /usr/include/unistd.h \
+ /usr/include/bits/posix_opt.h /usr/include/bits/environments.h \
+ /usr/include/bits/confname.h /usr/include/getopt.h
+fdt.o: /data/dwesterg/nios2-linux/nios2-linux/u-boot/lib/libfdt/fdt.c \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/include/libfdt_env.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/include/compiler.h \
+ /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stddef.h \
+ /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stdint.h \
+ /usr/include/stdint.h /usr/include/features.h /usr/include/sys/cdefs.h \
+ /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h \
+ /usr/include/gnu/stubs-64.h /usr/include/bits/wchar.h \
+ /usr/include/errno.h /usr/include/bits/errno.h \
+ /usr/include/linux/errno.h /usr/include/asm/errno.h \
+ /usr/include/asm-generic/errno.h /usr/include/asm-generic/errno-base.h \
+ /usr/include/stdlib.h /usr/include/bits/waitflags.h \
+ /usr/include/bits/waitstatus.h /usr/include/endian.h \
+ /usr/include/bits/endian.h /usr/include/bits/byteswap.h \
+ /usr/include/sys/types.h /usr/include/bits/types.h \
+ /usr/include/bits/typesizes.h /usr/include/time.h \
+ /usr/include/sys/select.h /usr/include/bits/select.h \
+ /usr/include/bits/sigset.h /usr/include/bits/time.h \
+ /usr/include/sys/sysmacros.h /usr/include/bits/pthreadtypes.h \
+ /usr/include/alloca.h /usr/include/stdio.h /usr/include/libio.h \
+ /usr/include/_G_config.h /usr/include/wchar.h \
+ /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stdarg.h \
+ /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h \
+ /usr/include/string.h /usr/include/xlocale.h /usr/include/sys/mman.h \
+ /usr/include/bits/mman.h /usr/include/fcntl.h /usr/include/bits/fcntl.h \
+ /usr/include/bits/stat.h /usr/include/byteswap.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/tools/fdt_host.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/tools/../include/fdt.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/tools/../include/libfdt.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/include/fdt.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/tools/../include/fdt_support.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/lib/libfdt/libfdt_internal.h
+fdt_ro.o: \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/lib/libfdt/fdt_ro.c \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/include/libfdt_env.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/include/compiler.h \
+ /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stddef.h \
+ /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stdint.h \
+ /usr/include/stdint.h /usr/include/features.h /usr/include/sys/cdefs.h \
+ /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h \
+ /usr/include/gnu/stubs-64.h /usr/include/bits/wchar.h \
+ /usr/include/errno.h /usr/include/bits/errno.h \
+ /usr/include/linux/errno.h /usr/include/asm/errno.h \
+ /usr/include/asm-generic/errno.h /usr/include/asm-generic/errno-base.h \
+ /usr/include/stdlib.h /usr/include/bits/waitflags.h \
+ /usr/include/bits/waitstatus.h /usr/include/endian.h \
+ /usr/include/bits/endian.h /usr/include/bits/byteswap.h \
+ /usr/include/sys/types.h /usr/include/bits/types.h \
+ /usr/include/bits/typesizes.h /usr/include/time.h \
+ /usr/include/sys/select.h /usr/include/bits/select.h \
+ /usr/include/bits/sigset.h /usr/include/bits/time.h \
+ /usr/include/sys/sysmacros.h /usr/include/bits/pthreadtypes.h \
+ /usr/include/alloca.h /usr/include/stdio.h /usr/include/libio.h \
+ /usr/include/_G_config.h /usr/include/wchar.h \
+ /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stdarg.h \
+ /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h \
+ /usr/include/string.h /usr/include/xlocale.h /usr/include/sys/mman.h \
+ /usr/include/bits/mman.h /usr/include/fcntl.h /usr/include/bits/fcntl.h \
+ /usr/include/bits/stat.h /usr/include/byteswap.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/tools/fdt_host.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/tools/../include/fdt.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/tools/../include/libfdt.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/include/fdt.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/tools/../include/fdt_support.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/lib/libfdt/libfdt_internal.h
+fdt_rw.o: \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/lib/libfdt/fdt_rw.c \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/include/libfdt_env.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/include/compiler.h \
+ /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stddef.h \
+ /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stdint.h \
+ /usr/include/stdint.h /usr/include/features.h /usr/include/sys/cdefs.h \
+ /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h \
+ /usr/include/gnu/stubs-64.h /usr/include/bits/wchar.h \
+ /usr/include/errno.h /usr/include/bits/errno.h \
+ /usr/include/linux/errno.h /usr/include/asm/errno.h \
+ /usr/include/asm-generic/errno.h /usr/include/asm-generic/errno-base.h \
+ /usr/include/stdlib.h /usr/include/bits/waitflags.h \
+ /usr/include/bits/waitstatus.h /usr/include/endian.h \
+ /usr/include/bits/endian.h /usr/include/bits/byteswap.h \
+ /usr/include/sys/types.h /usr/include/bits/types.h \
+ /usr/include/bits/typesizes.h /usr/include/time.h \
+ /usr/include/sys/select.h /usr/include/bits/select.h \
+ /usr/include/bits/sigset.h /usr/include/bits/time.h \
+ /usr/include/sys/sysmacros.h /usr/include/bits/pthreadtypes.h \
+ /usr/include/alloca.h /usr/include/stdio.h /usr/include/libio.h \
+ /usr/include/_G_config.h /usr/include/wchar.h \
+ /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stdarg.h \
+ /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h \
+ /usr/include/string.h /usr/include/xlocale.h /usr/include/sys/mman.h \
+ /usr/include/bits/mman.h /usr/include/fcntl.h /usr/include/bits/fcntl.h \
+ /usr/include/bits/stat.h /usr/include/byteswap.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/tools/fdt_host.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/tools/../include/fdt.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/tools/../include/libfdt.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/include/fdt.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/tools/../include/fdt_support.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/lib/libfdt/libfdt_internal.h
+fdt_strerror.o: \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/lib/libfdt/fdt_strerror.c \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/include/libfdt_env.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/include/compiler.h \
+ /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stddef.h \
+ /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stdint.h \
+ /usr/include/stdint.h /usr/include/features.h /usr/include/sys/cdefs.h \
+ /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h \
+ /usr/include/gnu/stubs-64.h /usr/include/bits/wchar.h \
+ /usr/include/errno.h /usr/include/bits/errno.h \
+ /usr/include/linux/errno.h /usr/include/asm/errno.h \
+ /usr/include/asm-generic/errno.h /usr/include/asm-generic/errno-base.h \
+ /usr/include/stdlib.h /usr/include/bits/waitflags.h \
+ /usr/include/bits/waitstatus.h /usr/include/endian.h \
+ /usr/include/bits/endian.h /usr/include/bits/byteswap.h \
+ /usr/include/sys/types.h /usr/include/bits/types.h \
+ /usr/include/bits/typesizes.h /usr/include/time.h \
+ /usr/include/sys/select.h /usr/include/bits/select.h \
+ /usr/include/bits/sigset.h /usr/include/bits/time.h \
+ /usr/include/sys/sysmacros.h /usr/include/bits/pthreadtypes.h \
+ /usr/include/alloca.h /usr/include/stdio.h /usr/include/libio.h \
+ /usr/include/_G_config.h /usr/include/wchar.h \
+ /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stdarg.h \
+ /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h \
+ /usr/include/string.h /usr/include/xlocale.h /usr/include/sys/mman.h \
+ /usr/include/bits/mman.h /usr/include/fcntl.h /usr/include/bits/fcntl.h \
+ /usr/include/bits/stat.h /usr/include/byteswap.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/tools/fdt_host.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/tools/../include/fdt.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/tools/../include/libfdt.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/include/fdt.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/tools/../include/fdt_support.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/lib/libfdt/libfdt_internal.h
+fdt_wip.o: \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/lib/libfdt/fdt_wip.c \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/include/libfdt_env.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/include/compiler.h \
+ /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stddef.h \
+ /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stdint.h \
+ /usr/include/stdint.h /usr/include/features.h /usr/include/sys/cdefs.h \
+ /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h \
+ /usr/include/gnu/stubs-64.h /usr/include/bits/wchar.h \
+ /usr/include/errno.h /usr/include/bits/errno.h \
+ /usr/include/linux/errno.h /usr/include/asm/errno.h \
+ /usr/include/asm-generic/errno.h /usr/include/asm-generic/errno-base.h \
+ /usr/include/stdlib.h /usr/include/bits/waitflags.h \
+ /usr/include/bits/waitstatus.h /usr/include/endian.h \
+ /usr/include/bits/endian.h /usr/include/bits/byteswap.h \
+ /usr/include/sys/types.h /usr/include/bits/types.h \
+ /usr/include/bits/typesizes.h /usr/include/time.h \
+ /usr/include/sys/select.h /usr/include/bits/select.h \
+ /usr/include/bits/sigset.h /usr/include/bits/time.h \
+ /usr/include/sys/sysmacros.h /usr/include/bits/pthreadtypes.h \
+ /usr/include/alloca.h /usr/include/stdio.h /usr/include/libio.h \
+ /usr/include/_G_config.h /usr/include/wchar.h \
+ /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stdarg.h \
+ /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h \
+ /usr/include/string.h /usr/include/xlocale.h /usr/include/sys/mman.h \
+ /usr/include/bits/mman.h /usr/include/fcntl.h /usr/include/bits/fcntl.h \
+ /usr/include/bits/stat.h /usr/include/byteswap.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/tools/fdt_host.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/tools/../include/fdt.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/tools/../include/libfdt.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/include/fdt.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/tools/../include/fdt_support.h \
+ /data/dwesterg/nios2-linux/nios2-linux/u-boot/lib/libfdt/libfdt_internal.h

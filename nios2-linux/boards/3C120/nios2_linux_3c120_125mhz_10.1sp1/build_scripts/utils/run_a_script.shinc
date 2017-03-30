@@ -1,0 +1,91 @@
+#
+#   This script is an error checking wrapper for the subsequent bash script
+#   that it executes.
+#
+#   Script:
+#       
+#       run_a_script.shinc
+#   
+#   Input Arguments:
+#   
+#       SCRIPT_NAME     : the name of the bash script to run
+#
+#   Output Results:
+#   
+#       This script runs the bash script that is passed into this wrapper
+#       after performing some simple error checking.  This script returns the
+#       result that it receives from the subsequent bash script.
+#
+#   Return Status:
+#       
+#       success         : 0
+#       error           : 1
+#       bad argument    : no return, exits with status 1
+#
+#   Required Environment Variables
+#   
+#       ABS_PATH_TO_BUILD_SRC_DIR   : this is a path to the build script src
+#                                     directory
+#
+
+run_a_script () {
+    
+    #
+    # validate the input arguments
+    #
+    if [ $# -ne 1 ] ; then
+        
+        echo ""
+        echo "ERROR: wrong number of arguments passed into this function"
+        echo "Expected 1 arguments, but got $#"
+        echo ""
+        echo "USAGE: run_a_script <SCRIPT_NAME>"
+        echo ""
+        
+        exit 1
+        
+    fi
+    
+    #
+    # validate the required environment variables
+    #
+    PATH_2_BUILD_SRC_DIR=${ABS_PATH_TO_BUILD_SRC_DIR:?environment variable is required...}
+    
+    #
+    # extract the input arguments that we need
+    #
+    SCRIPT_NAME=${1}
+    
+    #
+    # validate that the sopc_builder TCL script exists
+    #
+    if [ ! -e "${PATH_2_BUILD_SRC_DIR}/${SCRIPT_NAME}" ] ; then
+    
+        echo ""
+        echo "ERROR: Cannot locate bash script \"${PATH_2_BUILD_UTILS_DIR}/${SCRIPT_NAME}\""
+        echo ""
+        exit 1
+    
+    fi
+
+
+    echo ""
+    echo "Attempting to run the bash script \"${SCRIPT_NAME}\""
+    echo ""
+    
+    #
+    # execute the bash script
+    #
+    ${PATH_2_BUILD_SRC_DIR}/${SCRIPT_NAME}
+    
+    if [ $? -ne 0 ] ; then
+        
+        return 1
+        
+    else
+        
+        return 0
+        
+    fi
+
+}

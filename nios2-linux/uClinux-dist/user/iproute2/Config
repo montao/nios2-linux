@@ -1,0 +1,4 @@
+TC_CONFIG_ATM := n
+
+# arpd requires berkdb
+TARGETS := $(filter-out arpd,$(TARGETS))

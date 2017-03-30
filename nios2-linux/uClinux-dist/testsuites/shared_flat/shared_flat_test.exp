@@ -1,0 +1,75 @@
+#!/usr/bin/expect
+
+source  ../kernel_config.exp
+log_file [log_file_name "$argv0"]
+send_user "Starting $argv0\n"
+set TITLE [title "$argv0"]
+
+step "Spawn kermit"
+source ../spawn_kermit.exp
+
+step "Reboot the kernel."
+# To add following line here to indicate that if the bootargs is different,
+# it could be set here. If the bootargs value is 0, it needn't be stated, 
+# for it is the default value.
+# set bootargs 	$bootargs_param0   
+source ../reboot_kernel.exp 
+
+step "Start testing."
+set case_num 0
+sleep 20
+
+set timeout 20
+incr case_num
+send "ls -l /bin/\r" 
+while 1 {
+    expect {
+        -re $kernel_prompt {        
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+spawn /bin/bash
+set host_spawn_id $spawn_id
+sleep 2
+send "cd $uclinux_path/user/inetd\r"
+expect -re $sh_prompt
+
+set timeout 20
+incr case_num
+send "ls\r" 
+while 1 {
+    expect {
+        -re "inetd\.gdb.*$sh_prompt" {        
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+set timeout 20
+incr case_num
+send "readelf -a inetd.gdb|grep shared\r" 
+while 1 {
+    expect {
+        -re "shared_flat_init.*$sh_prompt" {        
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+all_pass
+send_user "Ending $argv0\n"
+log_file

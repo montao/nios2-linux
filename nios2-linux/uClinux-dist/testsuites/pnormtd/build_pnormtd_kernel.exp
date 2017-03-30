@@ -1,0 +1,88 @@
+#!/usr/bin/expect
+
+source ../kernel_config.exp
+source  ../board_info.exp
+log_file [log_file_name "$argv0"]
+send_user "Starting $argv0\n"
+
+cd $uclinux_path/testsuites
+step "Make config."
+source  make_default_config.exp
+
+# Following make specific configuration for this case.
+cd $uclinux_path/testsuites
+source  make_mtd_config.exp
+
+cd $uclinux_path/testsuites/jffs2
+source  make_parallel_config.exp
+
+cd $uclinux_path
+set timeout 300
+set baud_rate_done_flag 0
+spawn make config
+#puts "Begin the interactive process of configuration"
+while 1 {
+    expect {
+        -re "Customize Kernel Settings.*DEFAULTS_KERNEL.*\\\[.*]" {
+            send "y\r"
+        }
+
+        -re "Customize Application/Library Settings.*DEFAULTS_VENDOR.*\\\[.*]" {
+            send "y\r"
+        }
+
+        -re "Default bootloader kernel arguments.*CMDLINE_BOOL.*\\\[.*]" {
+            send -s "N\r"
+        }
+
+        -re "Initial RAM filesystem and RAM disk.*initramfs/initrd.*support.*BLK_DEV_INITRD.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Generic uClinux RAM/ROM filesystem support.*MTD_UCLINUX.*\\\[.*]" {
+            send -s "N\r"
+        }
+
+        -re "Journalling Flash File System v2.*JFFS2.*support.*JFFS2_FS.*\\\[.*]" {
+            send -s "Y\r"
+        }
+
+        -re "flash_erase.*\\\(USER_MTDUTILS_ERASE\\\).*\\\[.*]" {
+            send -s "Y\r"
+        }
+
+        -nocase -re "\\\[\[^\r]*] (\[ymn])|choice\\\[.*]: \[0-9]+\r" {
+            continue
+        }
+
+        "\\\(*) \\\[*]" {
+            sleep .05
+            send "\r"
+        }
+
+        -re "\[cC]hoice\\\[.*]:" {
+            send "\r"
+        }
+
+        eof {
+            puts "End of configuration"
+            break
+        }
+
+        timeout {
+            puts "\n\nFATAL ERROR: config prompt timeout in make config"
+            break
+        }
+    }
+}
+
+cd $uclinux_path/testsuites
+step "Make"
+source  make_kernel.exp
+
+cd $uclinux_path/testsuites
+step "Copy linux"
+source   copy_image.exp
+
+send_user "Ending $argv0\n"
+log_file

@@ -1,0 +1,9 @@
+hexdump.c: In function 'do_hexdump':
+hexdump.c:68: warning: format '%4X' expects type 'unsigned int', but argument 2 has type 'long unsigned int'
+hexdump.c:85: warning: format '%4X' expects type 'unsigned int', but argument 2 has type 'long unsigned int'
+hexdump.c:92: warning: '0' flag ignored with precision and '%X' printf format
+hexdump.c:92: warning: '0' flag ignored with precision and '%X' printf format
+hexdump.c:92: warning: '0' flag ignored with precision and '%X' printf format
+hexdump.c:102: warning: suggest parentheses around assignment used as truth value
+hexdump.c:119: warning: pointer targets in passing argument 1 of 'fgets' differ in signedness
+hexdump.c:34: warning: unused variable 'myname'

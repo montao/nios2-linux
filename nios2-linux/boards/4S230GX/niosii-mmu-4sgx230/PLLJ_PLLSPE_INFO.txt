@@ -1,0 +1,15 @@
+PLL_Name	ghrd_4sgx230_sopc:ghrd_4sgx230_sopc_inst|ddr3_top:the_ddr3_top|ddr3_top_controller_phy:ddr3_top_controller_phy_inst|ddr3_top_phy:ddr3_top_phy_inst|ddr3_top_phy_alt_mem_phy:ddr3_top_phy_alt_mem_phy_inst|ddr3_top_phy_alt_mem_phy_clk_reset:clk|ddr3_top_phy_alt_mem_phy_pll:half_rate.pll|altpll:altpll_component|altpll_f5v3:auto_generated|pll1
+PLLJITTER	26
+PLLSPEmax	40
+PLLSPEmin	-40
+
+PLL_Name	ghrd_4sgx230_sopc:ghrd_4sgx230_sopc_inst|tse_mac:the_tse_mac|altera_tse_mac_pcs_pma:altera_tse_mac_pcs_pma_inst|altera_tse_pma_lvds_rx:the_altera_tse_pma_lvds_rx|altlvds_rx:ALTLVDS_RX_component|lvds_rx_03l3:auto_generated|pll
+PLLJITTER	29
+PLLSPEmax	40
+PLLSPEmin	-40
+
+PLL_Name	ghrd_4sgx230_sopc:ghrd_4sgx230_sopc_inst|tse_mac:the_tse_mac|altera_tse_mac_pcs_pma:altera_tse_mac_pcs_pma_inst|altera_tse_pma_lvds_tx:the_altera_tse_pma_lvds_tx|altlvds_tx:altlvds_tx_component|lvds_tx_8c51:auto_generated|pll
+PLLJITTER	29
+PLLSPEmax	40
+PLLSPEmin	-40
+

@@ -1,0 +1,2 @@
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/drivers/net/ethernet/altera/altera_tse.c: In function 'altera_tse_probe':
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/drivers/net/ethernet/altera/altera_tse.c:1409: warning: 'mdio' may be used uninitialized in this function

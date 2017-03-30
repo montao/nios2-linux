@@ -1,0 +1,4 @@
+nios2-linux-gnu-gcc: --gc-sections: linker input file unused because linking not done
+recv_image.c: In function 'main':
+recv_image.c:171: warning: format '%zd' expects type 'signed size_t', but argument 3 has type 'ssize_t'
+nios2-linux-gnu-gcc: --gc-sections: linker input file unused because linking not done

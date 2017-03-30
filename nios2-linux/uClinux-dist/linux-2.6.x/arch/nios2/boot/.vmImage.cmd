@@ -1,0 +1,1 @@
+cmd_arch/nios2/boot/vmImage := /bin/sh /home/developer/altera/nios2-linux/linux-2.6/scripts/mkuboot.sh -A nios2 -O linux -C gzip  -T kernel -a c0000000 -e c0000000 -n 'Linux-3.5.0-rc4-01329-ga227997-dirty' -d arch/nios2/boot/vmlinux.gz arch/nios2/boot/vmImage

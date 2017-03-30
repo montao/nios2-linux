@@ -1,0 +1,174 @@
+<SOPC2DTS_COMPONENTLIB vendor="ALTR">
+	<S2DComponent classname="altera_nios2,altera_nios2_qsys" group="cpu" compatDevice="nios2">
+		<parameter dtsName="clock-frequency" sopcName="embeddedsw.CMacro.CPU_FREQ"></parameter>
+		<parameter dtsName="dcache-line-size" sopcName="embeddedsw.CMacro.DCACHE_LINE_SIZE"></parameter>
+		<parameter dtsName="icache-line-size" sopcName="embeddedsw.CMacro.ICACHE_LINE_SIZE"></parameter>
+		<parameter dtsName="dcache-size" sopcName="embeddedsw.CMacro.DCACHE_SIZE"></parameter>
+		<parameter dtsName="icache-size" sopcName="embeddedsw.CMacro.ICACHE_SIZE"></parameter>
+		<parameter sopcName="embeddedsw.CMacro.CPU_IMPLEMENTATION" dtsVName="implementation"></parameter>
+		<parameter sopcName="embeddedsw.CMacro.PROCESS_ID_NUM_BITS" dtsVName="pid-num-bits"></parameter>
+		<parameter sopcName="embeddedsw.CMacro.TLB_NUM_WAYS" dtsVName="tlb-num-ways"></parameter>
+		<parameter sopcName="embeddedsw.CMacro.TLB_NUM_ENTRIES" dtsVName="tlb-num-entries"></parameter>
+		<parameter sopcName="embeddedsw.CMacro.TLB_PTR_SZ" dtsVName="tlb-ptr-sz"></parameter>
+		<parameter sopcName="embeddedsw.CMacro.HARDWARE_DIVIDE_PRESENT" dtsVName="has-div" forceType="boolean"></parameter>
+		<parameter
+			sopcName="embeddedsw.CMacro.HARDWARE_MULTIPLY_PRESENT"
+			dtsVName="has-mul" forceType="boolean">
+		</parameter>
+		<parameter sopcName="embeddedsw.CMacro.HARDWARE_MULX_PRESENT"
+			dtsVName="has-mulx" forceType="boolean">
+		</parameter>
+		<parameter sopcName="embeddedsw.CMacro.INITDA_SUPPORTED" dtsVName="has-initda"></parameter>
+		<parameter dtsVName="has-flushda" sopcName="embeddedsw.CMacro.FLUSHDA_SUPPORTED"></parameter>
+		<parameter dtsVName="has-jmpi" sopcName="embeddedsw.CMacro.HAS_JMPI_INSTRUCTION"></parameter>
+		<parameter dtsVName="has-mmu" sopcName="embeddedsw.CMacro.MMU_PRESENT"></parameter>
+		<parameter dtsVName="reset-addr" sopcName="embeddedsw.CMacro.RESET_ADDR" forceType="unsigned"></parameter>
+		<parameter dtsVName="fast-tlb-miss-addr" sopcName="embeddedsw.CMacro.FAST_TLB_MISS_EXCEPTION_ADDR" forceType="unsigned"></parameter>
+		<parameter dtsVName="exception-addr" sopcName="embeddedsw.CMacro.EXCEPTION_ADDR" forceType="unsigned"></parameter>
+	</S2DComponent>
+	<S2DComponent classname="altera_avalon_cfi_flash"
+		compatDevice="cfi_flash" group="flash">
+		<compatible name="cfi-flash"></compatible>
+	</S2DComponent>
+	<S2DComponent classname="altera_avalon_uart" group="serial"
+		compatDevice="uart">
+		<CompatibleVersion value="1.0"></CompatibleVersion>
+		<parameter dtsName="current-speed" sopcName="embeddedsw.CMacro.BAUD"></parameter>
+		<parameter dtsName="clock-frequency" sopcName="embeddedsw.CMacro.FREQ"></parameter>
+	</S2DComponent>
+	<S2DComponent classname="fifoed_avalon_uart" group="serial"
+		compatDevice="uart">
+		<CompatibleVersion value="1.0"></CompatibleVersion>
+		<parameter dtsName="current-speed" sopcName="embeddedsw.CMacro.BAUD"></parameter>
+		<parameter dtsName="clock-frequency" sopcName="embeddedsw.CMacro.FREQ"></parameter>
+	</S2DComponent>
+	<S2DComponent classname="fifoed_avalon_uart_classic" group="serial"
+		compatDevice="uart">
+		<CompatibleVersion value="1.0"></CompatibleVersion>
+		<parameter dtsName="current-speed" sopcName="embeddedsw.CMacro.BAUD"></parameter>
+		<parameter dtsName="clock-frequency" sopcName="embeddedsw.CMacro.FREQ"></parameter>
+	</S2DComponent>
+	<S2DComponent classname="altera_avalon_jtag_uart" group="serial"
+		compatDevice="juart">
+		<CompatibleVersion value="1.0"></CompatibleVersion>
+	</S2DComponent>
+	<S2DComponent classname="altera_avalon_spi" group="spi"
+		compatDevice="spi">
+		<CompatibleVersion value="1.0"></CompatibleVersion>
+	</S2DComponent>
+	<S2DComponent classname="altera_avalon_pio" group="gpio"
+		compatDevice="pio">
+		<CompatibleVersion value="1.0"></CompatibleVersion>
+		<parameter dtsName="width" sopcName="WIDTH"></parameter>
+		<parameter dtsName="resetvalue" sopcName="resetValue"></parameter>
+	</S2DComponent>
+	<S2DComponent classname="altera_up_avalon_ps2_classic" group="ps2"
+		compatDevice="ps2">
+		<CompatibleVersion value="1.0"></CompatibleVersion>
+	</S2DComponent>
+	<S2DComponent classname="altera_avalon_tri_state_bridge"
+		group="bridge" compatDevice="avalon">
+		<compatible name="simple-bus"></compatible>
+	</S2DComponent>
+	<S2DComponent classname="altera_avalon_clock_crossing,altera_avalon_mm_clock_crossing_bridge,altera_avalon_pipeline_bridge,altera_avalon_mm_bridge,M64_32_bridge"
+		group="bridge" compatDevice="avalon">
+		<compatible name="simple-bus"></compatible>
+	</S2DComponent>
+	<S2DComponent classname="altera_avalon_cy7c1380_ssram" group="memory" compatDevice="ssram">
+	</S2DComponent>
+	<S2DComponent classname="altmemddr,ddr_sdram_component_classic,altmemddr2,ddr2_high_perf,altmemddr3,altera_uniphy_ddr3,altera_mem_if_ddr2_emif,altera_mem_if_ddr3_emif" group="memory"
+		compatDevice="altmemddr">
+	</S2DComponent>
+	<S2DComponent classname="altera_avalon_new_sdram_controller" group="memory"
+		compatDevice="sdram">
+	</S2DComponent>
+	<S2DComponent classname="altera_avalon_dma" group="dma"
+		compatDevice="dma">
+		<CompatibleVersion value="1.0"></CompatibleVersion>
+	</S2DComponent>
+	<S2DComponent classname="altera_avalon_sgdma" group="dma"
+		compatDevice="sgdma">
+		<CompatibleVersion value="1.0"></CompatibleVersion>
+	</S2DComponent>
+	<S2DComponent classname="clock_source" group="ignore"></S2DComponent>
+        <S2DComponent classname="altera_clock_bridge" group="ignore"></S2DComponent>
+	<S2DComponent classname="timing_adapter" group="ignore"></S2DComponent>
+	<S2DComponent classname="altera_avalon_fifo" group="fifo"
+		compatDevice="fifo">
+		<CompatibleVersion value="1.0"></CompatibleVersion>
+	</S2DComponent>
+	<S2DComponent classname="altera_tristate_conduit_bridge" group="ignore"></S2DComponent>
+	<S2DComponent classname="data_format_adapter" group="ignore">
+	                <TransparentInterfaceBridge master="out" slave="in"></TransparentInterfaceBridge>
+	</S2DComponent>
+	<S2DComponent classname="altera_avalon_pixel_converter" group="ignore"></S2DComponent>
+	<S2DComponent classname="altera_avalon_video_sync_generator"
+		group="ignore">
+	</S2DComponent>
+	<S2DComponent classname="altera_avalon_pll" group="clock"
+		compatDevice="pll">
+		<CompatibleVersion value="1.0"></CompatibleVersion>
+	</S2DComponent>
+	<S2DComponent classname="altpll" group="clock"
+		compatDevice="pll">
+		<CompatibleVersion value="1.0"></CompatibleVersion>
+	</S2DComponent>
+	<S2DComponent classname="altera_avalon_timer" group="timer"
+		compatDevice="timer">
+		<parameter dtsName="clock-frequency"></parameter>
+		<RequiredParameter name="timerPreset" value="FULL_FEATURED"></RequiredParameter>
+		<CompatibleVersion value="1.0"></CompatibleVersion>
+	</S2DComponent>
+	<S2DComponent classname="altera_avalon_timer" group="watchdog"
+		compatDevice="wdt">
+		<parameter dtsName="clock-frequency"></parameter>
+		<parameter dtsName="timeout" sopcName="embeddedsw.CMacro.LOAD_VALUE"></parameter>
+		<RequiredParameter name="timerPreset" value="WATCHDOG"></RequiredParameter>
+		<CompatibleVersion value="1.0"></CompatibleVersion>
+	</S2DComponent>
+	<S2DComponent classname="altera_avalon_performance_counter"
+		group="perf_counter" compatDevice="perf-counter">
+		<CompatibleVersion value="1.0"></CompatibleVersion>
+	</S2DComponent>
+	<S2DComponent classname="altera_avalon_sysid,altera_avalon_sysid_qsys" group="sysid"
+		compatDevice="sysid">
+		<CompatibleVersion value="1.0"></CompatibleVersion>
+	</S2DComponent>
+	<S2DComponent classname="altera_avalon_remote_update_cycloneiii"
+		group="altremote" compatDevice="remote">
+		<CompatibleVersion value="1.0"></CompatibleVersion>
+	</S2DComponent>
+	<S2DComponent classname="altera_avalon_onchip_memory2"
+		group="memory" compatDevice="onchipmem">
+	</S2DComponent>
+	<S2DComponent classname="triple_speed_ethernet"
+		group="ethernet" compatDevice="tse">
+		<CompatibleVersion value="1.0"></CompatibleVersion>
+		<parameter dtsVName="rx-fifo-depth" sopcName="embeddedsw.CMacro.RECEIVE_FIFO_DEPTH"></parameter>
+		<parameter dtsVName="tx-fifo-depth" sopcName="embeddedsw.CMacro.TRANSMIT_FIFO_DEPTH"></parameter>
+	</S2DComponent>
+	<S2DComponent classname="altera_avalon_lan91c111"
+		group="ethernet" compatDevice="smc91x">
+		<CompatibleVersion value="1.0"></CompatibleVersion>
+		<compatible name="smsc,lan91c111"></compatible>
+	</S2DComponent>
+	<S2DComponent classname="altera_avalon_cf"
+		group="ata" compatDevice="cf">
+		<CompatibleVersion value="1.0"></CompatibleVersion>
+	</S2DComponent>
+	<S2DComponent classname="multiplexer" group="ignore"></S2DComponent>
+	<S2DComponent classname="demultiplexer" group="ignore"></S2DComponent>
+	<S2DComponent classname="alt_vip_tpg" group="vip-tpg"
+		compatDevice="vip-testpattern-generator">
+		<CompatibleVersion value="1.0"></CompatibleVersion>
+	</S2DComponent>
+	<S2DComponent classname="alt_vip_swi" group="vip-switch"
+		compatDevice="vip-video-switch">
+		<CompatibleVersion value="1.0"></CompatibleVersion>
+	</S2DComponent>
+	<S2DComponent classname="altera_avalon_sc_fifo" group="fifo"
+		compatDevice="sc-fifo">
+		<CompatibleVersion value="1.0"></CompatibleVersion>
+		<TransparentInterfaceBridge master="out" slave="in"></TransparentInterfaceBridge>
+	</S2DComponent>
+</SOPC2DTS_COMPONENTLIB>

@@ -1,0 +1,607 @@
+#!/usr/bin/perl
+# generate u-boot config file from sopc
+#
+# Copyright (C) 2010 Thomas Chou <thomas@wytron.com.tw>
+# Licensed under the GPL-2 or later.
+#
+# usage: sopc-create-config-files <sopc> <fpga.h>
+
+use strict;
+use XML::LibXML;
+use Getopt::Long;
+
+my $doc;
+my $cpu_name;
+my $memory_slave; # for fdt
+my $timer; # for fdt
+my $device;
+my $kernel_space = 0;
+my $io_space = 0x80000000;
+my %modules = ();
+
+sub num
+{
+    my ($num) = @_;
+    $num =~ s/^_//;
+    $num = oct($num) if $num =~ /^0/; # convert from hex number
+    return $num;
+}
+
+sub get_parm
+{
+    my ($node, $name) = @_;
+    foreach my $parm ($node->findnodes("parameter[\@name='$name']")) {
+	return $parm;
+    }
+}
+
+sub get_value
+{
+    my ($node, $name) = @_;
+    my $parm = get_parm($node, $name);
+    return $parm->getAttribute('value');
+}
+
+sub get_module
+{
+    my ($name) = @_;
+    foreach my $module ($doc->findnodes(
+			    "/system/module[\@name='$name']")) {
+	return $module;
+    }
+}
+
+sub get_start
+{
+    my ($kind, $end) = @_;
+    foreach my $conn ($doc->findnodes("/system/connection[
+	\@kind='$kind' and
+	\@end='$end']")) {
+	return $conn->getAttribute('start');
+    }
+}
+
+sub get_end
+{
+    my ($kind, $start) = @_;
+    foreach my $conn ($doc->findnodes("/system/connection[
+	\@kind='$kind' and
+	\@start='$start']")) {
+	return $conn->getAttribute('end');
+    }
+}
+
+sub get_irq
+{
+    my ($name) = @_;
+    my $irq;
+    my $start = $cpu_name . '.d_irq';
+    foreach my $conn ($doc->findnodes("/system/connection[
+	\@kind='interrupt' and
+	\@start='$start' and
+	\@end='$name']")) {
+	$irq = get_value($conn, 'irqNumber');
+    }
+    return $irq;
+}
+
+sub get_clk
+{
+    my ($name) = @_;
+    my $clk;
+    my $start = get_start('clock', $name);
+    my $name = $start;
+    $name =~ s/\.\w+$//; # strip slave port
+    my $module = get_module($name);
+    my $kind = $module->getAttribute('kind');
+    if ($kind =~ /altmemddr/) {
+	my $rate = get_value($module, 'local_if_drate');
+	$clk = get_value($module, 'mem_if_clk_mhz') * 1000000;
+	if (($start =~ /\.sysclk$/ && $rate eq 'Half') ||
+	    $start =~ /\.auxhalf$/) {
+	    $clk /=  2;
+	}
+    } elsif ($kind eq 'clock_source') {
+	$clk = get_value($module, 'clockFrequency');
+    } elsif ($kind eq 'altera_avalon_pll') {
+	if ($start =~ /\.(c\d)/) {
+	    my $parm = get_parm($module, $1);
+	    my %fields = split /\s+/, $parm->to_literal;
+	    $clk = $fields{'outputfreq'};
+	}
+    }
+    return $clk;
+}
+
+sub get_size
+{
+    my ($module, $kind) = @_;
+    my $size;
+    if ($kind eq 'ddr_sdram_component_classic') {
+	my $parm = get_parm($module, 'instancePTF');
+	my $ptf = $parm->to_literal;
+	$ptf =~ /Address_Width = \"(\d+)\"/;
+	my $address_width = $1;
+	$ptf =~ /Data_Width = \"(\d+)\"/;
+	my $data_width = $1;
+	$size = $data_width / 8 * (2 ** $address_width);
+    } elsif ($kind =~ /altera_avalon_new_sdram_controller/) {
+	my $cs = get_value($module, 'numberOfChipSelects');
+	my $ba = get_value($module, 'numberOfBanks');
+	my $row = get_value($module, 'rowWidth');
+	my $col = get_value($module, 'columnWidth');
+	my $dat = get_value($module, 'dataWidth');
+	$size = $dat / 8 * $cs * $ba * (2 ** ($row + $col));
+    } elsif ($kind =~ /altmemddr/) {
+	my $cs = get_value($module, 'mem_if_cs_width');
+	my $ba = get_value($module, 'mem_if_bankaddr_width');
+	my $row = get_value($module, 'mem_if_rowaddr_width');
+	my $col = get_value($module, 'mem_if_coladdr_width');
+	my $dat = get_value($module, 'mem_if_dwidth');
+	$size = $dat / 8 * $cs * (2 ** ($ba + $row + $col));
+    } elsif ($kind eq 'altera_avalon_cfi_flash') {
+	my $ad = get_value($module, 'addressWidth');
+	my $dat = get_value($module, 'dataWidth');
+	$size = $dat / 8  * (2 ** $ad);
+    }
+    return $size;
+}
+
+sub gen_uboot
+{
+    my ($slave, $base) = @_;
+    my $name = $slave;
+    $name =~ s/\.\w+$//; # strip slave port
+    foreach my $module ($doc->findnodes(
+			    "/system/module[\@name='$name']")) {
+	my $kind = $module->getAttribute('kind');
+	printf("\n/* $slave is a $kind */\n");
+	if ($kind eq 'altera_nios2') {
+	    my $dev;
+	    my $addr;
+	    printf("#define CONFIG_SYS_CLK_FREQ %d\n",
+		   get_clk($cpu_name . '.clk'));
+	    $dev = get_value($module, 'resetSlave');
+	    $addr = num(get_value($module, 'resetOffset')) + $modules{$dev};
+	    printf("#define CONFIG_SYS_RESET_ADDR 0x%08x\n",
+		   $addr | $kernel_space);
+	    $dev = get_value($module, 'exceptionSlave');
+	    if (!defined($dev)) {
+		$dev = get_parm($module, 'exceptionSlave')->to_literal;
+	    }
+	    $addr = num(get_value($module, 'exceptionOffset')) +
+		$modules{$dev};
+	    printf("#define CONFIG_SYS_EXCEPTION_ADDR 0x%08x\n",
+		   $addr | $kernel_space);
+	    printf("#define CONFIG_SYS_ICACHE_SIZE %d\n",
+		   num(get_value($module, 'icache_size')));
+	    printf("#define CONFIG_SYS_ICACHELINE_SIZE %d\n", 32);
+	    printf("#define CONFIG_SYS_DCACHE_SIZE %d\n",
+		   num(get_value($module, 'dcache_size')));
+	    printf("#define CONFIG_SYS_DCACHELINE_SIZE %d\n",
+		   num(get_value($module, 'dcache_lineSize')));
+	    printf("#define IO_REGION_BASE 0x%08x\n", $io_space);
+	} elsif ($kind eq 'altera_avalon_sysid') {
+	    printf("#define CONFIG_SYS_SYSID_BASE 0x%08x\n",
+		   $base | $io_space);
+	} elsif ($kind eq 'gpio') {
+	    printf("#define CONFIG_SYS_GPIO_BASE 0x%08x\n",
+		   $base | $io_space);
+	} elsif ($kind eq 'altera_avalon_jtag_uart') {
+	    printf("#define CONFIG_SYS_JTAG_UART_BASE 0x%08x\n",
+		   $base | $io_space);
+	} elsif ($kind eq 'altera_avalon_uart') {
+	    printf("#define CONFIG_SYS_UART_BASE 0x%08x\n",
+		   $base | $io_space);
+	    printf("#define CONFIG_SYS_UART_FREQ %d\n",
+		   get_clk($name . '.clk'));
+	    printf("#define CONFIG_SYS_UART_BAUD %d\n",
+		   get_value($module, 'baud'));
+	} elsif ($kind eq 'fifoed_avalon_uart_classic') {
+	    printf("#define CONFIG_SYS_UART_BASE 0x%08x\n",
+		   $base | $io_space);
+	    printf("#define CONFIG_SYS_UART_FREQ %d\n",
+		   get_clk($name . '.s1_clock'));
+	    printf("#define CONFIG_SYS_UART_BAUD %d\n",
+		   115200);
+	} elsif ($kind eq 'altera_avalon_timer') {
+	    my $irq = get_irq($name . '.irq');
+	    printf("#define CONFIG_SYS_TIMER_BASE 0x%08x\n",
+		   $base | $io_space);
+	    printf("#define CONFIG_SYS_TIMER_IRQ %d\n", $irq);
+	    printf("#define CONFIG_SYS_TIMER_FREQ %d\n",
+		   get_clk($name . '.clk'));
+	} elsif ($kind eq 'altera_avalon_epcs_flash_controller') {
+	    if ($device eq 'CYCLONE' || $device eq 'CYCLONEII') {
+		$base += 0x200;
+	    } else {
+		$base += 0x400;
+	    }
+	    printf("#define EPCS_CONTROLLER_REG_BASE 0x%08x\n",
+		   $base | $io_space);
+	    my $spi_defs = <<EOF;
+#define CONFIG_SYS_ALTERA_SPI_LIST { EPCS_CONTROLLER_REG_BASE }
+#define CONFIG_ALTERA_SPI
+#define CONFIG_CMD_SPI
+#define CONFIG_CMD_SF
+#define CONFIG_SF_DEFAULT_SPEED 30000000
+#define CONFIG_SPI_FLASH
+#define CONFIG_SPI_FLASH_STMICRO
+EOF
+		print $spi_defs;
+	} elsif ($kind eq 'altera_avalon_spi' && $name eq 'mmc_spi') {
+	    printf("#define %s_BASE 0x%08x\n",
+		   uc $name, $base | $io_space);
+	    my $spi_defs = <<EOF;
+#define CONFIG_SYS_ALTERA_SPI_LIST { MMC_SPI_BASE }
+#define CONFIG_ALTERA_SPI
+#define CONFIG_CMD_SPI
+#define CONFIG_CMD_MMC
+#define CONFIG_MMC
+#define CONFIG_GENERIC_MMC
+#define CONFIG_CMD_MMC_SPI
+#define CONFIG_MMC_SPI
+#define CONFIG_MMC_SPI_BUS 0
+#define CONFIG_MMC_SPI_CS 0
+#define CONFIG_MMC_SPI_SPEED 30000000
+#define CONFIG_MMC_SPI_MODE SPI_MODE_3
+#define CONFIG_CMD_FAT
+#define CONFIG_DOS_PARTITION
+EOF
+		print $spi_defs;
+	} elsif ($kind eq 'altera_avalon_cf') {
+	    $slave =~ /\.(\w+)$/;
+	    if ($1 eq 'ide') {
+		printf("#define CONFIG_SYS_ATA_BASE_ADDR 0x%08x\n",
+		       $base | $io_space);
+		my $ata_defs = <<EOF;
+#define CONFIG_CMD_IDE
+#define CONFIG_IDE_RESET
+#define CONFIG_CMD_FAT
+#define CONFIG_DOS_PARTITION
+#define CONFIG_SYS_PIO_MODE 1
+#define CONFIG_SYS_IDE_MAXBUS 1
+#define CONFIG_SYS_IDE_MAXDEVICE 1
+#define CONFIG_SYS_ATA_STRIDE 4
+#define CONFIG_SYS_ATA_DATA_OFFSET 0x0
+#define CONFIG_SYS_ATA_REG_OFFSET 0x0
+#define CONFIG_SYS_ATA_ALT_OFFSET 0x20
+EOF
+		print $ata_defs;
+	    } elsif ($1 eq 'ctl') {
+		printf("#define CONFIG_SYS_CF_CTL_BASE 0x%08x\n",
+		       $base | $io_space);
+	    }
+	} elsif ($kind eq 'altera_avalon_lan91c111') {
+	    $base += 0x300;
+	    printf("#define CONFIG_SMC91111_BASE 0x%08x\n",
+		   $base | $io_space);
+	    printf("#define CONFIG_SMC91111\n");
+	    printf("#define CONFIG_SMC_USE_32_BIT\n");
+	} elsif ($kind eq 'DM9000A_IF' || $kind eq 'dm9000a') {
+	    printf("#define CONFIG_DM9000_BASE 0x%08x\n",
+		   $base | $io_space);
+	    printf("#define DM9000_IO 0x%08x\n",
+		   $base | $io_space);
+	    printf("#define DM9000_DATA 0x%08x\n",
+		   ($base + 4) | $io_space);
+	    printf("#define CONFIG_DRIVER_DM9000\n");
+	    printf("#define CONFIG_DM9000_USE_16BIT\n");
+	    printf("#define CONFIG_DM9000_NO_SROM\n");
+	} elsif ($kind eq 'eth_ocm') {
+	    printf("#define CONFIG_SYS_ETHOC_BASE 0x%08x\n",
+		   $base | $io_space);
+	    printf("#define CONFIG_ETHOC\n");
+	} elsif ($kind eq 'triple_speed_ethernet') {
+	    printf("#define CONFIG_SYS_ALTERA_TSE_MAC_BASE 0x%08x\n",
+		   $base | $io_space);
+		my $tse_defs = <<EOF;
+#define CONFIG_SYS_ALTERA_TSE_RX_FIFO 2048
+#define CONFIG_SYS_ALTERA_TSE_TX_FIFO 2048
+#define CONFIG_ALTERA_TSE
+#define CONFIG_MII
+#define CONFIG_CMD_MII
+#define CONFIG_SYS_ALTERA_TSE_PHY_ADDR 18
+#define CONFIG_SYS_ALTERA_TSE_FLAGS 0
+EOF
+		print $tse_defs;
+	} elsif ($kind eq 'altera_avalon_sgdma') {
+	    my $start = get_start('avalon_streaming', $name . '.in');
+	    my $found = 0;
+	    if ($start) {
+		my $mod = $start;
+		$mod =~ s/\.\w+$//; # strip slave port
+		$start =~ /\.(\w+)$/;
+		if ($1 == 'receive' &&
+		    get_module($mod)->getAttribute('kind') ==
+		    'triple_speed_ethernet') {
+		    printf("#define CONFIG_SYS_ALTERA_TSE_SGDMA_RX_BASE 0x%08x\n",
+			   $base | $io_space);
+		    $found = 1;
+		}
+	    }
+	    my $end = get_end('avalon_streaming', $name . '.out');
+	    if ($end) {
+		my $mod = $end;
+		$mod =~ s/\.\w+$//; # strip slave port
+		$end =~ /\.(\w+)$/;
+		if ($1 == 'transmit' &&
+		    get_module($mod)->getAttribute('kind') ==
+		    'triple_speed_ethernet') {
+		    printf("#define CONFIG_SYS_ALTERA_TSE_SGDMA_TX_BASE 0x%08x\n",
+			   $base | $io_space);
+		    $found = 1;
+		}
+	    }
+	    if ($found == 0) {
+		printf("#define %s_BASE 0x%08x\n",
+		       uc $name, $base | $io_space);
+	    }
+	} elsif ($kind eq 'altera_avalon_cfi_flash') {
+	    printf("#define CONFIG_SYS_FLASH_BASE 0x%08x\n",
+		   $base | $io_space);
+	    my $flash_defs = <<EOF;
+#define CONFIG_FLASH_CFI_DRIVER
+#define CONFIG_SYS_CFI_FLASH_STATUS_POLL /* fix amd flash issue */
+#define CONFIG_SYS_FLASH_CFI
+#define CONFIG_SYS_FLASH_USE_BUFFER_WRITE
+#define CONFIG_SYS_FLASH_PROTECTION
+#define CONFIG_SYS_MAX_FLASH_BANKS 1
+#define CONFIG_SYS_MAX_FLASH_SECT 1024
+EOF
+		print $flash_defs;
+	} elsif ($kind eq 'nand_flash') {
+	    printf("#define CONFIG_SYS_NAND_BASE 0x%08x\n",
+		   $base | $io_space);
+	    my $nand_defs = <<EOF;
+#define CONFIG_CMD_NAND
+#define CONFIG_NAND_PLAT
+#define CONFIG_SYS_MAX_NAND_DEVICE 1
+#define NIOS2_NAND_PLAT_CLE 2
+#define NIOS2_NAND_PLAT_ALE 3
+#define NAND_PLAT_WRITE_CMD(chip, cmd) \\
+	writel(cmd, (unsigned int)(this->IO_ADDR_W) + \\
+		(1 << NIOS2_NAND_PLAT_CLE))
+#define NAND_PLAT_WRITE_ADR(chip, cmd) \\
+	writel(cmd, (unsigned int)(this->IO_ADDR_W) + \\
+		(1 << NIOS2_NAND_PLAT_ALE))
+#define NAND_PLAT_INIT() {}
+#define NAND_PLAT_DEV_READY(chip) \\
+	readl(CONFIG_SYS_GPIO_BASE + (CONFIG_SYS_GPIO_NRB << 2))
+EOF
+		print $nand_defs;
+	} elsif ($kind eq 'altera_avalon_cy7c1380_ssram') {
+	    printf("#define CONFIG_SYS_SRAM_BASE 0x%08x\n",
+		   $base | $kernel_space);
+	    printf("#define CONFIG_SYS_SRAM_SIZE 0x%08x\n",
+		   get_value($module, 'size') * 0x100000);
+	} elsif ($kind eq 'altera_nios_dev_kit_stratix_edition_sram2') {
+	    printf("#define CONFIG_SYS_SRAM_BASE 0x%08x\n",
+		   $base | $kernel_space);
+	    printf("#define CONFIG_SYS_SRAM_SIZE 0x%08x\n",
+		   get_value($module, 'size'));
+	} elsif ($kind eq 'ddr_sdram_component_classic' ||
+		 $kind =~ /altera_avalon_new_sdram_controller/ ||
+		 $kind =~ /altmemddr/) {
+	    printf("#define CONFIG_SYS_SDRAM_BASE 0x%08x\n",
+		   $base | $kernel_space);
+	    printf("#define CONFIG_SYS_SDRAM_SIZE 0x%08x\n",
+		   get_size($module, $kind));
+	} else {
+	    printf("#define %s_BASE 0x%08x\n",
+		   uc $name, $base | $io_space);
+	}
+    }
+
+}
+
+sub gen_fdt
+{
+    my ($slave, $base) = @_;
+    my $name = $slave;
+    $name =~ s/\.\w+$//; # strip slave port
+    foreach my $module ($doc->findnodes(
+			    "/system/module[\@name='$name']")) {
+	my $kind = $module->getAttribute('kind');
+#	printf("\n/* $slave is a $kind */\n");
+	if ($kind eq 'altera_nios2') {
+	    my $cpu_defs = <<EOF;
+		cpu\@0 {
+			compatible = "altr,nios2";
+			device_type = "cpu";
+			model = "nios2";
+			reg = <0>;
+EOF
+	    print $cpu_defs;
+	    printf("\t\t\tclock-frequency = <%u>;\n",
+		   get_clk($cpu_name . '.clk'));
+	    printf("\t\t\td-cache-line-size = <0x%x>;\n",
+		   num(get_value($module, 'dcache_lineSize')));
+	    printf("\t\t\td-cache-size = <0x%x>;\n",
+		   num(get_value($module, 'dcache_size')));
+	    printf("\t\t\ti-cache-line-size = <0x%x>;\n", 32);
+	    printf("\t\t\ti-cache-size = <0x%x>;\n",
+		   num(get_value($module, 'icache_size')));
+	    printf("\t\t\ttimebase-frequency = <%u>;\n",
+		   get_clk($timer . '.clk'));
+	    printf("\t\t};\n");
+	} elsif ($kind eq 'altera_avalon_jtag_uart') {
+	    printf("\t\tserial@%08x {\n", $base);
+	    printf("\t\t\tcompatible = \"altera_jtaguart\";\n");
+	    printf("\t\t\tdevice_type = \"serial\";\n");
+	    printf("\t\t\tinterrupts = <%u>;\n",
+		   get_irq($name . '.irq'));
+	    printf("\t\t\treg = <0x%08x 0x%08x>;\n\t\t};\n",
+		   $base, 8);
+	} elsif ($kind eq 'altera_avalon_uart') {
+	    printf("\t\tserial@%08x {\n", $base);
+	    printf("\t\t\tclock-frequency = <%u>;\n",
+		   get_clk($name . '.clk'));
+	    printf("\t\t\tcompatible = \"altera_uart\";\n");
+	    printf("\t\t\tcurrent-speed = <%u>;\n",
+		   get_value($module, 'baud'));
+	    printf("\t\t\tdevice_type = \"serial\";\n");
+	    printf("\t\t\tinterrupts = <%u>;\n",
+		   get_irq($name . '.irq'));
+	    printf("\t\t\treg = <0x%08x 0x%08x>;\n\t\t};\n",
+		   $base, 32);
+	} elsif ($kind eq 'altera_avalon_timer') {
+	    printf("\t\ttimer@%08x {\n", $base);
+	    printf("\t\t\tcompatible = \"altera_timer\";\n");
+	    printf("\t\t\tinterrupts = <%u>;\n",
+		   get_irq($name . '.irq'));
+	    printf("\t\t\treg = <0x%08x 0x%08x>;\n\t\t};\n",
+		   $base, 32);
+	} elsif ($kind eq 'altera_avalon_cfi_flash') {
+	    printf("\t\tflash@%08x {\n", $base);
+	    printf("\t\t\tbank-width = <%u>;\n",
+		   get_value($module, 'dataWidth') / 8);
+	    printf("\t\t\tcompatible = \"cfi-flash\";\n");
+	    printf("\t\t\treg = <0x%08x 0x%08x>;\n\t\t};\n",
+		   $base, get_size($module, $kind));
+	} elsif ($kind eq 'ddr_sdram_component_classic' ||
+		 $kind =~ /altera_avalon_new_sdram_controller/ ||
+		 $kind =~ /altmemddr/) {
+	    printf("\tmemory@%08x {\n", $base);
+	    printf("\t\tdevice_type = \"memory\";\n");
+	    printf("\t\treg = <0x%08x 0x%08x>;\n\t};\n",
+		   $base, get_size($module, $kind));
+	}
+    }
+
+}
+
+sub scan_bus
+{
+    my ($bus, $bus_base) = @_;
+    foreach my $conn ($doc->findnodes("/system/connection[\@start='$bus']")) {
+	my $slave = $conn->getAttribute('end');
+	my $name = $slave;
+	$name =~ s/\.\w+$//; # strip slave port
+	my $base = get_value($conn, 'baseAddress');
+	$base = num($base);
+	$base += $bus_base; # add bus offset
+	# check module info
+	foreach my $module ($doc->findnodes(
+				"/system/module[\@name='$name']")) {
+	    my $kind = $module->getAttribute('kind');
+	    if ($kind eq 'altera_avalon_pipeline_bridge' ||
+		$kind eq 'altera_avalon_clock_crossing') {
+		scan_bus($name . '.m1', $base);
+	    } elsif ($kind eq 'altera_avalon_tri_state_bridge') {
+		scan_bus($name . '.tristate_master', $base);
+	    } elsif ($kind eq 'altera_nios2' || $kind eq 'altera_avalon_pll') {
+		# skip debug module
+	    } else {
+		$modules{$slave} = $base;
+		if ($kind eq 'ddr_sdram_component_classic' ||
+		    $kind =~ /altera_avalon_new_sdram_controller/ ||
+		    $kind =~ /altmemddr/ ) {
+		    $memory_slave = $slave;
+		} elsif ($kind eq 'altera_avalon_timer') {
+		    $timer = $slave;
+		    $timer =~ s/\.\w+$//; # strip slave port
+		}
+	    }
+	}
+    }
+}
+
+my $fdt;
+Getopt::Long::Configure ('bundling');
+GetOptions('m|module=s' => \$cpu_name, 'f|fdt' => \$fdt);
+
+my $sopc = $ARGV[0];
+my $header = $ARGV[1];
+my $parser = XML::LibXML->new();
+my $cpu;
+$doc = $parser->parse_file($sopc);
+
+# find cpu
+if ($cpu_name) {
+    foreach my $t ($doc->findnodes(
+			   "/system/module[\@kind='altera_nios2' and
+				\@name='$cpu_name']")) {
+	$cpu = $t;
+    }
+} else {
+    my @cpus = $doc->findnodes(
+			   "/system/module[\@kind='altera_nios2']");
+    if ($#cpus > 0) {
+	printf("More than one CPU found, please select one with --module\n");
+	foreach my $t (@cpus) {
+	    printf("%s\n", $t->getAttribute('name'));
+	}
+	exit 1;
+    }
+    $cpu = $cpus[0];
+}
+if (!defined($cpu)) {
+    printf("CPU not found\n");
+    exit 1;
+}
+$cpu_name = $cpu->getAttribute('name');
+if (get_value($cpu, 'mmu_enabled') eq 'true') {
+    $kernel_space = 0xc0000000;
+    $io_space = 0xe0000000;
+}
+foreach my $parm ($doc->findnodes("//parameter[\@name='deviceFamily']")) {
+    $device = $parm->getAttribute('value');
+}
+
+if (get_value($cpu, 'icache_numTCIM')) {
+    scan_bus($cpu_name . ".tightly_coupled_instruction_master_0", 0);
+}
+scan_bus($cpu_name . ".data_master", 0);
+
+if ($header) {
+    open HEADER, ">$header";
+    select HEADER;
+}
+if ($fdt) {
+    printf("\n/* generated from $sopc */\n\n");
+    my $fdt_defs = <<EOF;
+/dts-v1/;
+/ {
+	#address-cells = <1>;
+	#size-cells = <1>;
+	compatible = "altr,sopc";
+	model = "generic";
+EOF
+    print $fdt_defs;
+    gen_fdt($memory_slave, $modules{$memory_slave});
+    my $cpu_defs = <<EOF;
+	cpus {
+		#address-cells = <1>;
+		#cpus = <0x1>;
+		#size-cells = <0>;
+EOF
+    print $cpu_defs;
+    gen_fdt($cpu_name . ".data_master", 0);
+    printf("\t};\n");
+    my $bus_defs = <<EOF;
+	bus\@0 {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		compatible = "simple-bus";
+		ranges ;
+EOF
+    print $bus_defs;
+    while ( my ($slave, $base) = each(%modules) ) {
+	if (!($slave eq $memory_slave)) {
+	    gen_fdt($slave, $base);
+	}
+    }
+    printf("\t};\n");
+    printf("};\n");
+} else {
+    my $header_def = '_' . uc($header) . '_';
+    $header_def =~ tr/\./_/;
+    printf("#ifndef $header_def\n#define $header_def\n");
+    printf("\n/* generated from $sopc */\n");
+    gen_uboot($cpu_name . ".data_master", 0);
+    while ( my ($slave, $base) = each(%modules) ) {
+	gen_uboot($slave, $base);
+    }
+    printf("\n#endif /* $header_def */\n");
+}

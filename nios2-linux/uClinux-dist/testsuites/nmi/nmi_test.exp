@@ -1,0 +1,94 @@
+#!/usr/bin/expect
+
+source ../kernel_config.exp
+log_file [log_file_name "$argv0"]
+send_user "Starting $argv0\n"
+set TITLE [title "$argv0"]
+
+step "Start kermit."
+source ../spawn_kermit.exp
+
+step  "Reboot the kernel." 
+source ../reboot_kernel.exp
+
+step "Start testing."
+sleep 10
+set case_num 0
+incr case_num
+
+set timeout 8
+set flag 0
+
+send -s "modprobe nmi_wdt_test\r"
+while 1 {
+   expect {
+     -re "$kernel_prompt" {
+         incr flag
+         puts "module insert success.\n"
+         break
+      }
+
+      timeout {
+         puts "module probe failed.\n"
+         break
+         }
+     }
+}
+send -s "lsmod\r"
+while 1 {
+   expect {
+     -re "nmi_wdt_test.*$kernel_prompt" {
+         incr flag
+         puts "module ls success.\n"
+         break
+      }
+
+      timeout {
+         puts "module ls failed.\n"
+         break
+         }
+     }
+}
+set timeout 50
+
+send -s  "echo 1 > /proc/nmi_wdt\r" 
+while 1 {
+   expect {
+      "NMI Watchdog detected LOCKUP, dump for CPU " {
+                case_pass $case_num
+         break
+      }
+
+      timeout {
+                case_fail $case_num
+         }
+     }
+}
+
+incr case_num
+set timeout 100
+
+while 1 {    
+         expect {
+	 "Hit any key" {
+	        expect  -re $kernel_prompt
+                case_fail $case_num
+                exit
+         }
+
+         timeout {
+                case_pass $case_num
+                break
+         }
+	 }      
+}
+
+send_log "\n"
+send_log "\n$TITLE ............\[PASS\]\n"
+
+send_user "Ending $argv0\n"
+log_file
+ 
+
+
+

@@ -1,0 +1,7 @@
+for i in \
+binutils gcc3 linux-2.6 toolchain-build uClibc elf2flt \
+insight u-boot uClinux-dist
+do
+sed -i -e szgit://sopc.et.ntust.edu.twzgit+ssh://anonymous@sopc.et.ntust.edu.tw:443zg $i/.git/config
+sed -i -e szhttp://sopc.et.ntust.edu.twzgit+ssh://anonymous@sopc.et.ntust.edu.tw:443zg $i/.git/config
+done

@@ -1,0 +1,246 @@
+<html lang="en">
+<head>
+<title>Altera Nios II Options - Using the GNU Compiler Collection (GCC)</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="Using the GNU Compiler Collection (GCC)">
+<meta name="generator" content="makeinfo 4.8">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="up" href="Submodel-Options.html#Submodel-Options" title="Submodel Options">
+<link rel="next" href="ARC-Options.html#ARC-Options" title="ARC Options">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<!--
+Copyright (C) 1988, 1989, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
+1999, 2000, 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
+
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.2 or
+any later version published by the Free Software Foundation; with the
+Invariant Sections being ``GNU General Public License'' and ``Funding
+Free Software'', the Front-Cover texts being (a) (see below), and with
+the Back-Cover Texts being (b) (see below).  A copy of the license is
+included in the section entitled ``GNU Free Documentation License''.
+
+(a) The FSF's Front-Cover Text is:
+
+     A GNU Manual
+
+(b) The FSF's Back-Cover Text is:
+
+     You have freedom to copy and modify this GNU Manual, like GNU
+     software.  Copies published by the Free Software Foundation raise
+     funds for GNU development.-->
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<p>
+<a name="Altera-Nios-II-Options"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="ARC-Options.html#ARC-Options">ARC Options</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="Submodel-Options.html#Submodel-Options">Submodel Options</a>
+<hr>
+</div>
+
+<h4 class="subsection">3.17.1 Altera Nios II Options</h4>
+
+<p><a name="index-Altera-Nios-II-options-722"></a>
+These are the `<samp><span class="samp">-m</span></samp>' options defined for the Altera Nios II
+processor.
+
+     <dl>
+<dt><code>-mbypass-cache</code><dt><code>-mno-bypass-cache</code><dd><a name="index-mno_002dbypass_002dcache-723"></a><a name="index-mbypass_002dcache-724"></a>Force all load and store instructions to always bypass cache by
+using io variants of the instructions. The default is to not
+bypass the cache.
+
+     <br><dt><code>-mno-inline-memcpy</code><dt><code>-minline-memcpy</code><dd><a name="index-mno_002dinline_002dmemcpy-725"></a><a name="index-minline_002dmemcpy-726"></a>Do not inline memcpy. The default is to inline when -O is on.
+
+     <br><dt><code>-mno-fast-sw-div</code><dt><code>-mfast-sw-div</code><dd><a name="index-mno_002dfast_002dsw_002ddiv-727"></a><a name="index-mfast_002dsw_002ddiv-728"></a>Do no use table based fast divide for small numbers. The default
+is to use the fast divide at -O3 and above.
+
+     <br><dt><code>-mno-hw-mul</code><dt><code>-mhw-mul</code><dt><code>-mno-hw-mulx</code><dt><code>-mhw-mulx</code><dt><code>-mno-hw-div</code><dt><code>-mhw-div</code><dd><a name="index-mno_002dhw_002dmul-729"></a><a name="index-mhw_002dmul-730"></a><a name="index-mno_002dhw_002dmulx-731"></a><a name="index-mhw_002dmulx-732"></a><a name="index-mno_002dhw_002ddiv-733"></a><a name="index-mhw_002ddiv-734"></a>Enable or disable emitting <code>mul</code>, <code>mulx</code> and <code>div</code> family of
+instructions by the compiler. The default is to emit <code>mul</code>
+and not emit <code>div</code> and <code>mulx</code>.
+
+     <p>The different combinations of <code>mul</code> and <code>mulx</code> instructions
+generate a different multilib options.
+
+     <br><dt><code>-mno-stack-check</code><dt><code>-mstack-check</code><dd><a name="index-no_002dstack_002dcheck-735"></a><a name="index-stack_002dcheck-736"></a>Enables or disables the checking for sufficient memory when
+items are pushed onto the stack. A checked and non-checked
+version of each of the multilibs is provided.
+
+     <br><dt><code>-mno-reverse-bitfields</code><dt><code>-mreverse-bitfields</code><dd><a name="index-mno_002dreverse_002dbitfields-737"></a><a name="index-mreverse_002dbitfields-738"></a>When enabled, bitfields within a struct are allocated in reverse order. 
+This is useful with legacy code that depends on the (inherently
+non-portable) ordering of bitfields via a union.  Given:
+
+     <pre class="smallexample">          struct inner
+          {
+            unsigned int a:1;
+            unsigned int b:31;
+          };
+          
+          union outer
+          {
+            struct inner inner;
+            unsigned int val;
+          };
+          
+          unsigned int f()
+          {
+            union outer o;
+            o.inner.a = 1;
+            o.inner.b = 0;
+            return o.val;
+          }
+     </pre>
+     <p>a call to <code>f</code> will return 1 when compiled with
+<samp><span class="option">-mno-reverse-bitfields</span></samp> (the default), or 2147483648 when
+compiled with <samp><span class="option">-mreverse-bitfields</span></samp>.
+
+     <p>For structures that are a multiple of 32 bits wide, the reversal is
+done 32 bits at a time.  For structures that are an odd multiple of 16
+bits wide, the reversal is done 16 bits at a time.  For structures
+that are an odd multiple of 8 bits wide, the reversal is done 8 bits
+at a time.  The size of a structure (as measured by the <code>sizeof</code>
+operator) never changes between <samp><span class="option">-mno-reverse-bitfields</span></samp> and
+<samp><span class="option">-mreverse-bitfields</span></samp>.  Nonetheless, there can be some
+confusing corner cases with structs where the compiler has to add
+additional padding to meet alignment restrictions.  Consider:
+
+     <pre class="smallexample">          struct inner
+          {
+            unsigned int a:1;
+            unsigned int b:15;
+          };
+          
+          union outer
+          {
+            struct inner inner;
+            unsigned int val;
+          };
+          
+          unsigned int f()
+          {
+            union outer o;
+            o.val = 0;
+            o.inner.b = 1;
+            return o.val;
+          }
+     </pre>
+     <p>a call to <code>f</code> will return 2 when compiled with
+<samp><span class="option">-mno-reverse-bitfields</span></samp> (the default), or 65536 when compiled
+with <samp><span class="option">-mreverse-bitfields</span></samp>.  This is because <code>sizeof
+(inner)</code> is 4 in both cases.  In the <samp><span class="option">-mno-reverse-bitfields</span></samp>
+case, the compiler pads the struct at the end to be 4 bytes long,
+effectively doing:
+
+     <pre class="smallexample">          struct inner
+          {
+            unsigned int a:1;
+            unsigned int b:15;
+            unsigned int padding:16;
+          };
+     </pre>
+     <p>In the <samp><span class="option">-mreverse-bitfields</span></samp> case, the hidden padding is
+reversed along with everything else, yielding the equivalent of:
+
+     <pre class="smallexample">          struct inner
+          {
+            unsigned int padding:16;
+            unsigned int b:15;
+            unsigned int a:1;
+          };
+     </pre>
+     <p>Of course, if we would rather that <code>sizeof (inner)</code> was 2, we could
+write the struct as:
+
+     <pre class="smallexample">          struct inner
+          {
+            unsigned short a:1;
+            unsigned short b:15;
+          };
+     </pre>
+     <p>and the padding would go away.
+
+     <p>In some cases, especially when using the <code>__packed__</code> attribute,
+there is no well-defined bit reversal that is possible: the compiler
+will issue an error message in this case.  Consider:
+
+     <pre class="smallexample">          struct invalid
+          {
+            unsigned int f1:1;
+            unsigned int f2:15;
+            unsigned int f3:4;
+            unsigned int f4:4;
+          } __attribute__ ((__packed__));
+     </pre>
+     <p>Since <code>sizeof (invalid)</code> is 3, we are forced to try reversing
+individual bytes in the struct.  But f2 is more than a byte wide, so
+we can't reverse it and still have it be contiguous.  Similar cases
+occur when dealing with arrays or other large contiguous objects:
+
+     <pre class="smallexample">          struct invalid2
+          {
+            unsigned char f1[5];
+            unsigned char f2[3];
+          };
+     </pre>
+     <p>You'll have to rewrite the affected structs to say exactly what you
+mean in odd cases like that.
+
+     <p>Finally, note that individual fields are sized as a whole.  The structs
+
+     <pre class="smallexample">          struct array1
+          {
+            unsigned char f1[3];
+            unsigned char f2;
+          }
+     </pre>
+     <p>and:
+
+     <pre class="smallexample">          struct array2
+          {
+            unsigned char f1a;
+            unsigned char f1b;
+            unsigned char f1c;
+            unsigned char f2;
+          }
+     </pre>
+     <p>are not equivalent.  When compiled with <samp><span class="option">-mreverse-bitfields</span></samp>,
+they behave the same as:
+
+     <pre class="smallexample">          struct array1r
+          {
+            unsigned char f2;
+            unsigned char f1[3];
+          }
+     </pre>
+     <p>and:
+
+     <pre class="smallexample">          struct array2r
+          {
+            unsigned char f2;
+            unsigned char f1c;
+            unsigned char f1b;
+            unsigned char f1a;
+          }
+     </pre>
+     <p>would, respectively, when compiled with
+<samp><span class="option">-mno-reverse-bitfields</span></samp>.  In particular, f1 is treated as a
+single contiguous 24-bit object for purposes of reversal, while f1a,
+f1b, and f1c are treated as individual 8-bit objects that need not
+(and do not) remain contiguous.  Use caution.
+
+ </dl>
+
+ </body></html>
+

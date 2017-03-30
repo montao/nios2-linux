@@ -1,0 +1,2 @@
+nios2-linux-gnu-gcc: --gc-sections: linker input file unused because linking not done
+nios2-linux-gnu-gcc: --gc-sections: linker input file unused because linking not done

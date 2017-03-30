@@ -1,0 +1,298 @@
+#!/usr/bin/expect
+
+source ../kernel_config.exp
+source  ../board_info.exp
+
+if { $argc < 2} {
+    puts "Please input: board_type, audio_dev"
+    puts "audio_dev: audio_ssm2603, audio_ad73311, audio_adau1361, audio_adau1373, audio_ad1836, audio_ad1937, audio_ad1938, audio_ad1939, audio_ad73322"
+    exit
+}
+
+set audio_dev [lindex $argv 1]
+set title build_$audio_dev
+append title "_kernel_log"
+log_file $title
+
+send_user "Starting $argv0\n"
+send_log "\n#### build kernel for $audio_dev\n"
+
+cd $uclinux_path/testsuites
+step "Make clean."
+if { [source make_clean.exp] != 0 } {
+    send_user "\n\nFail to make clean. Exit!\n\n"
+    exit
+}
+
+if { $audio_dev == "audio_ad73322" } {
+    step "Apply ad73322 patch."
+    cd $uclinux_path/linux-2.6.x
+    if [ catch {exec patch -p0 < $uclinux_path/bfin_patch/ad73322_patch/old_sound_ad73322.patch} ] {
+        send_user "$errorInfo\n"
+        exit
+    }
+}
+
+if { $audio_dev == "audio_adau1361" } {
+    set board_file $uclinux_path/linux-2.6.x/arch/blackfin/mach-bf537/boards/stamp.c
+    if [ catch {exec sed -i "/I2C_BOARD_INFO.*adau1761/ s/1761/1361/" $board_file} ] {
+        send_user "\nfail to modify board file\n"
+        send_user "$errorInfo\n"
+        exit
+    }
+}
+
+
+cd $uclinux_path/testsuites
+step "Make config"
+source make_default_config.exp
+
+# Following make specific configuration for this case.
+cd $uclinux_path
+set timeout 300
+set baud_rate_done_flag 0
+spawn make config
+while 1 {
+    expect {
+        -re "Customize Kernel Settings.*DEFAULTS_KERNEL.*\\\[.*]" {
+            send "y\r"
+        }
+
+        -re "Customize Application/Library Settings.*DEFAULTS_VENDOR.*\\\[.*]" {
+            send "y\r"
+        }
+
+        -nocase -re "\\\[\[^\r]*] (\[ymn])|choice\\\[.*]: \[0-9]+\r" {
+            continue
+        }
+
+        -re "Virtual terminal.*VT.*\\\[.*]" {
+            send "N\r"
+        }
+
+#some sound card need blackfin I2C driver
+        -re "I2C support \\\(I2C\\\).*\\\[.*]" {
+            if { $audio_dev == "audio_ad1939" } {
+                send "M\r"
+            } else {
+                send "Y\r"
+            }
+        }
+
+        -re "Blackfin TWI I2C support.*I2C_BLACKFIN_TWI.*\\\[.*]" {
+            if { $audio_dev == "audio_ssm2603" || $audio_dev == "audio_ad73311" || $audio_dev == "audio_ad1937" || [string match "audio_adau*" $audio_dev] } {
+                send "Y\r"
+            } else {
+                send "\r"
+            }
+        }
+
+        -re "SPI support \\\(SPI\\\).*\\\[.*]" {
+            if { $audio_dev == "audio_ad1938" || $audio_dev == "audio_ad1939" } {
+                send "Y\r"
+            } elseif { $audio_dev == "audio_ad1937" } {
+                send "N\r"
+            } else {
+                send "\r"
+            }
+        }
+
+        -re "SPI controller driver for ADI Blackfin5xx.*SPI_BFIN.*\\\[.*]" {
+            if { $audio_dev == "audio_ad1938" || $audio_dev == "audio_ad1939" } {
+                send "Y\r"
+            } elseif { $audio_dev == "audio_ad73322" } {
+                send "N\r"
+            } else {
+                send "\r"
+            }
+        }
+
+        -re "SHARP LQ035Q1DH02 TFT LCD.*FB_BFIN_LQ035Q1.*\\\[.*]" {
+            if { $audio_dev == "audio_ssm2603" } {
+                send "N\r"
+            } else {
+                send "\r"
+            }
+        }
+
+#sound card
+        -re "Sound card support.*SOUND.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Advanced Linux Sound Architecture.*SND.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "OSS Mixer API.*SND_MIXER_OSS.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "OSS PCM.*digital audio.*API.*SND_PCM_OSS\\\).*\\\[.*]" {
+            send "Y\r"
+        }
+
+#SoC audio
+        -re "ALSA for SoC audio support.*SND_SOC.*\\\[.*]" {
+            if { $audio_dev != "audio_ad73322" } {
+                send "Y\r"
+            } else {
+                send "N\r"
+            }
+        }
+
+        -re "SoC I2S Audio for the ADI Blackfin chip.*SND_BF5XX_I2S.*\\\[.*]" {
+            if { $audio_dev == "audio_ssm2603" || $audio_dev == "audio_ad73311" || [string match "audio_adau*" $audio_dev] } {
+                send "Y\r"
+            } else {
+                send "N\r"
+            }
+        }
+
+        -re "SoC SSM2602 Audio Codec Add-On Card support.*SND_BF5XX_SOC_SSM2602.*\\\[.*]" {
+            if { $audio_dev == "audio_ssm2603" } {
+                send "Y\r"
+            } else {
+                send "N\r"
+            }
+        }
+
+        -re "SoC AD73311.*Audio support for Blackfin.*SND_BF5XX_SOC_AD73311.*\\\[.*]" {
+            if { $audio_dev == "audio_ad73311" } {
+                send "Y\r"
+            } else {
+                send "N\r"
+            }
+        }
+
+        -re "SoC ADAU1373 Audio support.*SND_BF5XX_SOC_ADAU1373.*\\\[.*]" {
+            if { $audio_dev == "audio_adau1373" } {
+                send "Y\r"
+            } else {
+                send "N\r"
+            }
+        }
+
+        -re "Support for the EVAL-ADAU1X61.*SND_SOC_BFIN_EVAL_ADAU1X61.*\\\[.*]" {
+            if { $audio_dev == "audio_adau1361" } {
+                send "Y\r"
+            } else {
+                send "N\r"
+            }
+        }
+
+        -re "SoC I2S\\\(TDM mode\\\) Audio for the ADI BF5xx chip.*SND_BF5XX_TDM.*\\\[.*]" {
+            if { $audio_dev == "audio_ad1836" || [string match "audio_ad193*" $audio_dev] } {
+                send "Y\r"
+            } else {
+                send "N\r"
+            }
+        }
+
+        -re "SoC AD1836 Audio support for BF5xx.*SND_BF5XX_SOC_AD1836.*\\\[.*]" {
+            if { $audio_dev == "audio_ad1836" } {
+                send "Y\r"
+            } else {
+                send "N\r"
+            }
+        }
+
+        -re "SoC AD193X Audio support for Blackfin.*SND_BF5XX_SOC_AD193X.*\\\[.*]" {
+            if { $audio_dev == "audio_ad1938" } {
+                send "Y\r"
+            } elseif { [string match "audio_ad193*" $audio_dev] } {
+                send "M\r"
+            } else {
+                send "N\r"
+            }
+        }
+
+        -re "Set a SPORT for Sound chip.*SND_BF5XX_SPORT_NUM.*\\\[.*]" {
+            if { [string match "BF527-EZKIT*" $board_type] } {
+                send "1\r"
+            } else {
+                send "0\r"
+            }
+        }
+
+        -re "SoC AC97 Audio for the ADI BF5xx chip.*SND_BF5XX_AC97.*\\\[.*]" {
+            send "N\r"
+        }
+
+#ad73322
+        -re "Cascaded AD73322 Audio support for BF53x.*SND_BFIN_AD73322.*\\\[.*]" {
+            if { $audio_dev == "audio_ad73322" } {
+                send "Y\r"
+            } else {
+                send "N\r"
+            }
+        }
+
+        -re "Blackfin Audio SPORT port.*SND_BF5XX_SPORT_NUM.*\\\[.*]" {
+            if { $audio_dev == "audio_ad73322" } {
+                send "2\r"
+            } else {
+                send "\r"
+            }
+        }
+
+        -re "Uncached DMA region.*(\[0-9]). Enable 2M DMA region.*DMA_UNCACHED_2M.*\[cC]hoice.*\\\[.*]" {
+            send "$expect_out(1,string)\r"
+        }
+
+#user app config
+        -re "Binary format.*FLAT.*Shared-FLAT.*FDPIC.*\\\[.*]" {
+            send "4\r"
+        }
+
+        -re "ALSA utils.*USER_ALSA_UTILS.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "tone.*USER_PLAY_TONE.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "mp3play.*USER_MP3PLAY_MP3PLAY.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "vplay.*USER_VPLAY_VPLAY.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "vrec.*USER_VPLAY_VREC.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        "\\\(*) \\\[*]" {
+            sleep .01
+            send "\r"
+        }
+
+        -re "\[cC]hoice\\\[.*]:" {
+            send "\r"
+        }
+
+        eof {
+            puts "End of configuration"
+            break
+        }
+
+        timeout {
+            puts "\n\nFATAL ERROR: config prompt timeout in make config"
+            break
+        }
+    }
+}
+
+cd $uclinux_path/testsuites
+step "Make"
+source  make_kernel.exp
+
+cd $uclinux_path/testsuites
+step "Copy linux"
+source   copy_image.exp
+
+send_user "Ending $argv0\n"
+log_file

@@ -1,0 +1,150 @@
+#!/usr/bin/expect
+
+source ../kernel_config.exp
+source  ../board_info.exp
+log_file [log_file_name "$argv0"]
+send_user "Starting $argv0\n"
+
+set env(EXT2_BLOCKS) "16384"
+
+cd $uclinux_path/testsuites
+
+step "Make config."
+
+source  make_default_config.exp
+
+# Following make specific configuration for this case.
+      
+cd $uclinux_path
+set timeout 300
+set baud_rate_done_flag 0
+spawn make config
+
+#puts "Begin the interactive process of configuration"
+while 1 {
+    expect {
+
+        -re "Customize Kernel Settings.*DEFAULTS_KERNEL.*\\\[.*]" {
+            send "y\r"
+        }
+
+        -re "Customize Application/Library Settings.*DEFAULTS_VENDOR.*\\\[.*]" {
+            send "y\r"
+        }
+
+        -re "Re-program Clocks while Kernel boots.*BFIN_KERNEL_CLOCK.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "VCO Multiplier.*VCO_MULT.*\\\[.*]" {
+            send "14\r"
+        }
+
+        -re "Core Clock Divider.*CCLK_DIV.*\\\[.*]" {
+            send "1\r"
+        }
+
+        -re "System Clock Divider.*SCLK_DIV.*\\\[.*]" {
+            send "5\r"
+        }
+
+        -re "SCSI device support.*SCSI.*\\\[.*]" {
+            send -s "Y\r"
+        }
+
+        -re "SCSI disk support.*BLK_DEV_SD.*\\\[.*]" {
+            send -s "Y\r"
+        }
+
+        -re "Serial ATA.*and Parallel ATA.*drivers.*ATA.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Generic platform device PATA support.*PATA_PLATFORM.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Second extended fs support.*EXT2_FS.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "ISO 9660 CDROM file system support.*ISO9660_FS.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "MSDOS fs support.*MSDOS_FS.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "VFAT.*Windows-95.*fs support.*VFAT_FS.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Default NLS Option.*NLS_DEFAULT.*\\\[.*]" {
+            send "\r"
+        }
+
+        -re "Codepage 437.*United States.*Canada.*NLS_CODEPAGE_437.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Codepage 850.*Europe.*NLS_CODEPAGE_850.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "NLS ISO 8859-1.*Latin 1.*Western European Languages.*NLS_ISO8859_1.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "fdisk.*USER_FDISK_FDISK.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "mke2fs.*USER_E2FSPROGS_MISC_MKE2FS.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "bonnie\\\+\\\+.*USER_BONNIE.*\\\[.*]" {
+            send "y\r"
+        }
+
+        -nocase -re "\\\[\[^\r]*] (\[ymn])|choice\\\[.*]: \[0-9]+\r" {
+            continue
+        }
+
+        "\\\(*) \\\[*]" {
+            sleep .01
+            send "\r"
+        }
+
+        -re "\[cC]hoice\\\[.*]:" {
+            send "\r"
+        }
+
+        eof {
+            puts "End of configuration"
+            break
+        }
+
+        timeout {
+            puts "\n\nFATAL ERROR: config prompt timeout in make config"
+            break
+        }
+    }
+}
+
+cd $uclinux_path/testsuites
+
+step "Make"
+
+source  make_kernel.exp
+
+
+cd $uclinux_path/testsuites
+
+step "Copy linux"
+
+source   copy_image.exp
+
+send_user "Ending $argv0\n"
+log_file

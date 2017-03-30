@@ -1,0 +1,2 @@
+/data/dwesterg/nios2-linux/nios2-linux/uClinux-dist/user/netperf/netperf-2.4.1/src/netcpu_procstat.c: In function 'get_cpu_idle':
+/data/dwesterg/nios2-linux/nios2-linux/uClinux-dist/user/netperf/netperf-2.4.1/src/netcpu_procstat.c:143: warning: format '%d' expects type 'int', but argument 4 has type 'uint64_t'

@@ -1,0 +1,277 @@
+#!/usr/bin/expect
+
+#
+#This program is to record audio on and from PC, using mainly sine waveform.
+#
+
+source ../kernel_config.exp
+
+if { $argc < 2} {
+    puts "Please input: board_type, audio_dev"
+    puts "Refer to build_audio_kernel.exp for audio_dev."
+    exit
+}
+
+set audio_dev [lindex $argv 1]
+set title ${audio_dev}_data_test_log
+log_file $title
+
+send_user "Starting $argv0\n"
+set TITLE [title "$argv0"]
+append TITLE " ($audio_dev)"
+
+
+step "Start kermit."
+source ../spawn_kermit.exp
+
+step "Reboot the kernel."
+source ../reboot_kernel.exp
+
+step "Start testing."
+
+set output_file_type "wav"
+if { $audio_dev == "audio_ad1938" || $audio_dev == "audio_ad1836" || $audio_dev == "audio_ssm2603" } {
+    set channel "Stereo"
+    set channel_num "2"
+    set sample_rate "48000"
+    set alsa_format "S32_LE"
+} elseif { $audio_dev == "audio_ad73311" } {
+    set channel "Mono"
+    set channel_num "1"
+    set sample_rate "8000"
+    set alsa_format "S16_LE"
+} else {
+    send_user "Can not recognize audio device, exit"
+    exit
+}
+
+
+proc rec_at_pc { freq magnitude } {
+    global case_num
+    global kermit_spawn_id
+    global host_spawn_id
+    global kernel_prompt
+    global output_dir
+    global output_file_type
+    global channel
+    global channel_num
+    global sample_rate
+    global alsa_format
+
+#Generate sine wave at $freq with magnitude of $magnitude on target board.
+    set spawn_id $kermit_spawn_id
+
+    incr case_num
+    set timeout 10
+    send "tone -s -m $magnitude $freq\n"
+    while 1 {
+        expect {
+            -re "TONE: generating sine wave at (\[0-9])+ Hz" {
+                case_pass $case_num
+                break
+            }
+            timeout {
+                send "\3"
+                expect -re $kernel_prompt
+                case_fail $case_num
+            }
+        }
+    }
+
+
+#In PC, record output sound from target board
+    set spawn_id $host_spawn_id
+
+    incr case_num
+    set timeout 10
+    send "arecord -t $output_file_type -c $channel_num -f $alsa_format -r $sample_rate -d 5 $output_dir/${freq}Hz_BFIN2PC.wav\n"
+    while 1 {
+        expect {
+            -re "$channel.*>" {
+                case_pass $case_num
+                break
+            }
+            timeout {
+                send "\3"
+                expect ">"
+                case_fail $case_num
+            }
+        }
+    }
+
+
+#Stop playing sound on target board.
+    set spawn_id $kermit_spawn_id
+
+    incr case_num
+    set timeout 5
+    send "\3"
+    while 1 {
+        expect {
+            -re $kernel_prompt {
+                case_pass $case_num
+                break
+            }
+            timeout {
+                case_fail $case_num
+            }
+        }
+    }
+}
+
+proc rec_from_pc { freq magnitude } {
+    global case_num
+    global kermit_spawn_id
+    global host_spawn_id
+    global kernel_prompt
+    global targetip
+    global output_dir
+    global output_file_type
+    global channel
+    global channel_num
+    global sample_rate
+    global alsa_format
+
+#Generate sine wave at $freq with magnitude of $magnitude on PC.
+    set spawn_id $host_spawn_id
+
+    incr case_num
+    set timeout 10
+    send "tone -s -m $magnitude $freq\n"
+    while 1 {
+        expect {
+            -re "TONE: generating sine wave at (\[0-9])+ Hz" {
+                case_pass $case_num
+                break
+            }
+            timeout {
+                send "\3"
+                expect ">"
+                case_fail $case_num
+            }
+        }
+    }
+
+#In target board, record sample sound from PC with signed 16 bit little endian format, 44100 sample rate and mono.
+    set spawn_id $kermit_spawn_id
+
+    incr case_num
+    set timeout 10
+    send "arecord -t $output_file_type -c $channel_num -f $alsa_format -r $sample_rate -d 5 ${freq}Hz_PC2BFIN.wav\n"
+    while 1 {
+        expect {
+            -re "$channel.*$kernel_prompt" {
+                case_pass $case_num
+                break
+            }
+            timeout {
+                send "\3"
+                expect -re $kernel_prompt
+                case_fail $case_num
+            }
+        }
+    }
+
+#Stop playing sound on PC.
+    set spawn_id $host_spawn_id
+
+    incr case_num
+    set timeout 5
+    send "\3"
+    while 1 {
+        expect {
+            -re ">" {
+                case_pass $case_num
+                break
+            }
+            timeout {
+                case_fail $case_num
+            }
+        }
+    }
+
+    incr case_num
+    if [ catch {exec rcp root@$targetip:/${freq}Hz_PC2BFIN.wav $output_dir} ] {
+        send_user "FAIL: copy recorded file to PC\n"
+        case_fail $case_num
+    } else {
+        send_user "PASS: copy recorded file to PC\n"
+        case_pass $case_num
+    }
+}
+
+
+step "Start test"
+set case_num 0
+set timeout 5
+set output_dir audio_data
+
+send "ifconfig eth0 $targetip\r"
+expect -re $kernel_prompt
+sleep 5
+
+incr case_num
+set timeout 5
+send "amixer cget name='Capture Switch'\r"
+while 1 {
+    expect {
+        -re "amixer: Cannot find the given element.*$kernel_prompt" {
+            case_pass $case_num
+            break
+        }
+        -re "values=off.*$kernel_prompt" {
+            send "amixer cset name='Capture Switch' on\r"
+            continue
+        }
+        -re "values=on.*$kernel_prompt" {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+
+spawn /bin/bash
+set host_spawn_id $spawn_id
+send "\r"
+expect ">"
+
+if [ catch {exec rm -fr $output_dir} ] {
+    send_user "FAIL: Remove the old DIRECTORY\n"
+    send_user "$errorInfo\n"
+} else {
+    send_user "PASS: Remove the old DIRECTORY\n"
+}
+
+incr case_num
+if [ catch {exec mkdir -p $output_dir} ] {
+    send_user "FAIL: Create the DIRECTORY\n"
+    send_user "$errorInfo\n"
+    case_fail $case_num
+} else {
+    send_user "PASS: Create the DIRECTORY\n"
+    case_pass $case_num
+}
+
+rec_at_pc 100   255
+rec_at_pc 250   255
+rec_at_pc 440   255
+rec_at_pc 1000  255
+rec_at_pc 2000  255
+rec_at_pc 3000  255
+
+sleep 5
+
+rec_from_pc 100   255
+rec_from_pc 250   255
+rec_from_pc 440   255
+rec_from_pc 1000  255
+rec_from_pc 2000  255
+rec_from_pc 3000  255
+
+all_pass
+send_user "Ending $argv0\n"
+log_file

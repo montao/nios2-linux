@@ -1,0 +1,58 @@
+#!/usr/bin/expect
+
+source  ../kernel_config.exp
+
+log_file [log_file_name "$argv0"]
+
+send_user "Starting $argv0\n"
+
+set TITLE [title "$argv0"]
+
+step "Spawn kermit"
+source ../spawn_kermit.exp
+
+step "Reboot the kernel."
+# To add following line here to indicate that if the bootargs is different,
+# it could be set here. If the bootargs value is 0, it needn't be stated,
+# for it is the default value.
+# set bootargs  $bootargs_param0
+source ../reboot_kernel.exp
+
+step "Start JVM testing"
+
+step "Do configuration..."
+
+catch {exec ./jvm_config.sh /uclinux/kernel/remote/717/uClinux-dist/testsuites/jvm > jvm_config_log}
+
+catch {exec rcp kaffe.flt $targetip:/bin/.}
+catch {exec rcp libraries/clib/native/.libs/libnative.a $targetip:/var/lib/.}
+catch {exec rcp libraries/clib/native/.libs/libnative.la $targetip:/var/lib/.}
+catch {exec rcp libraries/clib/nio/.libs/libnio.a $targetip:/var/lib/.}
+catch {exec rcp libraries/clib/nio/.libs/libnio.la $targetip:/var/lib/.}
+catch {exec rcp libraries/clib/io/.libs/libio.a $targetip:/var/lib/.}
+catch {exec rcp libraries/clib/io/.libs/libio.la $targetip:/var/lib/.}
+catch {exec rcp libraries/javalib/rt.jar $targetip:/var/lib/.}
+catch {exec rcp libraries/javalib/tools.jar $targetip:/var/lib/.}
+
+send "export KAFFELIBRARYPATH=/var/lib\r"
+
+send "kaffe.flt -Xbootclasspath:/var/lib/rt.jar HelloWorldApp\r"
+set timeout 300
+while 1 {
+   expect {
+      -re "Hello World!" {
+         send_log "\n$TITLE ......... \[PASS\]\n"
+         send_user "\n$TITLE ......... \[PASS\]\n"
+         break
+      }
+      timeout {
+         send_log "\n$TITLE ......... \[FAIL\]\n"
+         send_user "\n$TITLE ......... \[FAIL\]\n"
+         break
+      }
+   }
+}
+
+send_user "Ending $argv0\n"
+
+log_file

@@ -1,0 +1,26 @@
+From 72f9eb17b4a016389b990e1fe0f421a934bd872b Mon Sep 17 00:00:00 2001
+From: Mike Frysinger <vapier@gentoo.org>
+Date: Thu, 16 Jul 2009 18:46:03 -0400
+Subject: [PATCH 2/2] we already $(STRIP) so do not `install -s`
+
+Signed-off-by: Mike Frysinger <vapier@gentoo.org>
+---
+ ncat/Makefile.in |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/ncat/Makefile.in b/ncat/Makefile.in
+index c5ae8c1..0a3c18c 100644
+--- a/ncat/Makefile.in
++++ b/ncat/Makefile.in
+@@ -132,7 +132,7 @@ $(NSOCKDIR)/libnsock.a: $(NSOCKDIR)/Makefile
+ install: $(TARGET)
+ 	@echo Installing Ncat;
+ 	$(SHTOOL) mkdir -f -p -m 755 $(DESTDIR)$(bindir) $(DESTDIR)$(pkgdatadir) $(DESTDIR)$(mandir)/man1
+-	$(INSTALL) -c -m 755 -s ncat $(DESTDIR)$(bindir)/ncat
++	$(INSTALL) -c -m 755 ncat $(DESTDIR)$(bindir)/ncat
+ 	$(INSTALL) -c -m 644 $(DATAFILES) $(DESTDIR)$(pkgdatadir)/
+ 	$(INSTALL) -c -m 644 $(srcdir)/docs/$(TARGET).1 $(DESTDIR)$(mandir)/man1/$(TARGET).1
+ 
+-- 
+1.6.3.3
+

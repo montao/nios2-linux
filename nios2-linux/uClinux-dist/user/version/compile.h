@@ -1,0 +1,7 @@
+#define TOOLCHAIN_VERSION "#19 tor 30 mar 2017 15:56:12 CEST"
+#define TOOLCHAIN_COMPILE_TIME "15:56:12"
+#define TOOLCHAIN_COMPILE_BY "developer"
+#define TOOLCHAIN_COMPILE_HOST "1604"
+#define TOOLCHAIN_COMPILE_DOMAIN ""
+#define TOOLCHAIN_COMPILER "gcc version 4.1.2"
+#define TOOLCHAIN_FILENAME "nios2-linux-gnu-gcc"

@@ -1,0 +1,10 @@
+SECTIONS
+{
+  .data : { 
+	input_len = .;
+	LONG(input_data_end - input_data) input_data = .; 
+	*(.data) 
+	. = ALIGN(4); 
+	input_data_end = .; 
+	}
+}

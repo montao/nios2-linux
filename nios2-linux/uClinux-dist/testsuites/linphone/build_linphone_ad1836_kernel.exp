@@ -1,0 +1,142 @@
+#!/usr/bin/expect --
+
+#
+# Build Kernel for Linphone test
+#
+source ../kernel_config.exp
+source ../board_info.exp
+log_file [log_file_name "$argv0"]
+send_user "Starting $argv0\n"
+
+cd $uclinux_path/testsuites
+step "Make clean."
+if { [source make_clean.exp] != 0 } {
+    send_user "\n\nFail to make clean. Exit!\n\n"
+    exit
+}
+
+cd $uclinux_path/testsuites
+step "Make config."
+source make_default_config.exp
+
+# Following make specific configuration for this case.
+cd $uclinux_path
+set timeout 300
+spawn make config
+while 1 {
+    expect {
+        -re "Customize Kernel Settings.*DEFAULTS_KERNEL.*\\\[.*]" {
+            send "y\r"
+        }
+
+        -re "Customize Application/Library Settings.*DEFAULTS_VENDOR.*\\\[.*]" {
+            send "y\r"
+        }
+
+        -re "I2C support \\\(I2C\\\).*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Sound card support.*SOUND.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Advanced Linux Sound Architecture.*SND.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "OSS Mixer API.*SND_MIXER_OSS.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "OSS PCM.*digital audio.*API.*SND_PCM_OSS\\\).*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "ALSA for SoC audio support.*SND_SOC.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "SoC I2S Audio for the ADI Blackfin chip.*SND_BF5XX_I2S.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "SoC I2S\\\(TDM mode\\\) Audio for the ADI BF5xx chip.*SND_BF5XX_TDM.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "SoC AD1836 Audio support for BF5xx.*SND_BF5XX_SOC_AD1836.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "SoC AC97 Audio for the ADI BF5xx chip.*SND_BF5XX_AC97.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "Uncached DMA region.*(\[0-9]). Enable 2M DMA region.*DMA_UNCACHED_2M.*\[cC]hoice.*\\\[.*]" {
+            send "$expect_out(1,string)\r"
+        }
+
+        -re "Binary format.*FLAT.*Shared-FLAT.*FDPIC.*\\\[.*]" {
+            send "4\r"
+        }
+
+        -re "ALSA utils.*USER_ALSA_UTILS.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "tone.*USER_PLAY_TONE.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "mp3play.*USER_MP3PLAY_MP3PLAY.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "vplay.*USER_VPLAY_VPLAY.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "vrec.*USER_VPLAY_VREC.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Linphone, a SIP compatible VoIP phone.*USER_LINPHONE.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -nocase -re "\\\[\[^\r]*] (\[ymn])|choice\\\[.*]: \[0-9]+\r" {
+            continue
+        }
+
+        "\\\(*) \\\[*]" {
+            sleep .01
+            send "\r"
+        }
+
+        -re "\[cC]hoice\\\[.*]:" {
+            send "\r"
+        }
+
+        eof {
+            puts "End of configuration"
+            break
+        }
+
+        timeout {
+            puts "\n\nFATAL ERROR: config prompt timeout in make config"
+            break
+        }
+    }
+}
+
+cd $uclinux_path/testsuites
+step "Make"
+source make_kernel.exp
+
+cd $uclinux_path/testsuites
+step "Copy linux"
+source copy_image.exp
+
+send_user "Ending $argv0\n"
+log_file

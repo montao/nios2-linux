@@ -1,0 +1,107 @@
+Index: mpd-0.13.2/src/decode.c
+===================================================================
+--- mpd-0.13.2/src/decode.c	(revision 9093)
++++ mpd-0.13.2/src/decode.c	(working copy)
+@@ -406,7 +406,11 @@
+ {
+ 	blockSignals();
+ 	getPlayerData()->playerControl.decode_pid = 0;
++#ifdef __uClinux__
++	decode_pid = vfork();
++#else
+ 	decode_pid = fork();
++#endif
+ 
+ 	if (decode_pid == 0) {
+ 		/* CHILD */
+@@ -425,7 +429,11 @@
+ 				my_usleep(10000);
+ 		}
+ 
++#ifdef __uClinux__
++		_exit(EXIT_SUCCESS);
++#else
+ 		exit(EXIT_SUCCESS);
++#endif
+ 		/* END OF CHILD */
+ 	} else if (decode_pid < 0) {
+ 		unblockSignals();
+Index: mpd-0.13.2/src/player.c
+===================================================================
+--- mpd-0.13.2/src/player.c	(revision 9093)
++++ mpd-0.13.2/src/player.c	(working copy)
+@@ -115,7 +115,11 @@
+ int playerInit(void)
+ {
+ 	blockSignals();
++#ifdef __uClinux__
++	player_pid = vfork();
++#else
+ 	player_pid = fork();
++#endif
+ 	if (player_pid==0)
+ 	{
+ 		clock_t start = clock();
+@@ -163,7 +167,11 @@
+ 				my_usleep(10000);
+ 		}
+ 
++#ifdef __uClinux__
++		_exit(EXIT_SUCCESS);
++#else
+ 		exit(EXIT_SUCCESS);
++#endif
+ 	} 
+ 	else if (player_pid < 0) 
+ 	{
+Index: mpd-0.13.2/src/directory.c
+===================================================================
+--- mpd-0.13.2/src/directory.c	(revision 9093)
++++ mpd-0.13.2/src/directory.c	(working copy)
+@@ -172,7 +172,11 @@
+ 	/* need to block CHLD signal, cause it can exit before we
+ 	   even get a chance to assign directory_updatePID */
+ 	blockSignals();
++#ifdef __uClinux__
++	directory_updatePid = vfork();
++#else
+ 	directory_updatePid = fork();
++#endif
+ 	if (directory_updatePid == 0) {
+ 		/* child */
+ 		int dbUpdated = 0;
+@@ -215,7 +219,11 @@
+ 		if (writeDirectoryDB() < 0) {
+ 			exit(DIRECTORY_UPDATE_EXIT_ERROR);
+ 		}
++#ifdef __uClinux__
++		_exit(DIRECTORY_UPDATE_EXIT_UPDATE);
++#else
+ 		exit(DIRECTORY_UPDATE_EXIT_UPDATE);
++#endif
+ 	} else if (directory_updatePid < 0) {
+ 		unblockSignals();
+ 		ERROR("updateInit: Problems forking()'ing\n");
+Index: mpd-0.13.2/src/main.c
+===================================================================
+--- mpd-0.13.2/src/main.c	(revision 9093)
++++ mpd-0.13.2/src/main.c	(working copy)
+@@ -319,6 +319,9 @@
+ 		int pid;
+ 
+ 		fflush(NULL);
++#ifdef __uClinux__
++		daemon(1, 1);
++#else
+ 		pid = fork();
+ 		if (pid > 0)
+ 			_exit(EXIT_SUCCESS);
+@@ -335,7 +338,7 @@
+ 		else if (pid < 0) {
+ 			FATAL("problems fork'ing for daemon!\n");
+ 		}
+-
++#endif
+ 		DEBUG("daemonized!\n");
+ 	}
+ 

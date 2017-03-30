@@ -1,0 +1,2 @@
+tparam.c: In function 'memory_out':
+tparam.c:47: warning: implicit declaration of function 'write'

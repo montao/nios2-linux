@@ -1,0 +1,148 @@
+.EXPORT_ALL_VARIABLES:
+
+include $(ROOTDIR)/vendors/config/common/config.arch
+
+############################################################################
+#
+# The makefiles need to know how to do things in different contexts
+# To save some pain we put it all here
+#
+# First settings we always want for all builds
+#
+
+MACHINE = nios2  # this is for uClibc
+ARCH    = nios2  # this is for the kernel
+ENDIAN  = little
+
+ifeq ($(CONFIG_MMU),y)
+CONFIGURE_HOST       := nios2-linux-gnu
+CONFIGURE_SHARED_ENABLE := --enable-shared
+CONFIGURE_SHARED_WITH   := --with-shared
+else
+CONFIGURE_HOST       := nios2-linux-uclibc
+CONFIGURE_SHARED_ENABLE := --disable-shared
+CONFIGURE_SHARED_WITH   := --without-shared
+endif
+
+CROSS_COMPILE        := $(CONFIGURE_HOST)-
+CROSS                := $(CROSS_COMPILE)
+KERNEL_CROSS_COMPILE := $(CROSS_COMPILE)
+
+CC        = $(CROSS_COMPILE)gcc
+AS        = $(CROSS_COMPILE)as
+CXX       = $(CROSS_COMPILE)g++
+AR        = $(CROSS_COMPILE)ar
+LD        = $(CROSS_COMPILE)ld
+NM        = $(CROSS_COMPILE)nm
+OBJCOPY   = $(CROSS_COMPILE)objcopy
+OBJDUMP   = $(CROSS_COMPILE)objdump
+RANLIB    = $(CROSS_COMPILE)ranlib
+READELF   = $(CROSS_COMPILE)readelf
+ELF2FLT   = $(CROSS_COMPILE)elf2flt
+STRIPTOOL = $(CROSS_COMPILE)strip
+STRIP     = $(STRIPTOOL)
+CC_FOR_BUILD = gcc
+CONFIG_SITE = $(ROOTDIR)/vendors/config/config.site
+
+QMAKE     = $(CROSS_COMPILE)qmake
+
+MKIMAGE       = $(ROOTDIR)/$(LINUXDIR)/scripts/mkuboot.sh
+MKFS_CRAMFS   = $(ROOTDIR)/user/cramfs/host_build/mkcramfs
+MKFS_EXT2     = $(ROOTDIR)/user/genext2fs/build-host/genext2fs
+MKFS_JFFS2    = $(ROOTDIR)/user/mtd-utils/mkfs.jffs2
+MTD_SUMTOOL   = $(ROOTDIR)/user/mtd-utils/sumtool
+MKFS_ROMFS    = $(ROOTDIR)/user/genromfs/genromfs
+MKFS_SQUASHFS = $(ROOTDIR)/user/squashfs/build-host/mksquashfs
+MKFS_UBIFS    = $(ROOTDIR)/user/mtd-utils/mkfs.ubifs
+MKFS_YAFFS    = $(ROOTDIR)/user/yaffs-utils/mkfs.yaffs
+MKFS_YAFFS2   = $(ROOTDIR)/user/yaffs-utils/mkfs.yaffs2
+
+############################################################################
+#
+# Settings for configure / autotools
+#
+
+CONFIGURE_BUILD := $(shell sh $(ROOTDIR)/tools/config.guess)
+CONFIGURE_OPTS  := \
+	--host=$(CONFIGURE_HOST) \
+	--build=$(CONFIGURE_BUILD) \
+	--prefix=/usr \
+	--sysconfdir=/etc \
+	--datadir=/usr/share \
+	--mandir=/usr/share/man \
+	--infodir=/usr/share/info \
+	--localstatedir=/var/lib \
+	--disable-dependency-tracking \
+	--enable-fast-install
+ifneq ($(findstring s,$(MAKEFLAGS)),)
+CONFIGURE_OPTS += --quiet
+endif
+
+# Take configuration for MUL/MULX/DIV instructions from kernel
+CPUFLAGS =
+CPUFLAGS += $(if $(CONFIG_NIOS2_HW_MUL_SUPPORT),-mhw-mul,-mno-hw-mul)
+CPUFLAGS += $(if $(CONFIG_NIOS2_HW_MULX_SUPPORT),-mhw-mulx,-mno-hw-mulx)
+CPUFLAGS += $(if $(CONFIG_NIOS2_HW_DIV_SUPPORT),-mhw-div,-mno-hw-div)
+
+############################################################################
+#
+# Set up all our fun CFLAGS/CPPFLAGS/LDFLAGS.  Normalize our
+# settings so we don't differentiate between user and lib.
+#
+
+ifneq ($(UCLINUX_BUILD_USER)$(UCLINUX_BUILD_LIB),)
+
+CFLAGS-y   := -pipe -Wall
+CXXFLAGS-y := -pipe -Wall
+CPPFLAGS-y := -DEMBED -I$(ROOTDIR)
+ifneq ($(CONFIG_MMU),y)
+CPPFLAGS-y += -D__uClinux__
+endif
+LDFLAGS-y  := 
+FLTFLAGS-y := 
+
+CONFIG_ALL_DEBUG := n
+ifdef CONFIG_LIB_DEBUG
+	CONFIG_ALL_DEBUG := y
+endif
+ifdef CONFIG_USER_DEBUG
+	CONFIG_ALL_DEBUG := y
+endif
+
+ifeq ($(CONFIG_ALL_DEBUG),y)
+	CFLAGS-y   += -O0 -g
+	CXXFLAGS-y += -O0 -g
+	STRIPTOOL  := echo
+	STRIP      := $(STRIPTOOL)
+else
+	CFLAGS-y   += $(subst ",,$(strip $(CONFIG_USER_CFLAGS)))
+	CXXFLAGS-y += $(subst ",,$(strip $(CONFIG_USER_CFLAGS)))
+endif
+
+LDFLAGS-$(CONFIG_FMT_USE_FLAT) += -Wl,-elf2flt
+LDFLAGS-$(CONFIG_FMT_USE_SHARED_FLAT) += -Wl,-elf2flt
+LDFLAGS-$(CONFIG_FMT_USE_SEP_DATA) += -Wl,-elf2flt
+
+CFLAGS-$(CONFIG_FMT_USE_SEP_DATA) += -msep-data
+LDFLAGS-$(CONFIG_FMT_USE_SEP_DATA) += -msep-data
+
+CFLAGS-$(CONFIG_FMT_USE_SHARED_FLAT) += -mid-shared-library
+CFLAGS-$(CONFIG_FMT_USE_SEP_DATA) += -msep-data
+LDFLAGS-$(CONFIG_FMT_USE_SHARED_FLAT) += -Wl,-shared-lib-id,0 -mid-shared-library
+LDFLAGS-$(CONFIG_FMT_USE_SEP_DATA) += -Wl,-shared-lib-id,0 -msep-data
+
+#
+# This will prevent building up of code in lib/ as shared libs.
+# You will need to build/link those by hand anyways ...
+#
+CFLAGS-$(CONFIG_FMT_USE_SHARED_FLAT) += -mshared-library-id=0
+FLAT_LIBC := $(shell $(CC) $(CPUFLAGS) -mid-shared-library -print-file-name=libc.gdb)
+LDFLAGS-$(CONFIG_FMT_USE_SHARED_FLAT) += -Wl,-R,$(FLAT_LIBC)
+
+CFLAGS   := $(CFLAGS-y)   $(VENDOR_CFLAGS)   $(CPUFLAGS)
+CXXFLAGS := $(CXXFLAGS-y) $(VENDOR_CXXFLAGS) $(CPUFLAGS)
+CPPFLAGS := $(CPPFLAGS-y) $(VENDOR_CPPFLAGS) $(CPUFLAGS)
+LDFLAGS  := $(LDFLAGS-y)  $(VENDOR_LDFLAGS)  $(CPUFLAGS)
+FLTFLAGS := $(FLTFLAGS-y) $(VENDOR_FLTFLAGS)
+
+endif

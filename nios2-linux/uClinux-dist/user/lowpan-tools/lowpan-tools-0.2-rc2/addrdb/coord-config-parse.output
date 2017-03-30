@@ -1,0 +1,420 @@
+Grammar
+
+    0 $accept: input $end
+
+    1 input: /* empty */
+    2      | block input
+
+    3 block: lease_begin operators lease_end
+
+    4 lease_begin: TOK_LEASE '{'
+
+    5 lease_end: '}' ';'
+
+    6 operators: cmd ';'
+    7          | cmd ';' operators
+
+    8 cmd: cmd_hwaddr
+    9    | cmd_shortaddr
+   10    | cmd_timestamp
+
+   11 cmd_hwaddr: TOK_HWADDR hardaddr
+
+   12 cmd_shortaddr: TOK_SHORTADDR TOK_NUMBER
+
+   13 cmd_timestamp: TOK_TIMESTAMP TOK_NUMBER
+
+   14 hardaddr: num_col num_col num_col num_col num_col num_col num_col num
+
+   15 num_col: num ':'
+
+   16 num: TOK_NUMBER
+
+
+Terminals, with rules where they appear
+
+$end (0) 0
+':' (58) 15
+';' (59) 5 6 7
+'{' (123) 4
+'}' (125) 5
+error (256)
+TOK_NUMBER (258) 12 13 16
+TOK_LEASE (259) 4
+TOK_HWADDR (260) 11
+TOK_SHORTADDR (261) 12
+TOK_TIMESTAMP (262) 13
+
+
+Nonterminals, with rules where they appear
+
+$accept (12)
+    on left: 0
+input (13)
+    on left: 1 2, on right: 0 2
+block (14)
+    on left: 3, on right: 2
+lease_begin (15)
+    on left: 4, on right: 3
+lease_end (16)
+    on left: 5, on right: 3
+operators (17)
+    on left: 6 7, on right: 3 7
+cmd (18)
+    on left: 8 9 10, on right: 6 7
+cmd_hwaddr (19)
+    on left: 11, on right: 8
+cmd_shortaddr (20)
+    on left: 12, on right: 9
+cmd_timestamp (21)
+    on left: 13, on right: 10
+hardaddr (22)
+    on left: 14, on right: 11
+num_col (23)
+    on left: 15, on right: 14
+num (24)
+    on left: 16, on right: 14 15
+
+
+state 0
+
+    0 $accept: . input $end
+    1 input: .  [$end]
+    2      | . block input
+    3 block: . lease_begin operators lease_end
+    4 lease_begin: . TOK_LEASE '{'
+
+    TOK_LEASE  shift, and go to state 1
+
+    $default  reduce using rule 1 (input)
+
+    input        go to state 2
+    block        go to state 3
+    lease_begin  go to state 4
+
+
+state 1
+
+    4 lease_begin: TOK_LEASE . '{'
+
+    '{'  shift, and go to state 5
+
+
+state 2
+
+    0 $accept: input . $end
+
+    $end  shift, and go to state 6
+
+
+state 3
+
+    1 input: .  [$end]
+    2      | . block input
+    2      | block . input
+    3 block: . lease_begin operators lease_end
+    4 lease_begin: . TOK_LEASE '{'
+
+    TOK_LEASE  shift, and go to state 1
+
+    $default  reduce using rule 1 (input)
+
+    input        go to state 7
+    block        go to state 3
+    lease_begin  go to state 4
+
+
+state 4
+
+    3 block: lease_begin . operators lease_end
+    6 operators: . cmd ';'
+    7          | . cmd ';' operators
+    8 cmd: . cmd_hwaddr
+    9    | . cmd_shortaddr
+   10    | . cmd_timestamp
+   11 cmd_hwaddr: . TOK_HWADDR hardaddr
+   12 cmd_shortaddr: . TOK_SHORTADDR TOK_NUMBER
+   13 cmd_timestamp: . TOK_TIMESTAMP TOK_NUMBER
+
+    TOK_HWADDR     shift, and go to state 8
+    TOK_SHORTADDR  shift, and go to state 9
+    TOK_TIMESTAMP  shift, and go to state 10
+
+    operators      go to state 11
+    cmd            go to state 12
+    cmd_hwaddr     go to state 13
+    cmd_shortaddr  go to state 14
+    cmd_timestamp  go to state 15
+
+
+state 5
+
+    4 lease_begin: TOK_LEASE '{' .
+
+    $default  reduce using rule 4 (lease_begin)
+
+
+state 6
+
+    0 $accept: input $end .
+
+    $default  accept
+
+
+state 7
+
+    2 input: block input .
+
+    $default  reduce using rule 2 (input)
+
+
+state 8
+
+   11 cmd_hwaddr: TOK_HWADDR . hardaddr
+   14 hardaddr: . num_col num_col num_col num_col num_col num_col num_col num
+   15 num_col: . num ':'
+   16 num: . TOK_NUMBER
+
+    TOK_NUMBER  shift, and go to state 16
+
+    hardaddr  go to state 17
+    num_col   go to state 18
+    num       go to state 19
+
+
+state 9
+
+   12 cmd_shortaddr: TOK_SHORTADDR . TOK_NUMBER
+
+    TOK_NUMBER  shift, and go to state 20
+
+
+state 10
+
+   13 cmd_timestamp: TOK_TIMESTAMP . TOK_NUMBER
+
+    TOK_NUMBER  shift, and go to state 21
+
+
+state 11
+
+    3 block: lease_begin operators . lease_end
+    5 lease_end: . '}' ';'
+
+    '}'  shift, and go to state 22
+
+    lease_end  go to state 23
+
+
+state 12
+
+    6 operators: cmd . ';'
+    7          | cmd . ';' operators
+
+    ';'  shift, and go to state 24
+
+
+state 13
+
+    8 cmd: cmd_hwaddr .
+
+    $default  reduce using rule 8 (cmd)
+
+
+state 14
+
+    9 cmd: cmd_shortaddr .
+
+    $default  reduce using rule 9 (cmd)
+
+
+state 15
+
+   10 cmd: cmd_timestamp .
+
+    $default  reduce using rule 10 (cmd)
+
+
+state 16
+
+   16 num: TOK_NUMBER .
+
+    $default  reduce using rule 16 (num)
+
+
+state 17
+
+   11 cmd_hwaddr: TOK_HWADDR hardaddr .
+
+    $default  reduce using rule 11 (cmd_hwaddr)
+
+
+state 18
+
+   14 hardaddr: num_col . num_col num_col num_col num_col num_col num_col num
+   15 num_col: . num ':'
+   16 num: . TOK_NUMBER
+
+    TOK_NUMBER  shift, and go to state 16
+
+    num_col  go to state 25
+    num      go to state 19
+
+
+state 19
+
+   15 num_col: num . ':'
+
+    ':'  shift, and go to state 26
+
+
+state 20
+
+   12 cmd_shortaddr: TOK_SHORTADDR TOK_NUMBER .
+
+    $default  reduce using rule 12 (cmd_shortaddr)
+
+
+state 21
+
+   13 cmd_timestamp: TOK_TIMESTAMP TOK_NUMBER .
+
+    $default  reduce using rule 13 (cmd_timestamp)
+
+
+state 22
+
+    5 lease_end: '}' . ';'
+
+    ';'  shift, and go to state 27
+
+
+state 23
+
+    3 block: lease_begin operators lease_end .
+
+    $default  reduce using rule 3 (block)
+
+
+state 24
+
+    6 operators: . cmd ';'  ['}']
+    6          | cmd ';' .  ['}']
+    7          | . cmd ';' operators
+    7          | cmd ';' . operators
+    8 cmd: . cmd_hwaddr
+    9    | . cmd_shortaddr
+   10    | . cmd_timestamp
+   11 cmd_hwaddr: . TOK_HWADDR hardaddr
+   12 cmd_shortaddr: . TOK_SHORTADDR TOK_NUMBER
+   13 cmd_timestamp: . TOK_TIMESTAMP TOK_NUMBER
+
+    TOK_HWADDR     shift, and go to state 8
+    TOK_SHORTADDR  shift, and go to state 9
+    TOK_TIMESTAMP  shift, and go to state 10
+
+    $default  reduce using rule 6 (operators)
+
+    operators      go to state 28
+    cmd            go to state 12
+    cmd_hwaddr     go to state 13
+    cmd_shortaddr  go to state 14
+    cmd_timestamp  go to state 15
+
+
+state 25
+
+   14 hardaddr: num_col num_col . num_col num_col num_col num_col num_col num
+   15 num_col: . num ':'
+   16 num: . TOK_NUMBER
+
+    TOK_NUMBER  shift, and go to state 16
+
+    num_col  go to state 29
+    num      go to state 19
+
+
+state 26
+
+   15 num_col: num ':' .
+
+    $default  reduce using rule 15 (num_col)
+
+
+state 27
+
+    5 lease_end: '}' ';' .
+
+    $default  reduce using rule 5 (lease_end)
+
+
+state 28
+
+    7 operators: cmd ';' operators .
+
+    $default  reduce using rule 7 (operators)
+
+
+state 29
+
+   14 hardaddr: num_col num_col num_col . num_col num_col num_col num_col num
+   15 num_col: . num ':'
+   16 num: . TOK_NUMBER
+
+    TOK_NUMBER  shift, and go to state 16
+
+    num_col  go to state 30
+    num      go to state 19
+
+
+state 30
+
+   14 hardaddr: num_col num_col num_col num_col . num_col num_col num_col num
+   15 num_col: . num ':'
+   16 num: . TOK_NUMBER
+
+    TOK_NUMBER  shift, and go to state 16
+
+    num_col  go to state 31
+    num      go to state 19
+
+
+state 31
+
+   14 hardaddr: num_col num_col num_col num_col num_col . num_col num_col num
+   15 num_col: . num ':'
+   16 num: . TOK_NUMBER
+
+    TOK_NUMBER  shift, and go to state 16
+
+    num_col  go to state 32
+    num      go to state 19
+
+
+state 32
+
+   14 hardaddr: num_col num_col num_col num_col num_col num_col . num_col num
+   15 num_col: . num ':'
+   16 num: . TOK_NUMBER
+
+    TOK_NUMBER  shift, and go to state 16
+
+    num_col  go to state 33
+    num      go to state 19
+
+
+state 33
+
+   14 hardaddr: num_col num_col num_col num_col num_col num_col num_col . num
+   16 num: . TOK_NUMBER
+
+    TOK_NUMBER  shift, and go to state 16
+
+    num  go to state 34
+
+
+state 34
+
+   14 hardaddr: num_col num_col num_col num_col num_col num_col num_col num .
+
+    $default  reduce using rule 14 (hardaddr)

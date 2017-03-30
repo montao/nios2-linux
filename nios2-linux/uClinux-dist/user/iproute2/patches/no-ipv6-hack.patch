@@ -1,0 +1,20 @@
+--- iproute2-2.6.29-1/ip/iptunnel.c
++++ iproute2-2.6.29-1/ip/iptunnel.c
+@@ -483,7 +483,7 @@
+ 	 * IPv4 and IPv6.
+ 	 */
+ 	case AF_INET6:
+-		return do_ip6tunnel(argc, argv);
++		//return do_ip6tunnel(argc, argv);
+ 	default:
+ 		fprintf(stderr, "Unsupported family:%d\n", preferred_family);
+ 		exit(-1);
+--- iproute2-2.6.29-1/ip/Makefile
++++ iproute2-2.6.29-1-f/ip/Makefile
+@@ -1,5 +1,5 @@
+ IPOBJ=ip.o ipaddress.o ipaddrlabel.o iproute.o iprule.o \
+-    rtm_map.o iptunnel.o ip6tunnel.o tunnel.o ipneigh.o ipntable.o iplink.o \
++    rtm_map.o iptunnel.o tunnel.o ipneigh.o ipntable.o iplink.o \
+     ipmaddr.o ipmonitor.o ipmroute.o ipprefix.o \
+     ipxfrm.o xfrm_state.o xfrm_policy.o xfrm_monitor.o \
+     iplink_vlan.o link_veth.o link_gre.o

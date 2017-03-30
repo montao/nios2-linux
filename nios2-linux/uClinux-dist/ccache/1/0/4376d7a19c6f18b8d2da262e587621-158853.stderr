@@ -1,0 +1,4 @@
+ps.c: In function 'dev_to_name':
+ps.c:53: warning: format '%d' expects type 'int', but argument 3 has type 'dev_t'
+ps.c:55: warning: format '%d' expects type 'int', but argument 3 has type 'dev_t'
+ps.c:57: warning: format '%x' expects type 'unsigned int', but argument 4 has type 'dev_t'

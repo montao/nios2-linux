@@ -1,0 +1,6 @@
+ls.c: In function 'lsfile':
+ls.c:232: warning: format '%5d' expects type 'int', but argument 3 has type '__ino_t'
+ls.c:273: warning: format '%8d' expects type 'int', but argument 3 has type '__off_t'
+ls.c:284: warning: implicit declaration of function 'readlink'
+ls.c:218: warning: unused variable 'grp'
+ls.c:217: warning: unused variable 'pwd'

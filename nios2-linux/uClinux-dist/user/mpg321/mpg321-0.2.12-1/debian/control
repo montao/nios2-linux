@@ -1,0 +1,23 @@
+Source: mpg321
+Section: sound
+Priority: optional
+Maintainer: Nanakos Chrysostomos <nanakos@wired-net.gr>
+Homepage: http://mpg321.sourceforge.net
+Build-Depends: debhelper (>> 7.0.0),libmad0-dev, libao-dev (>= 1.0.0), libid3tag0-dev, zlib1g-dev
+Standards-Version: 3.9.0
+
+Package: mpg321
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libaudio-scrobbler-perl
+Provides: mpg123, mp3-decoder
+Description: Simple and lighweight command line MP3 player
+ mpg321 is a clone of the popular mpg123 command-line mp3 player. It should
+ function as a drop-in replacement for mpg123 in many cases. While some of
+ the functionality of mpg123 is not yet implemented, mpg321 should function 
+ properly in most cases for most people, such as for frontends such as
+ gqmpeg. 
+ .
+ mpg321 is based on the mad MPEG audio decoding library. It therefore is
+ highly accurate, and also uses only fixed-point calculation, making it
+ more efficient on machines without a floating-point unit. It is not as
+ fast as mpg123 on systems which have a floating point unit.

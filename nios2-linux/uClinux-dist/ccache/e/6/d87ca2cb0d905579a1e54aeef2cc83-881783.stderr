@@ -1,0 +1,4 @@
+In file included from /data/dwesterg/nios2-linux/nios2-linux/linux-2.6/drivers/net/ethernet/altera/altera_tse.h:28,
+                 from /data/dwesterg/nios2-linux/nios2-linux/linux-2.6/drivers/net/ethernet/altera/altera_tse_ethtool.c:27:
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/drivers/net/ethernet/altera/altera_1588_be.h:87: warning: 'struct altera_1588_be_private' declared inside parameter list
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/drivers/net/ethernet/altera/altera_1588_be.h:87: warning: its scope is only this definition or declaration, which is probably not what you want

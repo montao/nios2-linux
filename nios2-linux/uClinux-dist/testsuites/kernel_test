@@ -1,0 +1,2430 @@
+#!/bin/bash
+########################################################################################################################
+######### To run this script, please first set following uboot varibles properly on your target board  #################
+######### set  bootcmd   run tftpboot                                                                  #################
+######### set  tftpboot  'tftp 0x1000000 linux;bootelf'(or 'tftp 0x1000000 uImage;bootm')              #################
+######### set  ipaddr    10.100.4.50  (set your board ip here)                                         #################
+######### set  serverip  10.100.4.174 (set your server ip here)                                        #################
+########################################################################################################################
+
+ ############### Set up the testing environment. Edit the following variables to suit your situation. ###################
+
+ USER=/home/test/work/cruise
+ BOARD_CONFIG=BF537-STAMP-STD
+ CPU=BF537
+ REVISION=0.2
+ UCLINUX_DIST_PATH=$USER/checkouts/uclinux-dist
+ BINARY_FORMAT=flat
+ ALLOCATOR=slab\(p2\)
+ ICACHE=on
+ DCACHE=on
+ POLICY=write_through
+ UART_MODE=dma
+ SMP=off
+ MPU=off
+ XENOMAI=off
+ THIS_LOG="$USER/test_scripts/uclinux-dist/logs"
+
+
+ ########################################### Please don't edit anything below this line.###################################
+
+if [ $# -lt 1 ] ; then
+  echo "Please input BOARD_CONFIG [ CPU REVISION UCLINUX_DIST_PATH BINARY_FORMAT ALLOCATOR ICACHE DCACHE POLICY UART_MODE SMP MPU XENOMAI THIS_LOG VCO_MULT CCLK_DIV SCLK_DIV ] values: "
+  echo
+  echo "The BOARD_CONFIG :  BF533-STAMP-STD, BF537-STAMP-STD, BF537-STAMP-IDE,etc."
+  echo "The CPU :           BF533, BF537, BF561,etc."
+  echo "The REVISION :      0.2, 0.3 ,etc."
+  echo "The BINARY_FORMAT : flat, elf, shared-flat."
+  echo "The ALLOCATOR :     slab\(p2\), slob\(p2\)."
+  echo "The ICACHE,DCACHE : on, off."
+  echo "The POLICY :        write_through, write_back."
+  echo "The UART_MODE :     dma, pio."
+  echo "The SMP,MPU,XENOMAI :       on, off."
+  echo "For example:./kernel_test BF537-STAMP-STD BF537 /home/test/work/cruise/checkouts/uclinux-dist flat slab\(p2\) on on write_through dma off off off /home/test/work/cruise/test_scripts/uclinux-dist/logs."
+  exit 1
+fi
+
+if [ $# -gt 0 ] ; then
+  BOARD_CONFIG=$1
+  echo  "##### Testing is done with: $BOARD_CONFIG."
+fi
+
+if [ $# -gt 1 ] ; then
+  CPU=$2
+  echo "##### CPU: $CPU."
+fi
+
+if [ $# -gt 2 ] ; then
+  REVISION=$3
+  echo "##### REVISION: $REVISION."
+fi
+
+  if [ $# -gt 3 ] ; then
+  UCLINUX_DIST_PATH=$4
+  echo "##### UCLINUX_DIST_PATH: $UCLINUX_DIST_PATH."
+fi
+
+  UCLINUX_DIST_PATH_BAK="$UCLINUX_DIST_PATH"".bak"
+  UCLINUX_DIST_SCRIPTS=$USER/test_scripts
+  UCLINUX_DIST_TESTSUITES=$UCLINUX_DIST_PATH/testsuites
+
+if [ $# -gt 4 ] ; then
+  BINARY_FORMAT=$5
+  echo "##### BINARY_FORMAT: $BINARY_FORMAT."
+fi
+
+if [ $# -gt 5 ] ; then
+  ALLOCATOR=$6
+  echo "##### ALLOCATOR: $ALLOCATOR."
+fi
+
+if [ $# -gt 6 ] ; then
+  ICACHE=$7
+  DCACHE=$8
+  POLICY=$9
+  echo "##### ICACHE: $ICACHE, DCACHE: $DCACHE, POLICY is $POLICY."
+fi
+
+if [ $# -gt 9 ] ; then
+  UART_MODE=${10}
+  echo "##### UART_MODE: $UART_MODE."
+fi
+
+if [ $# -gt 10 ] ; then
+  SMP=${11}
+  echo "##### SMP: $SMP."
+fi
+
+if [ $# -gt 11 ] ; then
+  MPU=${12}
+  echo "##### MPU: $MPU."
+fi
+
+if [ $# -gt 12 ] ; then
+  XENOMAI=${13}
+  echo "##### XENOMAI: $XENOMAI."
+fi
+
+if [ $# -gt 13 ] ; then
+  THIS_LOG=${14}
+  echo "##### Test results are in folder: $THIS_LOG."
+fi
+
+if [ $# -gt 14 ] ; then
+  VCO_MULT=${15}
+  CCLK_DIV=${16}
+  SCLK_DIV=${17}
+  echo "##### VCO_MULT: $VCO_MULT, CCLK_DIV: $CCLK_DIV, SCLK_DIV: $SCLK_DIV."
+fi
+
+cat <<EOF
+echo "************* Tested uclinux-dist svn info *************"
+`cd $UCLINUX_DIST_PATH ; svn up ; svn info`
+echo "************* Tested linux git info ********************"
+`cd $UCLINUX_DIST_PATH/linux-2.6.x ; git pull ; git log -1 | head -3`
+EOF
+
+echo "********************************************************"
+echo "Testing on $BOARD_CONFIG ($CPU) $BINARY_FORMAT $ALLOCATOR ICACHE($ICACHE) DCACHE($DCACHE) $POLICY $UART_MODE SMP($SMP) MPU($MPU) XENOMAI($XENOMAI)"
+
+###### See if uclinux-dist has been checked out.##################################################
+
+if [ -d $UCLINUX_DIST_PATH_BAK ] ; then
+  rm -rf $UCLINUX_DIST_PATH_BAK
+fi
+if [ ! -d $UCLINUX_DIST_PATH ] ; then
+  exit 2
+fi
+
+if [ ! -d $THIS_LOG ] ; then
+  mkdir -p $THIS_LOG
+else 
+  rm -rf $THIS_LOG/*  
+fi
+  
+### set this value to 1 if your target board could be restarted from host machine parallel port.
+
+   RESET_BOARD=1 
+   BUILD_POLICY=1
+ 
+   n=100
+
+   AUTO_TESTCASE=( [0]="serial"    [1]="ethernet"   [2]="ethernet_in_buffer"  [3]="stress"  [4]="nfs"  [5]="ramfs"  [6]="module"  [7]="kgdb"  [8]="rtc"  [9]="watchdog"  [10]="pnormtd"  [11]="jffs2"  [12]="jffs2_fs"  [13]="strace"  [14]="uart_wakeup"  [15]="pthread"  [16]="xenomai"  [17]="l1_module"  [18]="l1_app"  [19]="dll"   [20]="sigqueue"  [21]="pound"  [22]="sqlite"   [23]="cfcard" [24]="ide_cdrom"  [25]="nand"  [26]="bluetoothuart"  [27]="edn"  [28]="gpio"  [29]="malloc_perf"  [30]="sram_alloc"   [31]="i2ctwi"  [32]="pbx"  [33]="sport"   [34]="erestart"  [35]="null_point"  [36]="mem_fragment"  [37]="dmacopy" [38]="boot_addr" [39]="lmbench" [40]="reserve_mem" [41]="scratchpad_app_stack" [42]="limit_vfssize" [43]="spimmc" [44]="bfindma" [45]="usbnet" [46]="string" [47]="shared_flat" [48]="nbench"  [49]="whetstone" [50]="dhrystone" [51]="usbhost_1362" [52]="usbhost_176x" [53]="mmap" [54]="atapi_hd" [55]="sdiommc"  [56]="linphone_ssm2603" [57]="smbfs" [58]="linphone_ad73322" [59]="mpu" [60]="reprogram_clock" [61]="earlyprintk" [62]="otpmem" [63]="traps" [64]="mplayer" [65]="kgdb_uart" [66]="l2_module" [67]="l2_app" [68]="multichannel" [69]="change_cpufreq" [70]="directfb" [71]="g729" [72]="ide_harddisk" [73]="fixed_code" [74]="spi_net" [75]="microwin" [76]="dsa" [77]="kgdb_smp" [78]="jtag_console" [79]="debug_mmrs" [80]="spimmc_interrupt"  [81]="ad5258" [82]="adxl_i2c" [83]="adxl_spi" [84]="spi_coexistence" [85]="mem_access" [86]="nmi" [87]="ethernet_wakeup" [88]="icc" [89]="mcapi" [90]="gptimer" [91]="usb_camera" [$((n+1))]="timer"  [$((n+2))]="ltp"  [$((n+3))]="audio_ad1836"  [$((n+4))]="audio_ad73311"  [$((n+5))]="audio_ad1938"  [$((n+6))]="snormtd"  [$((n+7))]="camera"  [$((n+8))]="coreb"  [$((n+9))]="serial_uart"  [$((n+10))]="video_adv7393"  [$((n+11))]="tftlcd" [$((n+12))]="power" [$((n+13))]="qt"  [$((n+14))]="audio_adau1373" [$((n+15))]="xip" [$((n+16))]="audio_ad73322" [$((n+17))]="audio_ssm2603" [$((n+18))]="usbdev" [$((n+19))]="snormtd_df" [$((n+20))]="oprofile" [$((n+21))]="usbhost_bf5xx" [$((n+22))]="snormtd_dma" [$((n+23))]="usbotg" [$((n+24))]="power_usbdev" [$((n+25))]="power_usbhost" )
+
+   AUTO_RUN_STATUS=(  [0]="1"  [1]="1"  [2]="0" [3]="1"  [4]="1"  [5]="1"   [6]="1"  [7]="1"  [8]="1"   [9]="0"   [10]="1"   [11]="1"   [12]="0"     [13]="1" [14]="1"   [15]="1"  [16]="1"    [17]="1"  [18]="1"  [19]="1"  [20]="1"  [21]="1"   [22]="1" [23]="0"   [24]="0"  [25]="0"  [26]="0"  [27]="1"  [28]="1" [29]="1"  [30]="1"   [31]="0"  [32]="0"  [33]="0"  [34]="1" [35]="1" [36]="1" [37]="1" [38]="1" [39]="1" [40]="1" [41]="1" [42]="0" [43]="0" [44]="1" [45]="0" [46]="1" [47]="1"  [48]="1"  [49]="1"  [50]="1"  [51]="0" [52]="0" [53]="1" [54]="0" [55]="0" [56]="0" [57]="0" [58]="0" [59]="0" [60]="1" [61]="1" [62]="0" [63]="1" [64]="0" [65]="0" [66]="0" [67]="0"  [68]="0" [69]="1" [70]="0" [71]="1" [72]="0" [73]="1" [74]="0" [75]="0" [76]="0" [77]="0" [78]="0" [79]="1" [80]="0" [81]="0" [82]="0" [83]="0" [84]="0" [85]="0" [86]="0" [87]="0" [88]="0" [89]="0" [90]="0" [91]="0" [$((n+1))]="1"  [$((n+2))]="1"  [$((n+3))]="0"  [$((n+4))]="0"  [$((n+5))]="0"  [$((n+6))]="0"  [$((n+7))]="0"  [$((n+8))]="0" [$((n+9))]="0" [$((n+10))]="0" [$((n+11))]="0" [$((n+12))]="1" [$((n+13))]="0" [$((n+14))]="0" [$((n+15))]="1" [$((n+16))]="0" [$((n+17))]="0" [$((n+18))]="0" [$((n+19))]="0" [$((n+20))]="1" [$((n+21))]="0" [$((n+22))]="0" [$((n+23))]="0" [$((n+24))]="0" )
+
+   MANUAL_TESTCASE=( [0]="adf702x"  [1]="pfbutton"  [2]="ppifcd"  [3]="cap_touch"  [4]="ndso"  [5]="awg"  [6]="i2ctwi"  [7]="wireless" [8]="bluetooth"  [9]="rts_cts"  [10]="canbus"   [11]="irda"  [12]="adp5588_qwerty"  [13]="linphone_ad1836"  [14]="sport_uart"  [15]="netaudio" [16]="touchscreen" [17]="" [18]="keypad" [19]="bluetoothalsa" [20]="rotary" [21]="" [22]="adp5520" [23]="bfinppi" [24]="sdio_wifi" [25]="sport_spi" [26]="ptp" [27]="generic_gpio" [28]="adp8860" [$((n+1))]="" [$((n+2))]="" )
+
+   MANUAL_RUN_STATUS=( [0]="0"    [1]="1"     [2]="1"    [3]="1"    [4]="1"  [5]="1"  [6]="1"  [7]="1" [8]="1"  [9]="0"  [10]="1"   [11]="1"  [12]="0"  [13]="1"  [14]="1"  [15]="1" [16]="1" [17]="0" [18]="0" [19]="0" [20]="0" [21]="0" [22]="1" [23]="0" [24]="0" [25]="0" [26]="0" [27]="1" [28]="0" [$((n+1))]="" [$((n+2))]="0" )
+
+
+#################################    BOARD CONFIG DEFINITION    ###################################################### 
+
+if [ $BOARD_CONFIG = "BF537-STAMP-STD" ] ; then
+
+   BOARD_TYPE=BF537-STAMP
+
+   AUTO_RUN_STATUS[2]="1"; AUTO_RUN_STATUS[9]="1"; AUTO_RUN_STATUS[57]="1"; AUTO_RUN_STATUS[83]="1"; AUTO_RUN_STATUS[87]="1"; AUTO_RUN_STATUS[$((n+3))]="1" 
+   MANUAL_RUN_STATUS[9]="1"; MANUAL_RUN_STATUS[12]="1"; MANUAL_RUN_STATUS[19]="1"; MANUAL_RUN_STATUS[23]="1"; MANUAL_RUN_STATUS[25]="1"; MANUAL_RUN_STATUS[28]="1"
+
+fi
+
+if [ $BOARD_CONFIG = "BF537-STAMP-AD1938" ] ; then
+
+   BOARD_TYPE=BF537-STAMP
+
+   AUTO_RUN_STATUS[2]="1"; AUTO_RUN_STATUS[9]="1"; AUTO_RUN_STATUS[57]="1"; AUTO_RUN_STATUS[68]="1"; AUTO_RUN_STATUS[$((n+5))]="1"; 
+   MANUAL_RUN_STATUS[9]="1"; MANUAL_RUN_STATUS[12]="1"; MANUAL_RUN_STATUS[19]="1"; MANUAL_RUN_STATUS[23]="1"; MANUAL_RUN_STATUS[25]="1"; MANUAL_RUN_STATUS[28]="1"
+
+fi
+
+if [ $BOARD_CONFIG = "BF537-STAMP-SPINET" ] ; then
+
+   BOARD_TYPE=BF537-STAMP
+
+   AUTO_RUN_STATUS[2]="1"; AUTO_RUN_STATUS[9]="1"; AUTO_RUN_STATUS[57]="1"; AUTO_RUN_STATUS[74]="1";AUTO_RUN_STATUS[81]="1"; AUTO_RUN_STATUS[87]="1"; AUTO_RUN_STATUS[90]="1"
+   MANUAL_RUN_STATUS[9]="1"; MANUAL_RUN_STATUS[12]="1"; MANUAL_RUN_STATUS[19]="1"; MANUAL_RUN_STATUS[23]="1"; MANUAL_RUN_STATUS[25]="1"; MANUAL_RUN_STATUS[28]="1"
+
+fi
+
+if [ $BOARD_CONFIG = "BF537-STAMP-USB176x" ] ; then
+
+   BOARD_TYPE=BF537-STAMP
+
+   AUTO_RUN_STATUS[2]="1"; AUTO_RUN_STATUS[10]="0"; AUTO_RUN_STATUS[11]="0"; AUTO_RUN_STATUS[12]="0"; AUTO_RUN_STATUS[21]="0"; AUTO_RUN_STATUS[52]="1"; AUTO_RUN_STATUS[$((n+7))]="1"; AUTO_RUN_STATUS[$((n+14))]="1"; AUTO_RUN_STATUS[$((n+15))]="0"
+   MANUAL_RUN_STATUS[9]="1"; MANUAL_RUN_STATUS[12]="1"; MANUAL_RUN_STATUS[19]="1"; MANUAL_RUN_STATUS[23]="1"; MANUAL_RUN_STATUS[25]="1"; MANUAL_RUN_STATUS[28]="1"
+
+fi
+
+if [ $BOARD_CONFIG = "BF537-STAMP-MMC" ] ; then
+
+   BOARD_TYPE=BF537-STAMP
+
+   AUTO_RUN_STATUS[2]="1"; AUTO_RUN_STATUS[9]="1"; AUTO_RUN_STATUS[11]="0"; AUTO_RUN_STATUS[12]="0"; AUTO_RUN_STATUS[21]="0"; AUTO_RUN_STATUS[26]="1"; AUTO_RUN_STATUS[43]="1"; AUTO_RUN_STATUS[45]="1"; AUTO_RUN_STATUS[80]="1"; AUTO_RUN_STATUS[84]="1"; AUTO_RUN_STATUS[87]="1";
+   MANUAL_RUN_STATUS[9]="1"; MANUAL_RUN_STATUS[12]="1"; MANUAL_RUN_STATUS[19]="1"; MANUAL_RUN_STATUS[23]="1"; MANUAL_RUN_STATUS[25]="1"; MANUAL_RUN_STATUS[28]="1"
+
+fi
+
+
+# Since SW6.4 setting for jffs2(on) and usbhost(off) are conflicting, disable jffs2 test here.
+if [ $BOARD_CONFIG = "BF537-STAMP-ADV7393" ] ; then
+
+   BOARD_TYPE=BF537-STAMP
+
+   AUTO_RUN_STATUS[2]="1"; AUTO_RUN_STATUS[9]="1"; AUTO_RUN_STATUS[10]="0"; AUTO_RUN_STATUS[11]="0"; AUTO_RUN_STATUS[12]="0"; AUTO_RUN_STATUS[51]="1"; AUTO_RUN_STATUS[78]="1"; AUTO_RUN_STATUS[$((n+10))]="1"
+   MANUAL_RUN_STATUS[9]="1"; MANUAL_RUN_STATUS[12]="1"; MANUAL_RUN_STATUS[19]="1"; MANUAL_RUN_STATUS[23]="1"; MANUAL_RUN_STATUS[25]="1"; MANUAL_RUN_STATUS[28]="1"
+
+fi
+
+
+if [ $BOARD_CONFIG = "BF537-STAMP-AD(73311)" ] ; then
+
+   BOARD_TYPE=BF537-STAMP
+   
+   AUTO_RUN_STATUS[2]="1"; AUTO_RUN_STATUS[9]="1"; AUTO_RUN_STATUS[31]="1"; AUTO_RUN_STATUS[33]="1"; AUTO_RUN_STATUS[70]="1"; AUTO_RUN_STATUS[75]="1"; AUTO_RUN_STATUS[$((n+4))]="1"; AUTO_RUN_STATUS[$((n+11))]="1"
+   MANUAL_RUN_STATUS[9]="1"; MANUAL_RUN_STATUS[12]="1"; MANUAL_RUN_STATUS[19]="1"; MANUAL_RUN_STATUS[23]="1"; MANUAL_RUN_STATUS[25]="1"; MANUAL_RUN_STATUS[28]="1"
+
+fi
+
+
+if [ $BOARD_CONFIG = "BF537-STAMP-AD73322" ] ; then
+
+   BOARD_TYPE=BF537-STAMP
+
+   AUTO_RUN_STATUS[11]="0"; AUTO_RUN_STATUS[12]="0"; AUTO_RUN_STATUS[21]="0"; AUTO_RUN_STATUS[58]="0"; AUTO_RUN_STATUS[$((n+16))]="0"; AUTO_RUN_STATUS[$((n+19))]="1";
+   MANUAL_RUN_STATUS[9]="1"; MANUAL_RUN_STATUS[12]="1"; MANUAL_RUN_STATUS[19]="1"; MANUAL_RUN_STATUS[23]="1"; MANUAL_RUN_STATUS[25]="1"; MANUAL_RUN_STATUS[28]="1"
+
+fi
+
+
+if [ $BOARD_CONFIG = "BF537-STAMP-BT" ] ; then
+
+   BOARD_TYPE=BF537-STAMP
+
+   AUTO_RUN_STATUS[11]="0"; AUTO_RUN_STATUS[12]="0"; AUTO_RUN_STATUS[21]="0"; AUTO_RUN_STATUS[26]="1"
+
+fi
+
+
+if [ $BOARD_CONFIG = "BF537-STAMP-MPU" ] ; then
+
+   BOARD_TYPE=BF537-STAMP
+
+   AUTO_RUN_STATUS[11]="0"; AUTO_RUN_STATUS[12]="0"; AUTO_RUN_STATUS[16]="0"; AUTO_RUN_STATUS[21]="0"; AUTO_RUN_STATUS[59]="1"; AUTO_RUN_STATUS[85]="1"
+
+fi
+
+
+if [ $BOARD_CONFIG = "BF537-STAMP-XENOMAI" ] ; then
+
+   BOARD_TYPE=BF537-STAMP
+
+   AUTO_RUN_STATUS[2]="1"; AUTO_RUN_STATUS[9]="1"; AUTO_RUN_STATUS[57]="1"
+
+fi
+
+
+if [ $BOARD_CONFIG = "BF537-DIGIUM-PBX" ] ; then
+   
+   BOARD_TYPE=BF537-STAMP
+
+   AUTO_RUN_STATUS[2]="1"; AUTO_RUN_STATUS[5]="0"; AUTO_RUN_STATUS[8]="0"; AUTO_RUN_STATUS[10]="0"; AUTO_RUN_STATUS[11]="0"; AUTO_RUN_STATUS[12]="0"; AUTO_RUN_STATUS[13]="0"; AUTO_RUN_STATUS[16]="0"; AUTO_RUN_STATUS[20]="0"; AUTO_RUN_STATUS[21]="0"; AUTO_RUN_STATUS[22]="0"; AUTO_RUN_STATUS[27]="0"; AUTO_RUN_STATUS[28]="0"; AUTO_RUN_STATUS[29]="0"; AUTO_RUN_STATUS[34]="0"; AUTO_RUN_STATUS[$((n+1))]="0";
+   MANUAL_RUN_STATUS[1]="0"; MANUAL_RUN_STATUS[2]="0"; MANUAL_RUN_STATUS[3]="0"; MANUAL_RUN_STATUS[4]="0"; MANUAL_RUN_STATUS[5]="0"; MANUAL_RUN_STATUS[6]="0"; MANUAL_RUN_STATUS[7]="0"; MANUAL_RUN_STATUS[8]="0"; MANUAL_RUN_STATUS[9]="0"; MANUAL_RUN_STATUS[10]="0"; MANUAL_RUN_STATUS[11]="0"; MANUAL_RUN_STATUS[12]="0"; MANUAL_RUN_STATUS[13]="0"; MANUAL_RUN_STATUS[14]="0"; MANUAL_RUN_STATUS[15]="0"; MANUAL_RUN_STATUS[16]="0"; MANUAL_RUN_STATUS[17]="0"
+
+fi
+
+
+# Since the SW6 setting for jffs2(all on) and cf card(on on off off) are conflicting, disable jffs2 test here.
+if [ $BOARD_CONFIG = "BF537-STAMP-CF" ] ; then
+
+   BOARD_TYPE=BF537-STAMP
+   
+   AUTO_RUN_STATUS[2]="1"; AUTO_RUN_STATUS[9]="1"; AUTO_RUN_STATUS[10]="0"; AUTO_RUN_STATUS[11]="0"; AUTO_RUN_STATUS[12]="0"; AUTO_RUN_STATUS[23]="1"; AUTO_RUN_STATUS[24]="1"; AUTO_RUN_STATUS[25]="1"; AUTO_RUN_STATUS[57]="1"; AUTO_RUN_STATUS[72]="1"; AUTO_RUN_STATUS[$((n+6))]="1"; AUTO_RUN_STATUS[$((n+15))]="0"; AUTO_RUN_STATUS[$((n+22))]="1"
+
+fi
+
+if [ $BOARD_CONFIG = "BF537-STAMP-AD1836" ] ; then
+
+   BOARD_TYPE=BF537-STAMP
+  
+   AUTO_RUN_STATUS[2]="1"; AUTO_RUN_STATUS[9]="1"; AUTO_RUN_STATUS[57]="1";AUTO_RUN_STATUS[65]="1"; AUTO_RUN_STATUS[68]="1"; AUTO_RUN_STATUS[90]="1"; AUTO_RUN_STATUS[$((n+3))]="1"; AUTO_RUN_STATUS[$((n+9))]="1"; 
+   MANUAL_RUN_STATUS[19]="1"; MANUAL_RUN_STATUS[27]="1"
+ 
+fi
+
+# Performance test on BF537-STAMP; BINARY_FORMAT should be set to elf
+if [ $BOARD_CONFIG = "BF537-STAMP-PERF" ] ; then
+
+   BOARD_TYPE=BF537-STAMP
+
+   AUTO_RUN_STATUS[2]="1"; AUTO_RUN_STATUS[9]="1"; AUTO_RUN_STATUS[21]="0"; AUTO_RUN_STATUS[27]="1"
+   MANUAL_RUN_STATUS[9]="1"; MANUAL_RUN_STATUS[12]="1"; MANUAL_RUN_STATUS[19]="1"; MANUAL_RUN_STATUS[23]="1"; MANUAL_RUN_STATUS[25]="1"; MANUAL_RUN_STATUS[28]="1"
+
+fi
+
+if [ $BOARD_CONFIG = "BF533-STAMP-STD" ] ; then
+
+   BOARD_TYPE=BF533-STAMP
+
+   AUTO_RUN_STATUS[57]="1"; AUTO_RUN_STATUS[43]="1"; AUTO_RUN_STATUS[$((n+3))]="1"; AUTO_RUN_STATUS[$((n+4))]="1"; AUTO_RUN_STATUS[$((n+6))]="1"; AUTO_RUN_STATUS[$((n+15))]="0"
+   MANUAL_RUN_STATUS[3]="0"; MANUAL_RUN_STATUS[7]="0"; MANUAL_RUN_STATUS[8]="0"; MANUAL_RUN_STATUS[9]="0"; MANUAL_RUN_STATUS[10]="0"; MANUAL_RUN_STATUS[23]="1"
+
+fi
+
+
+if [ $BOARD_CONFIG = "BF527-EZKIT-STD" ] ; then
+
+   BOARD_TYPE=BF527-EZKIT-V2
+
+  AUTO_RUN_STATUS[2]="1"; AUTO_RUN_STATUS[9]="1"; AUTO_RUN_STATUS[25]="1"; AUTO_RUN_STATUS[42]="0" ; AUTO_RUN_STATUS[45]="0"; AUTO_RUN_STATUS[57]="1"; AUTO_RUN_STATUS[55]="0"; AUTO_RUN_STATUS[62]="1"; AUTO_RUN_STATUS[70]="1"; AUTO_RUN_STATUS[65]="1"; AUTO_RUN_STATUS[75]="1"; AUTO_RUN_STATUS[87]="1"; AUTO_RUN_STATUS[$((n+6))]="1"; AUTO_RUN_STATUS[$((n+9))]="1"; AUTO_RUN_STATUS[$((n+11))]="1"; AUTO_RUN_STATUS[$((n+21))]="1"; AUTO_RUN_STATUS[$((n+23))]="1"; AUTO_RUN_STATUS[$((n+25))]="1"
+   MANUAL_RUN_STATUS[1]="0"; MANUAL_RUN_STATUS[2]="0"; MANUAL_RUN_STATUS[3]="0"; MANUAL_RUN_STATUS[4]="0"; MANUAL_RUN_STATUS[5]="0"; MANUAL_RUN_STATUS[7]="0"; MANUAL_RUN_STATUS[10]="0"; MANUAL_RUN_STATUS[13]="0"; MANUAL_RUN_STATUS[14]="0"; MANUAL_RUN_STATUS[15]="0"; MANUAL_RUN_STATUS[18]="1"; MANUAL_RUN_STATUS[19]="1"; MANUAL_RUN_STATUS[20]="1"; MANUAL_RUN_STATUS[22]="0"; MANUAL_RUN_STATUS[23]="1";
+
+fi
+
+
+if [ $BOARD_CONFIG = "BF533-EZKIT-STD" ] ; then
+
+   BOARD_TYPE=BF533-EZKIT
+
+   AUTO_RUN_STATUS[10]="0"; AUTO_RUN_STATUS[11]="0"; AUTO_RUN_STATUS[12]="0"; AUTO_RUN_STATUS[21]="0"; AUTO_RUN_STATUS[42]="0"; AUTO_RUN_STATUS[57]="1"; AUTO_RUN_STATUS[$((n+15))]="0"
+   
+   MANUAL_RUN_STATUS[1]="0"; MANUAL_RUN_STATUS[2]="0"; MANUAL_RUN_STATUS[3]="0"; MANUAL_RUN_STATUS[4]="0"; MANUAL_RUN_STATUS[5]="0"; MANUAL_RUN_STATUS[6]="0"; MANUAL_RUN_STATUS[7]="0"; MANUAL_RUN_STATUS[8]="0"; MANUAL_RUN_STATUS[10]="0"; MANUAL_RUN_STATUS[11]="0"; MANUAL_RUN_STATUS[13]="0"; MANUAL_RUN_STATUS[14]="0"; MANUAL_RUN_STATUS[15]="0"; MANUAL_RUN_STATUS[16]="0"; MANUAL_RUN_STATUS[22]="0";
+fi
+
+
+if [ $BOARD_CONFIG = "BF548-EZKIT-STD" ] ; then
+
+   BOARD_TYPE=BF548-EZKIT
+   
+   AUTO_RUN_STATUS[9]="1";AUTO_RUN_STATUS[12]="1"; AUTO_RUN_STATUS[25]="1"; AUTO_RUN_STATUS[42]="0" ; AUTO_RUN_STATUS[45]="0"; AUTO_RUN_STATUS[54]="1"; AUTO_RUN_STATUS[57]="1"; AUTO_RUN_STATUS[55]="1"; AUTO_RUN_STATUS[62]="1"; AUTO_RUN_STATUS[64]="1"; AUTO_RUN_STATUS[65]="1"; AUTO_RUN_STATUS[66]="1"; AUTO_RUN_STATUS[67]="1"; AUTO_RUN_STATUS[70]="1"; AUTO_RUN_STATUS[75]="1"; AUTO_RUN_STATUS[82]="1"; AUTO_RUN_STATUS[91]="1"; AUTO_RUN_STATUS[$((n+6))]="1";AUTO_RUN_STATUS[$((n+9))]="1"; AUTO_RUN_STATUS[$((n+11))]="1"; AUTO_RUN_STATUS[$((n+13))]="1"; AUTO_RUN_STATUS[$((n+17))]="0"; AUTO_RUN_STATUS[$((n+21))]="1"; AUTO_RUN_STATUS[$((n+23))]="1"; AUTO_RUN_STATUS[$((n+25))]="1"
+
+   MANUAL_RUN_STATUS[1]="0"; MANUAL_RUN_STATUS[2]="0"; MANUAL_RUN_STATUS[3]="0"; MANUAL_RUN_STATUS[4]="0"; MANUAL_RUN_STATUS[5]="0"; MANUAL_RUN_STATUS[7]="0"; MANUAL_RUN_STATUS[9]="1"; MANUAL_RUN_STATUS[10]="1"; MANUAL_RUN_STATUS[13]="0"; MANUAL_RUN_STATUS[14]="0"; MANUAL_RUN_STATUS[15]="0"; MANUAL_RUN_STATUS[18]="1"; MANUAL_RUN_STATUS[19]="1"; MANUAL_RUN_STATUS[20]="1"; MANUAL_RUN_STATUS[22]="0"; MANUAL_RUN_STATUS[23]="1"; MANUAL_RUN_STATUS[24]="1";
+
+fi
+
+if [ $BOARD_CONFIG = "BF561-EZKIT-STD" ] ; then
+
+   BOARD_TYPE=BF561-EZKIT
+
+   AUTO_RUN_STATUS[8]="0"; AUTO_RUN_STATUS[9]="1"; AUTO_RUN_STATUS[21]="0"; AUTO_RUN_STATUS[42]="0"; AUTO_RUN_STATUS[45]="1"; AUTO_RUN_STATUS[57]="1"; AUTO_RUN_STATUS[66]="1"; AUTO_RUN_STATUS[67]="1"; AUTO_RUN_STATUS[71]="0"; AUTO_RUN_STATUS[77]="1"; AUTO_RUN_STATUS[78]="1";AUTO_RUN_STATUS[88]="1"; AUTO_RUN_STATUS[89]="1"; AUTO_RUN_STATUS[$((n+7))]="1"; AUTO_RUN_STATUS[$((n+8))]="1"; AUTO_RUN_STATUS[$((n+12))]="0"
+
+   for i in `seq 0 $n`;
+   do
+       MANUAL_RUN_STATUS[$i]=0
+       MANUAL_RUN_STATUS[$((n+i))]="0"
+   done
+
+fi
+
+if [ $BOARD_CONFIG = "BF561-EZKIT-SMP" ] ; then
+
+   BOARD_TYPE=BF561-EZKIT
+
+   AUTO_RUN_STATUS[7]="0"; AUTO_RUN_STATUS[8]="0"; AUTO_RUN_STATUS[16]="0"; AUTO_RUN_STATUS[17]="0"; AUTO_RUN_STATUS[21]="0"; AUTO_RUN_STATUS[41]="0"; AUTO_RUN_STATUS[42]="0"; AUTO_RUN_STATUS[57]="1"; AUTO_RUN_STATUS[71]="0"; AUTO_RUN_STATUS[77]="1";AUTO_RUN_STATUS[86]="1"; AUTO_RUN_STATUS[$((n+8))]="0"; AUTO_RUN_STATUS[$((n+12))]="0"
+
+   for i in `seq 0 $n`;
+   do
+       MANUAL_RUN_STATUS[$i]=0
+       MANUAL_RUN_STATUS[$((n+i))]="0"
+   done
+
+fi
+
+
+if [ $BOARD_CONFIG = "BF548-EZKIT-USBDEV" ] ; then
+
+    BOARD_TYPE=BF548-EZKIT
+
+    for i in `seq 0 $n`;
+    do
+        AUTO_RUN_STATUS[$i]=0
+        AUTO_RUN_STATUS[$((n+i))]="0"
+    done
+    for i in `seq 0 $n`;
+    do
+        MANUAL_RUN_STATUS[$i]=0
+        MANUAL_RUN_STATUS[$((n+i))]="0"
+    done
+
+    AUTO_RUN_STATUS[$((n+18))]="1"; AUTO_RUN_STATUS[$((n+23))]="1"; AUTO_RUN_STATUS[$((n+24))]="1"
+
+fi
+
+
+if [ $BOARD_CONFIG = "BF527-EZKIT-USBDEV" ] ; then
+
+    BOARD_TYPE=BF527-EZKIT-V2
+
+    for i in `seq 0 $n`;
+    do
+        AUTO_RUN_STATUS[$i]=0
+        AUTO_RUN_STATUS[$((n+i))]="0"
+    done
+    for i in `seq 0 $n`;
+    do
+        MANUAL_RUN_STATUS[$i]=0
+        MANUAL_RUN_STATUS[$((n+i))]="0"
+    done
+
+    AUTO_RUN_STATUS[56]="1"; AUTO_RUN_STATUS[62]="1"; AUTO_RUN_STATUS[64]="1"; AUTO_RUN_STATUS[$((n+12))]="1"; AUTO_RUN_STATUS[$((n+17))]="1"; AUTO_RUN_STATUS[$((n+18))]="1"; AUTO_RUN_STATUS[$((n+23))]="1"; AUTO_RUN_STATUS[$((n+24))]="1"
+
+fi
+
+if [ $BOARD_CONFIG = "BF518F-EZBRD-STD" ] ; then
+
+    BOARD_TYPE=BF518F-EZBRD
+
+    AUTO_RUN_STATUS[2]="1"; AUTO_RUN_STATUS[9]="1"; AUTO_RUN_STATUS[11]="0"; AUTO_RUN_STATUS[55]="1"; AUTO_RUN_STATUS[57]="1"; AUTO_RUN_STATUS[76]="1"; AUTO_RUN_STATUS[$((n+6))]="1"; AUTO_RUN_STATUS[$((n+15))]="0"; AUTO_RUN_STATUS[87]="1";
+    MANUAL_RUN_STATUS[2]="0"; MANUAL_RUN_STATUS[7]="0"; MANUAL_RUN_STATUS[10]="0"; MANUAL_RUN_STATUS[13]="0"; MANUAL_RUN_STATUS[24]="1"; MANUAL_RUN_STATUS[26]="1"
+
+fi
+if [ $BOARD_CONFIG = "BF526-EZBRD-STD" ] ; then
+
+    BOARD_TYPE=BF526-EZBRD
+
+    AUTO_RUN_STATUS[2]="1"; AUTO_RUN_STATUS[9]="1"; AUTO_RUN_STATUS[11]="0"; AUTO_RUN_STATUS[25]="1"; AUTO_RUN_STATUS[57]="1"; AUTO_RUN_STATUS[87]="1";AUTO_RUN_STATUS[$((n+6))]="1"; AUTO_RUN_STATUS[$((n+15))]="0"
+    MANUAL_RUN_STATUS[2]="0"; MANUAL_RUN_STATUS[7]="0"; MANUAL_RUN_STATUS[10]="0"; MANUAL_RUN_STATUS[13]="0"; MANUAL_RUN_STATUS[15]="0"
+
+fi
+
+if [ $BOARD_CONFIG = "BF538-EZKIT-STD" ] ; then
+
+    BOARD_TYPE=BF538-EZKIT
+
+    AUTO_RUN_STATUS[2]="1"; AUTO_RUN_STATUS[9]="1"; AUTO_RUN_STATUS[11]="0"; AUTO_RUN_STATUS[57]="1"; 
+    MANUAL_RUN_STATUS[13]="0"; MANUAL_RUN_STATUS[23]="1"
+
+fi
+
+
+if [ $BINARY_FORMAT = "elf" ] ; then
+
+   AUTO_RUN_STATUS[11]="0"; AUTO_RUN_STATUS[12]="0"; AUTO_RUN_STATUS[47]="0"; AUTO_RUN_STATUS[$((n+6))]="0"; AUTO_RUN_STATUS[$((n+19))]="0"
+   MANUAL_RUN_STATUS[13]="1";
+fi
+
+#########################   List the tests to be run on the machine  #########################
+
+testcase_list=(${AUTO_TESTCASE[@]:0} ${MANUAL_TESTCASE[@]:0})
+run_status_list=(${AUTO_RUN_STATUS[@]:0} ${MANUAL_RUN_STATUS[@]:0})
+#echo ${testcase_list[@]:0}
+#echo ${run_status_list[@]:0}
+
+p1=${#AUTO_TESTCASE[*]}
+q1=${#MANUAL_TESTCASE[*]}
+#p2=${#AUTO_RUN_STATUS[*]}
+#q2=${#MANUAL_RUN_STATUS[*]}
+#echo "Auto testcase $p1 ,manual testcase $q1."
+p=${#testcase_list[*]}
+q=${#run_status_list[*]}
+#echo "Testcase list $p ,run status list $q."
+
+if [ $p -eq $q ] ; then
+echo "**********************************************"
+echo "All the testcases that run on this machine:"
+echo "(Auto test and manual test.)"
+echo "*** Auto test *** "
+for i in `seq 0 $p`
+do
+if [ ! -z ${run_status_list[$i]} ] && [ ${run_status_list[$i]} == 1 ] ; then
+    if [ $i -eq $p1 ]; then
+    echo
+    echo "*** Manual test *** "
+    fi
+    echo "${testcase_list[$i]}"
+
+fi
+done
+echo "**********************************************"
+fi
+
+#########################   Build and run the tests     #######################################
+
+export PATH=/opt/uClinux/bfin-uclinux/bin:/opt/uClinux/bfin-elf/bin:/opt/uClinux/bfin-linux-uclibc/bin:$PATH
+/opt/uClinux/bfin-uclinux/bin/bfin-uclinux-gcc -v
+echo 
+
+cd  $UCLINUX_DIST_TESTSUITES
+chmod +x *.exp  */*.exp
+cp  $UCLINUX_DIST_TESTSUITES/test_scripts/compare_kernel_results  $UCLINUX_DIST_SCRIPTS/uclinux-dist 
+cp  $UCLINUX_DIST_TESTSUITES/test_scripts/get_test_summary  $UCLINUX_DIST_SCRIPTS/uclinux-dist 
+cp  $UCLINUX_DIST_TESTSUITES/test_scripts/get_performance_result  $UCLINUX_DIST_SCRIPTS/uclinux-dist
+cp  $UCLINUX_DIST_TESTSUITES/test_scripts/test_runtime_control  $UCLINUX_DIST_SCRIPTS/uclinux-dist
+cp  $UCLINUX_DIST_SCRIPTS/uclinux-dist/reset_board $UCLINUX_DIST_TESTSUITES
+cp  $UCLINUX_DIST_SCRIPTS/uclinux-dist/reset_board $UCLINUX_DIST_TESTSUITES/ltp
+
+  #############################################################################################
+  ############################ BUILD POLICY UCLINUX_DIST ############################################
+if [ $BUILD_POLICY -eq 1  ] ; then
+  echo  "Running build policy in uclinux-dist... "
+  
+  cd $UCLINUX_DIST_TESTSUITES/policy
+  ./build_policy_kernel.exp        $BOARD_TYPE $CPU $REVISION $UCLINUX_DIST_PATH $BINARY_FORMAT $ALLOCATOR $ICACHE $DCACHE $POLICY $UART_MODE $SMP $MPU $XENOMAI >/dev/null  2>&1
+  echo "./build_policy_kernel.exp  $BOARD_TYPE $CPU $REVISION $UCLINUX_DIST_PATH $BINARY_FORMAT $ALLOCATOR $ICACHE $DCACHE $POLICY $UART_MODE $SMP $MPU $XENOMAI >/dev/null  2>&1"
+    
+  cp $UCLINUX_DIST_PATH/images/uImage $THIS_LOG/uImage.policy
+  cp $UCLINUX_DIST_PATH/linux-2.6.x/.config $THIS_LOG/config.policy
+  cp $UCLINUX_DIST_TESTSUITES/policy/build_policy_kernel_log  $THIS_LOG
+  
+  if [ ! -f $UCLINUX_DIST_PATH/images/uImage ] ; then
+  echo  "Linux image fails to be generated.Error!"
+  tail -50  ./build_policy_kernel_log
+  exit 3
+  fi
+      
+  sleep 30
+  
+  if [ $RESET_BOARD -eq 1  ] ; then
+   cd $UCLINUX_DIST_TESTSUITES
+   ./reset_board.exp  >/dev/null  2>&1 
+   sleep 10
+  fi
+  
+  if [ $XENOMAI == "on" ] ; then
+  echo "unset xenomai in user config after policy is built"
+  sed -i "s/CONFIG_USER_XENOMAI=y/# CONFIG_USER_XENOMAI is not set/" $UCLINUX_DIST_PATH/config/.config
+  fi
+
+  echo  "cp uclinux-dist source to UCLINUX_DIST_PATH_BAK."
+  cp -a $UCLINUX_DIST_PATH $UCLINUX_DIST_PATH_BAK 
+  
+  sleep 10
+fi
+  
+  #############################################################################################
+  ####################            AUTOMATED TESTING             ###############################
+  #############################################################################################
+ 
+for i in `seq 0 $n`
+do
+
+  if [ -z ${AUTO_TESTCASE[$i]} ] ; then
+  continue
+  fi
+
+  if [ ${AUTO_RUN_STATUS[$i]} -eq 1  ] ; then
+  
+  echo  "Start testing ${AUTO_TESTCASE[$i]}..."
+
+  if [ ${AUTO_TESTCASE[$i]} != "serial" ] &&
+     [ ${AUTO_TESTCASE[$i]} != "ethernet" ] &&
+     [ ${AUTO_TESTCASE[$i]} != "nfs" ] &&
+     [ ${AUTO_TESTCASE[$i]} != "module" ] &&
+     [ ${AUTO_TESTCASE[$i]} != "pound" ] &&
+     [ ${AUTO_TESTCASE[$i]} != "cfcard" ] &&
+     [ ${AUTO_TESTCASE[$i]} != "sram_alloc" ] &&
+     [ ${AUTO_TESTCASE[$i]} != "timer" ] ; then
+
+  rm -rf $UCLINUX_DIST_PATH/linux-2.6.x
+  cd $UCLINUX_DIST_PATH/
+  cp -a  $UCLINUX_DIST_PATH_BAK/linux-2.6.x  .
+  cp $UCLINUX_DIST_PATH_BAK/config/.config config
+  cp $UCLINUX_DIST_PATH_BAK/vendors/AnalogDevices/$BOARD_TYPE/Makefile vendors/AnalogDevices/$BOARD_TYPE
+
+  fi
+
+  rm -rf romfs/ images/
+
+  if [ ${AUTO_TESTCASE[$i]} == "jffs2_fs" ] ; then
+  cd $UCLINUX_DIST_TESTSUITES/jffs2
+  elif [ ${AUTO_TESTCASE[$i]} == "ethernet_in_buffer" ] ; then
+  cd $UCLINUX_DIST_TESTSUITES/ethernet
+  elif [ ${AUTO_TESTCASE[$i]} == "ide_cdrom" ] || [ ${AUTO_TESTCASE[$i]} == "ide_harddisk" ] ; then
+  cd $UCLINUX_DIST_TESTSUITES/ide
+  elif ([ ${AUTO_TESTCASE[$i]} == "usbhost_1362" ] || [ ${AUTO_TESTCASE[$i]} == "usbhost_176x" ]) ; then
+  cd $UCLINUX_DIST_TESTSUITES/usbhost
+  elif [ ${AUTO_TESTCASE[$i]} == "atapi_hd" ] ; then
+  cd $UCLINUX_DIST_TESTSUITES/atapi
+  elif [ ${AUTO_TESTCASE[$i]} == "kgdb_uart" ] || [ ${AUTO_TESTCASE[$i]} == "kgdb_smp" ] ; then
+  cd $UCLINUX_DIST_TESTSUITES/kgdb
+  elif [ ${AUTO_TESTCASE[$i]} == "adxl_i2c" ] || [ ${AUTO_TESTCASE[$i]} == "adxl_spi" ] ; then
+  cd $UCLINUX_DIST_TESTSUITES/adxl
+  elif [ ${AUTO_TESTCASE[$i]} == "linphone_ssm2603" ] || [ ${AUTO_TESTCASE[$i]} == "linphone_ad73322" ] ; then
+  cd $UCLINUX_DIST_TESTSUITES/linphone
+  elif [ ${AUTO_TESTCASE[$i]} == "spimmc_interrupt" ] ; then
+  cd $UCLINUX_DIST_TESTSUITES/spimmc
+  else
+  cd $UCLINUX_DIST_TESTSUITES/${AUTO_TESTCASE[$i]}    
+  fi
+ 
+  if [ ${AUTO_TESTCASE[$i]} == "kgdb_uart" ] ; then 
+  ./build_kgdb_kernel.exp $BOARD_TYPE uart >/dev/null  2>&1
+  elif [ ${AUTO_TESTCASE[$i]} == "kgdb_smp" ] ; then 
+  ./build_kgdb_kernel.exp $BOARD_TYPE ethernet SMP >/dev/null  2>&1
+  elif [ ${AUTO_TESTCASE[$i]} == "adxl_i2c" ] ; then 
+  ./build_adxl_kernel.exp $BOARD_TYPE i2c >/dev/null  2>&1
+  elif [ ${AUTO_TESTCASE[$i]} == "adxl_spi" ] ; then 
+  ./build_adxl_kernel.exp $BOARD_TYPE spi >/dev/null  2>&1
+  elif [ ${AUTO_TESTCASE[$i]} == "ethernet_in_buffer" ] ; then 
+  ./build_ethernet_kernel.exp $BOARD_TYPE in_buffer >/dev/null  2>&1
+  elif [ ${AUTO_TESTCASE[$i]} == "spimmc_interrupt" ] ; then 
+  ./build_spimmc_kernel.exp $BOARD_TYPE interrupt >/dev/null  2>&1
+  elif [ ${AUTO_TESTCASE[$i]} == "multichannel" ] ; then 
+      if [ ${AUTO_RUN_STATUS[$((n+3))]} -eq 1  ] ; then
+          audio_dev="audio_ad1836"
+      elif [ ${AUTO_RUN_STATUS[$((n+5))]} -eq 1  ] ; then
+          audio_dev="audio_ad1938"
+      fi
+  ./build_multichannel_kernel.exp $BOARD_TYPE $audio_dev >/dev/null  2>&1
+  else
+  ./build_${AUTO_TESTCASE[$i]}_kernel.exp $BOARD_TYPE  >/dev/null  2>&1
+  fi
+  if [ ! -f $UCLINUX_DIST_PATH/images/uImage ] && [ ${AUTO_TESTCASE[$i]} != "gpio" ] && [ ${AUTO_TESTCASE[$i]} != "jffs2" ]
+  then
+	echo "$0:   Error, failed."
+	tail -50 ./build_${AUTO_TESTCASE[$i]}_kernel_log
+  else
+ 	sleep 30
+	if [ ${AUTO_TESTCASE[$i]} == "jffs2" ] || [ ${AUTO_TESTCASE[$i]} == "jffs2_fs" ] ; then	
+	  ./flash_images.exp  $BOARD_TYPE  >/dev/null  2>&1
+	  sleep 30 
+	fi
+	
+	if [ ${AUTO_TESTCASE[$i]} == "ethernet_in_buffer" ] ; then
+	./ethernet_test.exp  $BOARD_TYPE in_buffer >/dev/null  2>&1
+        elif [ ${AUTO_TESTCASE[$i]} == "kgdb_uart" ] ; then
+	./kgdb_test.exp  $BOARD_TYPE uart >/dev/null  2>&1    
+        elif [ ${AUTO_TESTCASE[$i]} == "kgdb_smp" ] ; then
+	./kgdb_test.exp  $BOARD_TYPE ethernet SMP >/dev/null  2>&1    
+        elif [ ${AUTO_TESTCASE[$i]} == "adxl_i2c" ] ; then
+	./adxl_test.exp  $BOARD_TYPE i2c >/dev/null  2>&1    
+        elif [ ${AUTO_TESTCASE[$i]} == "adxl_spi" ] ; then
+	./adxl_test.exp  $BOARD_TYPE spi >/dev/null  2>&1    
+        elif [ ${AUTO_TESTCASE[$i]} == "linphone_ssm2603" ] || [ ${AUTO_TESTCASE[$i]} == "linphone_ad73322" ] ; then
+	./linphone_test.exp  $BOARD_TYPE  >/dev/null  2>&1    
+        elif [ ${AUTO_TESTCASE[$i]} == "multichannel" ] ; then
+            if [ ${AUTO_RUN_STATUS[$((n+3))]} -eq 1  ] ; then
+                audio_dev="audio_ad1836"
+            elif [ ${AUTO_RUN_STATUS[$((n+5))]} -eq 1  ] ; then
+                audio_dev="audio_ad1938"
+            fi
+            ./multichannel_test.exp $BOARD_TYPE $audio_dev >/dev/null  2>&1
+        elif [ ${AUTO_TESTCASE[$i]} == "spimmc_interrupt" ] ; then
+            ./spimmc_test.exp $BOARD_TYPE interrupt >/dev/null  2>&1
+	else
+	./${AUTO_TESTCASE[$i]}_test.exp  $BOARD_TYPE >/dev/null  2>&1    
+	fi
+  
+  fi
+  
+  cp $UCLINUX_DIST_PATH/images/uImage $THIS_LOG/uImage.${AUTO_TESTCASE[$i]}
+  cp $UCLINUX_DIST_PATH/linux-2.6.x/.config $THIS_LOG/config.linux.${AUTO_TESTCASE[$i]}  
+  cp $UCLINUX_DIST_PATH/config/.config $THIS_LOG/config.config.${AUTO_TESTCASE[$i]}  
+  
+  if [ ${AUTO_TESTCASE[$i]} == "jffs2_fs" ] ; then
+  cp $UCLINUX_DIST_TESTSUITES/jffs2/*_log  $THIS_LOG
+  elif [ ${AUTO_TESTCASE[$i]} == "ethernet_in_buffer" ] ; then
+  cp $UCLINUX_DIST_TESTSUITES/ethernet/*_log  $THIS_LOG
+  elif [ ${AUTO_TESTCASE[$i]} == "ide_cdrom" ] || [ ${AUTO_TESTCASE[$i]} == "ide_harddisk" ] ; then
+  cp $UCLINUX_DIST_TESTSUITES/ide/*_log  $THIS_LOG
+  elif ([ ${AUTO_TESTCASE[$i]} == "usbhost_1362" ] || [ ${AUTO_TESTCASE[$i]} == "usbhost_176x" ]) ; then
+  cp $UCLINUX_DIST_TESTSUITES/usbhost/*_log  $THIS_LOG
+  elif [ ${AUTO_TESTCASE[$i]} == "atapi_hd" ] ; then
+  cp $UCLINUX_DIST_TESTSUITES/atapi/*_log  $THIS_LOG
+  elif [ ${AUTO_TESTCASE[$i]} == "kgdb_uart" ] || [ ${AUTO_TESTCASE[$i]} == "kgdb_smp" ] ; then
+  cp $UCLINUX_DIST_TESTSUITES/kgdb/*_log  $THIS_LOG
+  elif [ ${AUTO_TESTCASE[$i]} == "adxl_i2c" ] || [ ${AUTO_TESTCASE[$i]} == "adxl_spi" ] ; then
+  cp $UCLINUX_DIST_TESTSUITES/adxl/*_log  $THIS_LOG
+  elif [ ${AUTO_TESTCASE[$i]} == "linphone_ssm2603" ] || [ ${AUTO_TESTCASE[$i]} == "linphone_ad73322" ] ; then
+  cp $UCLINUX_DIST_TESTSUITES/linphone/*_log  $THIS_LOG
+  elif [ ${AUTO_TESTCASE[$i]} == "spimmc_interrupt" ] ; then
+  cp $UCLINUX_DIST_TESTSUITES/spimmc/*_log  $THIS_LOG
+  else
+  cp $UCLINUX_DIST_TESTSUITES/${AUTO_TESTCASE[$i]}/*_log  $THIS_LOG   
+  fi
+
+  if [ ${AUTO_TESTCASE[$i]} == "cfcard" ] || [ ${AUTO_TESTCASE[$i]} == "ide_cdrom" ] || [ ${AUTO_TESTCASE[$i]} == "ide_harddisk" ] ; then
+  cp $UCLINUX_DIST_PATH/images/uImage  $THIS_LOG/uImage.${AUTO_TESTCASE[$i]}
+  cp $UCLINUX_DIST_PATH/images/rootfs.ext2  $THIS_LOG/rootfs.ext2.${AUTO_TESTCASE[$i]}  
+  fi
+   
+  if [ ${AUTO_TESTCASE[$i]} == "jffs2" ] ; then
+  cp $UCLINUX_DIST_PATH/images/vmImage  $THIS_LOG/vmImage.${AUTO_TESTCASE[$i]}
+  cp $UCLINUX_DIST_PATH/images/rootfs.jffs2  $THIS_LOG/rootfs.jffs2.${AUTO_TESTCASE[$i]}  
+  
+  cd $UCLINUX_DIST_TESTSUITES/${AUTO_TESTCASE[$i]}
+  sleep 30
+  ./boot_kernel_only_uimage_test.exp $BOARD_TYPE >/dev/null  2>&1
+  cp $UCLINUX_DIST_TESTSUITES/${AUTO_TESTCASE[$i]}/boot_kernel_only_uimage_test_log $THIS_LOG
+
+  fi
+ 
+  if [ ${AUTO_TESTCASE[$i]} == "g729" ] ; then
+  mv $UCLINUX_DIST_TESTSUITES/g729/g729 $THIS_LOG/
+  fi
+
+  if [ ${AUTO_TESTCASE[$i]} == "jffs2_fs" ] ; then
+  cp $UCLINUX_DIST_PATH/images/vmImage  $THIS_LOG/vmImage.${AUTO_TESTCASE[$i]}
+  cp $UCLINUX_DIST_PATH/images/rootfs.jffs2  $THIS_LOG/rootfs.jffs2.${AUTO_TESTCASE[$i]}
+  fi
+ 
+  if [ ${AUTO_TESTCASE[$i]} == "kgdb" ] || [ ${AUTO_TESTCASE[$i]} == "kgdb_uart" ] || [ ${AUTO_TESTCASE[$i]} == "kgdb_smp" ] ; then
+  cp $UCLINUX_DIST_PATH/linux-2.6.x/vmlinux  $THIS_LOG/vmlinux.${AUTO_TESTCASE[$i]}
+  fi
+
+  if [ ${AUTO_TESTCASE[$i]} == "spimmc" ] || [ ${AUTO_TESTCASE[$i]} == "spimmc_interrupt" ] || [ ${AUTO_TESTCASE[$i]} == "sdiommc" ] || [ ${AUTO_TESTCASE[$i]} == "nand" ] || [ ${AUTO_TESTCASE[$i]} == "usb_camera" ] ; then
+      cp $UCLINUX_DIST_PATH/images/vmImage $THIS_LOG/vmImage.${AUTO_TESTCASE[$i]}
+  fi
+
+  if [ ${AUTO_TESTCASE[$i]} == "traps" ] || [ ${AUTO_TESTCASE[$i]} == "l1_app" ] || [ ${AUTO_TESTCASE[$i]} == "pthread" ] || [ ${AUTO_TESTCASE[$i]} == "dmacopy" ] || [ ${AUTO_TESTCASE[$i]} == "sqlite" ]; then
+  rm -rf $UCLINUX_DIST_PATH/user/busybox
+  cd $UCLINUX_DIST_PATH/user 
+  cp -a  $UCLINUX_DIST_PATH_BAK/user/busybox  .
+  fi
+
+  if [ ${AUTO_TESTCASE[$i]} == "linphone_ssm2603" ] || [ ${AUTO_TESTCASE[$i]} == "linphone_ad73322" ] ; then
+  rm -rf $UCLINUX_DIST_PATH/user/linphone
+  cd $UCLINUX_DIST_PATH/user
+  cp -a  $UCLINUX_DIST_PATH_BAK/user/linphone  .
+  fi
+
+  if [ ${AUTO_TESTCASE[$i]} == "shared_flat" ] || [ ${AUTO_TESTCASE[$i]} == "linphone_ssm2603" ] || [ ${AUTO_TESTCASE[$i]} == "linphone_ad73322" ] || [ ${AUTO_TESTCASE[$i]} == "mplayer" ] || [ ${AUTO_TESTCASE[$i]} == "directfb" ] || [ ${AUTO_TESTCASE[$i]} == "multichannel" ] || [ ${AUTO_TESTCASE[$i]} == "microwin" ] || [ ${AUTO_TESTCASE[$i]} == "spi_coexistence" ] || [ ${AUTO_TESTCASE[$i]} == "usb_camera" ]; then
+  cd $UCLINUX_DIST_PATH/
+  make clean > /dev/null 2>&1
+  fi
+
+  if [ ${AUTO_TESTCASE[$i]} == "xenomai" ] ; then
+      if [ $XENOMAI == "on" ] ; then
+          echo "unset xenomai in user config after xenomai test is finished"
+          sed -i "s/CONFIG_USER_XENOMAI=y/# CONFIG_USER_XENOMAI is not set/" $UCLINUX_DIST_PATH/config/.config
+      else
+          rm -rf $UCLINUX_DIST_PATH/user/xenomai
+          cd $UCLINUX_DIST_PATH/user
+          cp -a  $UCLINUX_DIST_PATH_BAK/user/xenomai .
+      fi
+  fi
+
+  echo  "End testing ${AUTO_TESTCASE[$i]}..."
+  sleep 10
+  
+  if [ $RESET_BOARD -eq 1  ] ; then
+   cd $UCLINUX_DIST_TESTSUITES
+   ./reset_board.exp  >/dev/null  2>&1 
+   sleep 10
+  fi 
+  
+  fi
+  done
+  
+  ###############################################################################################
+  ########################## TEST TIMER #########################################################
+  
+ if [ ${AUTO_RUN_STATUS[$((n+1))]} -eq 1  ] ; then
+  echo  "Testing timer..."
+
+  rm -rf $UCLINUX_DIST_PATH/linux-2.6.x
+  cd $UCLINUX_DIST_PATH/ 
+  cp -a  $UCLINUX_DIST_PATH_BAK/linux-2.6.x  .
+  cp $UCLINUX_DIST_PATH_BAK/config/.config config 
+  cp $UCLINUX_DIST_PATH_BAK/vendors/AnalogDevices/$BOARD_TYPE/Makefile vendors/AnalogDevices/$BOARD_TYPE
+  rm -rf romfs/ images/
+  
+
+  cd $UCLINUX_DIST_TESTSUITES/timer
+  ./build_timer_kernel.exp $BOARD_TYPE  100  >/dev/null  2>&1
+  sleep 30
+  ./timer_tick_test.exp $BOARD_TYPE 100 >/dev/null  2>&1
+  
+  cp $UCLINUX_DIST_PATH/images/uImage $THIS_LOG/uImage.timer100 
+  cp $UCLINUX_DIST_PATH/linux-2.6.x/.config $THIS_LOG/config.timer100
+  
+  ./build_timer_kernel.exp $BOARD_TYPE  250  >/dev/null  2>&1
+  sleep 30
+  ./timer_tick_test.exp $BOARD_TYPE 250 >/dev/null  2>&1
+  
+  cp $UCLINUX_DIST_PATH/images/uImage $THIS_LOG/uImage.timer250
+  cp $UCLINUX_DIST_PATH/linux-2.6.x/.config $THIS_LOG/config.timer250
+    
+  ./build_timer_kernel.exp $BOARD_TYPE  1000  >/dev/null  2>&1
+  sleep 30
+  ./timer_tick_test.exp $BOARD_TYPE 1000 >/dev/null  2>&1
+  
+  cp $UCLINUX_DIST_PATH/images/uImage $THIS_LOG/uImage.timer1000
+  cp $UCLINUX_DIST_PATH/linux-2.6.x/.config $THIS_LOG/config.timer1000
+  cp $UCLINUX_DIST_TESTSUITES/timer/*_log $THIS_LOG
+  
+  sleep 30
+
+ 
+  if [ $RESET_BOARD -eq 1  ] ; then
+   cd $UCLINUX_DIST_TESTSUITES
+   ./reset_board.exp  >/dev/null  2>&1 
+   sleep 10
+  fi
+
+  fi
+  #############################################################################################
+  ########################## TEST VIDEO CAPTURE ###############################################
+  if [ ${AUTO_RUN_STATUS[$((n+7))]} -eq 1  ] ; then
+
+  echo  "Testing video capture driver..."
+
+  rm -rf $UCLINUX_DIST_PATH/linux-2.6.x
+  cd $UCLINUX_DIST_PATH/
+  cp -a  $UCLINUX_DIST_PATH_BAK/linux-2.6.x  .
+  cp $UCLINUX_DIST_PATH_BAK/config/.config config
+  cp $UCLINUX_DIST_PATH_BAK/vendors/AnalogDevices/$BOARD_TYPE/Makefile vendors/AnalogDevices/$BOARD_TYPE
+  rm -rf romfs/ images/
+
+
+  cd $UCLINUX_DIST_TESTSUITES/camera
+  if [ $BOARD_TYPE == "BF561-EZKIT" ] ; then
+      ./build_camera_kernel.exp $BOARD_TYPE ADV7183 >/dev/null 2>&1
+  else
+      ./build_camera_kernel.exp $BOARD_TYPE VS6624 >/dev/null 2>&1
+  fi
+
+  if [ ! -f $UCLINUX_DIST_PATH/images/uImage ]
+  then
+      echo "$0:   Error, failed."
+      tail -50 ./build_camera_kernel_log
+  else
+      sleep 30
+      if [ $BOARD_TYPE == "BF561-EZKIT" ] ; then
+          ./adv7183_test.exp $BOARD_TYPE >/dev/null  2>&1
+      else
+          ./camera_test.exp $BOARD_TYPE >/dev/null  2>&1
+      fi
+  fi
+
+  if [ $BOARD_TYPE == "BF561-EZKIT" ] ; then
+      cp $UCLINUX_DIST_PATH/images/uImage $THIS_LOG/uImage.camera_adv7183
+      cp $UCLINUX_DIST_PATH/linux-2.6.x/.config $THIS_LOG/config.camera_adv7183
+      cp $UCLINUX_DIST_TESTSUITES/camera/build_camera_kernel_log $THIS_LOG
+      cp $UCLINUX_DIST_TESTSUITES/camera/adv7183_test_log $THIS_LOG/camera_adv7183_test_log
+  else
+      cp $UCLINUX_DIST_PATH/images/uImage $THIS_LOG/uImage.camera_vs6624
+      cp $UCLINUX_DIST_PATH/linux-2.6.x/.config $THIS_LOG/config.camera_vs6624
+      cp $UCLINUX_DIST_TESTSUITES/camera/build_camera_kernel_log $THIS_LOG
+      cp $UCLINUX_DIST_TESTSUITES/camera/camera_test_log $THIS_LOG/camera_vs6624_test_log
+      cp $UCLINUX_DIST_TESTSUITES/camera/camera.avi $THIS_LOG
+  fi
+
+  cd $UCLINUX_DIST_PATH/
+  make clean  > /dev/null 2>&1
+
+
+  sleep 30
+
+  if [ $RESET_BOARD -eq 1  ] ; then
+   cd $UCLINUX_DIST_TESTSUITES
+   ./reset_board.exp  >/dev/null  2>&1
+   sleep 10
+  fi
+
+  fi
+
+
+  #############################################################################################
+  ########################## TEST VIDEO #########################################################
+  if [ ${AUTO_RUN_STATUS[$((n+10))]} -eq 1  ] ; then
+  
+  echo  "Testing video adv7393..."
+
+  rm -rf $UCLINUX_DIST_PATH/linux-2.6.x
+  cd $UCLINUX_DIST_PATH/
+  cp -a  $UCLINUX_DIST_PATH_BAK/linux-2.6.x  .
+  cp $UCLINUX_DIST_PATH_BAK/config/.config config
+  cp $UCLINUX_DIST_PATH_BAK/vendors/AnalogDevices/$BOARD_TYPE/Makefile vendors/AnalogDevices/$BOARD_TYPE
+  rm -rf romfs/ images/
+ 
+  cd $UCLINUX_DIST_TESTSUITES/video
+  ./build_video_kernel.exp $BOARD_TYPE  >/dev/null  2>&1
+
+
+  if [ ! -f $UCLINUX_DIST_PATH/images/uImage ]
+  then
+      echo "$0:   Error, failed."
+      tail -50 ./build_video_kernel_log
+  else
+      sleep 30
+      ./adv7393_test.exp $BOARD_TYPE >/dev/null  2>&1
+  fi
+
+
+  cp $UCLINUX_DIST_PATH/images/uImage $THIS_LOG/uImage.adv7393
+  cp $UCLINUX_DIST_PATH/linux-2.6.x/.config $THIS_LOG/config.adv7393
+  cp $UCLINUX_DIST_TESTSUITES/video/build_video_kernel_log $THIS_LOG
+  cp $UCLINUX_DIST_TESTSUITES/video/adv7393_test_log $THIS_LOG/video_adv7393_test_log
+
+  sleep 30
+ 
+  if [ $RESET_BOARD -eq 1  ] ; then
+   cd $UCLINUX_DIST_TESTSUITES
+   ./reset_board.exp  >/dev/null  2>&1 
+   sleep 10
+  fi
+
+  fi
+
+  #############################################################################################
+  ###################################### TEST TFTLCD###########################################
+
+  if [ ${AUTO_RUN_STATUS[$((n+11))]} -eq 1  ]; then
+
+  echo  "Testing tftlcd..."
+
+  rm -rf $UCLINUX_DIST_PATH/linux-2.6.x
+  cd $UCLINUX_DIST_PATH/
+  cp -a  $UCLINUX_DIST_PATH_BAK/linux-2.6.x  .
+  cp $UCLINUX_DIST_PATH_BAK/config/.config config
+  cp $UCLINUX_DIST_PATH_BAK/vendors/AnalogDevices/$BOARD_TYPE/Makefile vendors/AnalogDevices/$BOARD_TYPE
+  rm -rf romfs/ images/
+
+  cd $UCLINUX_DIST_TESTSUITES/tftlcd
+  ./build_tftlcd_kernel.exp $BOARD_TYPE >/dev/null  2>&1
+
+
+  if [ ! -f $UCLINUX_DIST_PATH/images/uImage ]
+  then
+      echo "$0:   Error, failed."
+      tail -50 ./build_tftlcd_kernel_log
+  else
+      sleep 30
+      ./tftlcd_test.exp $BOARD_TYPE >/dev/null  2>&1
+  fi
+
+
+  cp $UCLINUX_DIST_PATH/images/uImage $THIS_LOG/uImage.tftlcd
+  cp $UCLINUX_DIST_PATH/linux-2.6.x/.config $THIS_LOG/config.linux.tftlcd
+  cp $UCLINUX_DIST_PATH/config/.config $THIS_LOG/config.config.tftlcd
+  cp $UCLINUX_DIST_TESTSUITES/tftlcd/*_log $THIS_LOG
+
+  sleep 30
+
+  if [ $RESET_BOARD -eq 1  ] ; then
+   cd $UCLINUX_DIST_TESTSUITES
+   ./reset_board.exp  >/dev/null  2>&1
+   sleep 10
+  fi
+
+  fi
+
+
+  #############################################################################################
+  ########################## TEST AUDIO #########################################################
+  if [ ${AUTO_RUN_STATUS[$((n+3))]} -eq 1  ] ; then
+  
+  echo  "Testing audio ad1836..."
+  
+  rm -rf $UCLINUX_DIST_PATH/linux-2.6.x
+  cd $UCLINUX_DIST_PATH/
+  cp -a  $UCLINUX_DIST_PATH_BAK/linux-2.6.x  .
+  cp $UCLINUX_DIST_PATH_BAK/config/.config config
+  cp $UCLINUX_DIST_PATH_BAK/vendors/AnalogDevices/$BOARD_TYPE/Makefile vendors/AnalogDevices/$BOARD_TYPE
+  rm -rf romfs/ images/
+
+  cd $UCLINUX_DIST_TESTSUITES/audio
+  ./build_audio_kernel.exp $BOARD_TYPE audio_ad1836 >/dev/null  2>&1
+
+
+  if [ ! -f $UCLINUX_DIST_PATH/images/uImage ]
+  then
+      echo "$0:   Error, failed."
+      tail -50 ./build_audio_ad1836_kernel_log
+  else
+      sleep 30
+      ./audio_test.exp $BOARD_TYPE audio_ad1836 >/dev/null  2>&1
+
+      if [ $RESET_BOARD -eq 1  ] ; then
+          cd $UCLINUX_DIST_TESTSUITES
+          ./reset_board.exp  >/dev/null  2>&1 
+          sleep 10
+      fi
+
+      cd $UCLINUX_DIST_TESTSUITES/audio
+      ./audio_data_test.exp $BOARD_TYPE audio_ad1836 >/dev/null 2>&1
+      ./snd2fftw_test.exp $BOARD_TYPE audio_ad1836 >/dev/null 2>&1
+  fi
+
+
+  cp $UCLINUX_DIST_PATH/images/uImage $THIS_LOG/uImage.audio_ad1836
+  cp $UCLINUX_DIST_PATH/linux-2.6.x/.config $THIS_LOG/config.linux.audio_ad1836
+  cp $UCLINUX_DIST_PATH/config/.config $THIS_LOG/config.config.audio_ad1836
+  cp $UCLINUX_DIST_TESTSUITES/audio/*_log $THIS_LOG
+  mv $UCLINUX_DIST_TESTSUITES/audio/audio_data $THIS_LOG/audio_data.ad1836
+
+  cd $UCLINUX_DIST_PATH/
+  make clean  > /dev/null 2>&1
+
+  sleep 30
+ 
+  if [ $RESET_BOARD -eq 1  ] ; then
+   cd $UCLINUX_DIST_TESTSUITES
+   ./reset_board.exp  >/dev/null  2>&1 
+   sleep 10
+  fi
+
+  fi
+  
+  if [ ${AUTO_RUN_STATUS[$((n+4))]} -eq 1  ] ; then
+  
+  echo  "Testing audio ad73311..."
+ 
+  rm -rf $UCLINUX_DIST_PATH/linux-2.6.x
+  cd $UCLINUX_DIST_PATH/
+  cp -a  $UCLINUX_DIST_PATH_BAK/linux-2.6.x  .
+  cp $UCLINUX_DIST_PATH_BAK/config/.config config
+  cp $UCLINUX_DIST_PATH_BAK/vendors/AnalogDevices/$BOARD_TYPE/Makefile vendors/AnalogDevices/$BOARD_TYPE
+  rm -rf romfs/ images/
+
+  cd $UCLINUX_DIST_TESTSUITES/audio 
+  ./build_audio_kernel.exp $BOARD_TYPE audio_ad73311 >/dev/null  2>&1
+
+
+  if [ ! -f $UCLINUX_DIST_PATH/images/uImage ]
+  then
+      echo "$0:   Error, failed."
+      tail -50 ./build_audio_ad73311_kernel_log
+  else
+      sleep 30
+      ./audio_test.exp $BOARD_TYPE audio_ad73311 >/dev/null  2>&1
+
+      if [ $RESET_BOARD -eq 1  ] ; then
+          cd $UCLINUX_DIST_TESTSUITES
+          ./reset_board.exp  >/dev/null  2>&1 
+          sleep 10
+      fi
+
+      cd $UCLINUX_DIST_TESTSUITES/audio
+      ./audio_data_test.exp $BOARD_TYPE audio_ad73311 >/dev/null 2>&1
+      ./snd2fftw_test.exp $BOARD_TYPE audio_ad73311 >/dev/null 2>&1
+  fi
+
+
+  cp $UCLINUX_DIST_PATH/images/uImage $THIS_LOG/uImage.audio_ad73311
+  cp $UCLINUX_DIST_PATH/linux-2.6.x/.config $THIS_LOG/config.linux.audio_ad73311
+  cp $UCLINUX_DIST_PATH/config/.config $THIS_LOG/config.config.audio_ad73311
+  cp $UCLINUX_DIST_TESTSUITES/audio/*_log $THIS_LOG
+  mv $UCLINUX_DIST_TESTSUITES/audio/audio_data $THIS_LOG/audio_data.ad73311
+
+  cd $UCLINUX_DIST_PATH/
+  make clean  > /dev/null 2>&1
+ 
+  sleep 30
+ 
+  if [ $RESET_BOARD -eq 1  ] ; then
+   cd $UCLINUX_DIST_TESTSUITES
+   ./reset_board.exp  >/dev/null  2>&1 
+   sleep 10
+  fi
+
+  fi
+
+  if [ ${AUTO_RUN_STATUS[$((n+5))]} -eq 1  ] ; then
+
+  echo  "Testing audio ad1938..."
+
+  rm -rf $UCLINUX_DIST_PATH/linux-2.6.x
+  cd $UCLINUX_DIST_PATH/
+  cp -a  $UCLINUX_DIST_PATH_BAK/linux-2.6.x  .
+  cp $UCLINUX_DIST_PATH_BAK/config/.config config
+  cp $UCLINUX_DIST_PATH_BAK/vendors/AnalogDevices/$BOARD_TYPE/Makefile vendors/AnalogDevices/$BOARD_TYPE
+  rm -rf romfs/ images/
+
+  cd $UCLINUX_DIST_TESTSUITES/audio
+  ./build_audio_kernel.exp $BOARD_TYPE audio_ad1938 >/dev/null  2>&1
+
+
+  if [ ! -f $UCLINUX_DIST_PATH/images/uImage ]
+  then
+      echo "$0:   Error, failed."
+      tail -50 ./build_audio_ad1938_kernel_log
+  else
+      sleep 30
+      ./audio_test.exp $BOARD_TYPE audio_ad1938 >/dev/null  2>&1
+
+      if [ $RESET_BOARD -eq 1  ] ; then
+          cd $UCLINUX_DIST_TESTSUITES
+          ./reset_board.exp  >/dev/null  2>&1 
+          sleep 10
+      fi
+
+      cd $UCLINUX_DIST_TESTSUITES/audio
+      ./audio_data_test.exp $BOARD_TYPE audio_ad1938 >/dev/null 2>&1
+      ./snd2fftw_test.exp $BOARD_TYPE audio_ad1938 >/dev/null 2>&1
+  fi
+
+
+  cp $UCLINUX_DIST_PATH/images/uImage $THIS_LOG/uImage.audio_ad1938
+  cp $UCLINUX_DIST_PATH/linux-2.6.x/.config $THIS_LOG/config.linux.audio_ad1938
+  cp $UCLINUX_DIST_PATH/config/.config $THIS_LOG/config.config.audio_ad1938
+  cp $UCLINUX_DIST_TESTSUITES/audio/*_log $THIS_LOG
+  mv $UCLINUX_DIST_TESTSUITES/audio/audio_data $THIS_LOG/audio_data.ad1938
+
+  cd $UCLINUX_DIST_PATH/
+  make clean  > /dev/null 2>&1
+
+  sleep 30
+
+  if [ $RESET_BOARD -eq 1  ] ; then
+   cd $UCLINUX_DIST_TESTSUITES
+   ./reset_board.exp  >/dev/null  2>&1
+   sleep 10
+  fi
+
+  fi
+
+
+  if [ ${AUTO_RUN_STATUS[$((n+14))]} -eq 1  ] ; then
+
+  echo  "Testing audio adau1373..."
+
+  rm -rf $UCLINUX_DIST_PATH/linux-2.6.x
+  cd $UCLINUX_DIST_PATH/
+  cp -a  $UCLINUX_DIST_PATH_BAK/linux-2.6.x  .
+  cp $UCLINUX_DIST_PATH_BAK/config/.config config
+  cp $UCLINUX_DIST_PATH_BAK/vendors/AnalogDevices/$BOARD_TYPE/Makefile vendors/AnalogDevices/$BOARD_TYPE
+  rm -rf romfs/ images/
+
+  cd $UCLINUX_DIST_TESTSUITES/audio
+  ./build_audio_kernel.exp $BOARD_TYPE audio_adau1373 >/dev/null  2>&1
+
+
+  if [ ! -f $UCLINUX_DIST_PATH/images/uImage ]
+  then
+      echo "$0:   Error, failed."
+      tail -50 ./build_audio_adau1373_kernel_log
+  else
+      sleep 30
+      ./audio_test.exp $BOARD_TYPE audio_adau1373 >/dev/null  2>&1
+
+      if [ $RESET_BOARD -eq 1  ] ; then
+          cd $UCLINUX_DIST_TESTSUITES
+          ./reset_board.exp  >/dev/null  2>&1 
+          sleep 10
+      fi
+
+      cd $UCLINUX_DIST_TESTSUITES/audio
+      ./audio_data_test.exp $BOARD_TYPE audio_adau1373 >/dev/null 2>&1
+      ./snd2fftw_test.exp $BOARD_TYPE audio_adau1373 >/dev/null 2>&1
+  fi
+
+
+  cp $UCLINUX_DIST_PATH/images/uImage $THIS_LOG/uImage.audio_adau1373
+  cp $UCLINUX_DIST_PATH/linux-2.6.x/.config $THIS_LOG/config.linux.audio_adau1373
+  cp $UCLINUX_DIST_PATH/config/.config $THIS_LOG/config.config.audio_adau1373
+  cp $UCLINUX_DIST_TESTSUITES/audio/*_log $THIS_LOG
+  mv $UCLINUX_DIST_TESTSUITES/audio/audio_data $THIS_LOG/audio_data.adau1373
+
+  cd $UCLINUX_DIST_PATH/
+  make clean  > /dev/null 2>&1
+
+  sleep 30
+
+
+  if [ $RESET_BOARD -eq 1  ] ; then
+   cd $UCLINUX_DIST_TESTSUITES
+   ./reset_board.exp  >/dev/null  2>&1
+   sleep 10
+  fi
+
+  fi
+
+
+  if [ ${AUTO_RUN_STATUS[$((n+16))]} -eq 1  ] ; then
+
+  echo  "Testing audio ad73322..."
+
+  rm -rf $UCLINUX_DIST_PATH/linux-2.6.x
+  cd $UCLINUX_DIST_PATH/
+  cp -a  $UCLINUX_DIST_PATH_BAK/linux-2.6.x  .
+  cp $UCLINUX_DIST_PATH_BAK/config/.config config
+  cp $UCLINUX_DIST_PATH_BAK/vendors/AnalogDevices/$BOARD_TYPE/Makefile vendors/AnalogDevices/$BOARD_TYPE
+  rm -rf romfs/ images/
+
+  cd $UCLINUX_DIST_TESTSUITES/audio
+  ./build_audio_kernel.exp $BOARD_TYPE audio_ad73322 >/dev/null  2>&1
+
+
+  if [ ! -f $UCLINUX_DIST_PATH/images/uImage ]
+  then
+      echo "$0:   Error, failed."
+      tail -50 ./build_audio_ad73322_kernel_log
+  else
+      sleep 30
+      ./ad73322_test.exp $BOARD_TYPE >/dev/null  2>&1
+      sleep 30
+      ./audio_data_test.exp $BOARD_TYPE audio_ad73322 >/dev/null 2>&1
+      ./snd2fftw_test.exp $BOARD_TYPE audio_ad73322 >/dev/null 2>&1
+  fi
+
+
+  cp $UCLINUX_DIST_PATH/images/uImage $THIS_LOG/uImage.audio_ad73322
+  cp $UCLINUX_DIST_PATH/linux-2.6.x/.config $THIS_LOG/config.linux.audio_ad73322
+  cp $UCLINUX_DIST_PATH/config/.config $THIS_LOG/config.config.audio_ad73322
+  cp $UCLINUX_DIST_TESTSUITES/audio/*_log $THIS_LOG
+  mv $UCLINUX_DIST_TESTSUITES/audio/audio_data $THIS_LOG/audio_data.ad73322
+
+  cd $UCLINUX_DIST_PATH/
+  make clean  > /dev/null 2>&1
+
+  sleep 30
+
+  if [ $RESET_BOARD -eq 1  ] ; then
+   cd $UCLINUX_DIST_TESTSUITES
+   ./reset_board.exp  >/dev/null  2>&1
+   sleep 10
+  fi
+
+  fi
+
+
+  if [ ${AUTO_RUN_STATUS[$((n+17))]} -eq 1  ] ; then
+  
+  echo  "Testing audio ssm2603..."
+ 
+  rm -rf $UCLINUX_DIST_PATH/linux-2.6.x
+  cd $UCLINUX_DIST_PATH/
+  cp -a  $UCLINUX_DIST_PATH_BAK/linux-2.6.x  .
+  cp $UCLINUX_DIST_PATH_BAK/config/.config config
+  cp $UCLINUX_DIST_PATH_BAK/vendors/AnalogDevices/$BOARD_TYPE/Makefile vendors/AnalogDevices/$BOARD_TYPE
+  rm -rf romfs/ images/
+
+  cd $UCLINUX_DIST_TESTSUITES/audio 
+  ./build_audio_kernel.exp $BOARD_TYPE audio_ssm2603 >/dev/null  2>&1
+
+
+  if [ ! -f $UCLINUX_DIST_PATH/images/uImage ]
+  then
+      echo "$0:   Error, failed."
+      tail -50 ./build_audio_ssm2603_kernel_log
+  else
+      sleep 30
+      ./audio_test.exp $BOARD_TYPE audio_ssm2603 >/dev/null  2>&1
+
+      if [ $RESET_BOARD -eq 1  ] ; then
+          cd $UCLINUX_DIST_TESTSUITES
+          ./reset_board.exp  >/dev/null  2>&1 
+          sleep 10
+      fi
+
+      cd $UCLINUX_DIST_TESTSUITES/audio
+      ./audio_data_test.exp $BOARD_TYPE audio_ssm2603 >/dev/null 2>&1
+      ./snd2fftw_test.exp $BOARD_TYPE audio_ssm2603 >/dev/null 2>&1
+  fi
+
+
+  cp $UCLINUX_DIST_PATH/images/uImage $THIS_LOG/uImage.audio_ssm2603
+  cp $UCLINUX_DIST_PATH/linux-2.6.x/.config $THIS_LOG/config.linux.audio_ssm2603
+  cp $UCLINUX_DIST_PATH/config/.config $THIS_LOG/config.config.audio_ssm2603
+  cp $UCLINUX_DIST_TESTSUITES/audio/*_log $THIS_LOG
+  mv $UCLINUX_DIST_TESTSUITES/audio/audio_data $THIS_LOG/audio_data.ssm2603
+
+  cd $UCLINUX_DIST_PATH/
+  make clean  > /dev/null 2>&1
+ 
+  sleep 30
+ 
+  if [ $RESET_BOARD -eq 1  ] ; then
+   cd $UCLINUX_DIST_TESTSUITES
+   ./reset_board.exp  >/dev/null  2>&1
+   sleep 10
+  fi
+
+  fi
+
+
+   #############################################################################################
+  ################# TEST BOOT UCLINUX_DIST AND MOUNT JFFS2 FS FROM SPI FLASH ########################
+
+  if [ ${AUTO_RUN_STATUS[$((n+6))]} -eq 1  ] ; then
+  echo  "Testing boot uclinux-dist and mount jffs2 file system from SPI flash ..."
+ # Please set the chip selection to the 3rd one on bf533 and the 2rd on bf537 board.
+
+  rm -rf $UCLINUX_DIST_PATH/linux-2.6.x
+  cd $UCLINUX_DIST_PATH/
+  cp -a  $UCLINUX_DIST_PATH_BAK/linux-2.6.x  .
+  cp $UCLINUX_DIST_PATH_BAK/config/.config config
+  cp $UCLINUX_DIST_PATH_BAK/vendors/AnalogDevices/$BOARD_TYPE/Makefile vendors/AnalogDevices/$BOARD_TYPE
+  rm -rf romfs/ images/
+ 
+  cd $UCLINUX_DIST_TESTSUITES/snormtd
+  ./build_snormtd_kernel.exp $BOARD_TYPE   >/dev/null  2>&1
+  sleep 30
+  ./snormtd_test.exp $BOARD_TYPE >/dev/null  2>&1
+  sleep 30
+  ./spi_flash_images.exp $BOARD_TYPE >/dev/null  2>&1
+  if [ $? == 0 ] ; then
+  sleep 30
+  ./snormtd_reboot_test.exp $BOARD_TYPE >/dev/null  2>&1
+  fi
+  sleep 30
+
+  cp $UCLINUX_DIST_PATH/linux-2.6.x/.config $THIS_LOG/config.snormtd
+  cp $UCLINUX_DIST_PATH/images/uImage $THIS_LOG/uImage.snormtd
+  cp $UCLINUX_DIST_PATH/images/vmImage $THIS_LOG/vmImage.snormtd
+  cp $UCLINUX_DIST_PATH/images/rootfs.jffs2 $THIS_LOG/rootfs.jffs2.snormtd
+  cp $UCLINUX_DIST_TESTSUITES/snormtd/*_log $THIS_LOG
+
+  if [ $RESET_BOARD -eq 1  ] ; then
+   cd $UCLINUX_DIST_TESTSUITES
+   ./reset_board.exp  >/dev/null  2>&1 
+   sleep 10
+  fi
+
+  fi
+
+  
+  #############################################################################################
+  #################### TEST SPI FLASH WITH DIFFERENT CONFIGS ##################################
+
+  snormtd_df_config=""
+  snormtd_dma_config=""
+
+  if [ ${AUTO_RUN_STATUS[$((n+19))]} -eq 1 ] ; then
+  snormtd_df_config="pio df"
+  fi
+ 
+  if [ ${AUTO_RUN_STATUS[$((n+22))]} -eq 1 ] ; then
+  snormtd_dma_config="dma normal"
+  fi
+ 
+  for config in "$snormtd_df_config" "$snormtd_dma_config"
+  do
+
+  if [ -z $config ] ; then
+  continue
+  fi
+
+  echo  "Testing from spi flash $config ..."
+ # Please set the chip selection to the 3rd one on bf537 board.
+
+  rm -rf $UCLINUX_DIST_PATH/linux-2.6.x
+  cd $UCLINUX_DIST_PATH/
+  cp -a  $UCLINUX_DIST_PATH_BAK/linux-2.6.x  .
+  cp $UCLINUX_DIST_PATH_BAK/config/.config config
+  cp $UCLINUX_DIST_PATH_BAK/vendors/AnalogDevices/$BOARD_TYPE/Makefile vendors/AnalogDevices/$BOARD_TYPE
+  rm -rf romfs/ images/
+ 
+
+  cd $UCLINUX_DIST_TESTSUITES/snormtd
+  ./build_snormtd_kernel.exp $BOARD_TYPE $config  >/dev/null  2>&1
+  sleep 30
+  ./snormtd_test.exp $BOARD_TYPE $config >/dev/null  2>&1
+
+  cp $UCLINUX_DIST_PATH/images/uImage $THIS_LOG/uImage.snormtd_mount_"$config"
+  cp $UCLINUX_DIST_PATH/linux-2.6.x/.config $THIS_LOG/config.snormtd_mount_"$config"  
+  cp $UCLINUX_DIST_TESTSUITES/snormtd/*_log $THIS_LOG
+  
+  sleep 30
+ 
+  if [ $RESET_BOARD -eq 1  ] ; then
+   cd $UCLINUX_DIST_TESTSUITES
+   ./reset_board.exp  >/dev/null  2>&1 
+   sleep 10
+  fi
+  done
+  ###############################################################################################
+  ########################## TEST POWER #########################################################
+
+ if [ ${AUTO_RUN_STATUS[$((n+12))]} -eq 1  ] ; then
+  echo  "Testing power with with ethernet/video drivers ..."
+
+  rm -rf $UCLINUX_DIST_PATH/linux-2.6.x
+  cd $UCLINUX_DIST_PATH/
+  cp -a  $UCLINUX_DIST_PATH_BAK/linux-2.6.x  .
+  cp $UCLINUX_DIST_PATH_BAK/config/.config config
+  cp $UCLINUX_DIST_PATH_BAK/vendors/AnalogDevices/$BOARD_TYPE/Makefile vendors/AnalogDevices/$BOARD_TYPE
+  rm -rf romfs/ images/
+
+  cd $UCLINUX_DIST_TESTSUITES/power
+  ./build_power_kernel.exp $BOARD_TYPE >/dev/null  2>&1
+  sleep 30
+
+  if [ ! -f $UCLINUX_DIST_PATH/images/uImage ]
+  then
+	echo "$0:   Error, failed."
+        tail -50 ./build_power_kernel_log
+  else
+        if [ ${AUTO_RUN_STATUS[$((n+10))]} -eq 1  ] ; then
+            cd $UCLINUX_DIST_TESTSUITES/power
+            ./power_adv7393_test.exp $BOARD_TYPE 1 >/dev/null  2>&1
+            cd $UCLINUX_DIST_TESTSUITES
+            ./reset_board.exp  >/dev/null  2>&1
+            sleep 10
+
+            cd $UCLINUX_DIST_TESTSUITES/power
+            ./power_adv7393_test.exp $BOARD_TYPE 2 >/dev/null  2>&1
+            cd $UCLINUX_DIST_TESTSUITES
+            ./reset_board.exp  >/dev/null  2>&1
+            sleep 10
+        fi
+
+        if [ ${AUTO_RUN_STATUS[$((n+11))]} -eq 1  ] ; then
+            cd $UCLINUX_DIST_TESTSUITES/power
+            ./power_tftlcd_test.exp $BOARD_TYPE 1 >/dev/null  2>&1
+            cd $UCLINUX_DIST_TESTSUITES
+            ./reset_board.exp  >/dev/null  2>&1
+            sleep 10
+
+            cd $UCLINUX_DIST_TESTSUITES/power
+            ./power_tftlcd_test.exp $BOARD_TYPE 2 >/dev/null  2>&1
+            cd $UCLINUX_DIST_TESTSUITES
+            ./reset_board.exp  >/dev/null  2>&1
+            sleep 10
+        fi
+
+        cd $UCLINUX_DIST_TESTSUITES/power
+        ./power_ethernet_test.exp $BOARD_TYPE 1 >/dev/null  2>&1
+        cd $UCLINUX_DIST_TESTSUITES
+        ./reset_board.exp  >/dev/null  2>&1
+        sleep 10
+
+        cd $UCLINUX_DIST_TESTSUITES/power
+        ./power_ethernet_test.exp $BOARD_TYPE 2 >/dev/null  2>&1
+        cd $UCLINUX_DIST_TESTSUITES
+        ./reset_board.exp  >/dev/null  2>&1
+        sleep 10
+
+  fi
+
+  cp $UCLINUX_DIST_PATH/images/uImage $THIS_LOG/uImage.power
+  cp $UCLINUX_DIST_PATH/linux-2.6.x/.config $THIS_LOG/config.power
+  cp $UCLINUX_DIST_TESTSUITES/power/*_log $THIS_LOG
+
+
+  echo  "Testing power with I2S Audio drivers..."
+  if [ ${AUTO_RUN_STATUS[$((n+4))]} -eq 1  ] || [ ${AUTO_RUN_STATUS[$((n+17))]} -eq 1  ] ; then
+
+      cd $UCLINUX_DIST_PATH/
+      cp $UCLINUX_DIST_PATH_BAK/linux-2.6.x/.config linux-2.6.x/
+      cp $UCLINUX_DIST_PATH_BAK/config/.config config/
+
+      cd $UCLINUX_DIST_TESTSUITES/power
+      ./build_power_audio_i2s_kernel.exp $BOARD_TYPE >/dev/null  2>&1
+      sleep 30
+
+      if [ ! -f $UCLINUX_DIST_PATH/images/uImage ]
+      then
+          echo "$0:   Error, failed."
+          tail -50 ./build_power_audio_i2s_kernel_log
+      else
+          if [ ${AUTO_RUN_STATUS[$((n+4))]} -eq 1  ] ; then
+              cd $UCLINUX_DIST_TESTSUITES/power
+              ./power_ad73311_test.exp $BOARD_TYPE 1 >/dev/null  2>&1
+              cd $UCLINUX_DIST_TESTSUITES
+              ./reset_board.exp  >/dev/null  2>&1
+              sleep 10
+
+              cd $UCLINUX_DIST_TESTSUITES/power
+              ./power_ad73311_test.exp $BOARD_TYPE 2 >/dev/null  2>&1
+              cd $UCLINUX_DIST_TESTSUITES
+              ./reset_board.exp  >/dev/null  2>&1
+              sleep 10
+          fi
+
+          if [ ${AUTO_RUN_STATUS[$((n+14))]} -eq 1  ] ; then
+              cd $UCLINUX_DIST_TESTSUITES/power
+              ./power_adau1373_test.exp $BOARD_TYPE 1 >/dev/null  2>&1
+              cd $UCLINUX_DIST_TESTSUITES
+              ./reset_board.exp  >/dev/null  2>&1
+              sleep 10
+
+              cd $UCLINUX_DIST_TESTSUITES/power
+              ./power_adau1373_test.exp $BOARD_TYPE 2 >/dev/null  2>&1
+              cd $UCLINUX_DIST_TESTSUITES
+              ./reset_board.exp  >/dev/null  2>&1
+              sleep 10
+          fi
+
+          if [ ${AUTO_RUN_STATUS[$((n+17))]} -eq 1  ] ; then
+              cd $UCLINUX_DIST_TESTSUITES/power
+              ./power_ssm2603_test.exp $BOARD_TYPE 1 >/dev/null  2>&1
+              cd $UCLINUX_DIST_TESTSUITES
+              ./reset_board.exp  >/dev/null  2>&1
+              sleep 10
+
+              cd $UCLINUX_DIST_TESTSUITES/power
+              ./power_ssm2603_test.exp $BOARD_TYPE 2 >/dev/null  2>&1
+              cd $UCLINUX_DIST_TESTSUITES
+              ./reset_board.exp  >/dev/null  2>&1
+              sleep 10
+          fi
+
+      fi
+
+      cp $UCLINUX_DIST_PATH/images/uImage $THIS_LOG/uImage.power.audio_i2s
+      cp $UCLINUX_DIST_PATH/linux-2.6.x/.config $THIS_LOG/config.power.audio_i2s
+      cp $UCLINUX_DIST_TESTSUITES/power/*_log $THIS_LOG
+
+  fi
+
+
+  if [ ${AUTO_RUN_STATUS[$((n+3))]} -eq 1  ] || [ ${AUTO_RUN_STATUS[$((n+5))]} -eq 1  ] ; then
+      echo  "Testing power with I2S TDM mode Audio drivers..."
+
+      cd $UCLINUX_DIST_PATH/
+      cp $UCLINUX_DIST_PATH_BAK/linux-2.6.x/.config linux-2.6.x/
+      cp $UCLINUX_DIST_PATH_BAK/config/.config config/
+
+      if [ ${AUTO_RUN_STATUS[$((n+3))]} -eq 1  ] ; then
+          audio_dev="audio_ad1836"
+      elif [ ${AUTO_RUN_STATUS[$((n+5))]} -eq 1  ] ; then
+          audio_dev="audio_ad1938"
+      fi
+
+      cd $UCLINUX_DIST_TESTSUITES/power
+      ./build_power_audio_tdm_kernel.exp $BOARD_TYPE $audio_dev >/dev/null  2>&1
+      sleep 30
+
+      if [ ! -f $UCLINUX_DIST_PATH/images/uImage ]
+      then
+          echo "$0:   Error, failed."
+          tail -50 ./build_power_audio_tdm_kernel_log
+      else
+          if [ ${AUTO_RUN_STATUS[$((n+3))]} -eq 1  ] ; then
+              cd $UCLINUX_DIST_TESTSUITES/power
+              ./power_ad1836_test.exp $BOARD_TYPE 1 >/dev/null  2>&1
+              cd $UCLINUX_DIST_TESTSUITES
+              ./reset_board.exp  >/dev/null  2>&1
+              sleep 10
+
+              cd $UCLINUX_DIST_TESTSUITES/power
+              ./power_ad1836_test.exp $BOARD_TYPE 2 >/dev/null  2>&1
+              cd $UCLINUX_DIST_TESTSUITES
+              ./reset_board.exp  >/dev/null  2>&1
+              sleep 10
+          fi
+
+          if [ ${AUTO_RUN_STATUS[$((n+5))]} -eq 1  ] ; then
+              cd $UCLINUX_DIST_TESTSUITES/power
+              ./power_ad1938_test.exp $BOARD_TYPE 1 >/dev/null  2>&1
+              cd $UCLINUX_DIST_TESTSUITES
+              ./reset_board.exp  >/dev/null  2>&1
+              sleep 10
+
+              cd $UCLINUX_DIST_TESTSUITES/power
+              ./power_ad1938_test.exp $BOARD_TYPE 2 >/dev/null  2>&1
+              cd $UCLINUX_DIST_TESTSUITES
+              ./reset_board.exp  >/dev/null  2>&1
+              sleep 10
+          fi
+
+      fi
+
+      cp $UCLINUX_DIST_PATH/images/uImage $THIS_LOG/uImage.power.audio_tdm
+      cp $UCLINUX_DIST_PATH/linux-2.6.x/.config $THIS_LOG/config.power.audio_tdm
+      cp $UCLINUX_DIST_TESTSUITES/power/*_log $THIS_LOG
+
+  fi
+
+
+  cd $UCLINUX_DIST_PATH/
+  make clean > /dev/null 2>&1
+
+  sleep 30
+
+  if [ $RESET_BOARD -eq 1  ] ; then
+   cd $UCLINUX_DIST_TESTSUITES
+   ./reset_board.exp  >/dev/null  2>&1
+   sleep 10
+  fi
+
+ fi
+
+
+  ###############################################################################################
+  ################################## QT #########################################################
+  
+ if [ ${AUTO_RUN_STATUS[$((n+13))]} -eq 1  ] ; then
+
+    APP_FORMAT="flat fdpic"
+
+    for format in $APP_FORMAT
+    do
+
+        FORMAT=`echo $format|tr 'a-z' 'A-Z'`
+        echo  "Test qt in $format..."
+
+        rm -rf $UCLINUX_DIST_PATH/linux-2.6.x
+        cd $UCLINUX_DIST_PATH/
+        cp -a  $UCLINUX_DIST_PATH_BAK/linux-2.6.x  .
+        cp $UCLINUX_DIST_PATH_BAK/config/.config config
+        cp $UCLINUX_DIST_PATH_BAK/vendors/AnalogDevices/$BOARD_TYPE/Makefile vendors/AnalogDevices/$BOARD_TYPE
+
+        cd $UCLINUX_DIST_PATH/
+        make clean  > /dev/null 2>&1
+        cd user/pictureflow/pictureflow-0.1.0/pictureflow-qt
+        rm *.o pictureflow Makefile moc_pictureflow.cpp
+
+        cd $UCLINUX_DIST_PATH/lib/qt-embedded/
+        rm -fr `svn stat|awk '{print $2}'`
+
+        cd $UCLINUX_DIST_TESTSUITES/qt
+        ./build_qt_kernel.exp $BOARD_TYPE $format >/dev/null  2>&1
+
+        if [ ! -f $UCLINUX_DIST_PATH/images/uImage ]
+        then
+            echo "$0:   Error, failed."
+            tail -50 ./build_qt_kernel_log
+        else
+            sleep 30
+            ./qt_test.exp $BOARD_TYPE $FORMAT >/dev/null  2>&1
+        fi
+
+        cp $UCLINUX_DIST_PATH/images/uImage $THIS_LOG/uImage.qt.$format
+        cp $UCLINUX_DIST_PATH/images/vmImage $THIS_LOG/vmImage.qt.$format
+        cp $UCLINUX_DIST_PATH/linux-2.6.x/.config $THIS_LOG/config.linux.qt.$format
+        cp $UCLINUX_DIST_PATH/config/.config $THIS_LOG/config.config.qt.$format
+        cp $UCLINUX_DIST_TESTSUITES/qt/qt_sample $THIS_LOG/qt_sample.$format
+        mv $UCLINUX_DIST_TESTSUITES/qt/build_qt_kernel_log $THIS_LOG/build_qt_${format}_kernel_log
+        mv $UCLINUX_DIST_TESTSUITES/qt/qt_test_log $THIS_LOG/qt_${format}_test_log
+
+        cd $UCLINUX_DIST_PATH/
+        make clean  > /dev/null 2>&1
+        cd user/pictureflow/pictureflow-0.1.0/pictureflow-qt
+        rm *.o pictureflow Makefile moc_pictureflow.cpp
+
+        sleep 30
+
+        if [ $RESET_BOARD -eq 1  ] ; then
+            cd $UCLINUX_DIST_TESTSUITES
+            ./reset_board.exp  >/dev/null  2>&1 
+            sleep 10
+        fi
+
+    done
+
+ fi
+
+
+#############################################################################################
+######################################### TEST XIP###########################################
+
+if [ ${AUTO_RUN_STATUS[$((n+15))]} -eq 1  ] ; then
+
+    APP_FORMAT="fdpic shared-flat"
+
+    for format in $APP_FORMAT
+    do
+
+        FORMAT=`echo $format|tr 'a-z' 'A-Z'`
+        echo  "Test kernel xip in $format..."
+
+        rm -rf $UCLINUX_DIST_PATH/linux-2.6.x
+        cd $UCLINUX_DIST_PATH/
+        cp -a  $UCLINUX_DIST_PATH_BAK/linux-2.6.x  .
+        cp $UCLINUX_DIST_PATH_BAK/config/.config config
+        cp $UCLINUX_DIST_PATH_BAK/vendors/AnalogDevices/$BOARD_TYPE/Makefile vendors/AnalogDevices/$BOARD_TYPE
+        rm -rf romfs/ images/
+
+        cd $UCLINUX_DIST_TESTSUITES/xip
+        ./build_kernel_xip_kernel.exp $BOARD_TYPE $format >/dev/null  2>&1
+        if [ ! -f $UCLINUX_DIST_PATH/images/vmImage ]
+        then
+            echo "$0:   Error, failed."
+            tail -50 ./build_kernel_xip_kernel_log
+        else
+            sleep 30
+            ./kernel_xip_test.exp $BOARD_TYPE $FORMAT >/dev/null  2>&1
+        fi
+
+        cp $UCLINUX_DIST_PATH/images/vmImage $THIS_LOG/vmImage.kernel_xip.$format
+        cp $UCLINUX_DIST_PATH/linux-2.6.x/.config $THIS_LOG/config.linux.kernel_xip.$format
+        cp $UCLINUX_DIST_PATH/config/.config $THIS_LOG/config.config.kernel_xip.$format
+        cp -fr $UCLINUX_DIST_PATH/romfs $THIS_LOG/romfs.kernel_xip.$format
+        mv $UCLINUX_DIST_TESTSUITES/xip/build_kernel_xip_kernel_log $THIS_LOG/build_kernel_xip_${format}_kernel_log
+        mv $UCLINUX_DIST_TESTSUITES/xip/kernel_xip_test_log $THIS_LOG/kernel_xip_${format}_test_log
+
+        #make sure kernel can boot up before next xip test
+        cp $THIS_LOG/uImage.policy /tftpboot/uImage
+
+        cd $UCLINUX_DIST_PATH/
+        make clean > /dev/null 2>&1
+
+        sleep 30
+
+        if [ $RESET_BOARD -eq 1  ] ; then
+            cd $UCLINUX_DIST_TESTSUITES
+            ./reset_board.exp  >/dev/null  2>&1
+            sleep 10
+        fi
+
+    done
+
+    for format in $APP_FORMAT
+    do
+
+        FORMAT=`echo $format|tr 'a-z' 'A-Z'`
+        echo  "Test when whole root fs is userspace xip in $format..."
+
+        rm -rf $UCLINUX_DIST_PATH/linux-2.6.x
+        cd $UCLINUX_DIST_PATH/
+        cp -a  $UCLINUX_DIST_PATH_BAK/linux-2.6.x  .
+        cp $UCLINUX_DIST_PATH_BAK/config/.config config
+        cp $UCLINUX_DIST_PATH_BAK/vendors/AnalogDevices/$BOARD_TYPE/Makefile vendors/AnalogDevices/$BOARD_TYPE
+        rm -rf romfs/ images/
+
+        cd $UCLINUX_DIST_TESTSUITES/xip
+        ./build_fs_xip_kernel.exp $BOARD_TYPE $format >/dev/null  2>&1
+        if [ ! -f $UCLINUX_DIST_PATH/images/rootfs.romfs ] || [ ! -f $UCLINUX_DIST_PATH/images/vmImage ]
+        then
+            echo "$0:   Error, failed."
+            tail -50 ./build_fs_xip_kernel_log
+        else
+            sleep 30
+            ./fs_xip_test.exp $BOARD_TYPE $FORMAT >/dev/null  2>&1
+        fi
+
+        cp $UCLINUX_DIST_PATH/images/vmImage $THIS_LOG/vmImage.fs_xip.$format
+        cp $UCLINUX_DIST_PATH/images/rootfs.romfs $THIS_LOG/rootfs.romfs.fs_xip.$format
+        cp $UCLINUX_DIST_PATH/linux-2.6.x/.config $THIS_LOG/config.linux.fs_xip.$format
+        cp $UCLINUX_DIST_PATH/config/.config $THIS_LOG/config.config.fs_xip.$format
+        mv $UCLINUX_DIST_TESTSUITES/xip/build_fs_xip_kernel_log $THIS_LOG/build_fs_xip_${format}_kernel_log
+        mv $UCLINUX_DIST_TESTSUITES/xip/fs_xip_test_log $THIS_LOG/fs_xip_${format}_test_log
+
+        #make sure kernel can boot up before next xip test
+        cp $THIS_LOG/uImage.policy /tftpboot/uImage
+
+        cd $UCLINUX_DIST_PATH/
+        make clean > /dev/null 2>&1
+
+        sleep 30
+
+        if [ $RESET_BOARD -eq 1  ] ; then
+            cd $UCLINUX_DIST_TESTSUITES
+            ./reset_board.exp  >/dev/null  2>&1
+            sleep 10
+        fi
+
+    done
+
+    for format in $APP_FORMAT
+    do
+
+        FORMAT=`echo $format|tr 'a-z' 'A-Z'`
+        echo  "Testing xip_userspace in $format..."
+
+        rm -rf $UCLINUX_DIST_PATH/linux-2.6.x
+        cd $UCLINUX_DIST_PATH/
+        cp -a  $UCLINUX_DIST_PATH_BAK/linux-2.6.x  .
+        cp $UCLINUX_DIST_PATH_BAK/config/.config config
+        cp $UCLINUX_DIST_PATH_BAK/vendors/AnalogDevices/$BOARD_TYPE/Makefile vendors/AnalogDevices/$BOARD_TYPE
+        rm -rf romfs/ images/
+
+        cd $UCLINUX_DIST_TESTSUITES/xip
+        ./build_xip_userspace_kernel.exp $BOARD_TYPE $format >/dev/null  2>&1
+        if [ ! -f $UCLINUX_DIST_PATH/images/uImage ]
+        then
+            echo "$0:   Error, failed."
+            tail -50 ./build_xip_userspace_kernel_log
+        else
+            sleep 30
+            ./xip_userspace_test.exp $BOARD_TYPE $FORMAT >/dev/null  2>&1
+        fi
+
+        cp $UCLINUX_DIST_PATH/images/uImage $THIS_LOG/uImage.xip_userspace.$format
+        cp $UCLINUX_DIST_PATH/images/img.romfs $THIS_LOG/img.romfs.xip_userspace.$format
+        cp $UCLINUX_DIST_PATH/linux-2.6.x/.config $THIS_LOG/config.linux.xip_userspace.$format
+        cp $UCLINUX_DIST_PATH/config/.config $THIS_LOG/config.config.xip_userspace.$format
+        mv $UCLINUX_DIST_TESTSUITES/xip/build_xip_userspace_kernel_log $THIS_LOG/build_xip_userspace_${format}_kernel_log
+        mv $UCLINUX_DIST_TESTSUITES/xip/xip_userspace_test_log $THIS_LOG/xip_userspace_${format}_test_log
+
+        #make sure kernel can boot up before next xip test
+        cp $THIS_LOG/uImage.policy /tftpboot/uImage
+
+        cd $UCLINUX_DIST_PATH/
+        make clean > /dev/null 2>&1
+
+        sleep 30
+
+        if [ $RESET_BOARD -eq 1  ] ; then
+            cd $UCLINUX_DIST_TESTSUITES
+            ./reset_board.exp  >/dev/null  2>&1
+            sleep 10
+        fi
+
+    done
+
+fi
+
+
+#############################################################################################
+########################## TEST LTP #########################################################
+
+if [ ${AUTO_RUN_STATUS[$((n+2))]} -eq 1 ] ; then
+  echo "Testing LTP..."
+
+  ltp_args=( [0]="1 1" [1]="1 2" [2]="2 1" [3]="2 2" [4]="1 1 1" )
+  ltp_suf=(wb_slab wb_slob wt_slab wt_slob high_res_timer_preempt)
+
+  for i in 0 1 2 3 4
+  do
+
+  rm -rf $UCLINUX_DIST_PATH/linux-2.6.x
+  cd $UCLINUX_DIST_PATH/
+  cp -a  $UCLINUX_DIST_PATH_BAK/linux-2.6.x  .
+  cp $UCLINUX_DIST_PATH_BAK/config/.config config
+  cp $UCLINUX_DIST_PATH_BAK/vendors/AnalogDevices/$BOARD_TYPE/Makefile vendors/AnalogDevices/$BOARD_TYPE
+  rm -rf romfs/ images/
+ 
+  cd $UCLINUX_DIST_PATH/user/busybox
+  make clean  > /dev/null 2>&1
+
+  echo "Test ltp with option ${ltp_suf[i]}"
+  cd $UCLINUX_DIST_TESTSUITES/ltp
+  ./build_ltp_kernel.exp $BOARD_TYPE $UCLINUX_DIST_PATH ${ltp_args[i]}> /dev/null 2>&1
+
+  if [ ! -f $UCLINUX_DIST_PATH/images/uImage ]
+  then
+      echo "ltp build uclinux-dist failed for ${ltp_suf[i]}"
+      tail -50 ./build_ltp_kernel_log
+      cp $UCLINUX_DIST_TESTSUITES/ltp/build_ltp_kernel_log $THIS_LOG/build_ltp_kernel_log_${ltp_suf[i]}
+      cp $UCLINUX_DIST_PATH/linux-2.6.x/.config $THIS_LOG/config.ltp_${ltp_suf[i]}
+  else	
+      # do if build uclinux-dist succeed
+      echo "build_ltp_kernel.exp done"
+      sleep 30
+      ./ltp_auto_test.exp $BOARD_TYPE /dev/ttyS0 2 > /dev/null 2>&1
+      echo "ltp_auto_test.exp done"
+      ./ltp_compare_results_all.sh config/summary.base $UCLINUX_DIST_TESTSUITES/ltp/test/logs/summary.new >> ltp_test_log
+      #./ltp_decide_standard.pl config/summary.base $UCLINUX_DIST_TESTSUITES/ltp/test/logs/summary.new
+      if [ $? == 1 ] ; then
+          echo "ltp test fail"
+          echo "LTP Test ............[FAIL]" >> ltp_test_log
+      else
+          echo "ltp test pass"
+          echo "LTP Test ............[PASS]" >> ltp_test_log
+      fi
+
+      cp $UCLINUX_DIST_PATH/images/uImage $THIS_LOG/uImage.ltp_${ltp_suf[i]}
+      echo "ltp copy linux.ltp done"
+      cp $UCLINUX_DIST_PATH/linux-2.6.x/.config $THIS_LOG/config.linux.ltp_${ltp_suf[i]}
+      cp $UCLINUX_DIST_PATH/config/.config $THIS_LOG/config.config.ltp_${ltp_suf[i]}
+      echo "ltp copy config.ltp done"
+      cp $UCLINUX_DIST_TESTSUITES/ltp/build_ltp_kernel_log $THIS_LOG/build_ltp_kernel_log_${ltp_suf[i]}
+      if [ -e $THIS_LOG/build_ltp_kernel_log_${ltp_suf[i]} ]; then
+          rm -fr $UCLINUX_DIST_TESTSUITES/ltp/build_ltp_kernel_log
+      fi
+      echo "ltp copy build_ltp_kernel_log done"
+      mv $UCLINUX_DIST_TESTSUITES/ltp/test/logs/summary.new $THIS_LOG/ltp-summary_test_log_${ltp_suf[i]}
+      mv $UCLINUX_DIST_TESTSUITES/ltp/test/logs/ltp_auto_test*summary-log $THIS_LOG/
+      echo "ltp copy summary done"
+      mv $UCLINUX_DIST_TESTSUITES/ltp/test/logs/detailed.new $THIS_LOG/ltp-detailed_test_log_${ltp_suf[i]}
+      mv $UCLINUX_DIST_TESTSUITES/ltp/test/logs/ltp_auto_test*detailed-log $THIS_LOG/
+      echo "ltp copy detailed done"
+      mv $UCLINUX_DIST_TESTSUITES/ltp/build_ltp_log $THIS_LOG/build_ltp_log_${ltp_suf[i]}
+      mv $UCLINUX_DIST_TESTSUITES/ltp/ltp_test_log $THIS_LOG/ltp_test_log_${ltp_suf[i]}
+      echo "copy log files done"
+
+      sleep 30    
+
+      if [ $RESET_BOARD -eq 1  ] ; then
+          cd $UCLINUX_DIST_TESTSUITES
+          ./reset_board.exp   >/dev/null  2>&1       
+          sleep 10
+      fi
+      # end, do if build uclinux-dist succeed
+  fi
+
+  cd $UCLINUX_DIST_PATH/user/busybox
+  make clean  > /dev/null 2>&1
+
+done
+
+fi
+
+
+  ###############################################################################################
+  ########################## TEST COREB #########################################################
+  
+ if [ ${AUTO_RUN_STATUS[$((n+8))]} -eq 1  ] ; then
+  echo  "Testing coreb..."
+
+  rm -rf $UCLINUX_DIST_PATH/linux-2.6.x
+  cd $UCLINUX_DIST_PATH/
+  cp -a  $UCLINUX_DIST_PATH_BAK/linux-2.6.x  .
+  cp $UCLINUX_DIST_PATH_BAK/config/.config config
+  cp $UCLINUX_DIST_PATH_BAK/vendors/AnalogDevices/$BOARD_TYPE/Makefile vendors/AnalogDevices/$BOARD_TYPE
+  rm -rf romfs/ images/
+
+  cd $UCLINUX_DIST_TESTSUITES/coreb
+  ./build_coreb_kernel.exp $BOARD_TYPE  >/dev/null  2>&1
+  sleep 30
+  ./coreb_test.exp $BOARD_TYPE >/dev/null  2>&1
+  
+  cp $UCLINUX_DIST_PATH/images/uImage $THIS_LOG/uImage.coreb 
+  cp $UCLINUX_DIST_PATH/linux-2.6.x/.config $THIS_LOG/config.coreb
+  
+  cp $UCLINUX_DIST_TESTSUITES/coreb/build_coreb_kernel_log $THIS_LOG
+  cp $UCLINUX_DIST_TESTSUITES/coreb/coreb_test_log $THIS_LOG
+  
+  sleep 30
+ 
+  if [ $RESET_BOARD -eq 1  ] ; then
+   cd $UCLINUX_DIST_TESTSUITES
+   ./reset_board.exp  >/dev/null  2>&1 
+   sleep 10
+  fi
+
+  fi
+
+  #############################################################################################
+  ########################## TEST SERIAL UART1 ################################################  
+  
+  if [ ${AUTO_RUN_STATUS[$((n+9))]} -eq 1  ] ; then
+  echo  "Testing serial on uart..."
+  
+  rm -rf $UCLINUX_DIST_PATH/linux-2.6.x
+  cd $UCLINUX_DIST_PATH/
+  cp -a  $UCLINUX_DIST_PATH_BAK/linux-2.6.x  .
+  cp $UCLINUX_DIST_PATH_BAK/config/.config config
+  cp $UCLINUX_DIST_PATH_BAK/vendors/AnalogDevices/$BOARD_TYPE/Makefile vendors/AnalogDevices/$BOARD_TYPE
+  rm -rf romfs/ images/
+  
+  cd  $UCLINUX_DIST_TESTSUITES/serial
+  ./build_emulated_uart_kernel.exp $BOARD_TYPE serial_uart >/dev/null  2>&1
+  sleep 30
+  ./emulated_uart_test.exp $BOARD_TYPE serial_uart >/dev/null  2>&1
+  
+  cp $UCLINUX_DIST_PATH/images/uImage $THIS_LOG/uImage.serial_uart
+  cp $UCLINUX_DIST_PATH/linux-2.6.x/.config $THIS_LOG/config.serial_uart
+  cp $UCLINUX_DIST_TESTSUITES/serial/build_serial_uart_kernel_log  $THIS_LOG
+  cp $UCLINUX_DIST_TESTSUITES/serial/serial_uart_test_log $THIS_LOG/
+  
+  sleep 30
+    
+  if [ $RESET_BOARD -eq 1  ] ; then
+   cd $UCLINUX_DIST_TESTSUITES
+   ./reset_board.exp  >/dev/null  2>&1 
+   sleep 10
+   
+ fi
+ fi
+
+
+  ###############################################################################################
+  ################################## USB HOST TEST #####################################
+  
+ if [ ${AUTO_RUN_STATUS[$((n+21))]} -eq 1  ] ; then
+  if [[ $BOARD_TYPE == BF527-EZKIT* ]] ; then
+      if [ $REVISION == "0.0" ] || [ $REVISION == "0.1" ] ; then
+          TARGET_MUSB_MODE="pio"
+      else
+          TARGET_MUSB_MODE="dma pio"
+      fi
+  else
+      TARGET_MUSB_MODE="dma pio"
+  fi
+
+  for config in $TARGET_MUSB_MODE
+  do
+
+  CONFIG=`echo $config|tr 'a-z' 'A-Z'`
+  echo  "Testing usbhost in $config mode..."
+
+  rm -rf $UCLINUX_DIST_PATH/linux-2.6.x
+  cd $UCLINUX_DIST_PATH/
+  cp -a  $UCLINUX_DIST_PATH_BAK/linux-2.6.x  .
+  cp $UCLINUX_DIST_PATH_BAK/config/.config config
+  cp $UCLINUX_DIST_PATH_BAK/vendors/AnalogDevices/$BOARD_TYPE/Makefile vendors/AnalogDevices/$BOARD_TYPE
+  rm -rf romfs/ images/
+
+  cd $UCLINUX_DIST_TESTSUITES/usbhost
+  ./build_usbhost_bf5xx_kernel.exp $BOARD_TYPE $config >/dev/null  2>&1
+
+  if [ ! -f $UCLINUX_DIST_PATH/images/uImage ]
+  then
+      echo "$0:   Error, failed."
+      tail -50 ./build_usbhost_bf5xx_kernel_log
+  else
+      sleep 30
+      cd $UCLINUX_DIST_TESTSUITES/usbhost
+      ./usbhost_bf5xx_test.exp $BOARD_TYPE $CONFIG >/dev/null  2>&1
+  fi
+
+  cp $UCLINUX_DIST_PATH/images/uImage $THIS_LOG/uImage.usbhost_bf5xx.$config
+  cp $UCLINUX_DIST_PATH/linux-2.6.x/.config $THIS_LOG/config.usbhost_bf5xx.$config
+  mv $UCLINUX_DIST_TESTSUITES/usbhost/build_usbhost_bf5xx_kernel_log $THIS_LOG/build_usbhost_bf5xx_${config}_kernel_log
+  mv $UCLINUX_DIST_TESTSUITES/usbhost/usbhost_bf5xx_test_log $THIS_LOG/usbhost_bf5xx_${config}_test_log
+
+  sleep 30
+
+  if [ $RESET_BOARD -eq 1  ] ; then
+      cd $UCLINUX_DIST_TESTSUITES
+      ./reset_board.exp  >/dev/null  2>&1
+      sleep 10
+  fi
+
+  done
+
+ fi
+
+
+  ###############################################################################################
+  ################################## USB DEVICE STRESS TEST #####################################
+  
+ if [ ${AUTO_RUN_STATUS[$((n+18))]} -eq 1  ] ; then
+  TARGET_MUSB_MODE="dma pio"
+  for config in $TARGET_MUSB_MODE
+  do
+
+  CONFIG=`echo $config|tr 'a-z' 'A-Z'`
+  echo  "Testing usbdev in $config mode..."
+
+  rm -rf $UCLINUX_DIST_PATH/linux-2.6.x
+  cd $UCLINUX_DIST_PATH/
+  cp -a  $UCLINUX_DIST_PATH_BAK/linux-2.6.x  .
+  cp $UCLINUX_DIST_PATH_BAK/config/.config config
+  cp $UCLINUX_DIST_PATH_BAK/vendors/AnalogDevices/$BOARD_TYPE/Makefile vendors/AnalogDevices/$BOARD_TYPE
+  rm -rf romfs/ images/
+
+  cd $UCLINUX_DIST_TESTSUITES/usbdev
+  ./build_usbdev_kernel.exp $BOARD_TYPE $config >/dev/null  2>&1
+
+
+  if [ ! -f $UCLINUX_DIST_PATH/images/uImage ]
+  then
+      echo "$0:   Error, failed."
+      tail -50 ./build_usbdev_kernel_log
+  else
+      sleep 30
+      cd $UCLINUX_DIST_TESTSUITES/usbdev
+      ./gadget_zero_control_test.exp $BOARD_TYPE $CONFIG >/dev/null  2>&1
+      cd $UCLINUX_DIST_TESTSUITES
+      ./reset_board.exp  >/dev/null  2>&1
+
+      sleep 30
+      cd $UCLINUX_DIST_TESTSUITES/usbdev
+      ./gadget_fs_control_test.exp $BOARD_TYPE $CONFIG >/dev/null  2>&1
+      cd $UCLINUX_DIST_TESTSUITES
+      ./reset_board.exp  >/dev/null  2>&1
+
+      sleep 30
+      cd $UCLINUX_DIST_TESTSUITES/usbdev
+      ./gadget_zero_bulk_test.exp $BOARD_TYPE $CONFIG >/dev/null  2>&1
+      cd $UCLINUX_DIST_TESTSUITES
+      ./reset_board.exp  >/dev/null  2>&1
+
+      sleep 30
+      cd $UCLINUX_DIST_TESTSUITES/usbdev
+      ./gadget_fs_bulk_test.exp $BOARD_TYPE $CONFIG >/dev/null  2>&1
+      cd $UCLINUX_DIST_TESTSUITES
+      ./reset_board.exp  >/dev/null  2>&1
+
+      #if [[ `grep "TEST .*\.\.\.\[PASS]" -h -c *_test_log` == 1*1 ]] ; then
+      #fi
+
+      if [[ $BOARD_TYPE == BF527-EZKIT* ]] ; then
+      sleep 30
+      cd $UCLINUX_DIST_TESTSUITES/usbdev
+      ./gadget_audio_test.exp $BOARD_TYPE $CONFIG >/dev/null  2>&1
+      cd $UCLINUX_DIST_TESTSUITES
+      ./reset_board.exp  >/dev/null  2>&1
+      fi
+
+      sleep 30
+      cd $UCLINUX_DIST_TESTSUITES/usbdev
+      ./gadget_ethernet_test.exp $BOARD_TYPE $CONFIG >/dev/null  2>&1
+      cd $UCLINUX_DIST_TESTSUITES
+      ./reset_board.exp  >/dev/null  2>&1
+
+      sleep 30
+      cd $UCLINUX_DIST_TESTSUITES/usbdev
+      ./gadget_serial_generic_test.exp $BOARD_TYPE $CONFIG >/dev/null  2>&1
+      cd $UCLINUX_DIST_TESTSUITES
+      ./reset_board.exp  >/dev/null  2>&1
+
+      sleep 30
+      cd $UCLINUX_DIST_TESTSUITES/usbdev
+      ./gadget_serial_linuxACM_test.exp $BOARD_TYPE $CONFIG >/dev/null  2>&1
+      cd $UCLINUX_DIST_TESTSUITES
+      ./reset_board.exp  >/dev/null  2>&1
+
+      sleep 30
+      cd $UCLINUX_DIST_TESTSUITES/usbdev
+      ./gadget_storage_ram_test.exp $BOARD_TYPE $CONFIG >/dev/null  2>&1
+      cd $UCLINUX_DIST_TESTSUITES
+      ./reset_board.exp  >/dev/null  2>&1
+
+      if [ $BOARD_TYPE == "BF548-EZKIT" ] ; then
+          sleep 30
+          cd $UCLINUX_DIST_TESTSUITES/usbdev
+          ./gadget_storage_hd_test.exp $BOARD_TYPE $CONFIG >/dev/null  2>&1
+          cd $UCLINUX_DIST_TESTSUITES
+          ./reset_board.exp  >/dev/null  2>&1
+      fi
+
+  fi
+
+  cd $UCLINUX_DIST_TESTSUITES/usbdev
+  usbdev_file=`ls gadget_*_test_log |awk -Fgadget_ '{print $2}'|awk -F_test_log '{print $1}'`
+  echo $usbdev_file
+  for file in $usbdev_file;
+  do
+      mv gadget_${file}_test_log gadget_${file}_${config}_test_log
+  done
+
+  cp $UCLINUX_DIST_PATH/images/uImage $THIS_LOG/uImage.usbdev.$config
+  cp $UCLINUX_DIST_PATH/linux-2.6.x/.config $THIS_LOG/config.usbdev.$config
+  mv $UCLINUX_DIST_TESTSUITES/usbdev/build_usbdev_kernel_log $THIS_LOG/build_usbdev_${config}_kernel_log
+  mv $UCLINUX_DIST_TESTSUITES/usbdev/*_log $THIS_LOG
+
+  rm -rf $UCLINUX_DIST_PATH/user/busybox
+  cd $UCLINUX_DIST_PATH/user
+  cp -a  $UCLINUX_DIST_PATH_BAK/user/busybox  .
+
+  sleep 30
+
+  if [ $RESET_BOARD -eq 1  ] ; then
+      cd $UCLINUX_DIST_TESTSUITES
+      ./reset_board.exp  >/dev/null  2>&1
+      sleep 10
+  fi
+
+  done
+
+ fi
+
+
+  ###############################################################################################
+  ######################################## USB OTG TEST #########################################
+  
+ if [ ${AUTO_RUN_STATUS[$((n+23))]} -eq 1  ] ; then
+
+  if [ $BOARD_CONFIG = "BF548-EZKIT-USBDEV" ] || [ $BOARD_CONFIG = "BF527-EZKIT-USBDEV" ] ; then
+      OTG_mode=usbdev
+  elif [ $BOARD_CONFIG = "BF548-EZKIT-STD" ] || [ $BOARD_CONFIG = "BF527-EZKIT-STD" ] ; then
+      OTG_mode=usbhost
+  fi
+
+  echo  "Testing USB OTG in $OTG_mode mode..."
+
+  rm -rf $UCLINUX_DIST_PATH/linux-2.6.x
+  cd $UCLINUX_DIST_PATH/
+  cp -a  $UCLINUX_DIST_PATH_BAK/linux-2.6.x  .
+  cp $UCLINUX_DIST_PATH_BAK/config/.config config
+  cp $UCLINUX_DIST_PATH_BAK/vendors/AnalogDevices/$BOARD_TYPE/Makefile vendors/AnalogDevices/$BOARD_TYPE
+  rm -rf romfs/ images/
+
+  cd $UCLINUX_DIST_TESTSUITES/usbotg
+  ./build_usbotg_kernel.exp $BOARD_TYPE >/dev/null  2>&1
+
+  if [ ! -f $UCLINUX_DIST_PATH/images/uImage ]
+  then
+      echo "$0:   Error, failed."
+      tail -50 ./build_usbotg_kernel_log
+  else
+      sleep 30
+      cd $UCLINUX_DIST_TESTSUITES/$OTG_mode
+
+      if [ $OTG_mode = "usbhost" ] ; then
+          ./usbotg_host_test.exp $BOARD_TYPE >/dev/null  2>&1
+      elif [ $OTG_mode = "usbdev" ] ; then
+          ./gadget_zero_test.exp $BOARD_TYPE otg >/dev/null  2>&1
+      fi
+  fi
+
+  cp $UCLINUX_DIST_PATH/images/uImage $THIS_LOG/uImage.usbotg
+  cp $UCLINUX_DIST_PATH/linux-2.6.x/.config $THIS_LOG/config.linux.usbotg
+  cp $UCLINUX_DIST_PATH/config/.config $THIS_LOG/config.config.usbotg
+  cp $UCLINUX_DIST_TESTSUITES/usbotg/build_usbotg_kernel_log $THIS_LOG
+  if [ $OTG_mode = "usbhost" ] ; then
+      mv $UCLINUX_DIST_TESTSUITES/usbhost/usbotg_host_test_log $THIS_LOG
+  fi
+  if [ $OTG_mode = "usbdev" ] ; then
+      mv $UCLINUX_DIST_TESTSUITES/usbdev/gadget_zero_test_log $THIS_LOG/usbotg_dev_test_log
+  fi
+
+  sleep 30
+
+  if [ $RESET_BOARD -eq 1  ] ; then
+      cd $UCLINUX_DIST_TESTSUITES
+      ./reset_board.exp  >/dev/null  2>&1
+      sleep 10
+  fi
+
+
+ fi
+
+
+  ###############################################################################################
+  ################################### USB DEVICE POWER TEST #####################################
+  
+ if [ ${AUTO_RUN_STATUS[$((n+24))]} -eq 1  ] ; then
+  TARGET_MUSB_MODE="dma pio"
+  for config in $TARGET_MUSB_MODE
+  do
+
+  CONFIG=`echo $config|tr 'a-z' 'A-Z'`
+  echo  "Testing usbdev power case in $config mode..."
+
+  rm -rf $UCLINUX_DIST_PATH/linux-2.6.x
+  cd $UCLINUX_DIST_PATH/
+  cp -a  $UCLINUX_DIST_PATH_BAK/linux-2.6.x  .
+  cp $UCLINUX_DIST_PATH_BAK/config/.config config
+  cp $UCLINUX_DIST_PATH_BAK/vendors/AnalogDevices/$BOARD_TYPE/Makefile vendors/AnalogDevices/$BOARD_TYPE
+  rm -rf romfs/ images/
+
+  cd $UCLINUX_DIST_TESTSUITES/power_usbdev
+  ./build_power_usbdev_kernel.exp $BOARD_TYPE $config >/dev/null  2>&1
+
+
+  if [ ! -f $UCLINUX_DIST_PATH/images/uImage ]
+  then
+      echo "$0:   Error, failed."
+      tail -50 ./build_power_usbdev_kernel_log
+  else
+      sleep 30
+      cd $UCLINUX_DIST_TESTSUITES/power_usbdev
+      ./power_usbdev_test.exp $BOARD_TYPE $CONFIG >/dev/null  2>&1
+      cd $UCLINUX_DIST_TESTSUITES
+      ./reset_board.exp  >/dev/null  2>&1
+  fi
+
+  cd $UCLINUX_DIST_TESTSUITES/power_usbdev
+
+  cp $UCLINUX_DIST_PATH/images/uImage $THIS_LOG/uImage.power_usbdev.$config
+  cp $UCLINUX_DIST_PATH/linux-2.6.x/.config $THIS_LOG/config.linux.power_usbdev.$config
+  cp $UCLINUX_DIST_PATH/config/.config $THIS_LOG/config.config.power_usbdev.$config
+  mv $UCLINUX_DIST_TESTSUITES/power_usbdev/build_power_usbdev_kernel_log $THIS_LOG/build_power_usbdev_${config}_kernel_log
+  mv $UCLINUX_DIST_TESTSUITES/power_usbdev/power_usbdev_test_log $THIS_LOG/power_usbdev_${config}_test_log
+
+  sleep 30
+
+  if [ $RESET_BOARD -eq 1  ] ; then
+      cd $UCLINUX_DIST_TESTSUITES
+      ./reset_board.exp  >/dev/null  2>&1
+      sleep 10
+  fi
+
+  done
+
+ fi
+
+
+  #############################################################################################
+  ################################### USB HOST POWER TEST #####################################
+  
+ if [ ${AUTO_RUN_STATUS[$((n+25))]} -eq 1  ] ; then
+  TARGET_MUSB_MODE="dma pio"
+  for config in $TARGET_MUSB_MODE
+  do
+
+  CONFIG=`echo $config|tr 'a-z' 'A-Z'`
+  echo  "Testing usb host power case in $config mode..."
+
+  rm -rf $UCLINUX_DIST_PATH/linux-2.6.x
+  cd $UCLINUX_DIST_PATH/
+  cp -a  $UCLINUX_DIST_PATH_BAK/linux-2.6.x  .
+  cp $UCLINUX_DIST_PATH_BAK/config/.config config
+  cp $UCLINUX_DIST_PATH_BAK/vendors/AnalogDevices/$BOARD_TYPE/Makefile vendors/AnalogDevices/$BOARD_TYPE
+  rm -rf romfs/ images/
+
+  cd $UCLINUX_DIST_TESTSUITES/power_usbhost
+  ./build_power_usbhost_kernel.exp $BOARD_TYPE $config >/dev/null  2>&1
+
+
+  if [ ! -f $UCLINUX_DIST_PATH/images/uImage ]
+  then
+      echo "$0:   Error, failed."
+      tail -50 ./build_power_usbhost_kernel_log
+  else
+      sleep 30
+      cd $UCLINUX_DIST_TESTSUITES/power_usbhost
+      ./power_usbhost_test.exp $BOARD_TYPE $CONFIG >/dev/null  2>&1
+      cd $UCLINUX_DIST_TESTSUITES
+      ./reset_board.exp  >/dev/null  2>&1
+  fi
+
+  cd $UCLINUX_DIST_TESTSUITES/power_usbhost
+
+  cp $UCLINUX_DIST_PATH/images/uImage $THIS_LOG/uImage.power_usbhost.$config
+  cp $UCLINUX_DIST_PATH/linux-2.6.x/.config $THIS_LOG/config.linux.power_usbhost.$config
+  cp $UCLINUX_DIST_PATH/config/.config $THIS_LOG/config.config.power_usbhost.$config
+  mv $UCLINUX_DIST_TESTSUITES/power_usbhost/build_power_usbhost_kernel_log $THIS_LOG/build_power_usbhost_${config}_kernel_log
+  mv $UCLINUX_DIST_TESTSUITES/power_usbhost/power_usbhost_test_log $THIS_LOG/power_usbhost_${config}_test_log
+
+  sleep 30
+
+  if [ $RESET_BOARD -eq 1  ] ; then
+      cd $UCLINUX_DIST_TESTSUITES
+      ./reset_board.exp  >/dev/null  2>&1
+      sleep 10
+  fi
+
+  done
+
+ fi
+
+
+#############################################################################################
+##################################### TEST OPROFILE #########################################
+
+if [ ${AUTO_RUN_STATUS[$((n+20))]} -eq 1  ] ; then
+
+    APP_FORMAT="fdpic flat"
+
+    for format in $APP_FORMAT
+    do
+
+        FORMAT=`echo $format|tr 'a-z' 'A-Z'`
+        echo  "Testing oprofile in $format..."
+
+        rm -rf $UCLINUX_DIST_PATH/linux-2.6.x
+        cd $UCLINUX_DIST_PATH/
+        cp -a  $UCLINUX_DIST_PATH_BAK/linux-2.6.x  .
+        cp $UCLINUX_DIST_PATH_BAK/config/.config config
+        cp $UCLINUX_DIST_PATH_BAK/vendors/AnalogDevices/$BOARD_TYPE/Makefile vendors/AnalogDevices/$BOARD_TYPE
+        rm -rf romfs/ images/
+
+        cd $UCLINUX_DIST_TESTSUITES/oprofile
+        ./build_oprofile_kernel.exp $BOARD_TYPE $format >/dev/null  2>&1
+        if [ ! -f $UCLINUX_DIST_PATH/images/uImage ]
+        then
+            echo "$0:   Error, failed."
+            tail -50 ./build_oprofile_kernel_log
+        else
+            sleep 30
+            ./oprofile_test.exp $BOARD_TYPE $FORMAT >/dev/null  2>&1
+        fi
+
+        cp $UCLINUX_DIST_PATH/images/uImage $THIS_LOG/uImage.oprofile.$format
+        cp $UCLINUX_DIST_PATH/linux-2.6.x/.config $THIS_LOG/config.linux.oprofile.$format
+        cp $UCLINUX_DIST_PATH/config/.config $THIS_LOG/config.config.oprofile.$format
+        mv $UCLINUX_DIST_TESTSUITES/oprofile/build_oprofile_kernel_log $THIS_LOG/build_oprofile_${format}_kernel_log
+        mv $UCLINUX_DIST_TESTSUITES/oprofile/oprofile_test_log $THIS_LOG/oprofile_${format}_test_log
+
+        cd $UCLINUX_DIST_PATH/
+        make clean > /dev/null 2>&1
+
+        sleep 30
+
+        if [ $RESET_BOARD -eq 1  ] ; then
+            cd $UCLINUX_DIST_TESTSUITES
+            ./reset_board.exp  >/dev/null  2>&1
+            sleep 10
+        fi
+
+    done
+
+fi
+
+
+  ################################################################################################
+  ###########################          MANUAL TEST          ######################################
+  ################################################################################################
+    
+for i in `seq 0 $n`
+do
+
+  if [ -z ${MANUAL_TESTCASE[$i]} ] ; then
+  continue
+  fi
+
+  if [ ${MANUAL_RUN_STATUS[$i]} -eq 1  ] ; then
+  
+  echo  "Start testing ${MANUAL_TESTCASE[$i]}..."
+
+  rm -rf $UCLINUX_DIST_PATH/linux-2.6.x
+  cd $UCLINUX_DIST_PATH/
+  cp -a  $UCLINUX_DIST_PATH_BAK/linux-2.6.x  .
+  cp $UCLINUX_DIST_PATH_BAK/config/.config config
+  cp $UCLINUX_DIST_PATH_BAK/vendors/AnalogDevices/$BOARD_TYPE/Makefile vendors/AnalogDevices/$BOARD_TYPE
+  rm -rf romfs/ images/
+
+  if [ ${MANUAL_TESTCASE[$i]} == "ndso" ] || [ ${MANUAL_TESTCASE[$i]} == "awg" ] ; then
+  cd $UCLINUX_DIST_TESTSUITES/spiadc
+  elif [ ${MANUAL_TESTCASE[$i]} == "sport_uart" ] ; then
+  cd $UCLINUX_DIST_TESTSUITES/serial
+  elif [ ${MANUAL_TESTCASE[$i]} == "linphone_ad1836" ] ; then
+  cd $UCLINUX_DIST_TESTSUITES/linphone
+  else
+  cd $UCLINUX_DIST_TESTSUITES/${MANUAL_TESTCASE[$i]}    
+  fi
+  
+  if [ ${MANUAL_TESTCASE[$i]} == "i2ctwi" ] ; then
+      ./build_${MANUAL_TESTCASE[$i]}_keyboard_kernel.exp $BOARD_TYPE  >/dev/null  2>&1
+      cp $UCLINUX_DIST_PATH/images/uImage $THIS_LOG/uImage.i2ctwi_keyboard
+      cp $UCLINUX_DIST_PATH/linux-2.6.x/.config $THIS_LOG/config.linux.i2ctwi_keyboard
+      cp $UCLINUX_DIST_PATH/config/.config $THIS_LOG/config.config.i2ctwi_keyboard
+
+      cp $UCLINUX_DIST_PATH_BAK/linux-2.6.x/.config $UCLINUX_DIST_PATH/linux-2.6.x/
+      cp $UCLINUX_DIST_PATH_BAK/config/.config $UCLINUX_DIST_PATH/config/
+      rm -rf romfs/ images/
+      sleep 5
+      ./build_${MANUAL_TESTCASE[$i]}_lcd_kernel.exp $BOARD_TYPE  >/dev/null  2>&1
+      cp $UCLINUX_DIST_PATH/images/uImage $THIS_LOG/uImage.i2ctwi_lcd
+      cp $UCLINUX_DIST_PATH/linux-2.6.x/.config $THIS_LOG/config.linux.i2ctwi_lcd
+      cp $UCLINUX_DIST_PATH/config/.config $THIS_LOG/config.config.i2ctwi_lcd
+  elif [ ${MANUAL_TESTCASE[$i]} == "sport_uart" ] ; then
+      ./build_emulated_uart_kernel.exp $BOARD_TYPE sport_uart >/dev/null  2>&1
+  else
+      ./build_${MANUAL_TESTCASE[$i]}_kernel.exp $BOARD_TYPE  >/dev/null  2>&1  
+  fi
+
+  if [ ! -f $UCLINUX_DIST_PATH/images/uImage ]
+  then
+        echo "$0:       Error, failed."
+	tail -50 ./build_${MANUAL_TESTCASE[$i]}_kernel_log
+  fi
+  
+  if [ ${MANUAL_TESTCASE[$i]} != "i2ctwi" ] ; then
+  cp $UCLINUX_DIST_PATH/images/uImage $THIS_LOG/uImage.${MANUAL_TESTCASE[$i]}
+  cp $UCLINUX_DIST_PATH/linux-2.6.x/.config $THIS_LOG/config.linux.${MANUAL_TESTCASE[$i]}
+  cp $UCLINUX_DIST_PATH/config/.config $THIS_LOG/config.config.${MANUAL_TESTCASE[$i]}
+  fi
+  
+  if [ ${MANUAL_TESTCASE[$i]} == "ndso" ] || [ ${MANUAL_TESTCASE[$i]} == "awg" ] ; then
+  cp $UCLINUX_DIST_TESTSUITES/spiadc/*_log  $THIS_LOG
+  elif [ ${MANUAL_TESTCASE[$i]} == "sport_uart" ] ; then
+  cp $UCLINUX_DIST_TESTSUITES/serial/*sport_uart*log  $THIS_LOG
+  elif [ ${MANUAL_TESTCASE[$i]} == "linphone_ad1836" ] ; then
+  cp $UCLINUX_DIST_TESTSUITES/linphone/*_log  $THIS_LOG
+  else
+  cp $UCLINUX_DIST_TESTSUITES/${MANUAL_TESTCASE[$i]}/*_log  $THIS_LOG   
+  fi
+    
+  if [ ${MANUAL_TESTCASE[$i]} == "netaudio" ] || [ ${MANUAL_TESTCASE[$i]} == "linphone_ad1836" ] || [ ${MANUAL_TESTCASE[$i]} == "bluetoothalsa" ] ; then
+      cd $UCLINUX_DIST_PATH/ 
+      make clean > /dev/null 2>&1
+  fi
+
+  echo  "End testing ${MANUAL_TESTCASE[$i]}..."
+  fi
+done
+
+
+echo  "Testing Done."
+exit 0

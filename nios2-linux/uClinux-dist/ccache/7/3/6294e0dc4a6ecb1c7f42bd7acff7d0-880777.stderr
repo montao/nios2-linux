@@ -1,0 +1,4 @@
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/drivers/net/ethernet/altera/altera_tse_1588.c: In function 'alt_tse_1588_ioctl':
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/drivers/net/ethernet/altera/altera_tse_1588.c:187: warning: passing argument 2 of 'copy_to_user' discards qualifiers from pointer target type
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/drivers/net/ethernet/altera/altera_tse_1588.c:195: warning: passing argument 2 of 'copy_to_user' discards qualifiers from pointer target type
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/drivers/net/ethernet/altera/altera_tse_1588.c:200: warning: passing argument 2 of 'copy_to_user' discards qualifiers from pointer target type

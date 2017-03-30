@@ -1,0 +1,98 @@
+#
+#   This script is an error checking wrapper for the subsequent TCL script that
+#   it executes in quartus_sh.
+#
+#   Script:
+#       
+#       check_quartus_version.shinc
+#   
+#   Input Arguments:
+#   
+#       VERSION_STRING : the begining of the expected Quartus II version string
+#
+#   Output Results:
+#   
+#       script returns an exit status of success if the VERSION_STRING argument
+#       matches the begining of the current quartus version string, otherwise
+#       it returns an exit status of error
+#
+#   Return Status:
+#       
+#       success         : 0
+#       error           : 1
+#       bad argument    : no return, exits with status 1
+#
+#   Required Environment Variables
+#   
+#       ABS_PATH_TO_BUILD_UTILS_DIR : this is a path to the build script utils
+#                                     directory
+#
+
+check_quartus_version () {
+    
+    #
+    # validate the input arguments
+    #
+    if [ $# -ne 1 ] ; then
+        
+        echo ""
+        echo "ERROR: wrong number of arguments passed into this function"
+        echo "Expected 1 argument, but got $#"
+        echo ""
+        echo "USAGE: check_quartus_version <VERSION_STRING>"
+        echo ""
+        
+        exit 1
+        
+    fi
+    
+    #
+    # validate the required environment variables
+    #
+    PATH_2_BUILD_UTILS_DIR=${ABS_PATH_TO_BUILD_UTILS_DIR:?environment variable is required...}
+    
+    #
+    # validate that the quartus_sh TCL script exists
+    #
+    THE_TCL_SCRIPT=check_quartus_version.tcl
+    if [ ! -e "${PATH_2_BUILD_UTILS_DIR}/${THE_TCL_SCRIPT}" ] ; then
+    
+        echo ""
+        echo "ERROR: Cannot locate TCL script \"${PATH_2_BUILD_UTILS_DIR}/${THE_TCL_SCRIPT}\""
+        echo ""
+        exit 1
+    
+    fi
+
+    #
+    # extract the input arguments that we need
+    #
+    VERSION_STRING=${1}
+    
+    echo ""
+    echo "Expected Quartus version is \"${VERSION_STRING}\""
+    echo "Checking current Quartus version..."
+    echo ""
+    
+    #
+    # execute the quartus_sh TCL script
+    #
+    quartus_sh -t "${PATH_2_BUILD_UTILS_DIR}/${THE_TCL_SCRIPT}" "${VERSION_STRING}"
+    
+    if [ $? -ne 0 ] ; then
+        
+        echo ""
+        echo "Current Quartus version does NOT match the expected version..."
+        echo ""
+        return 1
+        
+    else
+        
+        echo ""
+        echo "Current Quartus version matches the expected version..."
+        echo ""
+        return 0
+        
+    fi
+
+}

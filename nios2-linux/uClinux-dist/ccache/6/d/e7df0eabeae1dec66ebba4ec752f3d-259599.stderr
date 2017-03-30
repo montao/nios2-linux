@@ -1,0 +1,2 @@
+../tcpsrv.c: In function 'tcpsrvDebugPrint':
+../tcpsrv.c:680: warning: unused parameter 'pThis'

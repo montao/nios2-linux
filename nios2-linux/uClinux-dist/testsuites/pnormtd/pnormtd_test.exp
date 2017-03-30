@@ -1,0 +1,218 @@
+#!/usr/bin/expect
+
+source ../kernel_config.exp
+
+log_file [log_file_name "$argv0"]
+send_user "Starting $argv0\n"
+set TITLE [title "$argv0"]
+
+step "Spawn kermit."
+source ../spawn_kermit.exp
+
+step "Reboot the kernel."
+source ../reboot_kernel.exp
+
+step "MTD test"
+set case_num 0
+
+incr case_num
+set timeout 5
+send -s "cat /proc/mtd\r"
+while 1 {
+    expect {
+        -re "mtd$pnor_rootfs_num.*$kernel_prompt" {
+            case_pass $case_num
+            break
+        }
+        -re $kernel_prompt {
+            case_fail $case_num
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+step "Erase MTD"
+sleep 1
+incr case_num
+set timeout 180
+send -s "flash_unlock /dev/mtd$pnor_rootfs_num\r"
+while 1 {
+    expect {
+        -re $kernel_prompt {
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+send -s "flash_erase -j /dev/mtd$pnor_rootfs_num 0 0\r"
+while 1 {
+    expect {
+        -re "(\[fF]ail|\[eE]rror).*$kernel_prompt" {
+            case_fail $case_num
+        }
+        -re "complete.*$kernel_prompt" {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+
+step "Make jffs2 image"
+send_log " \n1)create file system directory\n"
+send -s "mkdir -p rootfs\r"
+expect ">"
+send_log " \n2)create test file\n"
+send -s "echo This is test for mtd driver > rootfs/test\r"
+expect  -re $kernel_prompt
+send_log " \n3)create JFFS2 image\n"
+send -s "mkfs.jffs2 -r rootfs -o mtd.img\r"
+expect ">"
+
+
+step "Writing MTD"
+incr case_num
+set timeout 60
+send -s "cp mtd.img /dev/mtd$pnor_rootfs_num\r"
+while 1 {
+    expect {
+        -re "(\[eE]rror|\[fF]ail|cp:).*$kernel_prompt" {
+            case_fail $case_num
+        }
+        -re $kernel_prompt {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+
+step "Reading MTD "
+incr case_num
+set timeout 60
+send -s "mount -t jffs2 /dev/mtdblock$pnor_rootfs_num /mnt\n"
+while 1 {
+    expect {
+        -re "(\[eE]rror|\[fF]ail|mount:|not found).*$kernel_prompt" {
+            case_fail $case_num
+        }
+        -re $kernel_prompt {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+step "cp pwd to JFFS."
+incr case_num
+set timeout 200
+send -s "cp /bin/pwd /mnt\r"
+while 1 {
+    expect {
+        -re "(\[eE]rror|\[fF]ail|cp:).*$kernel_prompt" {
+            case_fail $case_num
+        }
+        -re $kernel_prompt {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+sleep 1
+
+step "JFFS Validating data integrity"
+incr case_num
+set timeout 60
+send "while \[ 1 \]; do md5sum /mnt/pwd ; done\r"
+while 1 {
+    expect {
+        -re "\[0-9a-z]+  /mnt/pwd" {
+            sleep 3
+            send "\3"
+            expect -re $kernel_prompt
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+
+step "Verify "
+incr case_num
+set timeout 2
+send -s "cmp /rootfs/test /mnt/test\r"
+while 1 {
+    expect {
+        -re "(differ|No such|cmp:).*$kernel_prompt" {
+            case_fail $case_num
+        }
+        -re $kernel_prompt {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+incr case_num
+set timeout 50
+send -s "umount /mnt\r"
+while 1 {
+    expect {
+        -re "(\[eE]rror|\[fF]ail|umount:).*$kernel_prompt" {
+            case_fail $case_num
+        }
+        -re $kernel_prompt {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+incr case_num
+set timeout 5
+send -s "ls /mnt\r"
+while 1 {
+    expect {
+        -re "test.*$kernel_prompt" {
+            case_fail $case_num
+        }
+        -re $kernel_prompt {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+all_pass
+send_user "Ending $argv0\n"
+log_file

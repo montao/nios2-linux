@@ -1,0 +1,69 @@
+#!/usr/bin/expect
+
+#
+#Test program to test strace.
+#
+
+source ../kernel_config.exp
+log_file [log_file_name "$argv0"]
+send_user "Starting $argv0\n"
+set TITLE [title "$argv0"]
+
+step "Start kermit."
+source ../spawn_kermit.exp
+
+step "Reboot the kernel."
+source ../reboot_kernel.exp
+
+step "Start $TITLE\r"
+set case_num 0
+
+set timeout 10
+incr case_num
+send -s "strace date\r"
+while 1 {
+    expect {
+        -re "ioctl.*time" {
+            expect "exit(0)"
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+incr case_num
+send -s "strace pwd\r"
+while 1 {
+    expect {
+        -re "ioctl.*getcwd" {
+            expect "exit(0)"
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+incr case_num
+send -s "strace ls /home\r"
+while 1 {
+    expect {
+        -re "ioctl.*lstat" {
+            expect "exit(0)"
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+all_pass
+send_user "Ending $argv0\n"
+log_file

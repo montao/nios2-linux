@@ -1,0 +1,2 @@
+/home/developer/altera/nios2-linux/uClinux-dist/user/netperf/netperf-2.4.1/src/netserver.c: In function 'main':
+/home/developer/altera/nios2-linux/uClinux-dist/user/netperf/netperf-2.4.1/src/netserver.c:689: warning: format '%d' expects type 'int', but argument 2 has type 'long unsigned int'

@@ -1,0 +1,3 @@
+inet.c: In function 'INET_resolve':
+inet.c:80: warning: unused variable 'np'
+inet.c:79: warning: unused variable 'hp'

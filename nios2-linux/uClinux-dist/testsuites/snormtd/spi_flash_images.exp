@@ -1,0 +1,268 @@
+#!/usr/bin/expect
+
+source  ../kernel_config.exp
+source  ../board_info.exp
+
+if { $argc >= 2} {
+set spi_board_type [lindex $argv 1]
+}
+log_file [log_file_name "$argv0.$spi_board_type"]
+
+send_user "Starting $argv0\n"
+
+set TITLE [title "$argv0"]
+
+append TITLE " TEST"
+
+step "Spawn kermit"
+source ../spawn_kermit.exp
+
+step "Reset the uboot."
+source ../reset_to_uboot.exp
+
+set TEST_PASS pass
+set TEST_FAIL fail
+
+if { $board_type == "BF537-STAMP" || $board_type == "BF533-STAMP" } {
+
+set bootargs 		 $bootargs_param1
+
+}  elseif { $board_type == "BF548-EZKIT" || [string match "BF527-EZKIT*" $board_type] || $board_type == "BF518F-EZBRD" || $board_type == "BF526-EZBRD" } {
+#set bootargs 		 $bootargs_param3
+exit 1
+}
+
+if { $board_type == "BF537-STAMP" } {
+
+set chip_select 1
+
+}  elseif { $board_type == "BF533-STAMP"  } {
+
+set chip_select 2
+}
+
+send -s "set bootargs $bootargs\r"
+expect ">"
+send -s "save\r"
+expect ">"
+
+###########################################################################################################
+set case_num 0
+
+incr case_num
+
+send -s "sf probe $chip_select\r"
+
+while 1 {
+set timeout 500
+expect {
+
+	-re "(now current device)|Detected" {
+        expect $uboot_prompt
+	set probe_sf_flag $TEST_PASS
+	break
+	}
+
+	"Failed to initialize" {
+	set probe_sf_flag $TEST_FAIL
+        case_fail $case_num
+        exit
+	}
+
+	timeout {
+	send_user "ERROR: probe sf error\n"
+	set temp_status_flag $TEST_FAIL
+	break
+	}
+}
+}
+
+send -s "sf erase 0x0 $spi_size\r"
+
+while 1 {
+	set timeout 500
+	expect {
+
+	    $uboot_prompt {
+		set write_sf_flag $TEST_PASS
+		break
+	    }
+
+	    timeout {
+		send_user "ERROR: write sf error\n"
+		set temp_status_flag $TEST_FAIL
+		break
+	    }
+	}
+    }
+
+
+##########################################################################################################
+
+set timeout 120
+
+send -s "tftp 0x1000000 $compressed_kernel_only_image\r"
+while 1 {
+expect {
+
+        -re "Bytes transferred = \[0-9]+ \\\((\[0-9a-fA-F]+) hex\\\)" {
+                set image_size $expect_out(1,string)
+                send_user "Image size is $image_size\n"
+                expect  $uboot_prompt
+                break
+        }
+	
+		
+	timeout {
+	send_user "ERROR: Uboot locked up during tftp\n"
+	
+	break
+	}
+}
+}
+
+send -s "sf write 0x1000000 $spi_kernel_start_addr 0x$image_size\r"
+
+while 1 {
+	expect {
+
+	    $uboot_prompt {
+		set write_sf_flag $TEST_PASS
+		break
+	    }
+
+	    timeout {
+		send_user "ERROR: write sf error\n"
+		set temp_status_flag $TEST_FAIL
+		break
+	    }
+	}
+    }
+sleep 1
+send -s "sf read 0x2000000 $spi_kernel_start_addr 0x$image_size\r"
+
+while 1 {
+	expect {
+
+	    $uboot_prompt {
+		set read_sf_flag $TEST_PASS
+		break
+	    }
+
+	    timeout {
+		send_user "ERROR: read sf error\n"
+		set temp_status_flag $TEST_FAIL
+		break
+	    }
+	}
+    }
+
+sleep 1
+send -s "cmp.b 0x1000000 0x2000000 0x$image_size\r"
+
+while 1 {
+	set timeout 15
+	expect {
+
+	  -re  "Total of [expr 0x$image_size] bytes were the same" {
+		set temp_status_flag $TEST_PASS
+		break
+	    }
+
+	    timeout {
+		send_user "ERROR: compare sf error\n"
+		set temp_status_flag $TEST_FAIL
+                break
+		#exit
+	    }
+	}
+    }
+
+################################################################################################################
+
+set timeout 120
+
+send -s "tftp 0x1000000 $jffs2_rootfs_image\r"
+while 1 {
+expect {
+
+         -re "Bytes transferred = \[0-9]+ \\\((\[0-9a-fA-F]+) hex\\\)" {
+                set image_size $expect_out(1,string)
+                send_user "Image size is $image_size\n"
+                expect  $uboot_prompt
+                break
+        }
+	
+	timeout {
+	send_user "ERROR: Uboot locked up during tftp\n"
+	
+	break
+	}
+}
+}
+
+send -s "sf write 0x1000000 $spi_rootfs_start_addr 0x$image_size\r"
+
+while 1 {
+	set timeout 500
+	expect {
+
+	    $uboot_prompt {
+		set write_sf_flag $TEST_PASS
+		break
+	    }
+
+	    timeout {
+		send_user "ERROR: write sf error\n"
+		set temp_status_flag $TEST_FAIL
+		break
+	    }
+	}
+    }
+
+send -s "bootm 0x2000000\r"
+while 1 {
+	set timeout 35
+	expect {
+
+	     -re $kernel_prompt {
+                case_pass $case_num
+		send_user "Boot from spi flash success\n"
+		break
+	    }
+
+	    timeout {
+                case_fail $case_num
+                exit	
+	    }
+	}
+    }
+
+incr case_num
+send -s "\r"
+sleep 3
+send -s "reboot\r"
+set timeout 100
+while 1 {
+expect {
+        "Hit any key" {
+                send -s "\r"
+                expect ">"
+                break
+        }
+        "error" {
+                case_fail $case_num
+                exit
+        }
+        timeout {
+               exit
+        }
+}
+}
+
+send_log "\n"
+send_log "\n$TITLE ............\[PASS\]\n"
+
+log_file
+send_user "Ending $argv0\n"
+exit 0

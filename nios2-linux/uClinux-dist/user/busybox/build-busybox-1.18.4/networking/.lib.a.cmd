@@ -1,0 +1,1 @@
+cmd_networking/lib.a := rm -f networking/lib.a; nios2-linux-gnu-ar  rcs networking/lib.a networking/ftpgetput.o networking/hostname.o networking/ifconfig.o networking/interface.o networking/nbd-client.o networking/nc.o networking/netstat.o networking/nslookup.o networking/ping.o networking/route.o networking/tftp.o networking/traceroute.o networking/vconfig.o networking/wget.o

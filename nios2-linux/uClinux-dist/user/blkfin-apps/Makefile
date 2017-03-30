@@ -1,0 +1,35 @@
+dir_y =
+dir_n =
+dir_  =
+dir_$(CONFIG_SIGMA_FIRMWARE_UTIL)                += sigma-firmware-util
+dir_$(CONFIG_USER_BLACKFIN_PPIFCDCGI)            += ppifcd-cgi
+dir_$(CONFIG_USER_BLKFIN_APPS_DEVFBAPP_DEVTEST)  += devfbapp
+dir_$(CONFIG_USER_INETUTILS)                     += inetutils
+dir_$(CONFIG_USER_LMBENCH)                       += lmbench3
+dir_$(CONFIG_USER_BF561_COREBLD)                 += corebld
+dir_$(CONFIG_USER_BF561_ICC)     		 += icc_utils
+dir_$(CONFIG_USER_POUND)                         += pound
+dir_$(CONFIG_USER_IRDA_TOOLS)                    += irda-tools
+dir_$(CONFIG_USER_IRCP)                          += ircp
+dir_$(CONFIG_USER_PNGVIEW)                       += pngview
+dir_$(CONFIG_USER_ALSA_UTILS)                    += alsa-utils
+dir_$(CONFIG_USER_BTSCO)                         += btsco
+dir_$(CONFIG_USER_AWG)                           += ndso
+dir_$(CONFIG_USER_NDSO)                          += ndso
+dir_$(CONFIG_USER_NDSO_IIO)                      += ndso
+dir_$(CONFIG_USER_PPIFPGACGI)                    += ndso
+dir_$(CONFIG_USER_NET_AUDIO)                     += net_audio
+dir_$(CONFIG_USER_SDLEXAMPLES)                   += sdl-examples
+dir_$(CONFIG_USER_FPGA_HSCONV)                   += fpga
+dir_$(CONFIG_USER_UVC_VIDEO)                     += uvc-video
+dir_$(CONFIG_USER_BFBLUET_EZEXT_UTIL)            += bfbluet-ezext-util
+dir_$(CONFIG_USER_EDN_BENCH)                     += edn
+dir_$(CONFIG_USER_DSP_BRIDGE)                    += dsp-bridge
+
+all romfs:
+	for i in $(dir_y) ; do $(MAKE) -C $$i $@ || exit $$? ; done
+
+clean:
+	for i in $(dir_y) $(dir_n) $(dir_) ; do $(MAKE) -C $$i $@ || exit $$? ; done
+
+.PHONY: all clean romfs

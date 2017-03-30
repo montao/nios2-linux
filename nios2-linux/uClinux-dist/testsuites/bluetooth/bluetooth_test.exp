@@ -1,0 +1,120 @@
+#!/usr/bin/expect
+
+# Main entrance
+source ../kernel_config.exp
+log_file [log_file_name "$argv0"]
+send_user "Starting $argv0\n"
+set TITLE [title "$argv0"]
+
+step "Start kermit."
+source ../spawn_kermit.exp
+
+step "Reboot the kernel."
+source ../reboot_kernel.exp
+
+step "Start testing."
+
+set MST_BD_ADDR			"00:10:60:D0:8C:41"	
+set SLV_BD_ADDR			"00:15:83:44:C2:E7"
+
+set case_num		0
+
+sleep 2
+incr case_num
+send "hciconfig hci0 up\r"
+expect  -re $kernel_prompt
+
+sleep 2
+send "hciconfig\r"
+set timeout 2
+while 1 {
+    expect {
+        -re "DOWN" {
+            case_fail $case_num
+        }
+        -re "BD Address.*$kernel_prompt" {
+            case_pass $case_num
+            break
+        }
+        -re "not found" {
+            case_fail $case_num
+        }
+        timeout {
+            send_user "hci0 not up\r"
+            case_fail $case_num
+        }
+    }
+}
+
+
+incr case_num
+send "hcitool scan\r"
+set timeout 20
+sleep 15
+while 1 {
+    expect {
+        -re "Inquiry failed: Success" {
+            case_fail $case_num
+        }
+        -re "$SLV_BD_ADDR.*$kernel_prompt" {
+            case_pass $case_num
+            break
+        }
+        -re "not found" {
+            case_fail $case_num
+        }
+        timeout {
+            send_user "scan device failed\r"
+            break
+        }
+    }
+}
+
+incr case_num
+send "hcitool -i hci0 info $SLV_BD_ADDR\r"
+set timeout 30
+sleep 30 
+while 1 {
+    expect {
+        -re "BD Address.*$SLV_BD_ADDR.*$kernel_prompt" {
+            case_pass $case_num
+            break
+        }
+        -re "not found" {
+            case_fail $case_num
+        }
+        timeout {
+            send_user "\rInquire failed\r"
+            case_fail $case_num
+        }
+    }
+}
+
+incr case_num
+send "l2ping -c 100 -i hci0 -f $SLV_BD_ADDR\r"
+set timeout 30
+sleep 1
+while 1 {
+    expect {
+        -re "100 sent, 100 received, 0% loss\r\n$kernel_prompt" {
+            case_pass $case_num
+            break
+        }
+        -re "Can't connect:" {
+            case_fail $case_num
+        }
+        -re "not found" {
+            case_fail $case_num
+        }
+        timeout {
+            send_user "ping failed\r"
+            case_fail $case_num
+        }
+    }
+}
+
+all_pass
+
+send_user "Ending $argv0\n"
+
+log_file

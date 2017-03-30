@@ -1,0 +1,4 @@
+nios2-linux-gnu-gcc: --gc-sections: linker input file unused because linking not done
+jffs2reader.c: In function 'printdir':
+jffs2reader.c:349: warning: dereferencing type-punned pointer will break strict-aliasing rules
+nios2-linux-gnu-gcc: --gc-sections: linker input file unused because linking not done

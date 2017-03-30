@@ -1,0 +1,22 @@
+should be turned into a configure check
+
+--- mpg321-0.2.12-1/scrobbler.c
++++ mpg321-0.2.12-1/scrobbler.c
+@@ -78,7 +78,7 @@
+         /*printf("Reporting to AudioScrobbler!\n");*/
+         args[1] = "-vP";
+     }
+-    switch(fork()) {
++    switch(vfork()) {
+         case -1:
+             /* Error */
+             mpg321_error("forking for the scrobbler helper");
+@@ -96,7 +96,7 @@
+             args[SARGS_SIZE - 2] = lengthbuf;
+             execvp(args[0], args);
+             mpg321_error("scrobbler helper " SCROBBLER_HELPER_PATH);
+-            exit(1);
++            _exit(1);
+             
+         default:
+             /* Parent: nothing to do */

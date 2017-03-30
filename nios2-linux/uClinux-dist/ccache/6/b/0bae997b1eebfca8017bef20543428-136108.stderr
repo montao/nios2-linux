@@ -1,0 +1,21 @@
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/mwin/wingdi.c: In function 'Rectangle':
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/mwin/wingdi.c:506: warning: dereferencing type-punned pointer will break strict-aliasing rules
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/mwin/wingdi.c: In function 'Ellipse':
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/mwin/wingdi.c:539: warning: dereferencing type-punned pointer will break strict-aliasing rules
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/mwin/wingdi.c: In function 'dopiearc':
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/mwin/wingdi.c:577: warning: dereferencing type-punned pointer will break strict-aliasing rules
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/mwin/wingdi.c:578: warning: dereferencing type-punned pointer will break strict-aliasing rules
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/mwin/wingdi.c: In function 'FillRect':
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/mwin/wingdi.c:694: warning: dereferencing type-punned pointer will break strict-aliasing rules
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/mwin/wingdi.c: In function 'MwExtTextOut':
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/mwin/wingdi.c:762: warning: dereferencing type-punned pointer will break strict-aliasing rules
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/mwin/wingdi.c: At top level:
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/mwin/wingdi.c:1038: warning: dereferencing type-punned pointer will break strict-aliasing rules
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/mwin/wingdi.c:1039: warning: dereferencing type-punned pointer will break strict-aliasing rules
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/mwin/wingdi.c:1040: warning: dereferencing type-punned pointer will break strict-aliasing rules
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/mwin/wingdi.c:1041: warning: dereferencing type-punned pointer will break strict-aliasing rules
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/mwin/wingdi.c:1042: warning: dereferencing type-punned pointer will break strict-aliasing rules
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/mwin/wingdi.c:1043: warning: dereferencing type-punned pointer will break strict-aliasing rules
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/mwin/wingdi.c:1044: warning: dereferencing type-punned pointer will break strict-aliasing rules
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/mwin/wingdi.c:1045: warning: dereferencing type-punned pointer will break strict-aliasing rules
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/mwin/wingdi.c:1046: warning: dereferencing type-punned pointer will break strict-aliasing rules

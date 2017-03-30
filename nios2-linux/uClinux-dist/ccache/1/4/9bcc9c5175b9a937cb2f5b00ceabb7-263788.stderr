@@ -1,0 +1,2 @@
+/data/dwesterg/nios2-linux/nios2-linux/uClinux-dist/user/e2fsprogs/e2fsprogs-1.41.12/e2fsck/pass1.c: In function 'check_is_really_dir':
+/data/dwesterg/nios2-linux/nios2-linux/uClinux-dist/user/e2fsprogs/e2fsprogs-1.41.12/e2fsck/pass1.c:408: warning: unused variable 'first_dir_blk'

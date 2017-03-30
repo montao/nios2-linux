@@ -1,0 +1,12 @@
+/home/developer/altera/nios2-linux/uClinux-dist/user/netperf/netperf-2.4.1/src/netlib.c: In function 'allocate_buffer_ring':
+/home/developer/altera/nios2-linux/uClinux-dist/user/netperf/netperf-2.4.1/src/netlib.c:1141: warning: format '%u' expects type 'unsigned int', but argument 2 has type 'long unsigned int'
+/home/developer/altera/nios2-linux/uClinux-dist/user/netperf/netperf-2.4.1/src/netlib.c: In function 'alloc_sendfile_buf_ring':
+/home/developer/altera/nios2-linux/uClinux-dist/user/netperf/netperf-2.4.1/src/netlib.c:1393: warning: format '%u' expects type 'unsigned int', but argument 2 has type 'long unsigned int'
+/home/developer/altera/nios2-linux/uClinux-dist/user/netperf/netperf-2.4.1/src/netlib.c: In function 'bind_to_specific_processor':
+/home/developer/altera/nios2-linux/uClinux-dist/user/netperf/netperf-2.4.1/src/netlib.c:1723: warning: format '%d' expects type 'int', but argument 3 has type 'long unsigned int'
+/home/developer/altera/nios2-linux/uClinux-dist/user/netperf/netperf-2.4.1/src/netlib.c:1729: warning: implicit declaration of function 'sched_setaffinity'
+/home/developer/altera/nios2-linux/uClinux-dist/user/netperf/netperf-2.4.1/src/netlib.c: In function 'send_request':
+/home/developer/altera/nios2-linux/uClinux-dist/user/netperf/netperf-2.4.1/src/netlib.c:1857: warning: format '%u' expects type 'unsigned int', but argument 3 has type 'long unsigned int'
+/home/developer/altera/nios2-linux/uClinux-dist/user/netperf/netperf-2.4.1/src/netlib.c: In function 'send_response':
+/home/developer/altera/nios2-linux/uClinux-dist/user/netperf/netperf-2.4.1/src/netlib.c:1895: warning: format '%u' expects type 'unsigned int', but argument 3 has type 'long unsigned int'
+/home/developer/altera/nios2-linux/uClinux-dist/user/netperf/netperf-2.4.1/src/netlib.c:1916: warning: format '%u' expects type 'unsigned int', but argument 3 has type 'long unsigned int'

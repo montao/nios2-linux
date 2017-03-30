@@ -1,0 +1,668 @@
+Info: create_system  
+Info: set_system_name ghrd_4sgx230_sopc
+Info: set_system_parameter deviceFamily STRATIXIV
+Info: set_system_parameter generateLegacySim false
+Info: set_system_parameter hardcopyCompatible false
+Warning: Obsolete system parameter: hardcopyCompatible
+Info: set_system_parameter hdlLanguage verilog
+Info: set_system_parameter projectName ghrd_4sgx230.qpf
+Info: add_module clock_source clkin_100
+Info: add_module altera_nios2 cpu
+Info: add_module altera_avalon_onchip_memory2 tlb_miss_ram_1k
+Info: add_module altera_avalon_pipeline_bridge pb_cpu_to_ddr3_top
+Info: add_module altmemddr3 ddr3_top
+Info: add_module altera_avalon_pipeline_bridge pb_dma_to_ddr3_top
+Info: add_module altera_avalon_pipeline_bridge pb_cpu_to_fsm
+Info: add_module altera_avalon_tri_state_bridge tb_fsm
+Info: add_module altera_avalon_cfi_flash ext_flash
+Info: add_module altera_avalon_cfi_flash ext_flash_1
+Info: add_module altera_avalon_pipeline_bridge pb_cpu_to_io
+Info: add_module altera_avalon_timer timer_1ms
+Info: add_module altera_avalon_sysid sysid
+Info: add_module altera_avalon_jtag_uart jtag_uart
+Info: add_module altera_avalon_uart uart
+Info: add_module triple_speed_ethernet tse_mac
+Info: add_module altera_avalon_sgdma sgdma_rx
+Info: add_module altera_avalon_sgdma sgdma_tx
+Info: add_module altera_avalon_pipeline_bridge pb_dma_to_descriptor_memory
+Info: add_module altera_avalon_onchip_memory2 descriptor_memory
+Info: add_module altera_avalon_pio led_pio
+Info: add_module altera_avalon_pio button_pio
+Info: add_module altera_avalon_pio dipsw_pio
+Info: set_parameter clkin_100 clockFrequency 100000000
+Info: set_parameter clkin_100 clockFrequencyKnown true
+Info: set_parameter cpu userDefinedSettings 
+Info: set_parameter cpu setting_showUnpublishedSettings false
+Info: set_parameter cpu setting_showInternalSettings false
+Info: set_parameter cpu setting_shadowRegisterSets 0
+Info: set_parameter cpu setting_preciseSlaveAccessErrorException false
+Info: set_parameter cpu setting_preciseIllegalMemAccessException false
+Info: set_parameter cpu setting_preciseDivisionErrorException false
+Info: set_parameter cpu setting_performanceCounter false
+Info: set_parameter cpu setting_perfCounterWidth _32
+Info: set_parameter cpu setting_interruptControllerType Internal
+Info: set_parameter cpu setting_illegalMemAccessDetection false
+Info: set_parameter cpu setting_illegalInstructionsTrap false
+Info: set_parameter cpu setting_fullWaveformSignals false
+Info: set_parameter cpu setting_extraExceptionInfo false
+Info: set_parameter cpu setting_exportPCB false
+Info: set_parameter cpu setting_debugSimGen false
+Info: set_parameter cpu setting_clearXBitsLDNonBypass true
+Info: set_parameter cpu setting_branchPredictionType Automatic
+Info: set_parameter cpu setting_bit31BypassDCache true
+Info: set_parameter cpu setting_bigEndian false
+Info: set_parameter cpu setting_bhtPtrSz _8
+Info: set_parameter cpu setting_bhtIndexPcOnly false
+Info: set_parameter cpu setting_avalonDebugPortPresent false
+Info: set_parameter cpu setting_alwaysEncrypt true
+Info: set_parameter cpu setting_allowFullAddressRange false
+Info: set_parameter cpu setting_activateTrace true
+Info: set_parameter cpu setting_activateTestEndChecker false
+Info: set_parameter cpu setting_activateMonitors true
+Info: set_parameter cpu setting_activateModelChecker false
+Info: set_parameter cpu setting_HDLSimCachesCleared true
+Info: set_parameter cpu setting_HBreakTest false
+Info: set_parameter cpu resetSlave ext_flash_1.s1
+Info: set_parameter cpu resetOffset 8388608
+Info: set_parameter cpu muldiv_multiplierType DSPBlock
+Info: set_parameter cpu muldiv_divider true
+Info: set_parameter cpu mpu_useLimit false
+Info: set_parameter cpu mpu_numOfInstRegion 8
+Info: set_parameter cpu mpu_numOfDataRegion 8
+Info: set_parameter cpu mpu_minInstRegionSize _12
+Info: set_parameter cpu mpu_minDataRegionSize _12
+Info: set_parameter cpu mpu_enabled false
+Info: set_parameter cpu mmu_uitlbNumEntries _4
+Info: set_parameter cpu mmu_udtlbNumEntries _6
+Info: set_parameter cpu mmu_tlbPtrSz _7
+Info: set_parameter cpu mmu_tlbNumWays _16
+Info: set_parameter cpu mmu_processIDNumBits _8
+Info: set_parameter cpu mmu_enabled true
+Info: set_parameter cpu mmu_autoAssignTlbPtrSz true
+Info: set_parameter cpu mmu_TLBMissExcSlave tlb_miss_ram_1k.s1
+Info: set_parameter cpu mmu_TLBMissExcOffset 0
+Info: set_parameter cpu manuallyAssignCpuID false
+Info: set_parameter cpu impl Fast
+Info: set_parameter cpu icache_size _32768
+Info: set_parameter cpu icache_ramBlockType Automatic
+Info: set_parameter cpu icache_numTCIM _1
+Info: set_parameter cpu icache_burstType None
+Info: set_parameter cpu exceptionSlave ddr3_top.s1
+Info: set_parameter cpu exceptionOffset 32
+Info: set_parameter cpu debug_triggerArming true
+Info: set_parameter cpu debug_level Level1
+Info: set_parameter cpu debug_jtagInstanceID 0
+Info: set_parameter cpu debug_embeddedPLL true
+Info: set_parameter cpu debug_debugReqSignals false
+Info: set_parameter cpu debug_assignJtagInstanceID false
+Info: set_parameter cpu debug_OCIOnchipTrace _128
+Info: set_parameter cpu dcache_size _32768
+Info: set_parameter cpu dcache_ramBlockType Automatic
+Info: set_parameter cpu dcache_omitDataMaster false
+Info: set_parameter cpu dcache_numTCDM _1
+Info: set_parameter cpu dcache_lineSize _32
+Info: set_parameter cpu dcache_bursts false
+Info: set_parameter cpu cpuReset false
+Info: set_parameter cpu cpuID 0
+Info: set_parameter cpu breakSlave cpu.jtag_debug_module
+Info: set_parameter cpu breakOffset 32
+Info: set_parameter tlb_miss_ram_1k allowInSystemMemoryContentEditor false
+Info: set_parameter tlb_miss_ram_1k blockType AUTO
+Info: set_parameter tlb_miss_ram_1k dataWidth 32
+Info: set_parameter tlb_miss_ram_1k dualPort true
+Info: set_parameter tlb_miss_ram_1k initMemContent true
+Info: set_parameter tlb_miss_ram_1k initializationFileName tlb_miss_ram_1k
+Info: set_parameter tlb_miss_ram_1k instanceID NONE
+Info: set_parameter tlb_miss_ram_1k memorySize 1024
+Info: set_parameter tlb_miss_ram_1k readDuringWriteMode DONT_CARE
+Info: set_parameter tlb_miss_ram_1k simAllowMRAMContentsFile false
+Info: set_parameter tlb_miss_ram_1k slave1Latency 1
+Info: set_parameter tlb_miss_ram_1k slave2Latency 1
+Info: set_parameter tlb_miss_ram_1k useNonDefaultInitFile false
+Info: set_parameter tlb_miss_ram_1k useShallowMemBlocks false
+Info: set_parameter tlb_miss_ram_1k writable true
+Info: set_parameter pb_cpu_to_ddr3_top burstEnable false
+Info: set_parameter pb_cpu_to_ddr3_top dataWidth 32
+Info: set_parameter pb_cpu_to_ddr3_top downstreamPipeline true
+Info: set_parameter pb_cpu_to_ddr3_top enableArbiterlock false
+Info: set_parameter pb_cpu_to_ddr3_top maxBurstSize 2
+Info: set_parameter pb_cpu_to_ddr3_top upstreamPipeline true
+Info: set_parameter pb_cpu_to_ddr3_top waitrequestPipeline false
+Info: set_parameter ddr3_top pipeline_commands false
+Info: set_parameter ddr3_top debug_en false
+Info: set_parameter ddr3_top export_debug_port false
+Info: set_parameter ddr3_top use_generated_memory_model true
+Info: set_parameter ddr3_top dedicated_memory_clk_phase_label Dedicated memory clock phase:
+Info: set_parameter ddr3_top mem_if_clk_mhz 300.0
+Info: set_parameter ddr3_top quartus_project_exists false
+Info: set_parameter ddr3_top local_if_drate HALF
+Info: set_parameter ddr3_top enable_v72_rsu false
+Info: set_parameter ddr3_top local_if_clk_mhz_label 150.0
+Info: set_parameter ddr3_top new_variant true
+Info: set_parameter ddr3_top mem_if_memtype DDR3 SDRAM
+Info: set_parameter ddr3_top pll_ref_clk_mhz 100.0
+Info: set_parameter ddr3_top mem_if_clk_ps_label (3333 ps)
+Info: set_parameter ddr3_top family Stratix IV
+Info: set_parameter ddr3_top project_family Stratix IV
+Info: set_parameter ddr3_top speed_grade 2
+Info: set_parameter ddr3_top dedicated_memory_clk_phase 0
+Info: set_parameter ddr3_top pll_ref_clk_ps_label (10000 ps)
+Info: set_parameter ddr3_top avalon_burst_length 1
+Info: set_parameter ddr3_top mem_if_clk_pair_count 1
+Info: set_parameter ddr3_top mem_if_cs_per_dimm 1
+Info: set_parameter ddr3_top pre_latency_label Fix read latency at:
+Info: set_parameter ddr3_top dedicated_memory_clk_en false
+Info: set_parameter ddr3_top mirror_addressing 0
+Info: set_parameter ddr3_top mem_if_bankaddr_width 3
+Info: set_parameter ddr3_top register_control_word_9 0000
+Info: set_parameter ddr3_top mem_if_rowaddr_width 13
+Info: set_parameter ddr3_top mem_dyn_deskew_en false
+Info: set_parameter ddr3_top post_latency_label cycles (0 cycles=minimum latency, non-deterministic)
+Info: set_parameter ddr3_top mem_if_dm_pins_en Yes
+Info: set_parameter ddr3_top local_if_dwidth_label 64
+Info: set_parameter ddr3_top register_control_word_7 0000
+Info: set_parameter ddr3_top register_control_word_8 0000
+Info: set_parameter ddr3_top mem_if_preset Custom (Micron MT41J64M16LA-15E)
+Info: set_parameter ddr3_top mem_if_pchaddr_bit 10
+Info: set_parameter ddr3_top WIDTH_RATIO 4
+Info: set_parameter ddr3_top vendor Micron
+Info: set_parameter ddr3_top register_control_word_3 0000
+Info: set_parameter ddr3_top register_control_word_4 0000
+Info: set_parameter ddr3_top chip_or_dimm Discrete Device
+Info: set_parameter ddr3_top register_control_word_5 0000
+Info: set_parameter ddr3_top register_control_word_6 0000
+Info: set_parameter ddr3_top mem_fmax 666.666
+Info: set_parameter ddr3_top register_control_word_0 0000
+Info: set_parameter ddr3_top register_control_word_size 4
+Info: set_parameter ddr3_top register_control_word_1 0000
+Info: set_parameter ddr3_top register_control_word_2 0000
+Info: set_parameter ddr3_top register_control_word_11 0000
+Info: set_parameter ddr3_top register_control_word_10 0000
+Info: set_parameter ddr3_top mem_if_cs_width 1
+Info: set_parameter ddr3_top mem_if_preset_rlat 0
+Info: set_parameter ddr3_top mem_if_cs_per_rank 1
+Info: set_parameter ddr3_top fast_simulation_en FAST
+Info: set_parameter ddr3_top register_control_word_15 0000
+Info: set_parameter ddr3_top register_control_word_14 0000
+Info: set_parameter ddr3_top mem_if_dwidth 16
+Info: set_parameter ddr3_top mem_if_dq_per_dqs 8
+Info: set_parameter ddr3_top mem_if_coladdr_width 10
+Info: set_parameter ddr3_top register_control_word_13 0000
+Info: set_parameter ddr3_top register_control_word_12 0000
+Info: set_parameter ddr3_top mem_tiha_ps 240
+Info: set_parameter ddr3_top mem_tdsh_ck 0.2
+Info: set_parameter ddr3_top mem_if_trfc_ns 110.0
+Info: set_parameter ddr3_top mem_tqh_ck 0.38
+Info: set_parameter ddr3_top mem_tisa_ps 340
+Info: set_parameter ddr3_top mem_tdss_ck 0.2
+Info: set_parameter ddr3_top mem_trtp_ns 3.6
+Info: set_parameter ddr3_top mem_if_tinit_us 500.0
+Info: set_parameter ddr3_top mem_if_trcd_ns 13.5
+Info: set_parameter ddr3_top mem_if_twtr_ck 4
+Info: set_parameter ddr3_top mem_trrd_ns 3.6
+Info: set_parameter ddr3_top mem_tdqss_ck 0.25
+Info: set_parameter ddr3_top mem_tqhs_ps 300
+Info: set_parameter ddr3_top mem_tdsa_ps 180
+Info: set_parameter ddr3_top mem_tac_ps 400
+Info: set_parameter ddr3_top mem_tdha_ps 165
+Info: set_parameter ddr3_top mem_if_tras_ns 36.0
+Info: set_parameter ddr3_top mem_if_twr_ns 15.0
+Info: set_parameter ddr3_top mem_tdqsck_ps 255
+Info: set_parameter ddr3_top mem_if_trp_ns 13.5
+Info: set_parameter ddr3_top mem_tdqsq_ps 125
+Info: set_parameter ddr3_top mem_if_tmrd_ns 6.0
+Info: set_parameter ddr3_top mem_tfaw_ns 13.6
+Info: set_parameter ddr3_top mem_if_trefi_us 7.8
+Info: set_parameter ddr3_top mem_tcl_40_fmax 533.0
+Info: set_parameter ddr3_top mem_odt Disabled
+Info: set_parameter ddr3_top mp_WLH_percent 0.6
+Info: set_parameter ddr3_top mem_drv_str Normal
+Info: set_parameter ddr3_top mp_DH_percent 0.5
+Info: set_parameter ddr3_top input_period 0
+Info: set_parameter ddr3_top mp_QH_percent 0.5
+Info: set_parameter ddr3_top mp_QHS_percent 0.5
+Info: set_parameter ddr3_top mem_tcl_30_fmax 533.0
+Info: set_parameter ddr3_top ac_clk_select dedicated
+Info: set_parameter ddr3_top mp_DQSQ_percent 0.65
+Info: set_parameter ddr3_top mp_DS_percent 0.6
+Info: set_parameter ddr3_top pll_reconfig_ports_en false
+Info: set_parameter ddr3_top mem_btype Sequential
+Info: set_parameter ddr3_top mp_IS_percent 0.7
+Info: set_parameter ddr3_top mem_tcl 9.0
+Info: set_parameter ddr3_top mp_DQSS_percent 0.5
+Info: set_parameter ddr3_top export_bank_info false
+Info: set_parameter ddr3_top mp_DSS_percent 0.6
+Info: set_parameter ddr3_top mem_dll_en Yes
+Info: set_parameter ddr3_top ac_phase 240
+Info: set_parameter ddr3_top mem_if_oct_en false
+Info: set_parameter ddr3_top mem_tcl_60_fmax 400.0
+Info: set_parameter ddr3_top mp_DSH_percent 0.6
+Info: set_parameter ddr3_top mem_if_dqsn_en true
+Info: set_parameter ddr3_top enable_mp_calibration true
+Info: set_parameter ddr3_top mp_IH_percent 0.6
+Info: set_parameter ddr3_top mem_tcl_15_fmax 533.0
+Info: set_parameter ddr3_top dll_external false
+Info: set_parameter ddr3_top mem_bl On the fly
+Info: set_parameter ddr3_top mp_WLS_percent 0.7
+Info: set_parameter ddr3_top mem_tcl_50_fmax 333.333
+Info: set_parameter ddr3_top mp_DQSCK_percent 0.5
+Info: set_parameter ddr3_top mem_tcl_25_fmax 533.0
+Info: set_parameter ddr3_top mem_tcl_20_fmax 533.0
+Info: set_parameter ddr3_top mem_addr_mapping CHIP_BANK_ROW_COL
+Info: set_parameter ddr3_top ctl_ecc_en false
+Info: set_parameter ddr3_top user_refresh_en false
+Info: set_parameter ddr3_top ctl_hrb_en false
+Info: set_parameter ddr3_top clk_source_sharing_en false
+Info: set_parameter ddr3_top ctl_lookahead_depth 4
+Info: set_parameter ddr3_top ref_clk_source clkin_100
+Info: set_parameter ddr3_top ctl_autopch_en false
+Info: set_parameter ddr3_top multicast_wr_en false
+Info: set_parameter ddr3_top ctl_powerdn_en false
+Info: set_parameter ddr3_top auto_powerdn_cycles 0
+Info: set_parameter ddr3_top csr_en false
+Info: set_parameter ddr3_top local_if_type_avalon true
+Info: set_parameter ddr3_top auto_powerdn_en false
+Info: set_parameter ddr3_top ctl_auto_correct_en false
+Info: set_parameter ddr3_top ctl_self_refresh_en false
+Info: set_parameter ddr3_top phy_if_type_afi true
+Info: set_parameter ddr3_top shared_sys_clk_source 
+Info: set_parameter ddr3_top controller_type ddrx_ctl
+Info: set_parameter ddr3_top max_local_size 4
+Info: set_parameter ddr3_top tool_context SOPC_BUILDER
+Info: set_parameter ddr3_top mem_srtr Normal
+Info: set_parameter ddr3_top mem_mpr_loc Predefined Pattern
+Info: set_parameter ddr3_top dss_tinit_rst_us 200.0
+Info: set_parameter ddr3_top mem_tcl_90_fmax 666.666
+Info: set_parameter ddr3_top mem_rtt_wr Dynamic ODT off
+Info: set_parameter ddr3_top mem_tcl_100_fmax 666.666
+Info: set_parameter ddr3_top mem_pasr Full Array
+Info: set_parameter ddr3_top mem_asrm Manual SR Reference (SRT)
+Info: set_parameter ddr3_top mem_mpr_oper Predefined Pattern
+Info: set_parameter ddr3_top mem_tcl_80_fmax 533.333
+Info: set_parameter ddr3_top mem_drv_impedance RZQ/7
+Info: set_parameter ddr3_top mem_rtt_nom ODT Disabled
+Info: set_parameter ddr3_top mem_tcl_70_fmax 533.333
+Info: set_parameter ddr3_top mem_wtcl 7.0
+Info: set_parameter ddr3_top mem_dll_pch Fast exit
+Info: set_parameter ddr3_top mem_atcl Disabled
+Info: set_parameter ddr3_top board_settings_valid true
+Info: set_parameter ddr3_top t_IH 0.248
+Info: set_parameter ddr3_top board_intra_DQS_group_skew 0.02
+Info: set_parameter ddr3_top isi_DQS 0.0
+Info: set_parameter ddr3_top addr_cmd_slew_rate 3.51
+Info: set_parameter ddr3_top board_tpd_inter_DIMM 0.05
+Info: set_parameter ddr3_top board_addresscmd_CK_skew 0.0
+Info: set_parameter ddr3_top t_DS_calculated 0.195
+Info: set_parameter ddr3_top isi_addresscmd_hold 0.0
+Info: set_parameter ddr3_top t_IS 0.232
+Info: set_parameter ddr3_top restore_default_toggle false
+Info: set_parameter ddr3_top dqs_dqsn_slew_rate 3.87
+Info: set_parameter ddr3_top dq_slew_rate 1.56
+Info: set_parameter ddr3_top board_inter_DQS_group_skew 0.02
+Info: set_parameter ddr3_top isi_addresscmd_setup 0.0
+Info: set_parameter ddr3_top board_minCK_DQS_skew -0.01
+Info: set_parameter ddr3_top t_IS_calculated 0.232
+Info: set_parameter ddr3_top num_slots_or_devices 1
+Info: set_parameter ddr3_top board_maxCK_DQS_skew 0.01
+Info: set_parameter ddr3_top board_skew_ps 20
+Info: set_parameter ddr3_top t_DH 0.165
+Info: set_parameter ddr3_top ck_ckn_slew_rate 1.28
+Info: set_parameter ddr3_top isi_DQ 0.0
+Info: set_parameter ddr3_top t_IH_calculated 0.248
+Info: set_parameter ddr3_top t_DH_calculated 0.165
+Info: set_parameter ddr3_top t_DS 0.195
+Info: set_parameter pb_dma_to_ddr3_top burstEnable false
+Info: set_parameter pb_dma_to_ddr3_top dataWidth 32
+Info: set_parameter pb_dma_to_ddr3_top downstreamPipeline true
+Info: set_parameter pb_dma_to_ddr3_top enableArbiterlock false
+Info: set_parameter pb_dma_to_ddr3_top maxBurstSize 2
+Info: set_parameter pb_dma_to_ddr3_top upstreamPipeline true
+Info: set_parameter pb_dma_to_ddr3_top waitrequestPipeline false
+Info: set_parameter pb_cpu_to_fsm burstEnable false
+Info: set_parameter pb_cpu_to_fsm dataWidth 32
+Info: set_parameter pb_cpu_to_fsm downstreamPipeline true
+Info: set_parameter pb_cpu_to_fsm enableArbiterlock false
+Info: set_parameter pb_cpu_to_fsm maxBurstSize 2
+Info: set_parameter pb_cpu_to_fsm upstreamPipeline true
+Info: set_parameter pb_cpu_to_fsm waitrequestPipeline false
+Info: set_parameter tb_fsm registerIncomingSignals true
+Info: set_parameter ext_flash addressWidth 24
+Info: set_parameter ext_flash corePreset CUSTOM
+Info: set_parameter ext_flash dataWidth 16
+Info: set_parameter ext_flash holdTime 20
+Info: set_parameter ext_flash setupTime 25
+Info: set_parameter ext_flash sharedPorts s1/address,s1/data,s1/read_n,s1/write_n
+Info: set_parameter ext_flash timingUnits NS
+Info: set_parameter ext_flash waitTime 100
+Info: set_parameter ext_flash_1 addressWidth 24
+Info: set_parameter ext_flash_1 corePreset CUSTOM
+Info: set_parameter ext_flash_1 dataWidth 16
+Info: set_parameter ext_flash_1 holdTime 20
+Info: set_parameter ext_flash_1 setupTime 25
+Info: set_parameter ext_flash_1 sharedPorts s1/address,s1/data,s1/read_n,s1/write_n
+Info: set_parameter ext_flash_1 timingUnits NS
+Info: set_parameter ext_flash_1 waitTime 100
+Info: set_parameter pb_cpu_to_io burstEnable false
+Info: set_parameter pb_cpu_to_io dataWidth 32
+Info: set_parameter pb_cpu_to_io downstreamPipeline true
+Info: set_parameter pb_cpu_to_io enableArbiterlock false
+Info: set_parameter pb_cpu_to_io maxBurstSize 2
+Info: set_parameter pb_cpu_to_io upstreamPipeline true
+Info: set_parameter pb_cpu_to_io waitrequestPipeline false
+Info: set_parameter timer_1ms alwaysRun false
+Info: set_parameter timer_1ms counterSize 32
+Info: set_parameter timer_1ms fixedPeriod false
+Info: set_parameter timer_1ms period 1
+Info: set_parameter timer_1ms periodUnits MSEC
+Info: set_parameter timer_1ms resetOutput false
+Info: set_parameter timer_1ms snapshot true
+Info: set_parameter timer_1ms timeoutPulseOutput false
+Info: set_parameter timer_1ms timerPreset CUSTOM
+Info: set_parameter jtag_uart allowMultipleConnections false
+Info: set_parameter jtag_uart hubInstanceID 0
+Info: set_parameter jtag_uart readBufferDepth 64
+Info: set_parameter jtag_uart readIRQThreshold 8
+Info: set_parameter jtag_uart simInputCharacterStream 
+Info: set_parameter jtag_uart simInteractiveOptions INTERACTIVE_ASCII_OUTPUT
+Info: set_parameter jtag_uart useRegistersForReadBuffer false
+Info: set_parameter jtag_uart useRegistersForWriteBuffer false
+Info: set_parameter jtag_uart useRelativePathForSimFile false
+Info: set_parameter jtag_uart writeBufferDepth 64
+Info: set_parameter jtag_uart writeIRQThreshold 8
+Info: set_parameter uart baud 115200
+Info: set_parameter uart dataBits 8
+Info: set_parameter uart fixedBaud false
+Info: set_parameter uart parity NONE
+Info: set_parameter uart simCharStream 
+Info: set_parameter uart simInteractiveInputEnable false
+Info: set_parameter uart simInteractiveOutputEnable false
+Info: set_parameter uart simTrueBaud false
+Info: set_parameter uart stopBits 1
+Info: set_parameter uart syncRegDepth 2
+Info: set_parameter uart useCtsRts false
+Info: set_parameter uart useEopRegister false
+Info: set_parameter uart useRelativePathForSimFile false
+Info: set_parameter tse_mac atlanticSinkClockRate 0
+Info: set_parameter tse_mac atlanticSinkClockSource unassigned
+Info: set_parameter tse_mac atlanticSourceClockRate 0
+Info: set_parameter tse_mac atlanticSourceClockSource unassigned
+Info: set_parameter tse_mac avalonSlaveClockRate 0
+Info: set_parameter tse_mac avalonSlaveClockSource unassigned
+Info: set_parameter tse_mac avalonStNeighbours {TRANSMIT=sgdma_tx, RECEIVE=sgdma_rx}
+Info: set_parameter tse_mac channel_count 1
+Info: set_parameter tse_mac core_variation MAC_PCS
+Info: set_parameter tse_mac core_version 2305
+Info: set_parameter tse_mac crc32check16bit 0
+Info: set_parameter tse_mac crc32dwidth 8
+Info: set_parameter tse_mac crc32gendelay 6
+Info: set_parameter tse_mac crc32s1l2_extern false
+Info: set_parameter tse_mac cust_version 0
+Info: set_parameter tse_mac dataBitsPerSymbol 8
+Info: set_parameter tse_mac dev_version 2305
+Info: set_parameter tse_mac deviceFamily STRATIXIV
+Info: set_parameter tse_mac eg_addr 11
+Info: set_parameter tse_mac ena_hash false
+Info: set_parameter tse_mac enable_alt_reconfig false
+Info: set_parameter tse_mac enable_clk_sharing false
+Info: set_parameter tse_mac enable_ena 32
+Info: set_parameter tse_mac enable_fifoless false
+Info: set_parameter tse_mac enable_gmii_loopback false
+Info: set_parameter tse_mac enable_hd_logic false
+Info: set_parameter tse_mac enable_mac_flow_ctrl false
+Info: set_parameter tse_mac enable_mac_txaddr_set true
+Info: set_parameter tse_mac enable_mac_vlan false
+Info: set_parameter tse_mac enable_maclite false
+Info: set_parameter tse_mac enable_magic_detect true
+Info: set_parameter tse_mac enable_multi_channel false
+Info: set_parameter tse_mac enable_pkt_class true
+Info: set_parameter tse_mac enable_pma false
+Info: set_parameter tse_mac enable_reg_sharing false
+Info: set_parameter tse_mac enable_sgmii true
+Info: set_parameter tse_mac enable_shift16 true
+Info: set_parameter tse_mac enable_sup_addr false
+Info: set_parameter tse_mac enable_use_internal_fifo true
+Info: set_parameter tse_mac export_calblkclk false
+Info: set_parameter tse_mac export_pwrdn false
+Info: set_parameter tse_mac ext_stat_cnt_ena false
+Info: set_parameter tse_mac gigeAdvanceMode true
+Info: set_parameter tse_mac ifGMII MII_GMII
+Info: set_parameter tse_mac ifPCSuseEmbeddedSerdes true
+Info: set_parameter tse_mac ing_addr 11
+Info: set_parameter tse_mac insert_ta true
+Info: set_parameter tse_mac maclite_gige false
+Info: set_parameter tse_mac max_channels 1
+Info: set_parameter tse_mac mdio_clk_div 40
+Info: set_parameter tse_mac phy_identifier 0
+Info: set_parameter tse_mac ramType AUTO
+Info: set_parameter tse_mac reset_level 1
+Info: set_parameter tse_mac stat_cnt_ena true
+Info: set_parameter tse_mac timingAdapterName timingAdapter
+Info: set_parameter tse_mac toolContext SOPC_BUILDER
+Info: set_parameter tse_mac transceiver_type LVDS_IO
+Info: set_parameter tse_mac uiHostClockFrequency 0
+Info: set_parameter tse_mac uiMDIOFreq 0.0 MHz
+Info: set_parameter tse_mac useLvds true
+Info: set_parameter tse_mac useMAC true
+Info: set_parameter tse_mac useMDIO true
+Info: set_parameter tse_mac usePCS true
+Info: set_parameter tse_mac use_sync_reset false
+Info: set_parameter sgdma_rx addressWidth 32
+Info: set_parameter sgdma_rx alwaysDoMaxBurst true
+Info: set_parameter sgdma_rx dataTransferFIFODepth 2
+Info: set_parameter sgdma_rx enableBurstTransfers false
+Info: set_parameter sgdma_rx enableDescriptorReadMasterBurst false
+Info: set_parameter sgdma_rx enableUnalignedTransfers false
+Info: set_parameter sgdma_rx internalFIFODepth 2
+Info: set_parameter sgdma_rx readBlockDataWidth 32
+Info: set_parameter sgdma_rx readBurstcountWidth 4
+Info: set_parameter sgdma_rx sinkErrorWidth 6
+Info: set_parameter sgdma_rx sourceErrorWidth 0
+Info: set_parameter sgdma_rx transferMode STREAM_TO_MEMORY
+Info: set_parameter sgdma_rx writeBurstcountWidth 4
+Info: set_parameter sgdma_tx addressWidth 32
+Info: set_parameter sgdma_tx alwaysDoMaxBurst true
+Info: set_parameter sgdma_tx dataTransferFIFODepth 2
+Info: set_parameter sgdma_tx enableBurstTransfers false
+Info: set_parameter sgdma_tx enableDescriptorReadMasterBurst false
+Info: set_parameter sgdma_tx enableUnalignedTransfers false
+Info: set_parameter sgdma_tx internalFIFODepth 2
+Info: set_parameter sgdma_tx readBlockDataWidth 32
+Info: set_parameter sgdma_tx readBurstcountWidth 4
+Info: set_parameter sgdma_tx sinkErrorWidth 0
+Info: set_parameter sgdma_tx sourceErrorWidth 1
+Info: set_parameter sgdma_tx transferMode MEMORY_TO_STREAM
+Info: set_parameter sgdma_tx writeBurstcountWidth 4
+Info: set_parameter pb_dma_to_descriptor_memory burstEnable false
+Info: set_parameter pb_dma_to_descriptor_memory dataWidth 32
+Info: set_parameter pb_dma_to_descriptor_memory downstreamPipeline true
+Info: set_parameter pb_dma_to_descriptor_memory enableArbiterlock false
+Info: set_parameter pb_dma_to_descriptor_memory maxBurstSize 2
+Info: set_parameter pb_dma_to_descriptor_memory upstreamPipeline false
+Info: set_parameter pb_dma_to_descriptor_memory waitrequestPipeline false
+Info: set_parameter descriptor_memory allowInSystemMemoryContentEditor false
+Info: set_parameter descriptor_memory blockType AUTO
+Info: set_parameter descriptor_memory dataWidth 32
+Info: set_parameter descriptor_memory dualPort false
+Info: set_parameter descriptor_memory initMemContent true
+Info: set_parameter descriptor_memory initializationFileName descriptor_memory
+Info: set_parameter descriptor_memory instanceID NONE
+Info: set_parameter descriptor_memory memorySize 8192
+Info: set_parameter descriptor_memory readDuringWriteMode DONT_CARE
+Info: set_parameter descriptor_memory simAllowMRAMContentsFile false
+Info: set_parameter descriptor_memory slave1Latency 1
+Info: set_parameter descriptor_memory slave2Latency 1
+Info: set_parameter descriptor_memory useNonDefaultInitFile false
+Info: set_parameter descriptor_memory useShallowMemBlocks false
+Info: set_parameter descriptor_memory writable true
+Info: set_parameter led_pio bitClearingEdgeCapReg false
+Info: set_parameter led_pio bitModifyingOutReg false
+Info: set_parameter led_pio captureEdge false
+Info: set_parameter led_pio direction Output
+Info: set_parameter led_pio edgeType RISING
+Info: set_parameter led_pio generateIRQ false
+Info: set_parameter led_pio irqType LEVEL
+Info: set_parameter led_pio resetValue 0
+Info: set_parameter led_pio simDoTestBenchWiring false
+Info: set_parameter led_pio simDrivenValue 0
+Info: set_parameter led_pio width 16
+Info: set_parameter button_pio bitClearingEdgeCapReg false
+Info: set_parameter button_pio bitModifyingOutReg false
+Info: set_parameter button_pio captureEdge true
+Info: set_parameter button_pio direction Input
+Info: set_parameter button_pio edgeType ANY
+Info: set_parameter button_pio generateIRQ true
+Info: set_parameter button_pio irqType EDGE
+Info: set_parameter button_pio resetValue 0
+Info: set_parameter button_pio simDoTestBenchWiring true
+Info: set_parameter button_pio simDrivenValue 7
+Info: set_parameter button_pio width 3
+Info: set_parameter dipsw_pio bitClearingEdgeCapReg true
+Info: set_parameter dipsw_pio bitModifyingOutReg false
+Info: set_parameter dipsw_pio captureEdge true
+Info: set_parameter dipsw_pio direction Input
+Info: set_parameter dipsw_pio edgeType ANY
+Info: set_parameter dipsw_pio generateIRQ true
+Info: set_parameter dipsw_pio irqType EDGE
+Info: set_parameter dipsw_pio resetValue 0
+Info: set_parameter dipsw_pio simDoTestBenchWiring true
+Info: set_parameter dipsw_pio simDrivenValue 0
+Info: set_parameter dipsw_pio width 8
+Info: add_connection clkin_100.clk/ddr3_top.refclk 
+Info: add_connection ddr3_top.sysclk/button_pio.clk 
+Info: add_connection ddr3_top.sysclk/cpu.clk 
+Info: add_connection ddr3_top.sysclk/descriptor_memory.clk1 
+Info: add_connection ddr3_top.sysclk/dipsw_pio.clk 
+Info: add_connection ddr3_top.sysclk/ext_flash.clk 
+Info: add_connection ddr3_top.sysclk/ext_flash_1.clk 
+Info: add_connection ddr3_top.sysclk/jtag_uart.clk 
+Info: add_connection ddr3_top.sysclk/led_pio.clk 
+Info: add_connection ddr3_top.sysclk/pb_cpu_to_ddr3_top.clk 
+Info: add_connection ddr3_top.sysclk/pb_cpu_to_fsm.clk 
+Info: add_connection ddr3_top.sysclk/pb_cpu_to_io.clk 
+Info: add_connection ddr3_top.sysclk/pb_dma_to_ddr3_top.clk 
+Info: add_connection ddr3_top.sysclk/pb_dma_to_descriptor_memory.clk 
+Info: add_connection ddr3_top.sysclk/sgdma_rx.clk 
+Info: add_connection ddr3_top.sysclk/sgdma_tx.clk 
+Info: add_connection ddr3_top.sysclk/sysid.clk 
+Info: add_connection ddr3_top.sysclk/tb_fsm.clk 
+Info: add_connection ddr3_top.sysclk/timer_1ms.clk 
+Info: add_connection ddr3_top.sysclk/tlb_miss_ram_1k.clk1 
+Info: add_connection ddr3_top.sysclk/tlb_miss_ram_1k.clk2 
+Info: add_connection ddr3_top.sysclk/tse_mac.control_port_clock_connection 
+Info: add_connection ddr3_top.sysclk/tse_mac.receive_clock_connection 
+Info: add_connection ddr3_top.sysclk/tse_mac.transmit_clock_connection 
+Info: add_connection ddr3_top.sysclk/uart.clk 
+Info: add_connection cpu.instruction_master/cpu.jtag_debug_module 
+Info: add_connection cpu.instruction_master/pb_cpu_to_ddr3_top.s1 
+Info: add_connection cpu.instruction_master/pb_cpu_to_fsm.s1 
+Info: add_connection cpu.data_master/cpu.jtag_debug_module 
+Info: add_connection cpu.data_master/pb_cpu_to_ddr3_top.s1 
+Info: add_connection cpu.data_master/pb_cpu_to_fsm.s1 
+Info: add_connection cpu.data_master/pb_cpu_to_io.s1 
+Info: add_connection cpu.tightly_coupled_data_master_0/tlb_miss_ram_1k.s2 
+Info: add_connection cpu.tightly_coupled_instruction_master_0/tlb_miss_ram_1k.s1 
+Info: add_connection pb_cpu_to_ddr3_top.m1/ddr3_top.s1 
+Info: add_connection pb_cpu_to_fsm.m1/tb_fsm.avalon_slave 
+Info: add_connection tb_fsm.tristate_master/ext_flash.s1 
+Info: add_connection tb_fsm.tristate_master/ext_flash_1.s1 
+Info: add_connection pb_cpu_to_io.m1/button_pio.s1 
+Info: add_connection pb_cpu_to_io.m1/descriptor_memory.s1 
+Info: add_connection pb_cpu_to_io.m1/dipsw_pio.s1 
+Info: add_connection pb_cpu_to_io.m1/jtag_uart.avalon_jtag_slave 
+Info: add_connection pb_cpu_to_io.m1/led_pio.s1 
+Info: add_connection pb_cpu_to_io.m1/sgdma_rx.csr 
+Info: add_connection pb_cpu_to_io.m1/sgdma_tx.csr 
+Info: add_connection pb_cpu_to_io.m1/sysid.control_slave 
+Info: add_connection pb_cpu_to_io.m1/timer_1ms.s1 
+Info: add_connection pb_cpu_to_io.m1/tse_mac.control_port 
+Info: add_connection pb_cpu_to_io.m1/uart.s1 
+Info: add_connection pb_dma_to_ddr3_top.m1/ddr3_top.s1 
+Info: add_connection pb_dma_to_descriptor_memory.m1/descriptor_memory.s1 
+Info: add_connection sgdma_rx.descriptor_read/pb_dma_to_descriptor_memory.s1 
+Info: add_connection sgdma_rx.descriptor_write/pb_dma_to_descriptor_memory.s1 
+Info: add_connection sgdma_rx.m_write/pb_dma_to_ddr3_top.s1 
+Info: add_connection sgdma_tx.descriptor_read/pb_dma_to_descriptor_memory.s1 
+Info: add_connection sgdma_tx.descriptor_write/pb_dma_to_descriptor_memory.s1 
+Info: add_connection sgdma_tx.m_read/pb_dma_to_ddr3_top.s1 
+Info: add_connection sgdma_tx.out/tse_mac.transmit 
+Info: add_connection tse_mac.receive/sgdma_rx.in 
+Info: add_connection cpu.d_irq/jtag_uart.irq 
+Info: add_connection cpu.d_irq/sgdma_rx.csr_irq 
+Info: add_connection cpu.d_irq/sgdma_tx.csr_irq 
+Info: add_connection cpu.d_irq/dipsw_pio.irq 
+Info: add_connection cpu.d_irq/button_pio.irq 
+Info: add_connection cpu.d_irq/uart.irq 
+Info: add_connection cpu.d_irq/timer_1ms.irq 
+Info: set_parameter cpu.instruction_master/cpu.jtag_debug_module arbitrationPriority 1
+Info: set_parameter cpu.instruction_master/cpu.jtag_debug_module baseAddress 0x07fff800
+Info: set_parameter cpu.instruction_master/pb_cpu_to_ddr3_top.s1 arbitrationPriority 8
+Info: set_parameter cpu.instruction_master/pb_cpu_to_ddr3_top.s1 baseAddress 0x10000000
+Info: set_parameter cpu.instruction_master/pb_cpu_to_fsm.s1 arbitrationPriority 8
+Info: set_parameter cpu.instruction_master/pb_cpu_to_fsm.s1 baseAddress 0x0000
+Info: set_parameter cpu.data_master/cpu.jtag_debug_module arbitrationPriority 1
+Info: set_parameter cpu.data_master/cpu.jtag_debug_module baseAddress 0x07fff800
+Info: set_parameter cpu.data_master/pb_cpu_to_ddr3_top.s1 arbitrationPriority 8
+Info: set_parameter cpu.data_master/pb_cpu_to_ddr3_top.s1 baseAddress 0x10000000
+Info: set_parameter cpu.data_master/pb_cpu_to_fsm.s1 arbitrationPriority 8
+Info: set_parameter cpu.data_master/pb_cpu_to_fsm.s1 baseAddress 0x0000
+Info: set_parameter cpu.data_master/pb_cpu_to_io.s1 arbitrationPriority 1
+Info: set_parameter cpu.data_master/pb_cpu_to_io.s1 baseAddress 0x08000000
+Info: set_parameter cpu.tightly_coupled_data_master_0/tlb_miss_ram_1k.s2 arbitrationPriority 1
+Info: set_parameter cpu.tightly_coupled_data_master_0/tlb_miss_ram_1k.s2 baseAddress 0x07fff400
+Info: set_parameter cpu.tightly_coupled_instruction_master_0/tlb_miss_ram_1k.s1 arbitrationPriority 1
+Info: set_parameter cpu.tightly_coupled_instruction_master_0/tlb_miss_ram_1k.s1 baseAddress 0x07fff400
+Info: set_parameter pb_cpu_to_ddr3_top.m1/ddr3_top.s1 arbitrationPriority 8
+Info: set_parameter pb_cpu_to_ddr3_top.m1/ddr3_top.s1 baseAddress 0x0000
+Info: set_parameter pb_cpu_to_fsm.m1/tb_fsm.avalon_slave arbitrationPriority 1
+Info: set_parameter pb_cpu_to_fsm.m1/tb_fsm.avalon_slave baseAddress 0x0000
+Info: set_parameter tb_fsm.tristate_master/ext_flash.s1 arbitrationPriority 1
+Info: set_parameter tb_fsm.tristate_master/ext_flash.s1 baseAddress 0x0000
+Info: set_parameter tb_fsm.tristate_master/ext_flash_1.s1 arbitrationPriority 1
+Info: set_parameter tb_fsm.tristate_master/ext_flash_1.s1 baseAddress 0x2000000
+Info: set_parameter pb_cpu_to_io.m1/button_pio.s1 arbitrationPriority 1
+Info: set_parameter pb_cpu_to_io.m1/button_pio.s1 baseAddress 0x4d00
+Info: set_parameter pb_cpu_to_io.m1/descriptor_memory.s1 arbitrationPriority 1
+Info: set_parameter pb_cpu_to_io.m1/descriptor_memory.s1 baseAddress 0x2000
+Info: set_parameter pb_cpu_to_io.m1/dipsw_pio.s1 arbitrationPriority 1
+Info: set_parameter pb_cpu_to_io.m1/dipsw_pio.s1 baseAddress 0x4ce0
+Info: set_parameter pb_cpu_to_io.m1/jtag_uart.avalon_jtag_slave arbitrationPriority 1
+Info: set_parameter pb_cpu_to_io.m1/jtag_uart.avalon_jtag_slave baseAddress 0x4d50
+Info: set_parameter pb_cpu_to_io.m1/led_pio.s1 arbitrationPriority 1
+Info: set_parameter pb_cpu_to_io.m1/led_pio.s1 baseAddress 0x4cc0
+Info: set_parameter pb_cpu_to_io.m1/sgdma_rx.csr arbitrationPriority 1
+Info: set_parameter pb_cpu_to_io.m1/sgdma_rx.csr baseAddress 0x4400
+Info: set_parameter pb_cpu_to_io.m1/sgdma_tx.csr arbitrationPriority 1
+Info: set_parameter pb_cpu_to_io.m1/sgdma_tx.csr baseAddress 0x4800
+Info: set_parameter pb_cpu_to_io.m1/sysid.control_slave arbitrationPriority 1
+Info: set_parameter pb_cpu_to_io.m1/sysid.control_slave baseAddress 0x4d40
+Info: set_parameter pb_cpu_to_io.m1/timer_1ms.s1 arbitrationPriority 1
+Info: set_parameter pb_cpu_to_io.m1/timer_1ms.s1 baseAddress 0x00400000
+Info: set_parameter pb_cpu_to_io.m1/tse_mac.control_port arbitrationPriority 1
+Info: set_parameter pb_cpu_to_io.m1/tse_mac.control_port baseAddress 0x4000
+Info: set_parameter pb_cpu_to_io.m1/uart.s1 arbitrationPriority 1
+Info: set_parameter pb_cpu_to_io.m1/uart.s1 baseAddress 0x4c80
+Info: set_parameter pb_dma_to_ddr3_top.m1/ddr3_top.s1 arbitrationPriority 8
+Info: set_parameter pb_dma_to_ddr3_top.m1/ddr3_top.s1 baseAddress 0x0000
+Info: set_parameter pb_dma_to_descriptor_memory.m1/descriptor_memory.s1 arbitrationPriority 8
+Info: set_parameter pb_dma_to_descriptor_memory.m1/descriptor_memory.s1 baseAddress 0x2000
+Info: set_parameter sgdma_rx.descriptor_read/pb_dma_to_descriptor_memory.s1 arbitrationPriority 8
+Info: set_parameter sgdma_rx.descriptor_read/pb_dma_to_descriptor_memory.s1 baseAddress 0x08000000
+Info: set_parameter sgdma_rx.descriptor_write/pb_dma_to_descriptor_memory.s1 arbitrationPriority 8
+Info: set_parameter sgdma_rx.descriptor_write/pb_dma_to_descriptor_memory.s1 baseAddress 0x08000000
+Info: set_parameter sgdma_rx.m_write/pb_dma_to_ddr3_top.s1 arbitrationPriority 8
+Info: set_parameter sgdma_rx.m_write/pb_dma_to_ddr3_top.s1 baseAddress 0x10000000
+Info: set_parameter sgdma_tx.descriptor_read/pb_dma_to_descriptor_memory.s1 arbitrationPriority 8
+Info: set_parameter sgdma_tx.descriptor_read/pb_dma_to_descriptor_memory.s1 baseAddress 0x08000000
+Info: set_parameter sgdma_tx.descriptor_write/pb_dma_to_descriptor_memory.s1 arbitrationPriority 8
+Info: set_parameter sgdma_tx.descriptor_write/pb_dma_to_descriptor_memory.s1 baseAddress 0x08000000
+Info: set_parameter sgdma_tx.m_read/pb_dma_to_ddr3_top.s1 arbitrationPriority 8
+Info: set_parameter sgdma_tx.m_read/pb_dma_to_ddr3_top.s1 baseAddress 0x10000000
+Info: set_parameter cpu.d_irq/jtag_uart.irq irqNumber 1
+Info: set_parameter cpu.d_irq/sgdma_rx.csr_irq irqNumber 2
+Info: set_parameter cpu.d_irq/sgdma_tx.csr_irq irqNumber 3
+Info: set_parameter cpu.d_irq/dipsw_pio.irq irqNumber 8
+Info: set_parameter cpu.d_irq/button_pio.irq irqNumber 9
+Info: set_parameter cpu.d_irq/uart.irq irqNumber 10
+Info: set_parameter cpu.d_irq/timer_1ms.irq irqNumber 11
+Info: save_system ghrd_4sgx230_sopc.sopc
+Info: save_script ghrd_4sgx230_sopc.debug.tcl

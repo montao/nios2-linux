@@ -1,0 +1,16 @@
+Index: openobex-1.3.0/doc/docproc.c
+===================================================================
+--- openobex-1.3.0/doc/docproc.c	(revision 9093)
++++ openobex-1.3.0/doc/docproc.c	(working copy)
+@@ -98,7 +98,11 @@
+ 			exit(1);
+ 		}
+ #else
++# ifdef __uClinux__
++		switch(pid=vfork())
++# else
+ 		switch(pid=fork())
++# endif
+ 		{
+ 		case -1:
+ 			perror("fork");

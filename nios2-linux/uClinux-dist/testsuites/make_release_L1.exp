@@ -1,0 +1,136 @@
+#!/usr/bin/expect
+set file_name $argv0
+
+cd $uclinux_path
+set timeout 300
+spawn make config
+while 1 {
+    expect {
+        -re "Customize Kernel Settings.*DEFAULTS_KERNEL.*\\\[.*]" {
+            send "y\r"
+        }
+
+        -re "Customize Application/Library Settings.*DEFAULTS_VENDOR.*\\\[.*]" {
+            send "y\r"
+        }
+
+        -nocase -re "\\\[\[^\r]*] (\[ymn])|choice\\\[.*]: \[0-9]+\r" {
+            continue
+        }
+
+        -re "Locate interrupt entry code in L1 Memory.*I_ENTRY_L1.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "Locate entire ASM lowlevel exception.*EXCPT_IRQ_SYSC_L1.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "Locate frequently called do_irq dispatcher function in L1 Memory.*DO_IRQ_L1.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "Locate frequently called timer_interrupt.*CORE_TIMER_IRQ_L1.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "Locate frequently idle function in L1 Memory.*IDLE_L1.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "Locate kernel schedule function in L1 Memory.*SCHEDULE_L1.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "Locate kernel owned arithmetic functions in L1 Memory.*ARITHMETIC_OPS_L1.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "Locate access_ok function in L1 Memory.*ACCESS_OK_L1.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "Locate memset function in L1 Memory.*MEMSET_L1.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "Locate memcpy function in L1 Memory.*MEMCPY_L1.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "locate strcmp function in L1 Memory.*STRCMP_L1.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "locate strncmp function in L1 Memory.*STRNCMP_L1.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "locate strcpy function in L1 Memory.*STRCPY_L1.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "locate strncpy function in L1 Memory.*STRNCPY_L1.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "Locate icache flush funcs in L1 Inst Memory.*ICACHE_FLUSH_L1.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Locate dcache flush funcs in L1 Inst Memory.*DCACHE_FLUSH_L1.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Locate sys_bfin_spinlock function in L1 Memory.*SYS_BFIN_SPINLOCK_L1.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "Locate IP Checksum function in L1 Memory.*IP_CHECKSUM_L1.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "Locate cacheline_aligned data to L1 Data Memory.*CACHELINE_ALIGNED_L1.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "Locate Syscall Table L1 Data Memory.*SYSCALL_TAB_L1.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "Locate CPLB Switch Tables L1 Data Memory.*CPLB_SWITCH_TAB_L1.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "Support locating application stack in L1 Scratch Memory.*APP_STACK_L1.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "Use L1 memory for rx/tx packets.*BFIN_MAC_USE_L1.*\\\[.*]" {
+            if { $file_name == "./build_g729_kernel.exp" || $file_name == "./build_camera_kernel.exp" } {
+                send "N\r"
+            } else {
+                send "\r"
+            }
+        }
+
+        "\\\(*) \\\[*]" {
+            sleep .05
+            send "\r"
+        }
+
+        -re "\[cC]hoice\\\[.*]:" {
+            send "\r"
+        }
+
+        eof {
+            puts "End of configuration"
+            break
+        }
+
+        timeout {
+            puts "\n\nFATAL ERROR: config prompt timeout in make config"
+            break
+        }
+    }
+}

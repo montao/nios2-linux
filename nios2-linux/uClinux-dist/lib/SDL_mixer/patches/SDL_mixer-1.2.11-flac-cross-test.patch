@@ -1,0 +1,118 @@
+http://bugzilla.libsdl.org/show_bug.cgi?id=954
+
+--- SDL_mixer-1.2.11/configure
++++ SDL_mixer-1.2.11/configure
+@@ -13523,16 +13309,7 @@ fi
+         LIBS="-lFLAC"
+         { $as_echo "$as_me:$LINENO: checking for libflac so-name version >= $libflac_ver" >&5
+ $as_echo_n "checking for libflac so-name version >= $libflac_ver... " >&6; }
+-        if test "$cross_compiling" = yes; then
+-  { { $as_echo "$as_me:$LINENO: error: in \`$ac_pwd':" >&5
+-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+-{ { $as_echo "$as_me:$LINENO: error: cannot run test program while cross compiling
+-See \`config.log' for more details." >&5
+-$as_echo "$as_me: error: cannot run test program while cross compiling
+-See \`config.log' for more details." >&2;}
+-   { (exit 1); exit 1; }; }; }
+-else
+-  cat >conftest.$ac_ext <<_ACEOF
++        cat >conftest.$ac_ext <<_ACEOF
+ /* confdefs.h.  */
+ _ACEOF
+ cat confdefs.h >>conftest.$ac_ext
+@@ -13541,51 +13318,47 @@ cat >>conftest.$ac_ext <<_ACEOF
+ 
+ #include "FLAC/export.h"
+ #include "stdio.h"
+-int main( int argc, char *argv[] ) {
++
++int
++main ()
++{
++
+ #if defined(FLAC_API_VERSION_CURRENT) && (FLAC_API_VERSION_CURRENT >= $libflac_ver)
+-    return 0;
+ #else
+-    return 1;
++#error
+ #endif
+-}
+ 
++  ;
++  return 0;
++}
+ _ACEOF
+-rm -f conftest$ac_exeext
+-if { (ac_try="$ac_link"
++rm -f conftest.$ac_objext
++if { (ac_try="$ac_compile"
+ case "(($ac_try" in
+   *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+   *) ac_try_echo=$ac_try;;
+ esac
+ eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+ $as_echo "$ac_try_echo") >&5
+-  (eval "$ac_link") 2>&5
+-  ac_status=$?
+-  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+-  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
+-  { (case "(($ac_try" in
+-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+-  *) ac_try_echo=$ac_try;;
+-esac
+-eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+-$as_echo "$ac_try_echo") >&5
+-  (eval "$ac_try") 2>&5
++  (eval "$ac_compile") 2>conftest.er1
+   ac_status=$?
++  grep -v '^ *+' conftest.er1 >conftest.err
++  rm -f conftest.er1
++  cat conftest.err >&5
+   $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+-  (exit $ac_status); }; }; then
++  (exit $ac_status); } && {
++	 test -z "$ac_c_werror_flag" ||
++	 test ! -s conftest.err
++       } && test -s conftest.$ac_objext; then
+   have_flac_ver=yes
+ else
+-  $as_echo "$as_me: program exited with status $ac_status" >&5
+-$as_echo "$as_me: failed program was:" >&5
++  $as_echo "$as_me: failed program was:" >&5
+ sed 's/^/| /' conftest.$ac_ext >&5
+ 
+-( exit $ac_status )
+-have_flac_ver=no
++	have_flac_ver=no
+ fi
+-rm -rf conftest.dSYM
+-rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
+-fi
+-
+ 
++rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+         LIBS="$LIBS_SAVED"
+         { $as_echo "$as_me:$LINENO: result: $have_flac_ver" >&5
+ $as_echo "$have_flac_ver" >&6; }
+--- SDL_mixer-1.2.11/configure.in
++++ SDL_mixer-1.2.11/configure.in
+@@ -417,16 +417,14 @@ if test x$enable_music_flac = xyes; then
+         LIBS_SAVED="$LIBS"
+         LIBS="-lFLAC"
+         AC_MSG_CHECKING([for libflac so-name version >= $libflac_ver])
+-        AC_TRY_RUN([
++        AC_TRY_COMPILE([
+ #include "FLAC/export.h"
+ #include "stdio.h"
+-int main( int argc, char *argv[] ) {
++],[
+ #if defined(FLAC_API_VERSION_CURRENT) && (FLAC_API_VERSION_CURRENT >= $libflac_ver)
+-    return 0;
+ #else
+-    return 1;
++#error
+ #endif
+-}
+ ], have_flac_ver=yes, have_flac_ver=no)
+         LIBS="$LIBS_SAVED"
+         AC_MSG_RESULT($have_flac_ver)

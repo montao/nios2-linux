@@ -1,0 +1,63 @@
+#
+#   This file includes the collection of build utility scripts and creates
+#   various variables that are required by the utilities.
+#   
+#   It performs some lite error checking on the environment as it does this and
+#   will exit with status 1 if it detects any issues.
+#   
+
+#
+# make absolute paths out of the relative paths to the build script utilities,
+# sources, and project directories.
+#
+export ABS_PATH_TO_PROJECT_DIR="${PWD}/${REL_PATH_TO_PROJECT_DIR:?environment variable is required...}"
+export ABS_PATH_TO_BUILD_UTILS_DIR="${PWD}/${REL_PATH_TO_BUILD_UTILS_DIR:?environment variable is required...}"
+export ABS_PATH_TO_BUILD_SRC_DIR="${PWD}/${REL_PATH_TO_BUILD_SRC_DIR:?environment variable is required...}"
+
+#
+# if we're running under cygwin on windows, then make these paths windows paths
+#
+if [ ${OSTYPE} = "cygwin" ] ; then
+
+    ABS_PATH_TO_PROJECT_DIR=$(cygpath -w ${ABS_PATH_TO_PROJECT_DIR})
+    ABS_PATH_TO_BUILD_UTILS_DIR=$(cygpath -w ${ABS_PATH_TO_BUILD_UTILS_DIR})
+    ABS_PATH_TO_BUILD_SRC_DIR=$(cygpath -w ${ABS_PATH_TO_BUILD_SRC_DIR})
+
+fi
+
+#
+# verify that all the build utility script files exist
+#
+BUILD_SCRIPT_FILES="\
+${ABS_PATH_TO_BUILD_UTILS_DIR}/add_project_assignments.shinc \
+${ABS_PATH_TO_BUILD_UTILS_DIR}/build_and_generate_sopc_system.shinc \
+${ABS_PATH_TO_BUILD_UTILS_DIR}/copy_and_generate_sopc_system.shinc \
+${ABS_PATH_TO_BUILD_UTILS_DIR}/check_critical_warning.shinc \
+${ABS_PATH_TO_BUILD_UTILS_DIR}/check_quartus_version.shinc \
+${ABS_PATH_TO_BUILD_UTILS_DIR}/check_timing_not_met.shinc \
+${ABS_PATH_TO_BUILD_UTILS_DIR}/compile_project.shinc \
+${ABS_PATH_TO_BUILD_UTILS_DIR}/create_new_project.shinc \
+${ABS_PATH_TO_BUILD_UTILS_DIR}/run_a_script.shinc \
+"
+
+for NEXT_FILE in ${BUILD_SCRIPT_FILES} ; do
+
+    if [ ! -e ${NEXT_FILE} ] ; then
+
+        echo ""
+        echo "Build utility script \"${NEXT_FILE}\" could not be located..."
+        echo ""
+        
+        exit 1
+    fi
+    
+done
+
+#
+# include all the build utility scripts
+#
+for NEXT_FILE in ${BUILD_SCRIPT_FILES} ; do
+
+    . ${NEXT_FILE}
+
+done

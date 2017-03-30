@@ -1,0 +1,46 @@
+Ncat BUGS
+=========
+
+[ DESCRIPTION ]
+
+	Like its author, Ncat isn't perfect.  But you can help make it better
+by sending bug reports or even writing patches.  If Ncat doesn't behave the way
+you expect, first upgrade to the latest version available from http://nmap.org.
+If the problem persists, do some research to determine whether it has already
+been discovered and addressed.  Try Googling the error message or browsing the
+nmap-dev mailing list archives at http://seclists.org.  Read the full manual
+page as well.  If nothing comes of this, mail a bug report to nmap-dev@insecure.org.
+Please include everything you have learned about the problem, as well as what
+version of Ncat you are running and what operating system version it is running
+on.  Problem reports and Ncat usage questions sent to nmap-dev@insecure.org are
+far more likely to be answered than those sent to Fyodor directly.
+	Code patches to fix bugs are even better than bug reports.  Basic
+instructions for creating patch files with your changes are available at
+http://nmap.org/data/HACKING.  Patches may be sent to nmap-dev (recommended) or
+to Fyodor directly.
+
+[ OUTSTANDING BUGS ]
+
+This is a list of bugs which are already known about and
+are not yet resolved:
+
+
+* UDP listen support handles --exec'd input from certain
+programs quite strangely. 
+
+  Additionally, it has been pointed out that --exec'ing 
+  "/bin/bash" with UDP and --listen for some reason 
+  only reads 1 character at a time. For example, if
+  you did an "ls\n" on the client side, the server
+  would only read the "l" -- you can temporarily
+  get around this rather bizzare problem by running
+  your commands one character at a time.
+ 
+  l
+  s
+  <return>
+  
+  ..will correctly display the file listing of the current
+  working directory.
+
+

@@ -1,0 +1,2 @@
+/home/developer/altera/nios2-linux/linux-2.6/fs/ubifs/dir.c: In function 'ubifs_rename':
+/home/developer/altera/nios2-linux/linux-2.6/fs/ubifs/dir.c:972: warning: 'saved_nlink' may be used uninitialized in this function

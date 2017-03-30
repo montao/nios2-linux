@@ -1,0 +1,150 @@
+#!/usr/bin/expect --
+
+#
+# Build Kernel for USB host test
+#
+
+source ../kernel_config.exp
+source  ../board_info.exp
+log_file [log_file_name "$argv0"]
+send_user "Starting $argv0\n"
+
+set env(EXT2_BLOCKS) "10240"
+
+cd $uclinux_path/testsuites
+step "Make config."
+source  make_default_config.exp
+
+# Following make specific configuration for this case.
+cd $uclinux_path
+set timeout 300
+spawn make config
+
+while 1 {
+    expect {
+
+        -re "Customize Kernel Settings.*DEFAULTS_KERNEL.*\\\[.*]" {
+            send "y\r"
+        }
+
+        -re "Customize Application/Library Settings.*DEFAULTS_VENDOR.*\\\[.*]" {
+            send "y\r"
+        }
+
+        -re "Flash device in physical memory map.*MTD_PHYSMAP.*\\\[.*]" {
+#CONFIG_MTD_PHYSMAP claims the entire Async. Memory Space
+#need to entirely disable it while using various U-Connector boards
+            send "N\r"
+        }
+
+        -re "Bank 3.*BANK_3.*\\\[.*]" {
+            send "0x66C4\r"
+        }
+
+        -re "SCSI device support \\\(SCSI\\\).*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "SCSI disk support.*BLK_DEV_SD.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Probe all LUNs on each SCSI device.*SCSI_MULTI_LUN.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "USB support.*USB_SUPPORT.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Support for Host-side USB.*USB.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "ISP 1760 HCD support.*USB_ISP1760_HCD.*\\\[.*]" {
+            send "M\r"
+        }
+
+        -re "USB Mass Storage support.*USB_STORAGE.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Second extended fs support.*EXT2_FS.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "MSDOS fs support.*MSDOS_FS.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "VFAT.*Windows-95.*fs support.*VFAT_FS.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Default codepage for FAT.*FAT_DEFAULT_CODEPAGE.*\\\[.*]" {
+            send "437\r"
+        }
+
+        -re "Default iocharset for FAT \\\(FAT_DEFAULT_IOCHARSET\\\).*\\\[.*]" {
+            send "iso8859-1\r"
+        }
+
+        -re "Default NLS Option \\\(NLS_DEFAULT\\\).*\\\[.*]" {
+            send "iso8859-1\r"
+        }
+
+        -re "Codepage 437.*United States, Canada.*NLS_CODEPAGE_437.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "NLS ISO 8859-1.*Latin 1; Western European Languages.*NLS_ISO8859_1.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "fdisk.*USER_FDISK_FDISK.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "bonnie\\\+\\\+.*USER_BONNIE.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -nocase -re "\\\[\[^\r]*] (\[ymn])|choice\\\[.*]: \[0-9]+\r" {
+            continue
+        }
+
+        "\\\(*) \\\[*]" {
+            sleep .01
+            send "\r"
+        }
+
+        -re "\[cC]hoice\\\[.*]:" {
+            send "\r"
+        }
+
+        eof {
+            send_user "\nEnd of configuration\n"
+            break
+        }
+
+        timeout {
+            send_user "\n\nFATAL ERROR: config prompt timeout in make config\n"
+            exit
+        }
+    }
+}
+
+cd $uclinux_path/testsuites
+
+step "Make"
+
+source  make_kernel.exp
+
+cd $uclinux_path/testsuites
+
+step "Copy linux"
+
+source   copy_image.exp
+
+send_user "Ending $argv0\n"
+log_file

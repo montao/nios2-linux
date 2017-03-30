@@ -1,0 +1,2 @@
+/home/developer/altera/nios2-linux/linux-2.6/net/ipv4/af_inet.c: In function 'build_ehash_secret':
+/home/developer/altera/nios2-linux/linux-2.6/net/ipv4/af_inet.c:241: warning: value computed is not used

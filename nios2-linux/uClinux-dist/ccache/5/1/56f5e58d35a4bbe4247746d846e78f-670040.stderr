@@ -1,0 +1,3 @@
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/arch/nios2/platform/platform.c: In function 'nios2_add_fixed_phys':
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/arch/nios2/platform/platform.c:46: warning: passing argument 1 of '__be32_to_cpup' makes pointer from integer without a cast
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/arch/nios2/platform/platform.c:47: warning: passing argument 1 of '__be32_to_cpup' makes pointer from integer without a cast

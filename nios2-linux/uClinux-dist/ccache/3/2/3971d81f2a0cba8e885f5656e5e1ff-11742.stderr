@@ -1,0 +1,4 @@
+In file included from /home/developer/altera/nios2-linux/linux-2.6/arch/nios2/lib/libgcc.c:11:
+/home/developer/altera/nios2-linux/linux-2.6/arch/nios2/lib/longlong.h:184:2: warning: #warning "Using count_leading_zeroes in C"
+/home/developer/altera/nios2-linux/linux-2.6/arch/nios2/lib/libgcc.c: In function '__udivmoddi4':
+/home/developer/altera/nios2-linux/linux-2.6/arch/nios2/lib/libgcc.c:232: warning: ISO C90 forbids mixed declarations and code

@@ -1,0 +1,570 @@
+#!/usr/bin/expect
+
+source ../kernel_config.exp
+log_file [log_file_name "$argv0"]
+send_user "Starting $argv0\n"
+set TITLE [title "$argv0"]
+
+if { $board_type != "BF518F-EZBRD" } {
+    send_user "Only test on BF518F-EZBRD, exit!\n\n"
+    exit
+}
+
+step "Start kermit."
+source ../spawn_kermit.exp
+
+step "Reboot the kernel."
+source ../reboot_kernel.exp
+
+step "Start testing."
+
+set host_eth1   10.100.4.174
+set host_eth2   192.168.1.1
+
+set target_eth0 0.0.0.0
+set target_eth1 10.100.4.50
+set target_eth2 192.168.1.2
+
+
+set ftp_folder stress
+set ftp_file   ftp_load
+
+set target_id $kermit_spawn_id
+set case_num 0
+
+# Connection: Target eth1 connect to host eth1, target eth2 connect to the switch which also connects to host eth2.
+
+spawn /bin/sh
+
+set host_id $spawn_id
+set timeout 20
+send -s "su\r"
+while 1 {
+    expect {
+        -re "\[Pp\]assword" {
+            send -s "$password\r"
+            break
+        }
+        timeout {
+            break
+        }
+    }
+}
+expect "#"
+
+# Case group 1: Target eth1 up, eth2 down, host ping the two ip addresses, eth1 should be through and eth2 should be dead.
+set spawn_id $target_id
+
+incr case_num
+set timeout 10
+send "ifconfig eth0 $target_eth0 up\r"
+while 1 {
+    sleep 3
+    expect {
+        -re $kernel_prompt {
+            break
+        }
+        timeout {
+            send_user "Fail at ifconfig\n"
+            break
+        }
+    }
+}
+
+send "\r"
+expect -re $kernel_prompt
+send_user "\nPlug wire to eth1 on target\n\n"
+sleep 5
+send "ifconfig eth1 $target_eth1 up\r"
+while 1 {
+    sleep 3
+    expect {
+        -re $kernel_prompt {
+            break
+        }
+        timeout {
+            send_user "Fail at ifconfig\n"
+            break
+        }
+    }
+}
+expect "duplex"
+
+send "\r"
+expect -re $kernel_prompt
+send_user "Unplug wire connected to eth2\n\n"
+sleep 5
+send "ifconfig eth2 $target_eth2 down\r"
+while 1 {
+    sleep 3
+    expect {
+        "No such device" {
+            case_fail $case_num
+        }
+        -re $kernel_prompt {
+            break
+        }
+        timeout {
+            send_user "Fail at ifconfig\n"
+            break
+        }
+    }
+}
+
+set spawn_id $host_id
+send "\r"
+expect -re $sh_prompt
+
+incr case_num
+set timeout 30
+send -s "ping -c 10 $target_eth1\r"
+while 1 {
+    expect {
+        -re " 0% packet loss.*$sh_prompt" {
+            case_pass $case_num
+            break
+        }
+        -re "100% packet loss.*$sh_prompt" {
+            case_fail $case_num
+        }
+        timeout {
+            send "\003"
+            expect -re $sh_prompt
+            case_fail $case_num
+        }
+    }
+}
+
+incr case_num
+set timeout 30
+send -s "ping -c 10 $target_eth2\r"
+while 1 {
+    expect {
+        -re "100% packet loss.*$sh_prompt" {
+            case_pass $case_num
+            break
+        }
+        -re " 0% packet loss.*$sh_prompt" {
+            case_fail $case_num
+        }
+        timeout {
+            send "\003"
+            expect -re $sh_prompt
+            case_fail $case_num
+        }
+    }
+}
+
+incr case_num
+set timeout 30
+send -s "traceroute $target_eth1\r"
+while 1 {
+    expect {
+        -re "(Unable|failure|H!|$target_eth2).*$sh_prompt" {
+            case_fail $case_num
+        }
+        -re "traceroute to $target_eth1.*ms.*ms.*ms.*$sh_prompt" {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            send "\003"
+            expect -re $sh_prompt
+            case_fail $case_num
+        }
+    }
+}
+
+incr case_num
+set timeout 30
+send -s "traceroute $target_eth2\r"
+while 1 {
+    expect {
+        -re "(Unable|failure|H!|$target_eth1).*$sh_prompt" {
+            case_pass $case_num
+            break
+        }
+        -re "traceroute to $target_eth2.*ms.*ms.*ms.*$sh_prompt" {
+            case_fail $case_num
+        }
+        timeout {
+            send "\003"
+            expect -re $sh_prompt
+            case_fail $case_num
+        }
+    }
+}
+
+send -s "cd $uclinux_path/testsuites/$ftp_folder\r"
+expect -re $sh_prompt
+
+incr case_num
+set timeout 60
+while (1) {
+    send -s "ftp $target_eth1\r"
+    expect {
+        "):" { }
+        timeout {
+            send_user "Failed first return\n"
+            break
+        }
+    }
+
+    send -s "root\r"
+    expect {
+        "Password:" { }
+        timeout {
+            send_user "Failed first return\n"
+            break
+        }
+    }
+
+    send -s "uClinux\r"
+    expect {
+        "ftp>" { }
+        timeout {
+            send_user "Failed first return\n"
+            break
+        }
+    }
+
+    send -s "get /bin/busybox\r"
+    expect {
+        -re "Transfer complete.*ftp>" {  }
+        timeout {
+            send_user "Failed first return\n"
+            break
+        }
+    }
+
+    send -s "put $ftp_file\r"
+    expect {
+        -re "Transfer complete.*ftp>" {  }
+        timeout {
+            send_user "Failed first return\n"
+            break
+        }
+    }
+
+    send -s "bye\r"
+    expect {
+        "Goodbye" {
+            break
+        }
+        timeout {
+            send_user "Failed first return\n"
+            break
+        }
+    }
+    sleep 2
+}
+
+expect -re $sh_prompt
+
+incr case_num
+set timeout 10
+send -s "md5sum $uclinux_path/testsuites/$ftp_folder/$ftp_file\r"
+while 1 {
+    expect {
+        -re "(\[0-9a-fA-F]+)\[\x20\t]+.*$ftp_file.*$sh_prompt" {
+            set host_md5sum_value $expect_out(1,string)
+            send_user "host md5sum $host_md5sum_value\n"
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+incr case_num
+set timeout 10
+send -s "rsh -l root $target_eth1 md5sum /root/$ftp_file\r"
+while 1 {
+    expect {
+        -re "(\[0-9a-fA-F]+)\[\x20\t]+/root/$ftp_file.*$sh_prompt" {
+            set target_md5sum_value $expect_out(1,string)
+            send_user "target md5sum $target_md5sum_value\n"
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+if { $host_md5sum_value == $target_md5sum_value } {
+    send_user "Ftp through eth1 success!"
+    case_pass $case_num
+} else {
+    send_user "Ftp through eth1 fail!"
+    case_fail $case_num
+}
+
+send -s "rsh -l root $target_eth1 rm /root/$ftp_file\r"
+while 1 {
+    expect {
+        -re $sh_prompt {
+            break
+        }
+        timeout {
+            break
+        }
+    }
+}
+
+
+# Case group 2: Target eth1 down, eth2 up, host ping the two ip addresses, eth2 should be through and eth1 should be dead.
+set spawn_id $target_id
+
+incr case_num
+set timeout 10
+send "ifconfig eth0 $target_eth0 up\r"
+while 1 {
+    sleep 3
+    expect {
+        -re $kernel_prompt {
+            break
+        }
+        timeout {
+            send_user "Fail at ifconfig\n"
+            break
+        }
+    }
+}
+
+send "\r"
+expect -re $kernel_prompt
+send_user "\nUnplug wire to eth1 on target\n\n"
+sleep 5
+send "ifconfig eth1 $target_eth1 down\r"
+while 1 {
+    sleep 3
+    expect {
+        -re $kernel_prompt {
+            break
+        }
+        timeout {
+            send_user "Fail at ifconfig\n"
+            break
+        }
+    }
+}
+expect "down"
+
+send "\r"
+expect -re $kernel_prompt
+send_user "Plug wire to eth2 in target\n\n"
+sleep 5
+send "ifconfig eth2 $target_eth2 up\r"
+while 1 {
+    sleep 3
+    expect {
+        "No such device" {
+            case_fail $case_num
+        }
+        -re $kernel_prompt {
+            break
+        }
+        timeout {
+            send_user "Fail at ifconfig\n"
+            break
+        }
+    }
+}
+
+set spawn_id $host_id
+send "\r"
+expect -re $sh_prompt
+
+incr case_num
+set timeout 30
+send -s "ping -c 10 $target_eth2\r"
+while 1 {
+    expect {
+        -re " 0% packet loss.*$sh_prompt" {
+            case_pass $case_num
+            break
+        }
+        -re "100% packet loss.*$sh_prompt" {
+            case_fail $case_num
+        }
+        timeout {
+            send "\003"
+            expect -re $sh_prompt
+            case_fail $case_num
+         }
+     }
+}
+
+incr case_num
+set timeout 30
+send -s "ping -c 10 $target_eth1\r"
+while 1 {
+    expect {
+        -re "100% packet loss.*$sh_prompt" {
+            case_pass $case_num
+            break
+        }
+        -re " 0% packet loss.*$sh_prompt" {
+            case_fail $case_num
+        }
+        timeout {
+            send "\003"
+            expect -re $sh_prompt
+            case_fail $case_num
+        }
+    }
+}
+
+incr case_num
+set timeout 30
+send -s "traceroute $target_eth2\r"
+while 1 {
+    expect {
+        -re "(Unable|failure|H!|$target_eth1).*$sh_prompt" {
+            case_fail $case_num
+        }
+        -re "traceroute to $target_eth2.*ms.*ms.*ms.*$sh_prompt" {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            send "\003"
+            expect -re $sh_prompt
+            case_fail $case_num
+        }
+    }
+}
+
+incr case_num
+set timeout 30
+send -s "traceroute $target_eth1\r"
+while 1 {
+    expect {
+        -re "(Unable|failure|H!|$target_eth2).*$sh_prompt" {
+            case_pass $case_num
+            break
+        }
+        -re "traceroute to $target_eth1.*ms.*ms.*ms.*$sh_prompt" {
+            case_fail $case_num
+        }
+        timeout {
+            send "\003"
+            expect -re $sh_prompt
+            case_fail $case_num
+        }
+    }
+}
+
+send -s "cd $uclinux_path/testsuites/$ftp_folder\r"
+expect -re $sh_prompt
+
+incr case_num
+set timeout 60
+while (1) {
+    send -s "ftp $target_eth2\r"
+    expect {
+        "):" { }
+        timeout {
+            send_user "Failed first return\n"
+            break
+        }
+    }
+
+    send -s "root\r"
+    expect {
+        "Password:" { }
+        timeout {
+            send_user "Failed first return\n"
+            break
+        }
+    }
+
+    send -s "uClinux\r"
+    expect {
+        "ftp>" { }
+        timeout {
+            send_user "Failed first return\n"
+            break
+        }
+    }
+
+    send -s "get /bin/busybox\r"
+    expect {
+        -re "Transfer complete.*ftp>" {  }
+        timeout {
+            send_user "Failed first return\n"
+            break
+        }
+    }
+
+    send -s "put $ftp_file\r"
+    expect {
+        -re "Transfer complete.*ftp>" {  }
+        timeout {
+            send_user "Failed first return\n"
+            break
+        }
+    }
+
+    send -s "bye\r"
+    expect {
+        "Goodbye" {
+            break
+        }
+        timeout {
+            send_user "Failed first return\n"
+            break
+        }
+    }
+    sleep 2
+}
+
+expect -re $sh_prompt
+
+incr case_num
+set timeout 10
+send -s "md5sum $uclinux_path/testsuites/$ftp_folder/$ftp_file\r"
+while 1 {
+    expect {
+        -re "(\[0-9a-fA-F]+)\[\x20\t]+.*$ftp_file.*$sh_prompt" {
+            set host_md5sum_value $expect_out(1,string)
+            send_user "host md5sum $host_md5sum_value .\n"
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+incr case_num
+set timeout 10
+send -s "rsh -l root $target_eth2  md5sum /root/$ftp_file\r"
+expect "\r"
+while 1 {
+    expect {
+        -re "(\[0-9a-fA-F]+)\[\x20\t]+/root/$ftp_file.*$sh_prompt" {
+            set target_md5sum_value $expect_out(1,string)
+            send_user "target md5sum $target_md5sum_value .\n"
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+if { $host_md5sum_value == $target_md5sum_value } {
+    send_user "Ftp through eth2 success!"
+    case_pass $case_num
+} else {
+    send_user "Ftp through eth2 fail!"
+    case_fail $case_num
+}
+
+all_pass
+send_user "Ending $argv0\n"
+log_file

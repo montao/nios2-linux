@@ -1,0 +1,4 @@
+lomount.c: In function 'set_loop':
+lomount.c:197: warning: pointer targets in passing argument 1 of '__builtin_strncpy' differ in signedness
+lomount.c:199: warning: pointer targets in passing argument 1 of 'strlen' differ in signedness
+lomount.c:208: warning: pointer targets in passing argument 1 of '__builtin_strncpy' differ in signedness

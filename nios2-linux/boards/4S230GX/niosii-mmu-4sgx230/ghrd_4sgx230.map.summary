@@ -1,0 +1,20 @@
+Analysis & Synthesis Status : Successful - Thu Nov  4 06:25:47 2010
+Quartus II Version : 10.1 Build 149 11/03/2010 SJ Full Version
+Revision Name : ghrd_4sgx230
+Top-level Entity Name : ghrd_4sgx230
+Family : Stratix IV
+Logic utilization : N/A
+    Combinational ALUTs : 12,027
+    Memory ALUTs : 68
+    Dedicated logic registers : 11,282
+Total registers : 11402
+Total pins : 130
+Total virtual pins : 0
+Total block memory bits : 839,934
+DSP block 18-bit elements : 4
+Total GXB Receiver Channel PCS : 0
+Total GXB Receiver Channel PMA : 0
+Total GXB Transmitter Channel PCS : 0
+Total GXB Transmitter Channel PMA : 0
+Total PLLs : 3
+Total DLLs : 1

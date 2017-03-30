@@ -1,0 +1,249 @@
+#!/usr/bin/expect
+
+source ../kernel_config.exp
+source ../board_info.exp
+log_file [log_file_name "$argv0"]
+send_user "Starting $argv0\n"
+set TITLE [title "$argv0"]
+
+step "$TITLE needs :\n SW5: on on on on for bf537 stamp board and bf548 ezkit board.\n SW13: on xx off off off off for bf527 ezkit board."
+
+step "Start kermit."
+source ../spawn_kermit.exp
+
+step "Reboot the kernel."
+source ../reboot_kernel.exp
+
+if { $board_type == "BF537-STAMP" } {
+   set led1_gpio_number 6
+   set btn1_gpio_number 2
+} elseif { $board_type == "BF533-STAMP" } {
+   set led1_gpio_number 2
+   set btn1_gpio_number 5
+} elseif { $board_type == "BF548-EZKIT" } {
+   set led1_gpio_number 102
+   set btn1_gpio_number 24
+} elseif { [string match "BF527-EZKIT*" $board_type] } {
+   set led1_gpio_number 8
+   set btn1_gpio_number 16
+} elseif { $board_type == "BF609-EZKIT" } {
+   set led1_gpio_number 110
+   set btn1_gpio_number 26
+}
+
+step "Starting test"
+set timeout 8
+set case_num 0
+
+incr case_num
+send "cd /sys/class/gpio/\r"
+while 1 {
+   expect {
+      -re ">" {
+         case_pass $case_num
+         break
+      }
+
+      timeout {
+         case_fail $case_num
+         exit
+         }
+     }
+}
+
+incr case_num
+send "echo $led1_gpio_number > export\r"
+expect  ">"
+send "ls\r"
+while 1 {
+   expect {
+      -re "gpio$led1_gpio_number.*>" {
+         case_pass $case_num
+         break
+      }
+
+      timeout {
+         case_fail $case_num
+         exit
+         }
+     }
+}
+incr case_num
+send "cd gpio$led1_gpio_number \r"
+expect  ">"
+send "echo out > direction\r"
+expect  ">"
+send "cat direction\r"
+while 1 {
+   expect {
+      -re "out.*>" {
+         case_pass $case_num
+         break
+      }
+
+      timeout {
+         case_fail $case_num
+         exit
+         }
+     }
+}
+incr case_num
+send "echo 0 > value\r"
+expect  ">"
+send_user "Check if the following happens as expected: \n "
+
+if { $board_type == "BF537-STAMP" || $board_type == "BF548-EZKIT" || [string match "BF527-EZKIT*" $board_type] || $board_type == "BF609-EZKIT" } {
+    send_user "the LED1 is going OFF for BF537-STAMP,BF548-EZKIT,BF527-EZKIT, BF609-EZKIT.\n "
+} elseif { $board_type == "BF533-STAMP" } {
+    send_user "the LED1 is going ON  for BF533-STAMP.\n "
+}
+
+sleep 5
+send "echo 1 > value\r"
+expect  ">"
+send_user "Check if the following happens as expected: \n "
+
+if { $board_type == "BF537-STAMP" || $board_type == "BF548-EZKIT" || [string match "BF527-EZKIT*" $board_type] || $board_type == "BF609-EZKIT" } {
+    send_user "the LED1 is going ON for BF537-STAMP,BF548-EZKIT,BF527-EZKIT, BF609-EZKIT. \n "
+} elseif { $board_type == "BF533-STAMP" } {
+    send_user "the LED1 is going OFF  for BF533-STAMP.\n "
+}
+sleep 5
+
+send "echo 0 > value\r"
+expect  ">"
+send_user "Check if the following happens as expected: \n "
+
+if { $board_type == "BF537-STAMP" || $board_type == "BF548-EZKIT" || [string match "BF527-EZKIT*" $board_type] || $board_type == "BF609-EZKIT" } {
+    send_user "the LED1 is going OFF again for BF537-STAMP,BF548-EZKIT,BF527-EZKIT, BF609-EZKIT.\n "
+} elseif { $board_type == "BF533-STAMP" } {
+    send_user "the LED1 is going ON again for BF533-STAMP.\n "
+}
+
+sleep 5
+
+incr case_num
+send "cd /sys/class/gpio/\r"
+while 1 {
+   expect {
+      -re ">" {
+         case_pass $case_num
+         break
+      }
+
+      timeout {
+         case_fail $case_num
+         exit
+         }
+     }
+}
+
+incr case_num
+send "echo $btn1_gpio_number > export\r"
+expect -re ">"
+send "ls\r"
+while 1 {
+   expect {
+      -re "gpio$btn1_gpio_number.*>" {
+         case_pass $case_num
+         break
+      }
+
+      timeout {
+         case_fail $case_num
+         exit
+         }
+     }
+}
+incr case_num
+send "cd gpio$btn1_gpio_number \r"
+expect -re ">"
+send "echo in > direction\r"
+expect -re ">"
+send "cat direction\r"
+while 1 {
+   expect {
+      -re "in.*>" {
+         case_pass $case_num
+         break
+      }
+
+      timeout {
+         case_fail $case_num
+         exit
+         }
+     }
+}
+incr case_num
+send_user "Please push the BTN1.\n "
+sleep 5 
+send "cat value\r"
+if { $board_type == "BF537-STAMP" || $board_type == "BF548-EZKIT" || [string match "BF527-EZKIT*" $board_type] || $board_type == "BF609-EZKIT" } {
+while 1 {
+   expect {
+      -re "1.*>" {
+         case_pass $case_num
+         break
+      }
+
+      timeout {
+         case_fail $case_num
+         exit
+         }
+     }
+}
+} elseif { $board_type == "BF533-STAMP" } {
+
+while 1 {
+   expect {
+      -re "0.*>" {
+         case_pass $case_num
+         break
+      }
+
+      timeout {
+         case_fail $case_num
+         exit
+         }
+     }
+}
+}
+send_user "Please release the BTN1.\n "
+sleep 5 
+send "cat value\r"
+if { $board_type == "BF537-STAMP" || $board_type == "BF548-EZKIT" || [string match "BF527-EZKIT*" $board_type] || $board_type == "BF609-EZKIT" } {
+while 1 {
+   expect {
+      -re "0.*>" {
+         case_pass $case_num
+         break
+      }
+
+      timeout {
+         case_fail $case_num
+         exit
+         }
+     }
+}
+} elseif { $board_type == "BF533-STAMP" } {
+
+while 1 {
+   expect {
+      -re "1.*>" {
+         case_pass $case_num
+         break
+      }
+
+      timeout {
+         case_fail $case_num
+         exit
+         }
+     }
+}
+}
+send_user "Ending $argv0\n"
+log_file
+
+
+
+

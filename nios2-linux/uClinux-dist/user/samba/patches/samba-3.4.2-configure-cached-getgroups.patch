@@ -1,0 +1,23 @@
+https://bugzilla.samba.org/show_bug.cgi?id=4534
+
+--- samba-3.4.2/source3/configure.in
++++ samba-3.4.2/source3/configure.in
+@@ -1246,6 +1246,7 @@
+ case "$host_os" in
+     *linux* | gnu* | k*bsd*-gnu | kopensolaris*-gnu)
+        # glibc <= 2.3.2 has a broken getgrouplist
++       AC_CACHE_CHECK([for broken getgrouplist],samba_cv_linux_getgrouplist_ok,[
+        AC_TRY_RUN([
+ #include <unistd.h>
+ #include <sys/utsname.h>
+@@ -1262,8 +1263,8 @@
+ #endif
+        exit(0);
+ }
+-], [linux_getgrouplist_ok=yes], [linux_getgrouplist_ok=no])
+-       if test x"$linux_getgrouplist_ok" = x"yes"; then
++], [samba_cv_linux_getgrouplist_ok=yes], [samba_cv_linux_getgrouplist_ok=no])])
++       if test x"$samba_cv_linux_getgrouplist_ok" = x"yes"; then
+           AC_DEFINE(HAVE_GETGROUPLIST, 1, [Have good getgrouplist])
+        fi
+        ;;

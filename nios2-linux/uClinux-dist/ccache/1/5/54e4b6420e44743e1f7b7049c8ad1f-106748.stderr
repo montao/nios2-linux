@@ -1,0 +1,9 @@
+In file included from mntent.c:9:
+sundries.h:54: warning: type qualifiers ignored on function return type
+mntent.c: In function 'mangle':
+mntent.c:22: warning: pointer targets in passing argument 1 of 'strlen' differ in signedness
+mntent.c: In function 'my_addmntent':
+mntent.c:122: warning: pointer targets in passing argument 1 of 'mangle' differ in signedness
+mntent.c:123: warning: pointer targets in passing argument 1 of 'mangle' differ in signedness
+mntent.c:124: warning: pointer targets in passing argument 1 of 'mangle' differ in signedness
+mntent.c:125: warning: pointer targets in passing argument 1 of 'mangle' differ in signedness

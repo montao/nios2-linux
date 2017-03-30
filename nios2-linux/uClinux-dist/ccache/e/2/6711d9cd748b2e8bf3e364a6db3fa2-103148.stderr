@@ -1,0 +1,9 @@
+auth.c: In function 'auth_user':
+auth.c:65: warning: implicit declaration of function 'strlen'
+auth.c:65: warning: incompatible implicit declaration of built-in function 'strlen'
+auth.c:71: warning: implicit declaration of function 'strcmp'
+auth.c:84: warning: implicit declaration of function 'strcpy'
+auth.c:84: warning: incompatible implicit declaration of built-in function 'strcpy'
+auth.c: In function 'auth_pass':
+auth.c:160: warning: implicit declaration of function 'crypt'
+auth.c:160: warning: assignment makes pointer from integer without a cast

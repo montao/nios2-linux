@@ -1,0 +1,2 @@
+libbridge_misc.c: In function 'br_get_index':
+libbridge_misc.c:130: warning: implicit declaration of function 'strlcpy'

@@ -1,0 +1,175 @@
+#!/usr/bin/expect --
+
+#
+# Build Kernel for Linphone test
+#
+source ../kernel_config.exp
+source ../board_info.exp
+log_file [log_file_name "$argv0"]
+send_user "Starting $argv0\n"
+
+
+step "Decide the linphone version from Makefile."
+cd $uclinux_path
+set timeout 2
+spawn ex user/linphone/Makefile
+expect {
+    "Entering Ex mode*Normal mode." { }
+    "already exists!" {
+        send "e\r"
+    }
+}
+send "/VER\r"
+while 1 {
+    expect -re "VER = (linphone-\[0-9]+.\[0-9]+.\[0-9]+)" {
+        set linphone_version $expect_out(1,string)
+        send_user "Linphone version is $linphone_version"
+        break
+    }
+}
+send "q\r"
+expect eof
+
+
+step "Apply linphone patch."
+cd $uclinux_path/user/linphone/$linphone_version
+if [ catch {exec patch -p1 < $uclinux_path/testsuites/linphone/linphone.patch} ] {
+    send_user "$errorInfo\n"
+    exit
+}
+
+step "Apply ad73322 patch."
+cd $uclinux_path/linux-2.6.x
+if [ catch {exec patch -p0 < $uclinux_path/bfin_patch/ad73322_patch/old_sound_ad73322.patch} ] {
+    send_user "$errorInfo\n"
+    exit
+}
+
+cd $uclinux_path/testsuites
+step "Make clean."
+if { [source make_clean.exp] != 0 } {
+    send_user "\n\nFail to make clean. Exit!\n\n"
+    exit
+}
+
+cd $uclinux_path/testsuites
+step "Make config."
+source make_default_config.exp
+
+# Following make specific configuration for this case.
+cd $uclinux_path
+set timeout 300
+spawn make config
+while 1 {
+    expect {
+        -re "Customize Kernel Settings.*DEFAULTS_KERNEL.*\\\[.*]" {
+            send "y\r"
+        }
+
+        -re "Customize Application/Library Settings.*DEFAULTS_VENDOR.*\\\[.*]" {
+            send "y\r"
+        }
+
+        -re "I2C support \\\(I2C\\\).*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Sound card support.*SOUND.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Advanced Linux Sound Architecture.*SND.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "OSS Mixer API.*SND_MIXER_OSS.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "OSS PCM.*digital audio.*API.*SND_PCM_OSS\\\).*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "SPI controller driver for ADI Blackfin5xx.*SPI_BFIN.*\\\[.*]" {
+            send "M\r"
+        }
+
+        -re "Cascaded AD73322 Audio support for BF53x.*SND_BFIN_AD73322.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Blackfin Audio SPORT port.*SND_BFIN_SPORT.*\\\[.*]" {
+            send "0\r"
+        }
+
+        -re "ALSA for SoC audio support.*SND_SOC.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "Uncached DMA region.*(\[0-9]). Enable 2M DMA region.*DMA_UNCACHED_2M.*\[cC]hoice.*\\\[.*]" {
+            send "$expect_out(1,string)\r"
+        }
+
+        -re "Binary format.*FLAT.*Shared-FLAT.*FDPIC.*\\\[.*]" {
+            send "4\r"
+        }
+
+        -re "ALSA utils.*USER_ALSA_UTILS.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "tone.*USER_PLAY_TONE.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "mp3play.*USER_MP3PLAY_MP3PLAY.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "vplay.*USER_VPLAY_VPLAY.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "vrec.*USER_VPLAY_VREC.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Linphone, a SIP compatible VoIP phone.*USER_LINPHONE.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -nocase -re "\\\[\[^\r]*] (\[ymn])|choice\\\[.*]: \[0-9]+\r" {
+            continue
+        }
+
+        "\\\(*) \\\[*]" {
+            sleep .01
+            send "\r"
+        }
+
+        -re "\[cC]hoice\\\[.*]:" {
+            send "\r"
+        }
+
+        eof {
+            puts "End of configuration"
+            break
+        }
+
+        timeout {
+            puts "\n\nFATAL ERROR: config prompt timeout in make config"
+            break
+        }
+    }
+}
+
+cd $uclinux_path/testsuites
+step "Make"
+source make_kernel.exp
+
+cd $uclinux_path/testsuites
+step "Copy linux"
+source copy_image.exp
+
+send_user "Ending $argv0\n"
+log_file

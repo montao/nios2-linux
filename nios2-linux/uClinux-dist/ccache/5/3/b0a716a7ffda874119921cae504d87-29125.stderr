@@ -1,0 +1,3 @@
+conftest.c: In function 'main':
+conftest.c:12: warning: implicit declaration of function 'exit'
+conftest.c:12: warning: incompatible implicit declaration of built-in function 'exit'

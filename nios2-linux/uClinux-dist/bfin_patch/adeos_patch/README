@@ -1,0 +1,44 @@
+File: adeos-bfin.patch
+
+Last update: 2009-10-30
+
+History:
+
+2009-10-30
+----------
+ipipe-blackfin-2.6.31.2-noarch.patch for Philippe.
+
+
+2009-06-30
+-----------
+update to ipipe-noarch-v2.6.30-294-gd40abe5-2.patch.
+"This patch addresses the concerns raised by the -noarch changeset sent
+earlier this week, and also fixes a nasty issue in the pipeline code
+introduced in kernel/sched.c."
+
+2009-06-10
+------------
+update to: ipipe-2.6.28.10-noarch-1.10-00.patch
+from http://download.gna.org/adeos/patches/v2.6/blackfin/adeos-ipipe-2.6.28.10-blackfin.git-1.10-00.patch
+
+2009-04-08
+--------------
+ipipe-2.6.28.9-noarch-git95aafe6.patch
+
+Here are updates to the I-pipe now rebased on 2.6.28.9/blackfin, commit
+#95aafe680eaf39c5ba9c8b3ccae69db40cd21d2e from the public GIT tree at
+git://sources.blackfin.uclinux.org/git/readonly-mirrors/linux-kernel.git.
+
+2009-02-09
+--------------
+
+This patch is for blackfin uclinux SVN trunk.
+The adeos Blackfin specific code has been merged to svn trunk linux kernel. This patch contains adeos -noarch code from Philippe:
+
+"
+To start this cycle, I have attached a major update to the I-pipe Blackfin port
+as available from your GIT tree as of today (commit
+#38a13eddc0a76bc73ebb2fe9e73361df5d0c35ff). Tested on bf537 and bf561
+successfully. In the same move, I have prepared the Xenomai -stable and -devel
+branches to support 2.6.28, against which these patches apply.
+"

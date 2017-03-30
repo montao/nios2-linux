@@ -1,0 +1,2 @@
+/dev/mtdblock4 /media/flash      jffs2 rw,noatime 0 0
+/dev/mmcblk0p1 /media/mmc        ext2  ro,noatime 0 0

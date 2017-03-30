@@ -1,0 +1,3 @@
+flashcp.c:255:2: warning: #warning "Check for smaller erase regions"
+nios2-linux-gnu-gcc: --gc-sections: linker input file unused because linking not done
+nios2-linux-gnu-gcc: --gc-sections: linker input file unused because linking not done

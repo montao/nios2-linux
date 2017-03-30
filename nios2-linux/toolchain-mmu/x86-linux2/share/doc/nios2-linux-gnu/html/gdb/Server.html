@@ -1,0 +1,162 @@
+<html lang="en">
+<head>
+<title>Server - Debugging with GDB</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="Debugging with GDB">
+<meta name="generator" content="makeinfo 4.8">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="up" href="Remote-Debugging.html#Remote-Debugging" title="Remote Debugging">
+<link rel="prev" href="Connecting.html#Connecting" title="Connecting">
+<link rel="next" href="Remote-Configuration.html#Remote-Configuration" title="Remote Configuration">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<p>
+<a name="Server"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="Remote-Configuration.html#Remote-Configuration">Remote Configuration</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="Connecting.html#Connecting">Connecting</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="Remote-Debugging.html#Remote-Debugging">Remote Debugging</a>
+<hr>
+</div>
+
+<h3 class="section">18.2 Using the <code>gdbserver</code> Program</h3>
+
+<p><a name="index-gdbserver-877"></a><a name="index-remote-connection-without-stubs-878"></a><code>gdbserver</code> is a control program for Unix-like systems, which
+allows you to connect your program with a remote <span class="sc">gdb</span> via
+<code>target remote</code>&mdash;but without linking in the usual debugging stub.
+
+   <p><code>gdbserver</code> is not a complete replacement for the debugging stubs,
+because it requires essentially the same operating-system facilities
+that <span class="sc">gdb</span> itself does.  In fact, a system that can run
+<code>gdbserver</code> to connect to a remote <span class="sc">gdb</span> could also run
+<span class="sc">gdb</span> locally!  <code>gdbserver</code> is sometimes useful nevertheless,
+because it is a much smaller program than <span class="sc">gdb</span> itself.  It is
+also easier to port than all of <span class="sc">gdb</span>, so you may be able to get
+started more quickly on a new system by using <code>gdbserver</code>. 
+Finally, if you develop code for real-time systems, you may find that
+the tradeoffs involved in real-time operation make it more convenient to
+do as much development work as possible on another system, for example
+by cross-compiling.  You can use <code>gdbserver</code> to make a similar
+choice for debugging.
+
+   <p><span class="sc">gdb</span> and <code>gdbserver</code> communicate via either a serial line
+or a TCP connection, using the standard <span class="sc">gdb</span> remote serial
+protocol.
+
+     <dl>
+<dt><em>On the target machine,</em><dd>you need to have a copy of the program you want to debug. 
+<code>gdbserver</code> does not need your program's symbol table, so you can
+strip the program if necessary to save space.  <span class="sc">gdb</span> on the host
+system does all the symbol handling.
+
+     <p>To use the server, you must tell it how to communicate with <span class="sc">gdb</span>;
+the name of your program; and the arguments for your program.  The usual
+syntax is:
+
+     <pre class="smallexample">          target&gt; gdbserver <var>comm</var> <var>program</var> [ <var>args</var> ... ]
+     </pre>
+     <p><var>comm</var> is either a device name (to use a serial line) or a TCP
+hostname and portnumber.  For example, to debug Emacs with the argument
+`<samp><span class="samp">foo.txt</span></samp>' and communicate with <span class="sc">gdb</span> over the serial port
+<samp><span class="file">/dev/com1</span></samp>:
+
+     <pre class="smallexample">          target&gt; gdbserver /dev/com1 emacs foo.txt
+     </pre>
+     <p><code>gdbserver</code> waits passively for the host <span class="sc">gdb</span> to communicate
+with it.
+
+     <p>To use a TCP connection instead of a serial line:
+
+     <pre class="smallexample">          target&gt; gdbserver host:2345 emacs foo.txt
+     </pre>
+     <p>The only difference from the previous example is the first argument,
+specifying that you are communicating with the host <span class="sc">gdb</span> via
+TCP.  The `<samp><span class="samp">host:2345</span></samp>' argument means that <code>gdbserver</code> is to
+expect a TCP connection from machine `<samp><span class="samp">host</span></samp>' to local TCP port 2345. 
+(Currently, the `<samp><span class="samp">host</span></samp>' part is ignored.)  You can choose any number
+you want for the port number as long as it does not conflict with any
+TCP ports already in use on the target system (for example, <code>23</code> is
+reserved for <code>telnet</code>).<a rel="footnote" href="#fn-1" name="fnd-1"><sup>1</sup></a>  You must use the same port number with the host <span class="sc">gdb</span>
+<code>target remote</code> command.
+
+     <p>On some targets, <code>gdbserver</code> can also attach to running programs. 
+This is accomplished via the <code>--attach</code> argument.  The syntax is:
+
+     <pre class="smallexample">          target&gt; gdbserver <var>comm</var> --attach <var>pid</var>
+     </pre>
+     <p><var>pid</var> is the process ID of a currently running process.  It isn't necessary
+to point <code>gdbserver</code> at a binary for the running process.
+
+     <p><a name="index-pidof-879"></a><a name="index-attach-to-a-program-by-name-880"></a>You can debug processes by name instead of process ID if your target has the
+<code>pidof</code> utility:
+
+     <pre class="smallexample">          target&gt; gdbserver <var>comm</var> --attach `pidof <var>program</var>`
+     </pre>
+     <p>In case more than one copy of <var>program</var> is running, or <var>program</var>
+has multiple threads, most versions of <code>pidof</code> support the
+<code>-s</code> option to only return the first process ID.
+
+     <br><dt><em>On the host machine,</em><dd>first make sure you have the necessary symbol files.  Load symbols for
+your application using the <code>file</code> command before you connect.  Use
+<code>set sysroot</code> to locate target libraries (unless your <span class="sc">gdb</span>
+was compiled with the correct sysroot using <code>--with-system-root</code>).
+
+     <p>The symbol file and target libraries must exactly match the executable
+and libraries on the target, with one exception: the files on the host
+system should not be stripped, even if the files on the target system
+are.  Mismatched or missing files will lead to confusing results
+during debugging.  On <span class="sc">gnu</span>/Linux targets, mismatched or missing
+files may also prevent <code>gdbserver</code> from debugging multi-threaded
+programs.
+
+     <p>Connect to your target (see <a href="Connecting.html#Connecting">Connecting to a Remote Target</a>). 
+For TCP connections, you must start up <code>gdbserver</code> prior to using
+the <code>target remote</code> command.  Otherwise you may get an error whose
+text depends on the host system, but which usually looks something like
+`<samp><span class="samp">Connection refused</span></samp>'.  You don't need to use the <code>load</code>
+command in <span class="sc">gdb</span> when using <code>gdbserver</code>, since the program is
+already on the target.
+
+   </dl>
+
+<h4 class="subsection">18.2.1 Monitor Commands for <code>gdbserver</code></h4>
+
+<p><a name="index-monitor-commands_002c-for-_0040code_007bgdbserver_007d-881"></a>
+During a <span class="sc">gdb</span> session using <code>gdbserver</code>, you can use the
+<code>monitor</code> command to send special requests to <code>gdbserver</code>. 
+Here are the available commands; they are only of interest when
+debugging <span class="sc">gdb</span> or <code>gdbserver</code>.
+
+     <dl>
+<dt><code>monitor help</code><dd>List the available monitor commands.
+
+     <br><dt><code>monitor set debug 0</code><dt><code>monitor set debug 1</code><dd>Disable or enable general debugging messages.
+
+     <br><dt><code>monitor set remote-debug 0</code><dt><code>monitor set remote-debug 1</code><dd>Disable or enable specific debugging messages associated with the remote
+protocol (see <a href="Remote-Protocol.html#Remote-Protocol">Remote Protocol</a>).
+
+   </dl>
+
+   <div class="footnote">
+<hr>
+<h4>Footnotes</h4><p class="footnote"><small>[<a name="fn-1" href="#fnd-1">1</a>]</small> If you choose a port number that
+conflicts with another service, <code>gdbserver</code> prints an error message
+and exits.</p>
+
+   <p><hr></div>
+
+   </body></html>
+

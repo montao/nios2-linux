@@ -1,0 +1,21 @@
+NXP ISP1362 USB host controller
+
+Required properties :
+ - compatible : Should be "nxp,usb-isp1362"
+ - reg : Offset and length of the register set for the device
+ - interrupts : interrupt number
+
+Optional properties :
+ - nxp,sel15Kres: boolean; Enable internal pulldown resistors on downstream
+   ports.
+ - nxp,clknotstop: boolean; Clock cannot be stopped
+ - nxp,oc_enable: boolean; Enable on-chip overcurrent protection
+ - nxp,int_act_high: boolean; INT output polarity high
+ - nxp,int_edge_triggered: boolean; INT edge triggered
+ - nxp,dreq_act_high: boolean; DREQ output polarity high
+ - nxp,dack_act_high: boolean; DACK input polarity high
+ - nxp,remote_wakeup_connected: boolean; chip can be resumed via H_WAKEUP pin
+ - nxp,no_power_switching: boolean; Switch or not to switch (keep always
+   powered)
+ - nxp,power_switching_mode: boolean; Ganged port power switching (0) or
+   individual port power switching (1)

@@ -1,0 +1,254 @@
+#!/usr/bin/expect
+#
+# usage example
+# build_kgdb_kernel.exp BF561-EZKIT ethernet SMP
+
+source ../kernel_config.exp
+
+set debug_port "ethernet"
+set core_config ""
+
+if { $argc >= 2} {
+set debug_port [lindex $argv 1]
+}
+if { $argc >= 3} {
+set core_config [lindex $argv 2]
+}
+
+if { $debug_port == "uart" || $debug_port == "ethernet" } {
+    send_log "\n#### Debugging is through $debug_port port.\n"
+} else {
+    send_log "\n#### This port $debug_port is not supported. Sorry.\n"
+    exit
+}
+
+if { $core_config != "" } {
+    log_file [log_file_name $argv0.$core_config.$debug_port ]
+} else {
+    log_file [log_file_name $argv0.$debug_port ]
+}
+
+source ../board_info.exp
+send_user "Starting $argv0\n"
+
+cd $uclinux_path/testsuites
+step "Make config."
+source make_default_config.exp
+
+# Following make specific configuration for this case.
+cd $uclinux_path
+set timeout 300
+set baud_rate_done_flag 0
+spawn make config
+
+if { $debug_port == "ethernet" } {
+    #puts "Begin the interactive process of configuration"
+    while 1 {
+        expect {
+            -re "Customize Kernel Settings.*DEFAULTS_KERNEL.*\\\[.*]" {
+                send "y\r"
+            }
+
+            -re "Customize Application/Library Settings.*DEFAULTS_VENDOR.*\\\[.*]" {
+                send "y\r"
+            }
+
+            -re "Symmetric multi-processing support.*SMP.*\\\[.*]" {
+                if { $core_config == "SMP" } {
+                    send "Y\r"
+                } elseif { $core_config == "" } {
+                    send "N\r"
+                } else {
+                    send "\r"
+                }
+            }
+
+            -re "Kernel debugging.*DEBUG_KERNEL.*\\\[.*]" {
+                send "Y\r"
+            }
+
+            -re "KGDB: kernel debugger.*KGDB.*\\\[.*]" {
+                send "Y\r"
+            }
+
+            -re "Compile the kernel with frame pointers.*FRAME_POINTER.*\\\[.*]" {
+                send "Y\r"
+            }
+
+            -re "KGDB: use kgdb over the serial console.*KGDB_SERIAL_CONSOLE.*\\\[.*]" {
+                send "N\r"
+            }
+
+            -re "KGDB: On ethernet.*KGDBOE.*\\\[.*]" {
+                send "Y\r"
+            }
+
+            -re "KGDB: internal test suite.*KGDB_TESTS.*\\\[.*]" {
+                send "Y\r"
+            }
+
+            -re "Compile the kernel with debug info.*DEBUG_INFO.*\\\[.*]" {
+                send "Y\r"
+            }
+
+            -re "Default bootloader kernel arguments \\\(CMDLINE_BOOL\\\) \\\[\[^\r]*]" {
+                send -s "Y\r"
+            }
+
+            -re "Initial kernel command string.*CMDLINE.*\\\[(.*)]" {
+                send -s "console=ttyBF$def_uart_port,57600 kgdboe=@10.100.4.50/,@10.100.4.174/\r"
+            }
+
+            -re "Blackfin On-Chip Watchdog Timer.*BFIN_WDT.*\\\[.*]" {
+                send -s "N\r"
+            }
+
+            -nocase -re "\\\[\[^\r]*] (\[ymn])|choice\\\[.*]: \[0-9]+\r" {
+                continue
+            }
+
+            "\\\(*) \\\[*]" {
+                sleep .05
+                send "\r"
+            }
+
+            -re "\[cC]hoice\\\[.*]:" {
+                send "\r"
+            }
+
+            eof {
+                puts "End of configuration"
+                break
+            }
+
+            timeout {
+                puts "\n\nFATAL ERROR: config prompt timeout in make config"
+                break
+            }
+        }
+    }
+} elseif { $debug_port == "uart" } {
+    while 1 {
+        expect {
+            -re "Customize Kernel Settings.*DEFAULTS_KERNEL.*\\\[.*]" {
+                send "y\r"
+            }
+
+            -re "Customize Application/Library Settings.*DEFAULTS_VENDOR.*\\\[.*]" {
+                send "y\r"
+            }
+
+            -re "Kernel debugging.*DEBUG_KERNEL.*\\\[.*]" {
+                send "Y\r"
+            }
+
+            -re "KGDB: kernel debugger.*KGDB.*\\\[.*]" {
+                send "Y\r"
+            }
+
+            -re "Compile the kernel with frame pointers.*FRAME_POINTER.*\\\[.*]" {
+                send "Y\r"
+            }
+
+            -re "KGDB: use kgdb over the serial console.*KGDB_SERIAL_CONSOLE.*\\\[.*]" {
+                send "Y\r"
+            }
+
+            -re "KGDB: internal test suite.*KGDB_TESTS.*\\\[.*]" {
+                send "Y\r"
+            }
+
+            -re "Compile the kernel with debug info.*DEBUG_INFO.*\\\[.*]" {
+                send "Y\r"
+            }
+
+            -re "Default bootloader kernel arguments.*CMDLINE_BOOL.*\\\[.*]" {
+                send "Y\r"
+            }
+
+            -re "Initial kernel command string.*CMDLINE.*\\\[(.*)]" {
+                if { $board_type == "BF537-STAMP" } {
+                    send -s "console=ttyBF$def_uart_port,57600 kgdboc=ttyBF1,57600n8\r"
+                } elseif { $board_type == "BF548-EZKIT" } {
+                    send -s "console=ttyBF$def_uart_port,57600 kgdboc=ttyBF3,57600n8\r"
+                } elseif { [string match "BF527-EZKIT*" $board_type] } {
+                    send -s "console=ttyBF$def_uart_port,57600 kgdboc=ttyBF0,57600n8\r"
+                }
+            }
+
+            -re "UART Mode.*DMA mode.*SERIAL_BFIN_DMA.*PIO mode.*SERIAL_BFIN_PIO.*choice\\\[.*]" {
+                send "2\r"
+            }
+
+            -re "Enable UART0.*SERIAL_BFIN_UART0.*\\\[.*]" {
+                if { [string match "BF527-EZKIT*" $board_type] || $board_type == "BF537-STAMP" } {
+                    send "Y\r"
+                } else {
+                    send "\r"
+                }
+            }
+
+            -re "Enable UART1.*SERIAL_BFIN_UART1.*\\\[.*]" {
+                if { $board_type == "BF537-STAMP" || $board_type == "BF548-EZKIT" || [string match "BF527-EZKIT*" $board_type] } {
+                    send "Y\r"
+                } else {
+                    send "\r"
+                }
+            }
+
+            -re "Enable UART3.*SERIAL_BFIN_UART3.*\\\[.*]" {
+                if { $board_type == "BF548-EZKIT" } {
+                    send "Y\r"
+                } else {
+                    send "\r"
+                }
+            }
+
+            -re "Blackfin On-Chip Watchdog Timer.*BFIN_WDT.*\\\[.*]" {
+                send -s "N\r"
+            }
+
+            -re "NAND Device Support.*MTD_NAND.*\\\[.*]" {
+                if { $board_type == "BF537-STAMP" } {
+                    send "N\r"
+                } else {
+                    send "\r"
+                }
+            }
+
+            -nocase -re "\\\[\[^\r]*] (\[ymn])|choice\\\[.*]: \[0-9]+\r" {
+                continue
+            }
+
+            "\\\(*) \\\[*]" {
+                sleep .05
+                send "\r"
+            }
+
+            -re "\[cC]hoice\\\[.*]:" {
+                send "\r"
+            }
+
+            eof {
+                puts "End of configuration"
+                break
+            }
+
+            timeout {
+                puts "\n\nFATAL ERROR: config prompt timeout in make config"
+                break
+            }
+        }
+    }
+}
+
+cd $uclinux_path/testsuites
+step "Make"
+source make_kernel.exp
+
+cd $uclinux_path/testsuites
+step "Copy linux"
+source copy_image.exp
+
+send_user "Ending $argv0\n"
+log_file

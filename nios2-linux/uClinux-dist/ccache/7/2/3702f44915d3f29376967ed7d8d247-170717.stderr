@@ -1,0 +1,51 @@
+telnet.c:140: warning: missing braces around initializer
+telnet.c:140: warning: (near initialization for 'toplevel[0]')
+telnet.c: In function 'init_telnet':
+telnet.c:177: warning: implicit declaration of function 'env_init'
+telnet.c: In function 'mklist':
+telnet.c:664: warning: implicit declaration of function 'is_unique'
+telnet.c: In function 'setupterm':
+telnet.c:747: warning: implicit declaration of function 'tgetent'
+telnet.c: In function 'suboption':
+telnet.c:837: warning: implicit declaration of function 'ExitString'
+telnet.c:852: warning: implicit declaration of function 'TerminalSpeeds'
+telnet.c: In function 'slc_init':
+telnet.c:1162: warning: suggest parentheses around assignment used as truth value
+telnet.c:1164: warning: suggest parentheses around assignment used as truth value
+telnet.c:1165: warning: suggest parentheses around assignment used as truth value
+telnet.c:1167: warning: suggest parentheses around assignment used as truth value
+telnet.c:1168: warning: suggest parentheses around assignment used as truth value
+telnet.c:1170: warning: suggest parentheses around assignment used as truth value
+telnet.c:1172: warning: suggest parentheses around assignment used as truth value
+telnet.c:1173: warning: suggest parentheses around assignment used as truth value
+telnet.c:1175: warning: suggest parentheses around assignment used as truth value
+telnet.c:1176: warning: suggest parentheses around assignment used as truth value
+telnet.c:1177: warning: suggest parentheses around assignment used as truth value
+telnet.c:1179: warning: suggest parentheses around assignment used as truth value
+telnet.c:1180: warning: suggest parentheses around assignment used as truth value
+telnet.c:1185: warning: suggest parentheses around assignment used as truth value
+telnet.c:1187: warning: suggest parentheses around assignment used as truth value
+telnet.c:1191: warning: suggest parentheses around assignment used as truth value
+telnet.c: In function 'slc_export':
+telnet.c:1255: warning: implicit declaration of function 'TerminalDefaultChars'
+telnet.c: In function 'env_opt_add':
+telnet.c:1561: warning: suggest parentheses around assignment used as truth value
+telnet.c:1566: warning: suggest parentheses around assignment used as truth value
+telnet.c:1586: warning: implicit declaration of function 'opt_welldefined'
+telnet.c:1596: warning: suggest parentheses around assignment used as truth value
+telnet.c:1610: warning: suggest parentheses around assignment used as truth value
+telnet.c: In function 'telrcv':
+telnet.c:1784: warning: implicit declaration of function 'ttyflush'
+telnet.c:1785: warning: implicit declaration of function 'stilloob'
+telnet.c: In function 'telsnd':
+telnet.c:2029: warning: implicit declaration of function 'TerminalSpecialChars'
+telnet.c: In function 'Scheduler':
+telnet.c:2132: warning: implicit declaration of function 'process_rings'
+telnet.c: In function 'sendnaws':
+telnet.c:2533: warning: implicit declaration of function 'TerminalWindowSize'
+telnet.c: At top level:
+telnet.c:35: warning: 'sccsid' defined but not used
+telnet.c: In function 'telrcv':
+telnet.c:1665: warning: 'sbp' may be used uninitialized in this function
+telnet.c: In function 'Scheduler':
+telnet.c:1939: warning: 'tbp' may be used uninitialized in this function

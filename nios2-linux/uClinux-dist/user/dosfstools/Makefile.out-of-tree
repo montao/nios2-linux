@@ -1,0 +1,3 @@
+CPPFLAGS += -I../@VER@ -I../@VER@/src
+include ../@VER@/Makefile
+VPATH = ../@VER@/src

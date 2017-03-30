@@ -1,0 +1,15 @@
+#!/bin/sh
+
+BOARD_CONFIG=BF561-EZKIT-SMP
+CPU=BF5xx
+REVISION=0.5
+UCLINUX_DIST_PATH=$USER/checkouts/uclinux-dist
+BINARY_FORMAT=flat
+ALLOCATOR=slab\(p2\)
+ICACHE=on
+DCACHE=on
+POLICY=write_back
+UART_MODE=dma
+SMP=on
+MPU=off
+XENOMAI=off

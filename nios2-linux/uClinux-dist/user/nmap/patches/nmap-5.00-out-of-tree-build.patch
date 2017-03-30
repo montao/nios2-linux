@@ -1,0 +1,407 @@
+From e6843fd735d4ff9714df6a4efede1c10578d78f1 Mon Sep 17 00:00:00 2001
+From: Mike Frysinger <vapier@gentoo.org>
+Date: Tue, 26 May 2009 20:51:53 -0400
+Subject: [PATCH 2/2] fix out-of-tree building
+
+This attempts to fix the out-of-tree building such as:
+mkdir build && cd build
+../configure && make
+
+Many of these changes are patently correct while others might incur some
+debate as to how to address them (like the nbase/ncat subdirs).
+
+Signed-off-by: Mike Frysinger <vapier@gentoo.org>
+---
+ Makefile.in            |   45 +++++++++++++++++++++++----------------------
+ configure.ac           |   22 +++++++++++++++++-----
+ nbase/Makefile.in      |   13 +++++++------
+ ncat/Makefile.in       |   16 +++++++++++-----
+ nsock/src/Makefile.in  |   15 ++++++++-------
+ nsock/src/configure.ac |   44 +++++++++++++++++++++++++-------------------
+ 6 files changed, 91 insertions(+), 64 deletions(-)
+
+diff --git a/Makefile.in b/Makefile.in
+index d1ed9f6..30dab9a 100644
+--- a/Makefile.in
++++ b/Makefile.in
+@@ -1,5 +1,6 @@
++srcdir = @srcdir@
+ # Extract the version string from nmap.h.
+-export NMAP_VERSION := $(shell grep '^\#[ \t]*define[ \t]\+NMAP_VERSION' nmap.h | sed -e 's/.*"\(.*\)".*/\1/' -e 'q')
++export NMAP_VERSION := $(shell grep '^\#[ \t]*define[ \t]\+NMAP_VERSION' $(srcdir)/nmap.h | sed -e 's/.*"\(.*\)".*/\1/' -e 'q')
+ NMAP_NAME= Nmap
+ NMAP_URL= http://nmap.org
+ NMAP_PLATFORM=@host@
+@@ -8,7 +9,6 @@ exec_prefix = @exec_prefix@
+ bindir = @bindir@
+ sbindir = @sbindir@
+ mandir = @mandir@
+-srcdir = @srcdir@
+ nmapdatadir = @datadir@/nmap
+ deskdir = $(prefix)/share/applications
+ NMAPDEVDIR=~/nmap-private-dev
+@@ -40,7 +40,7 @@ DEFS += -D_FORTIFY_SOURCE=2
+ # Should only be enabled during debugging and not in any real release.
+ # DEFS += -DMTRACE=1
+ CXXFLAGS = @CXXFLAGS@ $(DBGFLAGS) $(CCOPT) $(DEFS)
+-CPPFLAGS = @CPPFLAGS@
++CPPFLAGS = @CPPFLAGS@ -I$(srcdir) -I.
+ export CFLAGS = $(CXXFLAGS)
+ # CFLAGS = $(DEFS) $(INCLS)
+ STATIC =
+@@ -77,13 +77,14 @@ NSE_OBJS+=nse_openssl.o
+ endif
+ endif
+ 
+-export SRCS = main.cc nmap.cc targets.cc tcpip.cc nmap_error.cc utils.cc idle_scan.cc osscan.cc osscan2.cc output.cc scan_engine.cc timing.cc charpool.cc services.cc protocols.cc nmap_rpc.cc portlist.cc NmapOps.cc TargetGroup.cc Target.cc FingerPrintResults.cc service_scan.cc NmapOutputTable.cc MACLookup.cc nmap_tty.cc nmap_dns.cc traceroute.cc portreasons.cc $(NSE_SRC) @COMPAT_SRCS@
++export SRCS = $(shell printf '$(srcdir)/%s ' main.cc nmap.cc targets.cc tcpip.cc nmap_error.cc utils.cc idle_scan.cc osscan.cc osscan2.cc output.cc scan_engine.cc timing.cc charpool.cc services.cc protocols.cc nmap_rpc.cc portlist.cc NmapOps.cc TargetGroup.cc Target.cc FingerPrintResults.cc service_scan.cc NmapOutputTable.cc MACLookup.cc nmap_tty.cc nmap_dns.cc traceroute.cc portreasons.cc $(NSE_SRC) @COMPAT_SRCS@)
+ 
+ export HDRS = charpool.h FingerPrintResults.h global_structures.h idle_scan.h MACLookup.h nmap_amigaos.h nmap_dns.h nmap_error.h nmap.h NmapOps.h NmapOutputTable.h nmap_rpc.h nmap_tty.h nmap_winconfig.h osscan.h osscan2.h output.h portlist.h protocols.h scan_engine.h service_scan.h services.h TargetGroup.h Target.h targets.h tcpip.h timing.h utils.h traceroute.h portreasons.h $(NSE_HDRS)
+ 
+ OBJS = main.o nmap.o targets.o tcpip.o nmap_error.o utils.o idle_scan.o osscan.o osscan2.o output.o scan_engine.o timing.o charpool.o services.o protocols.o nmap_rpc.o portlist.o NmapOps.o TargetGroup.o Target.o FingerPrintResults.o service_scan.o NmapOutputTable.o MACLookup.o nmap_tty.o nmap_dns.o  traceroute.o portreasons.o $(NSE_OBJS) @COMPAT_OBJS@
+ 
+ # %.o : %.cc -- nope this is a GNU extension
++VPATH = $(srcdir)
+ .cc.o:
+ 	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $< -o $@
+ 
+@@ -193,22 +194,22 @@ install-nmap: $(TARGET)
+ # Use strip -x to avoid stripping dynamically loaded NSE functions. See
+ # http://seclists.org/nmap-dev/2007/q4/0272.html.
+ 	$(STRIP) -x $(DESTDIR)$(bindir)/nmap
+-	$(INSTALL) -c -m 644 docs/$(TARGET).1 $(DESTDIR)$(mandir)/man1/
+-	$(INSTALL) -c -m 644 docs/nmap.xsl $(DESTDIR)$(nmapdatadir)/
+-	$(INSTALL) -c -m 644 docs/nmap.dtd $(DESTDIR)$(nmapdatadir)/
+-	$(INSTALL) -c -m 644 nmap-services $(DESTDIR)$(nmapdatadir)/
+-	$(INSTALL) -c -m 644 nmap-rpc $(DESTDIR)$(nmapdatadir)/
+-	$(INSTALL) -c -m 644 nmap-os-db $(DESTDIR)$(nmapdatadir)/
+-	$(INSTALL) -c -m 644 nmap-service-probes $(DESTDIR)$(nmapdatadir)/
+-	$(INSTALL) -c -m 644 nmap-protocols $(DESTDIR)$(nmapdatadir)/
+-	$(INSTALL) -c -m 644 nmap-mac-prefixes $(DESTDIR)$(nmapdatadir)/
++	$(INSTALL) -c -m 644 $(srcdir)/docs/$(TARGET).1 $(DESTDIR)$(mandir)/man1/
++	$(INSTALL) -c -m 644 $(srcdir)/docs/nmap.xsl $(DESTDIR)$(nmapdatadir)/
++	$(INSTALL) -c -m 644 $(srcdir)/docs/nmap.dtd $(DESTDIR)$(nmapdatadir)/
++	$(INSTALL) -c -m 644 $(srcdir)/nmap-services $(DESTDIR)$(nmapdatadir)/
++	$(INSTALL) -c -m 644 $(srcdir)/nmap-rpc $(DESTDIR)$(nmapdatadir)/
++	$(INSTALL) -c -m 644 $(srcdir)/nmap-os-db $(DESTDIR)$(nmapdatadir)/
++	$(INSTALL) -c -m 644 $(srcdir)/nmap-service-probes $(DESTDIR)$(nmapdatadir)/
++	$(INSTALL) -c -m 644 $(srcdir)/nmap-protocols $(DESTDIR)$(nmapdatadir)/
++	$(INSTALL) -c -m 644 $(srcdir)/nmap-mac-prefixes $(DESTDIR)$(nmapdatadir)/
+ 
+ # Update the Ncat version number.
+-$(NCATDIR)/ncat.h: nmap.h
+-	sed -i -e 's/^#[ \t]*define[ \t]\+NCAT_VERSION[ \t]\+\(".*"\)/#define NCAT_VERSION "$(NMAP_VERSION)"/' $@
++$(NCATDIR)/ncat.h: $(srcdir)/nmap.h
++	sed -i -e 's/^#[ \t]*define[ \t]\+NCAT_VERSION[ \t]\+\(".*"\)/#define NCAT_VERSION "$(NMAP_VERSION)"/' $(srcdir)/$@
+ 
+ # Update the version number used by Zenmap.
+-$(ZENMAPDIR)/zenmapCore/Version.py $(ZENMAPDIR)/share/zenmap/config/zenmap_version: nmap.h
++$(ZENMAPDIR)/zenmapCore/Version.py $(ZENMAPDIR)/share/zenmap/config/zenmap_version: $(srcdir)/nmap.h
+ 	cd $(ZENMAPDIR) && $(PYTHON) install_scripts/utils/version_update.py "$(NMAP_VERSION)"
+ 
+ # By default distutils rewrites installed scripts to hardcode the
+@@ -243,11 +244,11 @@ build-ndiff:
+ install-ndiff:
+ 	cd $(NDIFFDIR) && $(PYTHON) setup.py install --prefix "$(prefix)" $(if $(DESTDIR),--root "$(DESTDIR)")
+ 
+-NSE_FILES = scripts/script.db scripts/*.nse
+-NSE_LIB_LUA_FILES = nselib/*.lua
++NSE_FILES = $(srcdir)/scripts/script.db $(srcdir)/scripts/*.nse
++NSE_LIB_LUA_FILES = $(srcdir)/nselib/*.lua
+ 
+ install-nse: $(TARGET)
+-	$(INSTALL) -c -m 644 nse_main.lua $(DESTDIR)$(nmapdatadir)/
++	$(INSTALL) -c -m 644 $(srcdir)/nse_main.lua $(DESTDIR)$(nmapdatadir)/
+ 	$(INSTALL) -d $(DESTDIR)$(nmapdatadir)/scripts
+ 	cp -f $(NSE_FILES) $(DESTDIR)$(nmapdatadir)/scripts
+ 	$(INSTALL) -d $(DESTDIR)$(nmapdatadir)/nselib
+@@ -278,7 +279,7 @@ uninstall-zenmap:
+ uninstall-ncat:
+ 	@cd $(NCATDIR) && $(MAKE) uninstall
+ 
+-${srcdir}/configure: configure.ac 
++${srcdir}/configure: $(srcdir)/configure.ac
+ 	cd ${srcdir} && autoconf
+ 
+ ## autoheader might not change config.h.in, so touch a stamp file.
+@@ -292,10 +293,10 @@ ${srcdir}/configure: configure.ac
+ #stamp-h: config.h.in config.status
+ #	./config.status
+ 
+-Makefile: Makefile.in config.status
++Makefile: $(srcdir)/Makefile.in config.status
+ 	./config.status
+ 
+-config.status: configure
++config.status: $(srcdir)/configure
+ 	./config.status --recheck
+ 
+ makefile.dep:
+diff --git a/configure.ac b/configure.ac
+index 5e2ec6c..c8198c7 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -509,7 +509,7 @@ AC_HELP_STRING([--with-libdnet=included], [Use the libdnet version included with
+ # If they didn't provide location, we use the included one
+ if test $have_dnet != yes ; then
+   AC_CONFIG_SUBDIRS( libdnet-stripped )
+-  CPPFLAGS="-I$LIBDNETDIR/include $CPPFLAGS"
++  CPPFLAGS="-I"'$(srcdir)/'"$LIBDNETDIR/include $CPPFLAGS"
+   LIBDNET_LIBS="$LIBDNETDIR/src/.libs/libdnet.a"
+   DNET_DEPENDS="$LIBDNETDIR/src/.libs/libdnet.a"
+   DNET_BUILD="dnet_build"
+@@ -724,8 +724,14 @@ NBASE_BUILD="nbase_build"
+ NBASEDIR="nbase"
+ )
+ 
+-LDFLAGS="$LDFLAGS -L$NBASEDIR"
+-CPPFLAGS="$CPPFLAGS -I$NBASEDIR"
++if test "x$NBASEDIR" != "x" ; then
++  LDFLAGS="$LDFLAGS -L$NBASEDIR"
++  if test "x$NBASEDIR" = "xnbase" ; then
++    CPPFLAGS="$CPPFLAGS -I"'$(srcdir)/'"$NBASEDIR -I$NBASEDIR"
++  else
++    CPPFLAGS="$CPPFLAGS -I$NBASEDIR"
++  fi
++fi
+ LIBNBASE_LIBS="-lnbase"
+ 
+ AC_SUBST(NBASEDIR)
+@@ -748,8 +754,14 @@ AC_HELP_STRING([--with-libnsock=DIR], [Compile and link to libnsock in DIR]),
+   esac]
+ )
+ 
+-LDFLAGS="$LDFLAGS -L$NSOCKDIR/src/"
+-CPPFLAGS="$CPPFLAGS -I$NSOCKDIR/include"
++if test "x$NSOCKDIR" != "x" ; then
++  LDFLAGS="$LDFLAGS -L$NSOCKDIR/src/"
++  if test "x$NSOCKDIR" = "xnsock" ; then
++    CPPFLAGS="$CPPFLAGS -I"'$(srcdir)/'"$NSOCKDIR/include"
++  else
++    CPPFLAGS="$CPPFLAGS -I$NSOCKDIR/include"
++  fi
++fi
+ LIBNSOCK_LIBS="-lnsock"
+ 
+ AC_SUBST(NSOCKDIR)
+diff --git a/nbase/Makefile.in b/nbase/Makefile.in
+index c2e1a6e..03c5e0f 100644
+--- a/nbase/Makefile.in
++++ b/nbase/Makefile.in
+@@ -12,18 +12,18 @@ CCOPT =
+ DEFS = @DEFS@
+ # With GCC, add extra security checks to source code.
+ DEFS += -D_FORTIFY_SOURCE=2
+-CPPFLAGS = @CPPFLAGS@
++CPPFLAGS = @CPPFLAGS@ -I$(srcdir) -I.
+ CFLAGS = @CFLAGS@ $(CCOPT) $(GLIB_CFLAGS) $(DEFS) $(INCLS)
+ STATIC = 
+ LDFLAGS = @LDFLAGS@ $(STATIC)
+ LIBS =  @LIBS@ 
+-SHTOOL = ./shtool
++SHTOOL = $(srcdir)/shtool
+ INSTALL = $(SHTOOL) install 
+ MAKEDEPEND = @MAKEDEPEND@
+ 
+ TARGET = libnbase.a
+ 
+-DEPS = getopt.h nbase.h nbase_winconfig.h nbase_config.h nbase_ipv6.h nbase_winunix.h nbase_crc32ct.h
++DEPS = $(shell printf '$(srcdir)/%s ' getopt.h nbase.h nbase_winconfig.h nbase_ipv6.h nbase_winunix.h nbase_crc32ct.h) nbase_config.h
+ OBJS = @LIBOBJS@
+ 
+ all: $(TARGET) 
+@@ -42,15 +42,16 @@ distclean: clean
+ depend:
+ 	$(MAKEDEPEND) $(INCLS) -s "# DO NOT DELETE" -- $(DEFS) -- $(SRCS)
+ 
+-configure: configure.ac
++configure: $(srcdir)/configure.ac
+ 	autoconf
+ 
+-Makefile: Makefile.in config.status
++Makefile: $(srcdir)/Makefile.in config.status
+ 	./config.status
+ 
+-config.status: configure
++config.status: $(srcdir)/configure
+ 	./config.status --recheck
+ 
++VPATH = $(srcdir)
+ .cc.o:
+ 	$(CC) -c $(CFLAGS) $*.cc
+ 
+diff --git a/ncat/Makefile.in b/ncat/Makefile.in
+index 3e3f85a..b4f7d7a 100644
+--- a/ncat/Makefile.in
++++ b/ncat/Makefile.in
+@@ -58,23 +58,23 @@ LIBS = @LIBS@
+ DEFS = @DEFS@ -DNCAT_DATADIR="\"$(pkgdatadir)\""
+ # With GCC, add extra security checks to source code.
+ DEFS += -D_FORTIFY_SOURCE=2
+-INCLS = -I. -I.. -I../nsock/include/ -I$(NBASEDIR)
++INCLS = -I$(srcdir) -I. -I$(srcdir)/.. -I.. -I$(srcdir)/../nsock/include/ -I$(srcdir)/$(NBASEDIR) -I$(NBASEDIR)
+ RM = rm -f
+ OPENSSL_LIBS = @OPENSSL_LIBS@
+ PCAP_LIBS = @PCAP_LIBS@
+ 
+ CPPFLAGS += $(DEFS) $(INCLS)
+ 
+-SHTOOL = ./shtool
++SHTOOL = $(srcdir)/shtool
+ 
+ # DESTDIR can be used by package maintainers to install Ncat under its 
+ # usual directory structure into a different tree.
+ DESTDIR = 
+ 
+-SRCS = ncat_main.c ncat_connect.c ncat_core.c ncat_posix.c ncat_listen.c ncat_proxy.c ncat_broker.c ncat_hostmatch.c ncat_ssl.c base64.c http.c util.c sys_wrap.c
++SRCS = $(shell printf '$(srcdir)/%s ' ncat_main.c ncat_connect.c ncat_core.c ncat_posix.c ncat_listen.c ncat_proxy.c ncat_broker.c ncat_hostmatch.c ncat_ssl.c base64.c http.c util.c sys_wrap.c)
+ OBJS = ncat_main.o ncat_connect.o ncat_core.o ncat_posix.o ncat_listen.o ncat_proxy.o ncat_broker.o ncat_hostmatch.o ncat_ssl.o base64.o http.o util.o sys_wrap.o
+ 
+-DATAFILES = certs/ca-bundle.crt
++DATAFILES = $(srcdir)/certs/ca-bundle.crt
+ 
+ TARGET = ncat
+ mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
+@@ -107,6 +107,12 @@ config.h:
+ 		        $(SHELL) ./config.status; \
+ 	fi
+ 
++test/addrset.o: test
++
++.PHONY: test
++test:
++	mkdir -p test
++
+ test/addrset: test/addrset.o ncat_core.o ncat_hostmatch.o sys_wrap.o util.o
+ 	$(CC) -o $@ $(CFLAGS) $(LDFLAGS) $^ $(NSOCKLIB) $(NBASELIB) $(OPENSSL_LIBS) $(PCAP_LIBS) $(LIBS)
+ 
+@@ -128,7 +134,7 @@ install: $(TARGET)
+ 	$(SHTOOL) mkdir -f -p -m 755 $(DESTDIR)$(bindir) $(DESTDIR)$(pkgdatadir) $(DESTDIR)$(mandir)/man1
+ 	$(INSTALL) -c -m 755 -s ncat $(DESTDIR)$(bindir)/ncat
+ 	$(INSTALL) -c -m 644 $(DATAFILES) $(DESTDIR)$(pkgdatadir)/
+-	$(INSTALL) -c -m 644 docs/$(TARGET).1 $(DESTDIR)$(mandir)/man1/$(TARGET).1
++	$(INSTALL) -c -m 644 $(srcdir)/docs/$(TARGET).1 $(DESTDIR)$(mandir)/man1/$(TARGET).1
+ 
+ uninstall:
+ 	@echo Uninstalling Ncat;
+diff --git a/nsock/src/Makefile.in b/nsock/src/Makefile.in
+index 2af7601..cb43081 100644
+--- a/nsock/src/Makefile.in
++++ b/nsock/src/Makefile.in
+@@ -14,12 +14,12 @@ CCOPT =
+ DEFS = @DEFS@ -DNSOCK_VERSION=\"$(NSOCK_VERSION)\"
+ # With GCC, add extra security checks to source code.
+ DEFS += -D_FORTIFY_SOURCE=2
+-INCLS = -I../include -I../../libpcap
++INCLS = -I$(srcdir) -I. -I$(srcdir)/../include -I$(srcdir)/../../libpcap
+ CFLAGS = @CFLAGS@ $(CCOPT) $(DEFS) $(INCLS)
+ # CFLAGS = -g -Wall $(DEFS) $(INCLS)
+ CPPFLAGS = @CPPFLAGS@
+ STATIC = 
+-SHTOOL = ./shtool
++SHTOOL = $(srcdir)/shtool
+ INSTALL = $(SHTOOL) install 
+ MAKEDEPEND = @MAKEDEPEND@
+ RPMTDIR=$(HOME)/rpmdir
+@@ -35,8 +35,9 @@ SRCS = error.c filespace.c gh_list.c nsock_connect.c nsock_core.c nsock_iod.c ns
+ 
+ OBJS = error.o filespace.o gh_list.o nsock_connect.o nsock_core.o nsock_iod.o nsock_read.o nsock_timers.o nsock_write.o nsock_ssl.o nsock_utils.o nsock_event.o nsock_pool.o netutils.o nsock_pcap.o @COMPAT_OBJS@
+ 
+-DEPS = error.h filespace.h gh_list.h nsock_internal.h nsock_utils.h netutils.h nsock_pcap.h ../include/nsock.h $(NBASEDIR)/libnbase.a
++DEPS = $(shell printf '$(srcdir)/%s ' error.h filespace.h gh_list.h nsock_internal.h nsock_utils.h netutils.h nsock_pcap.h ../include/nsock.h) $(NBASEDIR)/libnbase.a
+ 
++VPATH = $(srcdir)
+ .c.o:
+ 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $< -o $@
+ 
+@@ -59,12 +60,12 @@ distclean: clean
+ depend:
+ 	$(MAKEDEPEND) $(INCLS) -s "# DO NOT DELETE" -- $(DEFS) -- $(SRCS)
+ 
+-${srcdir}/configure: configure.ac 
++${srcdir}/configure: $(srcdir)/configure.ac
+ 	cd ${srcdir} && autoconf
+ 
+ # autoheader might not change config.h.in, so touch a stamp file.
+ ${srcdir}/config.h.in: stamp-h.in
+-${srcdir}/stamp-h.in: configure.ac acconfig.h \
++${srcdir}/stamp-h.in: $(srcdir)/configure.ac acconfig.h \
+ 	config.h.top config.h.bot
+ 	cd ${srcdir} && autoheader
+ 	echo timestamp > ${srcdir}/stamp-h.in
+@@ -73,10 +74,10 @@ config.h: stamp-h
+ stamp-h: config.h.in config.status
+ 	./config.status
+ 
+-Makefile: Makefile.in config.status
++Makefile: $(srcdir)/Makefile.in config.status
+ 	./config.status
+ 
+-config.status: configure
++config.status: $(srcdir)/configure
+ 	./config.status --recheck
+ 
+ # DO NOT DELETE -- Needed by makedepend
+diff --git a/nsock/src/configure.ac b/nsock/src/configure.ac
+index 728e925..61ec00d 100644
+--- a/nsock/src/configure.ac
++++ b/nsock/src/configure.ac
+@@ -140,25 +140,6 @@ AC_HEADER_STDC
+ 
+ dnl Checks for typedefs, structures, and compiler characteristics.
+ 
+-AC_ARG_WITH(libnbase,
+-[  --with-libnbase=DIR     Look for nbase include/libs in DIR],
+-[  case "$with_libnbase" in
+-  yes)
+-    ;;
+-  *)
+-    NBASEDIR="$with_libnbase"
+-    ;;
+-  esac],
+-NBASEDIR="../../nbase"
+-)
+-
+-LDFLAGS="$LDFLAGS -L$NBASEDIR"
+-CFLAGS="$CFLAGS -I$NBASEDIR"
+-LIBNBASE_LIBS="$LIBS -lnbase"
+-
+-AC_SUBST(LIBNBASE_LIBS)
+-AC_SUBST(NBASEDIR)
+-
+ AC_MSG_CHECKING([struct ip])
+ AC_TRY_COMPILE([#include <sys/types.h>
+ #include <netinet/in.h>
+@@ -337,5 +318,29 @@ if test $ac_cv_ip_has_ip_sum = yes ; then
+         AC_DEFINE(HAVE_IP_IP_SUM)
+ fi
+ 
++AC_ARG_WITH(libnbase,
++[  --with-libnbase=DIR     Look for nbase include/libs in DIR],
++[  case "$with_libnbase" in
++  yes)
++    ;;
++  *)
++    NBASEDIR="$with_libnbase"
++    ;;
++  esac],
++NBASEDIR="../../nbase"
++)
++
++if test "x$NBASEDIR" != "x" ; then
++  LDFLAGS="$LDFLAGS -L$NBASEDIR"
++  if test "x$NBASEDIR" = "x../../nbase" ; then
++    CFLAGS="$CFLAGS -I"'$(srcdir)/'"$NBASEDIR -I$NBASEDIR"
++  else
++    CFLAGS="$CFLAGS -I$NBASEDIR"
++  fi
++fi
++LIBNBASE_LIBS="$LIBS -lnbase"
++
++AC_SUBST(LIBNBASE_LIBS)
++AC_SUBST(NBASEDIR)
++
+ AC_OUTPUT(Makefile)
+-- 
+1.6.3.3
+

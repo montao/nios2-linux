@@ -1,0 +1,2003 @@
+#!/usr/bin/expect
+#
+# Usage example:
+# kgdb_test.exp BF561-EZKIT ethernet SMP
+
+#
+#Test program to test the KGDB patch.
+#
+source ../kernel_config.exp
+source ../board_info.exp
+
+set debug_port "ethernet"
+set core_config ""
+
+if { $argc >= 2} {
+set debug_port [lindex $argv 1]
+}
+if { $argc >= 3} {
+set core_config [lindex $argv 2]
+}
+
+if { $debug_port == "uart" || $debug_port == "ethernet" } {
+send_log "\n#### Debugging is through $debug_port port.\n"
+} else {
+send_log "\n#### This port $debug_port is not supported. Sorry.\n"
+exit
+}
+
+set TITLE [title "$argv0"]
+
+if { $core_config != "" } {
+
+log_file [log_file_name $argv0.$core_config.$debug_port ]
+
+append TITLE " ($core_config)"
+} else {
+
+log_file [log_file_name $argv0.$debug_port ]
+}
+
+append TITLE " ($debug_port)"
+
+send_user "Starting $argv0\n"
+
+step "Start kermit."
+source ../spawn_kermit.exp
+
+step "Reboot the kernel."
+source ../reboot_kernel.exp
+
+step "Start $TITLE\r"
+
+set timeout 10
+
+proc clean_host_gdb { } {
+
+global gdb_id
+global sh_prompt
+
+spawn /bin/sh
+expect -re  $sh_prompt
+
+set timeout 10
+send -s "ps aux | grep bfin-uclinux-gdb\r"
+expect {
+    -re  $sh_prompt { }
+    timeout {
+    send_log "Fails to get bfin-uclinux-gdb process id!"
+    }
+}
+
+send -s "kill -9 `pidof  bfin-uclinux-gdb`\r"
+expect {
+    -re  $sh_prompt { }
+    timeout { 
+    send_log "Fails to kill bfin-uclinux-gdb process id!"
+    }
+}
+
+}
+
+set case_num 0
+
+set flag 0
+send -s "ifconfig eth0 $targetip\r"
+sleep 3
+expect {
+    ">" {
+         set flag 1
+         puts "ifconfig set success.\n"
+    }
+
+    timeout {
+         puts "Fail ifconfig. "
+    }
+}
+
+if { $debug_port == "uart" } {
+send -s "\x81"
+send -s "b"
+send -s "g"
+sleep 3
+expect {
+    -re "SysRq :.*Entering KGDB" {
+        send_log "Prepare KGDB through uart port debug!"
+    }
+
+    timeout {
+        send_user "ERROR: enter to kgdb error\n"
+    }
+}
+}
+
+incr case_num
+#spawn bfin-uclinux-gdb /tftpboot/vmlinux
+spawn bfin-uclinux-gdb $uclinux_path/linux-2.6.x/vmlinux
+set gdb_id $spawn_id
+expect {
+	"(gdb)" {
+                case_pass $case_num
+        }
+        timeout {
+                case_fail $case_num
+		exit
+        }
+}
+
+while 1 {
+	incr case_num
+        if { $debug_port == "ethernet" } {
+	send -s "target remote udp:$targetip:6443\r"
+	expect {
+		"Remote debugging using udp" {
+                 case_pass $case_num
+			expect { 
+				"(gdb) " {
+				}
+			}
+		}
+		timeout {
+                clean_host_gdb
+                case_fail $case_num
+			exit
+		}
+	}
+        } elseif { $debug_port == "uart" } {
+        send -s "set remotebaud 57600\r"
+        expect {
+                "(gdb)" {
+                case_pass $case_num
+                }
+                timeout {
+                clean_host_gdb
+                case_fail $case_num
+                exit
+                }
+        }
+        send -s "target remote $ttyUSBdev\r"
+        expect {
+                "Remote debugging using $ttyUSBdev" {
+                 case_pass $case_num
+                        expect {
+                                "(gdb) " {
+                                }
+                        }
+                }
+                timeout {
+                clean_host_gdb
+                case_fail $case_num
+                        exit
+                }
+        }
+        }
+	incr case_num
+	send -s "break kgdb_test\r"
+	expect {
+		"Breakpoint 1" {
+                case_pass $case_num
+			expect { 
+				"(gdb) " {
+				}
+			}
+		}
+		timeout {
+                clean_host_gdb
+                case_fail $case_num
+			exit
+		}
+	}
+	incr case_num
+	send "c\r"
+	expect {
+		"Continuing." {
+                case_pass $case_num
+		}
+		timeout {
+                clean_host_gdb
+                case_fail $case_num
+			exit
+		}
+	}
+	incr case_num
+	set spawn_id $kermit_spawn_id
+	send "\r"
+	expect {
+		"> " {
+		}
+		timeout {
+                clean_host_gdb
+                case_fail $case_num
+			exit
+		}
+	}
+###########################################################################
+# First round of cat /proc/kgdbtest which is for normal DRAM.
+
+	send -s "cat /proc/kgdbtest\r"
+	set spawn_id $gdb_id
+	expect {
+		"Breakpoint 1" {
+                case_pass $case_num
+		expect { 
+			"(gdb) " {
+			}
+		}
+		}
+		timeout {
+                clean_host_gdb
+                case_fail $case_num
+			exit
+		}
+	}
+        incr case_num
+        send -s "hbreak 57\r"
+        expect {
+                "Hardware assisted breakpoint 2*(gdb) " {
+                case_pass $case_num
+                }
+                timeout {
+                clean_host_gdb
+                case_fail $case_num
+                        exit
+                }
+        }
+        incr case_num
+        send "info b\r"
+        expect {
+               "1   breakpoint*2   hw breakpoint" {
+                case_pass $case_num
+                expect {
+                        "(gdb) " {
+                        }
+                }
+                }
+                timeout {
+                clean_host_gdb
+                case_fail $case_num
+                        exit
+                }
+        }
+
+	incr case_num
+	send "list\r"
+	expect {
+		"(gdb) " {
+                case_pass $case_num
+		}
+		timeout {
+                clean_host_gdb
+                case_fail $case_num
+			exit
+		}
+	}
+	incr case_num
+	send "bt\r"
+	expect {
+		"kgdb_test" {
+                case_pass $case_num
+		expect {
+			"(gdb) " {
+			}
+		}
+		}
+		timeout {
+                clean_host_gdb
+                case_fail $case_num
+			exit
+		}
+	}
+	incr case_num
+	send "c\r"
+	expect {
+		"Continuing." {
+		}
+		timeout {
+                clean_host_gdb
+                case_fail $case_num
+			exit
+		}
+	}
+        expect {
+                "Breakpoint 2" {
+                case_pass $case_num
+                expect {
+                        "(gdb) " {
+                        }
+                }
+                }
+                timeout {
+                clean_host_gdb
+                case_fail $case_num
+                        exit
+                }
+        }
+        # between breakpoint 1 and 2, it prints "helloworld".
+	set spawn_id $kermit_spawn_id
+	expect {
+		"hello world!" {
+		expect {
+		"> " {
+                clean_host_gdb
+                case_fail $case_num
+                        exit
+		}
+               timeout {
+                case_pass $case_num
+                }
+		}
+		}
+	}
+        incr case_num
+        set spawn_id $gdb_id
+        incr case_num
+        send "print z\r"
+        expect {
+               -re "\\\$1 = " {
+                case_pass $case_num
+                expect {
+                        "(gdb) " {
+                        }
+                }
+                }
+                timeout {
+                clean_host_gdb
+                case_fail $case_num
+                        exit
+                }
+        }
+        send "c\r"
+        expect {
+                "Continuing." {
+                }
+                timeout {
+                clean_host_gdb
+                case_fail $case_num
+                        exit
+                }
+        }
+
+        # Here is no explicit memory name to match for l1 or l2 could be skipped to run. 
+        set spawn_id $kermit_spawn_id
+        expect {
+              -re  "\\\(before change\\\).*data variable addr = 0x\[0-9a-f]{8}.*code function addr = 0x\[0-9a-f]{8}.*\\\(after change\\\).*data variable addr = 0x\[0-9a-f]{8}.*>" {
+                case_pass $case_num
+                }
+                timeout {
+                clean_host_gdb
+                case_fail $case_num
+                        exit
+                }
+        }
+######################################################################################
+#Second round of running cat /proc/kgdbtest which is running in L1.
+
+if {  $core_config != "SMP" } {
+	send -s "cat /proc/kgdbtest\r"
+	set spawn_id $gdb_id
+	expect {
+		"Breakpoint 1" {
+		expect {
+			"(gdb) " {
+			}
+		}
+		}
+		timeout {
+                clean_host_gdb
+                case_fail $case_num
+			exit
+		}
+	}
+	incr case_num
+	send "hbreak kgdb_l1_test\r"
+	expect {
+	  -re	"\[Bb]reakpoint 3 at 0xffa0\[0-9a-f]{4}" {
+                case_pass $case_num
+		expect {
+			"(gdb) " {
+			}
+		}
+		}
+		timeout {
+                clean_host_gdb
+                case_fail $case_num
+			exit
+		}
+	}
+        incr case_num
+        send "break 34\r"
+        expect {
+              -re  "Breakpoint 4 at 0xffa0\[0-9a-f]{4}" {
+                case_pass $case_num
+                expect {
+                        "(gdb) " {
+                        }
+                }
+                }
+                timeout {
+                clean_host_gdb
+                case_fail $case_num
+                        exit
+                }
+        }
+        send "c\r"
+        expect {
+                "Continuing." {
+                 expect {
+                       -re "Breakpoint 2, kgdb_test.*\\\(gdb\\\)" {
+                        }
+                }
+                }
+                timeout {
+                clean_host_gdb
+                case_fail $case_num
+                        exit
+                }
+        }
+
+        set spawn_id $kermit_spawn_id
+        expect {
+                "hello world!" {
+                expect {
+                "> " {
+                clean_host_gdb
+                case_fail $case_num
+                        exit
+                }
+               timeout {
+                case_pass $case_num
+                }
+                }
+                }
+        }
+        set spawn_id $gdb_id
+        send "c\r"
+        expect {
+                "Continuing." {
+                 expect {
+                       -re "Breakpoint 3, kgdb_l1_test.*\\\(gdb\\\)" {
+                        }
+                }
+                }
+                timeout {
+                clean_host_gdb
+                case_fail $case_num
+                        exit
+                }
+        }
+        incr case_num
+        send "print num1\r"
+        expect {
+              -re  "\\\$2 = 10" {
+                case_pass $case_num
+                expect {
+                        "(gdb) " {
+                        }
+                }
+                }
+                timeout {
+                clean_host_gdb
+                case_fail $case_num
+                        exit
+                }
+        }
+
+        send "c\r"
+        expect {
+                "Continuing." {
+                 expect {
+                        -re "Breakpoint 4, kgdb_l1_test.*\\\(gdb\\\)" {
+                        }
+                }
+                }
+                timeout {
+                clean_host_gdb
+                case_fail $case_num
+                        exit
+                }
+        }
+       
+        incr case_num
+        send "print num1\r"
+        expect {
+              -re  "\\\$3 = 20" {
+                case_pass $case_num
+                expect {
+                        "(gdb) " {
+                        }
+                }
+                }
+                timeout {
+                clean_host_gdb
+                case_fail $case_num
+                        exit
+                }
+        }
+	set spawn_id $kermit_spawn_id
+	expect {
+              -re  "L1\\\(before change\\\).*data variable addr = 0xff80\[0-9a-f]{4}.*code function addr = 0xffa0\[0-9a-f]{4}" {
+                   expect {
+                   "> " {
+                   clean_host_gdb
+                   case_fail $case_num
+                           exit
+                   }
+                   timeout {
+                   case_pass $case_num
+                   }
+                   }
+                }
+                timeout {
+                case_fail $case_num
+                }
+        }
+
+       set spawn_id $gdb_id
+
+        incr case_num
+        send " x/1xw 0xff808010\r"
+        expect {
+                "Cannot access memory at address" {
+                case_pass $case_num
+                expect {
+                        "(gdb) " {
+                        }
+                }
+                }
+                timeout {
+                clean_host_gdb
+                case_fail $case_num
+                        exit
+                }
+        }
+
+        incr case_num
+        send "set *0xff808020 = 23\r"
+        expect {
+                "Cannot access memory at address" {
+                case_pass $case_num
+                expect {
+                        "(gdb) " {
+                        }
+                }
+                }
+                timeout {
+                clean_host_gdb
+                case_fail $case_num
+                        exit
+                }
+        }
+
+        incr case_num
+        # Read the uart0 register.
+        send " x/1xw 0xffc00400\r" 
+        expect {
+           -re "0xffc00400:\[\x20\t]+0x\[0-9a-fA-F]{8}\[\r\n]" {
+                case_pass $case_num
+                expect {
+                        "(gdb) " {
+                        }
+                }
+                }
+                timeout {
+                clean_host_gdb
+                case_fail $case_num
+                        exit
+                }
+        }
+
+        incr case_num
+        # Set the performance register.
+        send "set *0xffe08100=0x456\r" 
+        expect {
+                "(gdb)" {
+                }
+                timeout {
+                clean_host_gdb
+                case_fail $case_num
+                        exit
+                }
+        }
+        send " x/1xw 0xffe08100\r"
+        expect {
+           -re "0xffe08100:\[\x20\t]+0x00000456" {
+                case_pass $case_num
+                expect {
+                        "(gdb) " {
+                        }
+                }
+                }
+                timeout {
+                clean_host_gdb
+                case_fail $case_num
+                        exit
+                }
+        }
+
+	incr case_num
+	send "d 1\r"
+	send "d 2\r"
+	send "info break\r"
+	expect {
+		"1   breakpoint" {
+                case_fail $case_num
+			exit
+		}
+		"2   hw breakpoint" {
+                case_fail $case_num
+			exit
+		}
+		"3  *breakpoint*4  *breakpoint" {
+                case_pass $case_num
+		expect {
+			"(gdb) " {
+			}
+		}
+		}
+		timeout {
+                clean_host_gdb
+                case_fail $case_num
+			exit
+		}
+	}
+
+	incr case_num
+	send "info reg\r"
+	expect {
+		-re "pc\[\x20\t]+(0x\[0-9a-fA-F]+)" {
+                        set reg_addr_before $expect_out(1,string)
+                        puts "\nreg_addr_before $reg_addr_before \n"
+		}
+		"to quit---" {
+			send "\r"
+			exp_continue
+		}
+                timeout {
+                        puts "\nreg_addr_before timeout! \n"
+                clean_host_gdb
+                case_fail $case_num
+			exit
+		}
+	}
+	expect {
+		"to quit---" {
+			send "\r"
+			exp_continue
+		}
+		"(gdb) " {
+                        case_pass $case_num
+		}
+		timeout {
+		clean_host_gdb
+		case_fail $case_num
+			exit
+		}
+	}
+
+	incr case_num
+        send "disassemble\r"
+        expect {
+		-re "$reg_addr_before\[^\n]*\[\n](0x\[0-9a-fA-F]{8})" {
+                          set reg_addr_after1 $expect_out(1,string)
+                          send_log "Get reg_addr_after1.\n"
+                          puts "\nreg_addr_after1 $reg_addr_after1 \n"
+                }
+                -re "\[^0-9a-fA-F](0x\[0-9a-fA-F]{8})\[^\n]*\[\r\n]\[^\n]*to quit" {
+
+                       set match_addr $expect_out(1,string)
+                       send "\r"
+                       send_log "reg_addr_after1 after quit.####reg_addr_before $reg_addr_before ####$expect_out(1,string)###\n"
+                       
+                       if { 0 == [ expr $reg_addr_before - $match_addr ] } {
+                             send_log "Locate the right reg_addr_before.\n"
+                             expect {
+                                     -re "(0x\[0-9a-fA-F]{8})" {
+                                                set reg_addr_after1 $expect_out(1,string)
+                                                send_log "Get reg_addr_after1 after quit .\n"
+                                                puts "\nreg_addr_after1 $reg_addr_after1 \n"
+                                      }
+                                     timeout {
+                                                send_log "Timeout to find reg_addr_after1 after quit .\n"
+                                                clean_host_gdb
+                                                case_fail $case_num
+                                                        exit
+
+                                     }
+                              }
+                        } else {
+                              send_log "Failed to locate the right reg_addr_before .\n"
+                              exp_continue
+                        }
+
+                }
+
+                timeout {
+                send_log "Failed to find reg_addr_before at all .\n"
+                clean_host_gdb
+                case_fail $case_num
+                        exit
+                }
+        }
+	expect {
+		"to quit---" {
+			send "\r"
+			exp_continue
+		}
+		"(gdb) " {
+                          send_log "Find reg_addr_after1 .\n"
+                          case_pass $case_num
+		}
+		timeout {
+		clean_host_gdb
+		case_fail $case_num
+			exit
+		}
+	}
+
+        incr case_num
+        send "si\r"
+        expect {
+                "(gdb) " {
+                }
+                timeout {
+                clean_host_gdb
+                case_fail $case_num
+                        exit
+                }
+        }
+
+	incr case_num
+	send "info reg\r"
+	expect {
+		-re "pc\[\x20\t]+(0x\[0-9a-fA-F]+)" {
+                        set reg_addr_after2 $expect_out(1,string)
+                        puts "\nreg_addr_after2 $reg_addr_after2 \n"
+		}
+		"to quit---" {
+			send "\r"
+			exp_continue
+		}
+                timeout {
+                        puts "\nreg_addr_after timeout! \n"
+                clean_host_gdb
+                case_fail $case_num
+			exit
+		}
+	}
+	expect {
+		"to quit---" {
+			send "\r"
+			exp_continue
+		}
+		"(gdb) " {
+			if { 0 == [expr $reg_addr_after2 - $reg_addr_after1] } {
+                            case_pass $case_num
+			    send_user "\nSI case pass!\n"
+			} else {
+			    send_user "\n"
+			    case_fail $case_num
+			}
+		}
+		timeout {
+		clean_host_gdb
+		case_fail $case_num
+			exit
+		}
+	}
+
+	incr case_num
+	send "print len\r"
+	expect {
+	      -re  "\\\$4 =" {
+                case_pass $case_num
+		expect {
+			"(gdb) " {
+			}
+		}
+		}
+		timeout {
+                clean_host_gdb
+                case_fail $case_num
+			exit
+		}
+	}
+	send "c\r"
+	expect {
+		"Continuing." {
+		}
+		timeout {
+                clean_host_gdb
+                case_fail $case_num
+			exit
+		}
+	}
+       set spawn_id $kermit_spawn_id
+        expect {
+                -re  "L1\\\(after change\\\) : data variable addr = 0xff80\[0-9a-f]{4}.*>" {
+                case_pass $case_num
+                }
+                timeout {
+                clean_host_gdb
+                case_fail $case_num
+                        exit
+                }
+        }
+
+###########################################################################################
+# Set the round number to 2. Don't change it for it is related to num2 values behind.
+for { set j 0 } { $j < 2 } { incr j 1 } {
+        send_user "\n######## Kgdb stress test: this is the [expr $j + 3] round.#########\n "
+       
+        set spawn_id $kermit_spawn_id
+	send -s "cat /proc/kgdbtest\r"
+	set spawn_id $gdb_id
+	expect {
+		"Breakpoint 3, kgdb_l1_test" {
+		expect {
+			"(gdb) " {
+			}
+		}
+		}
+		timeout {
+                clean_host_gdb
+                case_fail $case_num
+			exit
+		}
+	}
+
+        set spawn_id $kermit_spawn_id
+        incr case_num
+        expect {
+                "hello world!" {
+                case_pass $case_num
+                }
+                timeout {
+                clean_host_gdb
+                case_fail $case_num
+                        exit
+                }
+        }
+        set spawn_id $gdb_id
+        incr case_num
+        send "c\r"
+        expect {
+        "Continuing." {
+           expect {
+              -re "Breakpoint 4, kgdb_l1_test.*\\\(gdb\\\)" {
+              }
+              timeout {
+              send_user "!!!!!!!! Breakpoint 4 has been skipped. Error!"
+              clean_host_gdb
+              case_fail $case_num
+              exit
+              }
+           }
+        }
+
+        timeout {
+                clean_host_gdb
+                case_fail $case_num
+                        exit
+        }
+        }
+ 
+        set spawn_id $kermit_spawn_id
+        expect {
+              -re  "L1\\\(before change\\\).*data variable addr = 0xff80\[0-9a-f]{4}.*code function addr = 0xffa0\[0-9a-f]{4}" { 
+                    expect {
+                    "> " {
+                    clean_host_gdb
+                    case_fail $case_num
+                            exit
+                    }
+                   timeout {
+                    case_pass $case_num
+                    }
+                    }
+                }
+              timeout {
+                case_fail $case_num
+              }
+        }
+
+        set spawn_id $gdb_id
+        send "c\r"
+        expect {
+                "Continuing." {
+                }
+                timeout {
+                clean_host_gdb
+                case_fail $case_num
+                        exit
+                }
+        }
+        set spawn_id $kermit_spawn_id
+        expect {
+              -re  "L1\\\(after change\\\).*data variable addr = 0xff80\[0-9a-f]{4}.*>" {
+                case_pass $case_num
+                }
+                timeout {
+                clean_host_gdb
+                case_fail $case_num
+                }
+        }
+
+}
+}
+######################################################################################
+#This round of running cat /proc/kgdbtest is for l2.
+#if  l1 is not run, the breakpoints here are b1 and b2.
+#if  l1 is run, the breakpoints here are b3 and b4.
+#
+if { $board_type == "BF548-EZKIT" || $board_type == "BF561-EZKIT" } {
+
+        set spawn_id $kermit_spawn_id
+	send -s "cat /proc/kgdbtest\r"
+	set spawn_id $gdb_id
+	expect {
+             -re "Breakpoint " {
+		expect {
+			"(gdb) " {
+			}
+		}
+		}
+		timeout {
+                clean_host_gdb
+                case_fail $case_num
+			exit
+		}
+	}
+        if { $core_config == "SMP" } {
+        incr case_num
+	send "info thread\r"
+	expect {
+	  -re	"(\[0-9]+) +Thread +-\[0-9]+ +\\\(shadowCPU1\\).*\[\r\n].*(\[0-9]+) +Thread +-\[0-9]+ +\\\(shadowCPU0\\\)" {
+                set CPU1_NUM $expect_out(1,string) 
+                set CPU0_NUM $expect_out(2,string) 
+		expect {
+			"(gdb) " {
+                        case_pass $case_num
+			}
+                        "to quit---" {
+                            send "\r"
+                            exp_continue
+                        }
+		}
+		}
+		"to quit---" {
+			send "\r"
+			exp_continue
+		}
+		timeout {
+                clean_host_gdb
+                case_fail $case_num
+			exit
+		}
+	}
+        incr case_num
+	send "thread $CPU1_NUM\r"
+	expect {
+	  -re	"Switching to thread $CPU1_NUM" {
+                case_pass $case_num
+		expect {
+			"(gdb) " {
+			}
+		}
+		}
+		timeout {
+                clean_host_gdb
+                case_fail $case_num
+			exit
+		}
+	} 
+        incr case_num
+        # read cpu1 register
+        send " x/1xw 0xffe05000\r"
+        expect {
+           -re "0xffe05000:\[\x20\t]+0xe5040501" {
+                case_pass $case_num
+                expect {
+                        "(gdb) " {
+                        }
+                }
+                }
+                timeout {
+                clean_host_gdb
+                case_fail $case_num
+                        exit
+                }
+        }
+        incr case_num
+	send "thread $CPU0_NUM\r"
+	expect {
+	  -re	"Switching to thread $CPU0_NUM" {
+                case_pass $case_num
+		expect {
+			"(gdb) " {
+			}
+		}
+		}
+		timeout {
+                clean_host_gdb
+                case_fail $case_num
+			exit
+		}
+	}
+        # read cpu0 register
+        incr case_num
+        send " x/1xw 0xffe05000\r"
+        expect {
+           -re "0xffe05000:\[\x20\t]+0xe5040500" {
+                case_pass $case_num
+                expect {
+                        "(gdb) " {
+                        }
+                }
+                }
+                timeout {
+                clean_host_gdb
+                case_fail $case_num
+                        exit
+                }
+        }
+        incr case_num
+	send "thread $CPU1_NUM\r"
+	expect {
+	  -re	"Switching to thread $CPU1_NUM" {
+                case_pass $case_num
+		expect {
+			"(gdb) " {
+			}
+		}
+		}
+		timeout {
+                clean_host_gdb
+                case_fail $case_num
+			exit
+		}
+	}
+        ##### Add one more continue. 
+        incr case_num
+        send "c\r"
+        expect {
+                "Continuing." {
+                 expect {
+           		"Program received signal SIGTRAP" {
+                          clean_host_gdb
+                          case_fail $case_num
+                  		exit
+                  	}
+                        -re "Breakpoint .*\\\(gdb\\\)" {
+                        }
+                        timeout {
+                        clean_host_gdb
+                        case_fail $case_num
+                                exit
+                        }
+                }
+                }
+                timeout {
+                clean_host_gdb
+                case_fail $case_num
+                        exit
+                }
+        }
+        }
+        incr case_num
+        send "c\r"
+        expect {
+                "Continuing." {
+                 expect {
+                        "Breakpoint" {
+                        }
+                }
+                }
+                timeout {
+                clean_host_gdb
+                case_fail $case_num
+                        exit
+                }
+        }
+        # If l1 is not run, the breakpoints  are different.
+        incr case_num
+        send "info b\r"
+        expect {
+               -re "Num Type.*breakpoint" {
+                case_pass $case_num
+                expect {
+                        "(gdb) " {
+                        }
+                }
+                }
+                timeout {
+                clean_host_gdb
+                case_fail $case_num
+                        exit
+                }
+        }
+        set spawn_id $kermit_spawn_id
+        expect {
+                "hello" {
+                    expect {
+                    "> " {
+                    clean_host_gdb
+                    case_fail $case_num
+                            exit
+                    }
+                    timeout {
+                    case_pass $case_num
+                    }
+                    }
+               }
+               timeout {
+                case_fail $case_num
+               }
+        }
+        set spawn_id $gdb_id
+	incr case_num
+	send "d b\r"
+	expect {
+		"Delete all breakpoints" {
+                send "y\r"
+                case_pass $case_num
+		expect {
+			"(gdb) " {
+			}
+		}
+		}
+		timeout {
+                clean_host_gdb
+                case_fail $case_num
+			exit
+		}
+	}
+	incr case_num
+	send "break kgdb_l2_test\r"
+	expect {
+	  -re	"Breakpoint .* at 0xfeb0\[0-9a-f]{4}" {
+                case_pass $case_num
+		expect {
+			"(gdb) " {
+			}
+		}
+		}
+		timeout {
+                clean_host_gdb
+                case_fail $case_num
+			exit
+		}
+	}
+        incr case_num
+        send "c\r"
+        expect {
+                "Continuing." {
+                 expect {
+                        -re "Breakpoint .*, kgdb_l2_test.*\\\(gdb\\\)" {
+                        }
+                }
+                }
+                timeout {
+                clean_host_gdb
+                case_fail $case_num
+                        exit
+                }
+        }
+        incr case_num
+        send "list\r"
+        expect {
+              -re  "(gdb)" {
+                case_pass $case_num
+                }
+                timeout {
+                clean_host_gdb
+                case_fail $case_num
+                        exit
+                }
+        }
+        incr case_num
+        send "hbreak 48\r"
+        expect {
+              -re  "Hardware assisted breakpoint .* at 0xfeb0\[0-9a-f]{4}" {
+                case_pass $case_num
+                expect {
+                        "(gdb) " {
+                        }
+                }
+                }
+                timeout {
+                clean_host_gdb
+                case_fail $case_num
+                        exit
+                }
+        }
+        incr case_num
+	send "info break\r"
+	expect {
+		"*breakpoint" {
+                case_pass $case_num
+		expect {
+			"(gdb) " {
+			}
+		}
+		}
+		timeout {
+                clean_host_gdb
+                case_fail $case_num
+			exit
+		}
+	}
+        #########################################################
+        if { $core_config == "SMP" } {
+        incr case_num
+	send "info thread\r"
+	expect {
+	  -re	"(\[0-9]+) +Thread +-\[0-9]+ +\\\(shadowCPU1\\).*\[\r\n].*(\[0-9]+) +Thread +-\[0-9]+ +\\\(shadowCPU0\\\)" {
+                set CPU1_NUM $expect_out(1,string) 
+                set CPU0_NUM $expect_out(2,string) 
+		expect {
+			"(gdb) " {
+                        case_pass $case_num
+			}
+                        "to quit---" {
+                            send "\r"
+                            exp_continue
+                        }
+		}
+		}
+		"to quit---" {
+			send "\r"
+			exp_continue
+		}
+		timeout {
+                clean_host_gdb
+                case_fail $case_num
+			exit
+		}
+	}
+        incr case_num
+	send "thread $CPU0_NUM\r"
+	expect {
+                -re  "Switching to thread $CPU0_NUM" {
+                case_pass $case_num
+		expect {
+			"(gdb) " {
+			}
+		}
+		}
+		timeout {
+                clean_host_gdb
+                case_fail $case_num
+			exit
+		}
+	}
+#####################################To test the cpu0 schedule issue ##################/* 
+#        incr case_num
+#        # read cpu1 register
+#        send " x/1xw 0xffe05000\r"
+#        expect {
+#           -re "0xffe05000:\[\x20\t]+0xe5040500" {
+#                case_pass $case_num
+#                expect {
+#                        "(gdb) " {
+#                        }
+#                }
+#                }
+#                timeout {
+#                clean_host_gdb
+#                case_fail $case_num
+#                        exit
+#                }
+#        }
+#        incr case_num
+#	send "thread $CPU1_NUM\r"
+#	expect {
+#	  -re	"Switching to thread $CPU1_NUM" {
+#                case_pass $case_num
+#		expect {
+#			"(gdb) " {
+#			}
+#		}
+#		}
+#		timeout {
+#                clean_host_gdb
+#                case_fail $case_num
+#			exit
+#		}
+#	}
+#        # read cpu0 register
+#        incr case_num
+#        send " x/1xw 0xffe05000\r"
+#        expect {
+#           -re "0xffe05000:\[\x20\t]+0xe5040501" {
+#                case_pass $case_num
+#                expect {
+#                        "(gdb) " {
+#                        }
+#                }
+#                }
+#                timeout {
+#                clean_host_gdb
+#                case_fail $case_num
+#                        exit
+#                }
+#        }
+#        incr case_num
+#	send "thread $CPU0_NUM\r"
+#	expect {
+#	  -re	"Switching to thread $CPU0_NUM" {
+#                case_pass $case_num
+#		expect {
+#			"(gdb) " {
+#			}
+#		}
+#		}
+#		timeout {
+#                clean_host_gdb
+#                case_fail $case_num
+#			exit
+#		}
+#	}
+###########################################################################/*
+        ##### Add more continue after thread schedule.
+        send "c\r"
+        expect {
+                "Continuing." {
+                 expect {
+           		"Program received signal SIGTRAP" {
+                          clean_host_gdb
+                          case_fail $case_num
+                  		exit
+                  	}
+                        -re "Breakpoint.*kgdb_l2_test.*\\\(gdb\\\)" {
+                        send_log "Get kgdb_l2_test.\n"
+                        }
+                        timeout {
+                        clean_host_gdb
+                        case_fail $case_num
+                                exit
+                        }
+                }
+                }
+                timeout {
+                clean_host_gdb
+                case_fail $case_num
+                        exit
+                }
+        }
+        }
+        incr case_num
+        send "print num2\r"
+        expect {
+              -re  "\\\$\[0-9]+ = (80|20)" {
+                set num2_before $expect_out(1,string)
+                case_pass $case_num
+                expect {
+                        "(gdb) " {
+                        }
+                }
+                }
+                timeout {
+                clean_host_gdb
+                case_fail $case_num
+                        exit
+                }
+        }
+
+        send "c\r"
+        expect {
+                "Continuing." {
+                 expect {
+                       -re "Breakpoint .*, kgdb_l2_test.*\\\(gdb\\\)" {
+                        }
+                }
+                }
+                timeout {
+                clean_host_gdb
+                case_fail $case_num
+                        exit
+                }
+        }
+        #########################################################
+        set num2_after [ expr $num2_before + 20 ]
+        incr case_num
+        send "print num2\r"
+        expect {
+              -re  "\\\$\[0-9]+ = $num2_after" {
+                case_pass $case_num
+                expect {
+                        "(gdb) " {
+                        }
+                }
+                }
+                timeout {
+                clean_host_gdb
+                case_fail $case_num
+                        exit
+                }
+        }
+	set spawn_id $kermit_spawn_id
+	expect {
+
+              -re  "L2.*\\\(before change\\\).*data variable addr = 0xfeb0\[0-9a-f]{4}.*\[\r\n].*code function addr = 0xfeb0\[0-9a-f]{4}" {                
+                    send_log "L2 before change.\n"
+                    expect {
+                    "> " {
+                    send_log "Fail for prompt shown.\n"
+                    clean_host_gdb
+                    case_fail $case_num
+                            exit
+                    }
+                    timeout {
+                    send_log "Timeout expected.\n"
+                    case_pass $case_num
+                    }
+                    }
+                }
+
+                timeout {
+                send_log "Timeout unexpected.\n"
+                clean_host_gdb
+                case_fail $case_num
+                        exit
+                }
+
+        }
+
+ 	set spawn_id $gdb_id
+
+        if { $core_config == "SMP" } {
+        incr case_num
+	send "info thread\r"
+	expect {
+	  -re	"(\[0-9]+) +Thread +-\[0-9]+ +\\\(shadowCPU1\\).*\[\r\n].*(\[0-9]+) +Thread +-\[0-9]+ +\\\(shadowCPU0\\\)" {
+                set CPU1_NUM $expect_out(1,string) 
+                set CPU0_NUM $expect_out(2,string) 
+		expect {
+			"(gdb) " {
+                        case_pass $case_num
+			}
+                        "to quit---" {
+                            send "\r"
+                            exp_continue
+                        }
+		}
+		}
+		"to quit---" {
+			send "\r"
+			exp_continue
+		}
+		timeout {
+                clean_host_gdb
+                case_fail $case_num
+			exit
+		}
+	}
+        incr case_num
+	send "thread $CPU0_NUM\r"
+	expect {
+	  -re	"Switching to thread $CPU0_NUM" {
+                case_pass $case_num
+		expect {
+			"(gdb) " {
+			}
+		}
+		}
+		timeout {
+                clean_host_gdb
+                case_fail $case_num
+			exit
+		}
+	} 
+        incr case_num
+        # read cpu1 register
+        send " x/1xw 0xffe05000\r"
+        expect {
+           -re "0xffe05000:\[\x20\t]+0xe5040500" {
+                case_pass $case_num
+                expect {
+                        "(gdb) " {
+                        }
+                }
+                }
+                timeout {
+                clean_host_gdb
+                case_fail $case_num
+                        exit
+                }
+        }
+        incr case_num
+	send "thread $CPU1_NUM\r"
+	expect {
+	  -re	"Switching to thread $CPU1_NUM" {
+                case_pass $case_num
+		expect {
+			"(gdb) " {
+			}
+		}
+		}
+		timeout {
+                clean_host_gdb
+                case_fail $case_num
+			exit
+		}
+	}
+        # read cpu0 register
+        incr case_num
+        send " x/1xw 0xffe05000\r"
+        expect {
+           -re "0xffe05000:\[\x20\t]+0xe5040501" {
+                case_pass $case_num
+                expect {
+                        "(gdb) " {
+                        }
+                }
+                }
+                timeout {
+                clean_host_gdb
+                case_fail $case_num
+                        exit
+                }
+        }
+        incr case_num
+	send "thread $CPU0_NUM\r"
+	expect {
+	  -re	"Switching to thread $CPU0_NUM" {
+                case_pass $case_num
+		expect {
+			"(gdb) " {
+			}
+		}
+		}
+		timeout {
+                clean_host_gdb
+                case_fail $case_num
+			exit
+		}
+	}
+        ##### Add more continue after thread schedule.
+        send "c\r"
+        expect {
+                "Continuing." {
+                 expect {
+           		"Program received signal SIGTRAP" {
+                          clean_host_gdb
+                          case_fail $case_num
+                  		exit
+                  	}
+                        -re "Breakpoint .*, kgdb_l2_test.*\\\(gdb\\\)" {
+                        }
+                        timeout {
+                        clean_host_gdb
+                        case_fail $case_num
+                                exit
+                        }
+                }
+                }
+                timeout {
+                clean_host_gdb
+                case_fail $case_num
+                        exit
+                }
+        }
+        }
+        incr case_num
+        send " x/1xw 0xfeb28010\r"
+        expect {
+                "Cannot access memory at address" {
+                case_pass $case_num
+                expect {
+                        "(gdb) " {
+                        }
+                }
+                }
+                timeout {
+                clean_host_gdb
+                case_fail $case_num
+                        exit
+                }
+        }
+        incr case_num
+        send "set *0xfeb28020 = 23\r"
+        expect {
+                "Cannot access memory at address" {
+                case_pass $case_num
+                expect {
+                        "(gdb) " {
+                        }
+                }
+                }
+                timeout {
+                clean_host_gdb
+                case_fail $case_num
+                        exit
+                }
+        }
+	incr case_num
+	send "info reg\r"
+	expect {
+		-re "pc\[\x20\t]+(0x\[0-9a-fA-F]+)" {
+                        set reg_addr_before $expect_out(1,string)
+                        puts "\nreg_addr_before $reg_addr_before \n"
+		}
+		"to quit---" {
+			send "\r"
+			exp_continue
+		}
+                timeout {
+                        puts "\nreg_addr_before timeout! \n"
+                clean_host_gdb
+                case_fail $case_num
+			exit
+		}
+	}
+	expect {
+		"to quit---" {
+			send "\r"
+			exp_continue
+		}
+		"(gdb) " {
+                        case_pass $case_num
+		}
+		timeout {
+		clean_host_gdb
+		case_fail $case_num
+			exit
+		}
+	}
+        set reg_addr_before [format "0x%08x" $reg_addr_before]
+	incr case_num
+        send "disassemble\r"
+        expect {
+		-re "$reg_addr_before\[^\n]*\[\n](0x\[0-9a-fA-F]{8})" {
+                          set reg_addr_after1 $expect_out(1,string)
+                          send_log "Get reg_addr_after1.\n"
+                          puts "\nreg_addr_after1 $reg_addr_after1 \n"
+                }
+                -re "\[^0-9a-fA-F](0x\[0-9a-fA-F]{8})\[^\n]*\[\r\n]\[^\n]*to quit" {
+
+                       send "\r"
+                       send_log "reg_addr_after1 after quit.\n"
+
+                       if { 0 == [ expr $reg_addr_before - $expect_out(1,string) ] } {
+                             send_log "Locate the right reg_addr_before .\n"
+                             expect {
+                                     -re "(0x\[0-9a-fA-F]{8})" {
+                                                set reg_addr_after1 $expect_out(1,string)
+                                                send_log "Get reg_addr_after1 after quit .\n"
+                                                puts "\nreg_addr_after1 $reg_addr_after1 \n"
+                                      }
+                                     timeout {
+                                                send_log "Timeout to find reg_addr_after1 after quit .\n"
+                                                clean_host_gdb
+                                                case_fail $case_num
+                                                        exit
+
+                                     }
+                              }
+                        } else {
+                              send_log "Failed to locate the right reg_addr_before .\n"
+                              exp_continue
+                        }
+
+                }
+
+                timeout {
+                send_log "Failed to find reg_addr_before at all .\n"
+                clean_host_gdb
+                case_fail $case_num
+                        exit
+                }
+        }
+	expect {
+		"to quit---" {
+			send "\r"
+			exp_continue
+		}
+		"(gdb) " {
+                          case_pass $case_num
+		}
+		timeout {
+		clean_host_gdb
+		case_fail $case_num
+			exit
+		}
+	}
+
+        incr case_num
+        send "si\r"
+        expect {
+                "(gdb) " {
+                }
+                timeout {
+                clean_host_gdb
+                case_fail $case_num
+                        exit
+                }
+        }
+
+	incr case_num
+	send "info reg\r"
+	expect {
+		-re "pc\[\x20\t]+(0x\[0-9a-fA-F]+)" {
+                        set reg_addr_after2 $expect_out(1,string)
+                        puts "\nreg_addr_after2 $reg_addr_after2 \n"
+		}
+		"to quit---" {
+			send "\r"
+			exp_continue
+		}
+                timeout {
+                        puts "\nreg_addr_after timeout! \n"
+                clean_host_gdb
+                case_fail $case_num
+			exit
+		}
+	}
+	expect {
+		"to quit---" {
+			send "\r"
+			exp_continue
+		}
+		"(gdb) " {
+			if { 0 == [expr $reg_addr_after2 - $reg_addr_after1] } {
+                            case_pass $case_num
+			    send_user "\nSI case pass!\n"
+			} else {
+			    send_user "\n"
+			    case_fail $case_num
+			}
+		}
+		timeout {
+		clean_host_gdb
+		case_fail $case_num
+			exit
+		}
+	}
+
+	incr case_num
+	send "print len\r"
+	expect {
+	      -re  "\\\$.* =" {
+                case_pass $case_num
+		expect {
+			"(gdb) " {
+			}
+		}
+		}
+		timeout {
+                clean_host_gdb
+                case_fail $case_num
+			exit
+		}
+	}
+
+        send "c\r"
+        expect {
+                "Continuing." {
+                send_log "Continue!\n"
+                }
+                timeout {
+                clean_host_gdb
+                case_fail $case_num
+                        exit
+                }
+        }
+        set spawn_id $kermit_spawn_id
+        incr case_num
+        expect {
+                -re "L2\\\(after change\\\).*data variable addr.*>" {
+                case_pass $case_num
+                }
+                timeout {
+                clean_host_gdb
+                case_fail $case_num
+                        exit
+                }
+        }
+}
+###########################################################################################
+# The last round.
+# Since in l2 testing, it deletes all the breakpoints before, the remain breakpoints until here are b5 and b6.
+# If l2 is not run, then the rest breakpoints are b3 and b4 (l1 must have been run).
+        set spawn_id $kermit_spawn_id
+	send -s "cat /proc/kgdbtest\r"
+	set spawn_id $gdb_id
+	expect {
+		"Breakpoint " {
+		expect {
+			"(gdb) " {
+			}
+		}
+		}
+		timeout {
+                clean_host_gdb
+                case_fail $case_num
+			exit
+		}
+	}
+        # If l1 or l2 is not run, the breakpoints now are different.
+        incr case_num
+        send "info b\r"
+        expect {
+               -re "Num Type.*breakpoint" {
+                case_pass $case_num
+                expect {
+                        "(gdb) " {
+                        }
+                }
+                }
+                timeout {
+                clean_host_gdb
+                case_fail $case_num
+                        exit
+                }
+        }
+        set spawn_id $kermit_spawn_id
+        expect {
+              -re  "hello" {
+                    expect {
+                    "> " {
+                    send_log "Prompt unexpected.\n"
+                    case_fail $case_num
+                    }
+                   timeout {
+                    send_log "Timeout expected.\n"
+                    case_pass $case_num
+                    }
+                    }
+                }
+                timeout {
+                clean_host_gdb
+                case_fail $case_num
+                        exit
+                }
+        }
+        set spawn_id $gdb_id
+        incr case_num
+        send "c\r"
+        expect {
+                "Continuing." {
+                 expect {
+                        "Breakpoint " {
+                         send_log "Breakpoint expected.\n"
+                        }
+                }
+                }
+                timeout {
+                clean_host_gdb
+                case_fail $case_num
+                        exit
+                }
+        }
+        set spawn_id $kermit_spawn_id
+        expect {
+              -re  "\\\(before change\\\).*data variable addr = 0x\[0-9a-f]{8}.*code function addr = 0x\[0-9a-f]{8}" {
+                    expect {
+                    "> " {
+                    send_log "Prompt unexpected.\n"
+                    case_fail $case_num
+                    }
+                   timeout {
+                    send_log "Timeout expected.\n"
+                    case_pass $case_num
+                    }
+                    }
+                 }
+                timeout {
+                clean_host_gdb
+                case_fail $case_num
+                        exit
+                }
+        }
+        set spawn_id $gdb_id
+	incr case_num
+	send "d\r"
+	expect {
+		"Delete all breakpoints? (y or n)" {
+		}
+		timeout {
+                clean_host_gdb
+                case_fail $case_num
+			exit
+		}
+	}
+	send "y\r"
+	expect {
+		"(gdb) " {
+		}
+		timeout {
+                clean_host_gdb
+                case_fail $case_num
+			exit
+		}
+	}
+	send "info break\r"
+	expect {
+		"No breakpoints or watchpoints." {
+                case_pass $case_num
+		expect {
+			"(gdb) " {
+			}
+		}
+		}
+		timeout {
+                clean_host_gdb
+                case_fail $case_num
+			exit
+		}
+	}
+	incr case_num
+	send "c\r"
+	expect {
+		"Continuing." {
+		}
+		timeout {
+                clean_host_gdb
+                case_fail $case_num
+			exit
+		}
+	}
+	set spawn_id $kermit_spawn_id
+	expect {
+		"> " {
+		}
+	}
+	incr case_num
+	set spawn_id $gdb_id
+        sleep 3
+	send -s "\3"
+	expect {
+		"breakpoint" {
+                send_log "Interrupt the current debug.\n"
+                case_pass $case_num
+		expect {
+			"(gdb) " {
+			}
+		}
+		}
+		timeout {
+                 send_log "Timeout."
+                clean_host_gdb
+                case_fail $case_num
+			exit
+		}
+	}
+	incr case_num
+	send "detach\r"
+	expect {
+		"Ending remote debugging." {
+                case_pass $case_num
+		expect {
+			"(gdb) " {
+			}
+		}
+		}
+		timeout {
+                clean_host_gdb
+                case_fail $case_num
+			exit
+		}
+	}
+	send "q\r"
+	set spawn_id $kermit_spawn_id
+	incr case_num
+	send "\r"
+	expect {
+		"> " {
+                case_pass $case_num
+			break
+		}
+		timeout {
+                clean_host_gdb
+                case_fail $case_num
+			exit
+		}
+	}
+	
+}
+   
+send_log "\n$TITLE ............\[PASS\]\n"
+
+send_user "Ending $argv0\n"
+log_file
+

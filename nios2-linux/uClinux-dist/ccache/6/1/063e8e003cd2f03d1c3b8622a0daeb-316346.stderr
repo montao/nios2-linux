@@ -1,0 +1,28 @@
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/nanox/client.c: In function 'GrClose':
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/nanox/client.c:446: warning: value computed is not used
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/nanox/client.c: In function 'GrGetScreenInfo':
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/nanox/client.c:554: warning: value computed is not used
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/nanox/client.c: In function 'GrPrepareSelect':
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/nanox/client.c:755: warning: value computed is not used
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/nanox/client.c: In function '_GrPeekEvent':
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/nanox/client.c:1068: warning: value computed is not used
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/nanox/client.c: In function 'GrCheckNextEvent':
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/nanox/client.c:1137: warning: value computed is not used
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/nanox/client.c: In function 'GrNewGC':
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/nanox/client.c:1438: warning: value computed is not used
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/nanox/client.c: In function 'GrNewRegion':
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/nanox/client.c:1501: warning: value computed is not used
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/nanox/client.c: In function 'GrGetFocus':
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/nanox/client.c:2116: warning: value computed is not used
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/nanox/client.c: In function 'GrCreateFont':
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/nanox/client.c:2545: warning: pointer targets in assignment differ in signedness
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/nanox/client.c:2547: warning: pointer targets in passing argument 1 of 'strlen' differ in signedness
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/nanox/client.c:2549: warning: pointer targets in passing argument 2 of 'strcpy' differ in signedness
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/nanox/client.c: In function 'GrGetSystemPalette':
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/nanox/client.c:3685: warning: value computed is not used
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/nanox/client.c: In function 'GrSetWMProperties':
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/nanox/client.c:3879: warning: pointer targets in passing argument 1 of 'strlen' differ in signedness
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/nanox/client.c: In function 'GrSetSelectionOwner':
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/nanox/client.c:4021: warning: pointer targets in passing argument 1 of 'strlen' differ in signedness
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/nanox/client.c: In function 'GrBell':
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/nanox/client.c:4166: warning: value computed is not used

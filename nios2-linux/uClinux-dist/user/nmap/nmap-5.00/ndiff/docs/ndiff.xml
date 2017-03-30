@@ -1,0 +1,133 @@
+<!-- This is the DocBook XML source for the Ndiff manual page. -->
+
+<refentry>
+  <refmeta>
+    <refentrytitle>ndiff</refentrytitle>
+    <manvolnum>1</manvolnum>
+  </refmeta>
+
+  <refnamediv>
+    <refname>ndiff</refname>
+    <refpurpose>Utility to compare the results of Nmap scans</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>ndiff</command>
+      <arg choice='opt'>
+        <replaceable>options</replaceable>
+      </arg>
+      <arg choice='req'>
+        <replaceable><filename>a.xml</filename></replaceable>
+      </arg>
+      <arg choice='req'>
+        <replaceable><filename>b.xml</filename></replaceable>
+      </arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+  <refsect1>
+    <title>Description</title>
+
+    <para>
+    Ndiff is a tool to aid in the comparison of Nmap scans. It takes two
+    Nmap XML output files and prints the differences between them: hosts
+    coming up and down, ports becoming open or closed, etc.
+    </para>
+
+    <para>
+    Ndiff compares two scans at a time. The first scan is called the A
+    scan and the second scan is called the B scan.
+    </para>
+  </refsect1>
+
+  <refsect1>
+    <title>Options Summary</title>
+
+    <variablelist>
+      <varlistentry>
+        <term><option>-h</option></term>
+        <term><option>--help</option></term>
+        <listitem>
+          <para>
+          Show a help message and exit.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>-v</option></term>
+        <term><option>--verbose</option></term>
+        <listitem>
+          <para>
+          Include all hosts and ports in the output, not only those that
+          have changed.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>--text</option></term>
+        <listitem>
+          <para>
+          Write output in human-readable text format.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>--xml</option></term>
+        <listitem>
+          <para>
+          Write output in machine-readable XML format. The document
+          structure is defined in the file
+          <filename>ndiff.dtd</filename> included in the distribution.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+
+    <para>
+    Any other arguments are taken to be the names of Nmap XML output
+    files. There must be exactly two. The first one listed is the A scan
+    and the second is the B scan.
+    </para>
+  </refsect1>
+
+  <refsect1>
+    <title>Bugs</title>
+    <para>
+    Report bugs to the <citetitle>nmap-dev</citetitle> mailing list at
+    <email>nmap-dev@insecure.org</email>.
+    </para>
+  </refsect1>
+
+  <refsect1>
+    <title>History</title>
+
+    <para>
+    Ndiff started as a project by Michael Pattrick during the 2008
+    Google Summer of Code. Michael designed the program and led the
+    discussion of its output formats. He wrote versions of the program
+    in Perl and C++, but the summer ended shortly after it was decided
+    to rewrite the program in Python for the sake of Windows (and Zenmap)
+    compatibility. This Python version was written by David Fifield.
+    </para>
+  </refsect1>
+
+  <refsect1>
+    <title>Authors</title>
+
+    <para>
+    David Fifield <email>david@bamsoftware.com</email>
+    </para>
+    <para>
+    Michael Pattrick <email>mpattrick@rhinovirus.org</email>
+    </para>
+  </refsect1>
+
+  <refsect1>
+    <title>Web site</title>
+
+    <para>
+    <ulink url="http://nmap.org/ndiff/"/>
+    </para>
+  </refsect1>
+</refentry>

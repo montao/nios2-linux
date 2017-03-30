@@ -1,0 +1,3 @@
+date.c: In function 'do_date':
+date.c:13: warning: implicit declaration of function 'memcpy'
+date.c:13: warning: incompatible implicit declaration of built-in function 'memcpy'

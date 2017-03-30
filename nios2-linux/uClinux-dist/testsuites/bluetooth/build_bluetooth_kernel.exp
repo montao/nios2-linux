@@ -1,0 +1,175 @@
+#!/usr/bin/expect --
+
+#
+# Build Kernel for Bluetooth USB Dongle test
+#
+
+source ../kernel_config.exp
+source  ../board_info.exp
+log_file [log_file_name "$argv0"]
+send_user "Starting $argv0\n"
+
+cd $uclinux_path/testsuites
+
+step "Make config."
+source  make_default_config.exp
+
+# Following make specific configuration for this case.
+
+cd $uclinux_path
+set timeout 300
+spawn make config
+
+while 1 {
+    expect {
+        -re "Customize Kernel Settings.*DEFAULTS_KERNEL.*\\\[.*]" {
+            send "y\r"
+        }
+
+        -re "Customize Application/Library Settings.*DEFAULTS_VENDOR.*\\\[.*]" {
+            send "y\r"
+        }
+
+        -nocase -re "\\\[\[^\r]*] (\\\(NEW\\\) )?(\[ymn])|choice\\\[.*]: \[0-9]+\r" {
+            continue
+        }
+
+        -re "Virtual terminal.*VT.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "Bluetooth subsystem support.*BT.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "L2CAP protocol support.*BT_L2CAP.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "SCO links support.*BT_SCO.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "RFCOMM protocol support.*BT_RFCOMM.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "RFCOMM TTY support.*BT_RFCOMM_TTY.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "BNEP protocol support.*BT_BNEP.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Multicast filter support.*BT_BNEP_MC_FILTER.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Protocol filter support.*BT_BNEP_PROTO_FILTER.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "HIDP protocol support.*BT_HIDP.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "HCI USB driver.*BT_HCIBTUSB.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Flash device in physical memory map.*MTD_PHYSMAP.*\\\[.*]" {
+#CONFIG_MTD_PHYSMAP claims the entire Async. Memory Space
+#need to entirely disable it while using various U-Connector boards
+            send "N\r"
+        }
+
+        -re "Bank 3.*BANK_3.*\\\[.*]" {
+            if { $board_type == "BF537-STAMP" } {
+                send "0xAAC2\r"
+            } else {
+                send "\r"
+            }
+        }
+
+        -re "USB support.*USB_SUPPORT.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Support for Host-side USB.*USB.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Inventra Highspeed Dual Role Controller.*USB_MUSB_HDRC.*\\\[.*]" {
+            if { $board_type == "BF548-EZKIT" || [string match "BF527-EZKIT*" $board_type] } {
+                send "Y\r"
+            } else {
+                send "\r"
+            }
+        }
+
+        -re "Platform Glue Layer \\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Disable DMA \\\(always use PIO\\\).*MUSB_PIO_ONLY.*\\\[.*]" {
+            if { $board_type == "BF548-EZKIT" } {
+                send "N\r"
+            } elseif { [string match "BF527-EZKIT*" $board_type] } {
+                send "Y\r"
+            } else {
+                send "\r"
+            }
+        }
+
+        -re "ISP1362 HCD support \\\(USB_ISP1362_HCD\\\).*\\\[.*]" {
+            if { $board_type == "BF537-STAMP" } {
+                send "Y\r"
+            } else {
+                send "\r"
+            }
+        }
+
+        -re "SL811HS HCD support.*USB_SL811_HCD.*\\\[.*]" {
+            if { $board_type == "BF537-STAMP" } {
+                send "Y\r"
+            } else {
+                send "\r"
+            }
+        }
+
+        -re "Bluez-utils.*USER_BLUEZ.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        "\\\(*) \\\[*]" {
+            sleep .01
+            send "\r"
+        }
+
+        -re "\[cC]hoice\\\[.*]:" {
+            send "\r"
+        }
+
+        eof {
+            puts "End of configuration"
+            break
+        }
+
+        timeout {
+            puts "\n\nFATAL ERROR: config prompt timeout in make config"
+            break
+        }
+    }
+}
+
+cd $uclinux_path/testsuites
+step "Make"
+source make_kernel.exp
+
+cd $uclinux_path/testsuites
+step "Copy linux"
+source copy_image.exp
+
+send_user "Ending $argv0\n"
+log_file

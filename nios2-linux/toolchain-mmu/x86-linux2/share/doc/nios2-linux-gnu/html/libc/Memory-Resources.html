@@ -1,0 +1,52 @@
+<html lang="en">
+<head>
+<title>Memory Resources - The GNU C Library</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="The GNU C Library">
+<meta name="generator" content="makeinfo 4.8">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="up" href="Resource-Usage-And-Limitation.html#Resource-Usage-And-Limitation" title="Resource Usage And Limitation">
+<link rel="prev" href="Priority.html#Priority" title="Priority">
+<link rel="next" href="Processor-Resources.html#Processor-Resources" title="Processor Resources">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<p>
+<a name="Memory-Resources"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="Processor-Resources.html#Processor-Resources">Processor Resources</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="Priority.html#Priority">Priority</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="Resource-Usage-And-Limitation.html#Resource-Usage-And-Limitation">Resource Usage And Limitation</a>
+<hr>
+</div>
+
+<h3 class="section">22.4 Querying memory available resources</h3>
+
+<p>The amount of memory available in the system and the way it is organized
+determines oftentimes the way programs can and have to work.  For
+functions like <code>mmap</code> it is necessary to know about the size of
+individual memory pages and knowing how much memory is available enables
+a program to select appropriate sizes for, say, caches.  Before we get
+into these details a few words about memory subsystems in traditional
+Unix systems will be given.
+
+<ul class="menu">
+<li><a accesskey="1" href="Memory-Subsystem.html#Memory-Subsystem">Memory Subsystem</a>:            Overview about traditional Unix memory handling. 
+<li><a accesskey="2" href="Query-Memory-Parameters.html#Query-Memory-Parameters">Query Memory Parameters</a>:     How to get information about the memory
+                                subsystem? 
+</ul>
+
+   </body></html>
+

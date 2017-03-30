@@ -1,0 +1,33 @@
+--- e2fsprogs-libs-1.41.10/configure.in
++++ e2fsprogs-libs-1.41.10/configure.in
+@@ -817,7 +817,7 @@
+   AC_SEARCH_LIBS([blkid_probe_all], [blkid])
+ fi
+ dnl
+-AC_CHECK_FUNCS(chflags getrusage llseek lseek64 open64 fstat64 ftruncate64 getmntinfo strtoull strcasecmp srandom jrand48 fchown mallinfo fdatasync strnlen strptime strdup sysconf pathconf posix_memalign memalign valloc __secure_getenv prctl mmap utime setresuid setresgid usleep nanosleep getdtablesize getrlimit blkid_probe_get_topology)
++AC_CHECK_FUNCS(chflags getrusage llseek lseek64 open64 fstat64 ftruncate64 getmntinfo strtoull strcasecmp srandom jrand48 fchown mallinfo fdatasync strnlen strptime strdup sysconf pathconf posix_memalign memalign valloc __secure_getenv prctl mmap utime setresuid setresgid usleep nanosleep getdtablesize getrlimit blkid_probe_get_topology fork)
+ dnl
+ dnl Check to see if -lsocket is required (solaris) to make something
+ dnl that uses socket() to compile; this is needed for the UUID library
+--- e2fsprogs-libs-1.41.10/configure
++++ e2fsprogs-libs-1.41.10/configure
+@@ -10599,7 +10599,7 @@
+ fi
+ 
+ fi
+-for ac_func in chflags getrusage llseek lseek64 open64 fstat64 ftruncate64 getmntinfo strtoull strcasecmp srandom jrand48 fchown mallinfo fdatasync strnlen strptime strdup sysconf pathconf posix_memalign memalign valloc __secure_getenv prctl mmap utime setresuid setresgid usleep nanosleep getdtablesize getrlimit blkid_probe_get_topology
++for ac_func in chflags getrusage llseek lseek64 open64 fstat64 ftruncate64 getmntinfo strtoull strcasecmp srandom jrand48 fchown mallinfo fdatasync strnlen strptime strdup sysconf pathconf posix_memalign memalign valloc __secure_getenv prctl mmap utime setresuid setresgid usleep nanosleep getdtablesize getrlimit blkid_probe_get_topology fork
+ do :
+   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
+ ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
+--- e2fsprogs-libs-1.41.10/lib/uuid/gen_uuid.c
++++ e2fsprogs-libs-1.41.10/lib/uuid/gen_uuid.c
+@@ -474,7 +474,7 @@
+  */
+ static int get_uuid_via_daemon(int op, uuid_t out, int *num)
+ {
+-#if defined(USE_UUIDD) && defined(HAVE_SYS_UN_H)
++#if defined(USE_UUIDD) && defined(HAVE_SYS_UN_H) && defined(HAVE_FORK)
+ 	char op_buf[64];
+ 	int op_len;
+ 	int s;

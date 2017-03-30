@@ -1,0 +1,4 @@
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) enet_gtx_clk_ddio_buffer.v]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) global_reset_generator.v]
+set_global_assignment -name SDC_FILE [file join $::quartus(qip_path) nios2_linux_3c120_125mhz_top.sdc]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) nios2_linux_3c120_125mhz_top.v]

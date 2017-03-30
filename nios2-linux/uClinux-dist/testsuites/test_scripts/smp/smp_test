@@ -1,0 +1,31 @@
+#!/bin/sh
+echo -e "Start to applay smp patch to uclinux-dist/testsuites"
+
+UCLINUX_DIST_PATH=$USER/checkouts/uclinux-dist
+
+cd $UCLINUX_DIST_PATH/testsuites/
+if [ $? -ne 0 ]
+then
+    echo "$0:       Error: cd $UCLINUX_DIST_PATH/testsuites/"
+    exit 1
+fi
+
+rm `svn stat|awk '{print $2}'`
+
+svn up
+if [ $? -ne 0 ]
+then
+    echo "$0:       Error: svn up"
+    exit 1
+fi
+
+cp smp/testsuites.patch ./
+cp smp/config.mk.patch ltp/
+patch -p0 < testsuites.patch
+if [ $? -ne 0 ]
+then
+    echo "$0:       Error: apply patch"
+    exit 1
+fi
+
+echo -e "Apply smp patch done"

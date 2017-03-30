@@ -1,0 +1,2 @@
+/data/dwesterg/nios2-linux/nios2-linux/uClinux-dist/user/e2fsprogs/e2fsprogs-1.41.12/misc/filefrag.c: In function 'main':
+/data/dwesterg/nios2-linux/nios2-linux/uClinux-dist/user/e2fsprogs/e2fsprogs-1.41.12/misc/filefrag.c:266: warning: 'count' may be used uninitialized in this function

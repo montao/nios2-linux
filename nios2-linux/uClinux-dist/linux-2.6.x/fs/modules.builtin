@@ -1,0 +1,4 @@
+kernel/fs/jffs2/jffs2.ko
+kernel/fs/lockd/lockd.ko
+kernel/fs/nfs/nfs.ko
+kernel/fs/nfs_common/nfs_acl.ko

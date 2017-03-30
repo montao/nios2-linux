@@ -1,0 +1,1 @@
+include ../../AnalogDevices/vendor.mak

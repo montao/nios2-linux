@@ -1,0 +1,58 @@
+From 82195ad03999ef653f9e94ea3950b219cbe13287 Mon Sep 17 00:00:00 2001
+From: Mike Frysinger <vapier@gentoo.org>
+Date: Tue, 26 May 2009 20:08:56 -0400
+Subject: [PATCH 1/2] configure: fix external libcap cross-compile
+
+If cross-compiling nmap against an external libpcap, the configure will
+always fail with no way around it:
+
+checking pcap.h usability... yes
+checking pcap.h presence... yes
+checking for pcap.h... yes
+checking for pcap_datalink in -lpcap... yes
+checking if libpcap version is recent enough... configure: error: cannot run test program while cross compiling
+See `config.log' for more details.
+
+Same thing happens in the ncat/ subdir which isn't surprising as both seem
+to use the same libpcap configure code.
+
+If people are cross-compiling, then let's just assume their system doesn't
+suck.  If it does, then it'll fail for other reasons anyways, so ...
+
+Signed-off-by: Mike Frysinger <vapier@gentoo.org>
+---
+ configure.ac      |    3 ++-
+ ncat/configure.ac |    3 ++-
+ 2 files changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/configure.ac b/configure.ac
+index 555ce7f..5e2ec6c 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -387,7 +387,8 @@ int main() {
+   exit(0);
+ }],
+ [AC_MSG_RESULT(yes); have_libpcap=yes],
+-[AC_MSG_RESULT(no); have_libpcap=no])
++[AC_MSG_RESULT(no); have_libpcap=no],
++[AC_MSG_RESULT(cross-compiling -- assuming yes); have_libpcap=yes])
+ LIBS="$LIBS_OLD"
+ fi
+ 
+diff --git a/ncat/configure.ac b/ncat/configure.ac
+index 05d89d4..5adb297 100644
+--- a/ncat/configure.ac
++++ b/ncat/configure.ac
+@@ -164,7 +164,8 @@ int main() {
+   exit(0);
+ }],
+ [AC_MSG_RESULT(yes); have_libpcap=yes],
+-[AC_MSG_RESULT(no); have_libpcap=no])
++[AC_MSG_RESULT(no); have_libpcap=no],
++[AC_MSG_RESULT(cross-compiling -- assuming yes); have_libpcap=yes])
+ LIBS="$LIBS_OLD"
+ fi
+ 
+-- 
+1.6.3.3
+

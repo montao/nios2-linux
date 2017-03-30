@@ -1,0 +1,173 @@
+#!/usr/bin/expect
+
+# Main entrance
+source ../kernel_config.exp
+log_file [log_file_name "$argv0"]
+send_user "Starting $argv0\n"
+set TITLE [title "$argv0"]
+set case_num 0
+
+step "Start kermit."
+source ../spawn_kermit.exp
+
+step "Reboot the kernel."
+source ../reboot_kernel.exp
+
+sleep 3
+set spawn_id $kermit_spawn_id
+
+step "Start testing: test_cpp"
+
+incr case_num
+set timeout 5
+send "modprobe dualcore_test\r"
+while 1 {
+   expect {
+      -re "Dual core test module inserted: set testarg = \\\[\[0-9]+].*feb1fffc.*$kernel_prompt" {
+         send_user "\nDual core test module inserted\n"
+         break
+      }
+      timeout {
+         send_user "\nInsert coreb test module timeout\n"
+         case_fail $case_num
+         break
+      }
+   }
+}
+
+send "lsmod\r"
+while 1 {
+   expect {
+      -re "dualcore_test.*$kernel_prompt" {
+         case_pass $case_num
+         break
+      }
+      timeout {
+         case_fail $case_num
+         break
+      }
+   }
+}
+
+sleep 3
+set timeout 10
+incr case_num
+send "corebld /usr/coreb/test_cpp\r"
+while 1 {
+   expect {
+      -re ".*not found" {
+         send_user "\nexecute application corebld failed\n"
+         case_fail $case_num
+         break
+      }
+      -re "writing.*OK.*writing.*OK.*writing.*OK.*$kernel_prompt" {
+         send_user "\nexecuted C++ application on another core\n"
+         case_pass $case_num
+         break
+      }
+      timeout {
+         send_user "\nexecute C++ application on another core timeout\n"
+         case_fail $case_num
+         break
+      }
+   }
+}
+
+incr case_num
+send "modprobe -r dualcore_test\r"
+while 1 {
+   expect {
+      -re "Dual core test module removed: testarg = \\\[\[0-9]+]\r\n$kernel_prompt" {
+         case_pass $case_num
+         break
+      }
+      timeout {
+         case_fail $case_num
+         break
+      }
+   }
+}
+
+
+step "Reboot the kernel."
+source ../reboot_kernel.exp
+
+sleep 3
+
+step "Start testing: test_c"
+
+incr case_num
+set timeout 5
+send "modprobe dualcore_test\r"
+while 1 {
+   expect {
+      -re "Dual core test module inserted: set testarg = \\\[\[0-9]+].*feb1fffc.*$kernel_prompt" {
+         send_user "\nDual core test module inserted\n"
+         break
+      }
+      timeout {
+         send_user "\nInsert coreb test module timeout\n"
+         case_fail $case_num
+         break
+      }
+   }
+}
+
+send "lsmod\r"
+while 1 {
+   expect {
+      -re "dualcore_test.*$kernel_prompt" {
+         case_pass $case_num
+         break
+      }
+      timeout {
+         case_fail $case_num
+         break
+      }
+   }
+}
+
+sleep 3
+set timeout 10 
+incr case_num
+send "corebld /usr/coreb/test_c\r"
+while 1 {
+   expect {
+      -re ".*not found" {
+         send_user "\nexecute application corebld failed\n"
+         case_fail $case_num
+         break
+      }
+      -re "writing.*OK.*writing.*OK.*$kernel_prompt" {
+         send_user "\nexecute C application on another core\n"
+         case_pass $case_num
+         break
+      }
+      timeout {
+         send_user "\nexecute C application on another core timeout\n"
+         case_fail $case_num
+         break
+      }
+   }
+}
+
+incr case_num
+send "modprobe -r dualcore_test\r"
+while 1 {
+   expect {
+      -re "Dual core test module removed: testarg = \\\[\[0-9]+]\r\n$kernel_prompt" {
+         case_pass $case_num
+         break
+      }
+      timeout {
+         case_fail $case_num
+         break
+      }
+   }
+}
+
+all_pass
+
+send_user "Ending $argv0\n"
+
+log_file

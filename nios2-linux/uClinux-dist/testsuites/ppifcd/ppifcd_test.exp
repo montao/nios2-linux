@@ -1,0 +1,91 @@
+#!/usr/bin/expect
+source ../kernel_config.exp
+log_file [log_file_name "$argv0"]
+send_user "Starting $argv0\n"
+set TITLE [title "$argv0"]
+
+if { $board_type == "BF533-STAMP" } {
+    set board_num 533
+    set pack_mode 1
+} elseif { $board_type == "BF537-STAMP" } {
+    set board_num 537
+    set pack_mode 0
+}
+
+step "Start kermit."
+source ../spawn_kermit.exp
+
+step "Reboot the kernel."
+source ../reboot_kernel.exp
+
+step "Start testing."
+set case_num 0
+
+set timeout 10
+incr case_num
+send "ppifcd_test -p $pack_mode -b $board_num\r"
+while 1 {
+    expect {
+        -re "Total Frame Capture Time.*$kernel_prompt" {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+incr case_num
+send "ppifcd_test -p $pack_mode -b $board_num -c3 -t\r"
+while 1 {
+    expect {
+        -re "Total Frame Capture Time.*Total Frame Capture Time.*Total Frame Capture Time.*$kernel_prompt" {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+incr case_num
+send "ppifcd_test -p $pack_mode -b $board_num -c3 /var/ppifcd.bmp\r"
+while 1 {
+    expect {
+        -re "Saved.*$kernel_prompt" {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+incr case_num
+send "time ppifcd_test -p $pack_mode -b $board_num -c100 \r"
+while 1 {
+    expect {
+        -re "usec\r\n\r\nreal.*user.*sys.*$kernel_prompt" {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+if [ catch {exec rcp root@$targetip:/var/ppifcd.bmp ./} ] {
+    send_user "FAIL: rcp ppifcd.bmp to host PC\n"
+    send_user "$errorInfo\n"
+    case_fail $case_num
+} else {
+    send_user "PASS: rcp ppifcd.bmp to host PC\n"
+}
+
+all_pass
+send_user "Ending $argv0\n"
+log_file

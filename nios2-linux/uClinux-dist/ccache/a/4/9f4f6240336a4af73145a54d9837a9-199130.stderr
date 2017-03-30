@@ -1,0 +1,6 @@
+/data/dwesterg/nios2-linux/nios2-linux/uClinux-dist/user/e2fsprogs/e2fsprogs-1.41.12/lib/blkid/probe.c: In function 'linux_version_code':
+/data/dwesterg/nios2-linux/nios2-linux/uClinux-dist/user/e2fsprogs/e2fsprogs-1.41.12/lib/blkid/probe.c:251: warning: type defaults to 'int' in declaration of 'version_code'
+/data/dwesterg/nios2-linux/nios2-linux/uClinux-dist/user/e2fsprogs/e2fsprogs-1.41.12/lib/blkid/probe.c: In function 'probe_hfs':
+/data/dwesterg/nios2-linux/nios2-linux/uClinux-dist/user/e2fsprogs/e2fsprogs-1.41.12/lib/blkid/probe.c:1178: warning: pointer targets in passing argument 3 of 'blkid_set_tag' differ in signedness
+/data/dwesterg/nios2-linux/nios2-linux/uClinux-dist/user/e2fsprogs/e2fsprogs-1.41.12/lib/blkid/probe.c: In function 'probe_hfsplus':
+/data/dwesterg/nios2-linux/nios2-linux/uClinux-dist/user/e2fsprogs/e2fsprogs-1.41.12/lib/blkid/probe.c:1299: warning: pointer targets in passing argument 1 of 'unicode_16be_to_utf8' differ in signedness

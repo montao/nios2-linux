@@ -1,0 +1,52 @@
+<html lang="en">
+<head>
+<title>Submitting Syslog Messages - The GNU C Library</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="The GNU C Library">
+<meta name="generator" content="makeinfo 4.8">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="up" href="Syslog.html#Syslog" title="Syslog">
+<link rel="prev" href="Overview-of-Syslog.html#Overview-of-Syslog" title="Overview of Syslog">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<p>
+<a name="Submitting-Syslog-Messages"></a>
+Previous:&nbsp;<a rel="previous" accesskey="p" href="Overview-of-Syslog.html#Overview-of-Syslog">Overview of Syslog</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="Syslog.html#Syslog">Syslog</a>
+<hr>
+</div>
+
+<h3 class="section">18.2 Submitting Syslog Messages</h3>
+
+<p>The GNU C library provides functions to submit messages to the Syslog
+facility:
+
+<ul class="menu">
+<li><a accesskey="1" href="openlog.html#openlog">openlog</a>:                       Open connection to Syslog
+<li><a accesskey="2" href="syslog_003b-vsyslog.html#syslog_003b-vsyslog">syslog; vsyslog</a>:               Submit message to Syslog
+<li><a accesskey="3" href="closelog.html#closelog">closelog</a>:                      Close connection to Syslog
+<li><a accesskey="4" href="setlogmask.html#setlogmask">setlogmask</a>:                    Cause certain messages to be ignored
+<li><a accesskey="5" href="Syslog-Example.html#Syslog-Example">Syslog Example</a>:                Example of all of the above
+</ul>
+
+   <p>These functions only work to submit messages to the Syslog facility on
+the same system.  To submit a message to the Syslog facility on another
+system, use the socket I/O functions to write a UDP datagram to the
+<code>syslog</code> UDP port on that system.  See <a href="Sockets.html#Sockets">Sockets</a>.
+
+   </body></html>
+

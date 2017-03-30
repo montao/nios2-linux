@@ -1,0 +1,97 @@
+#!/usr/bin/expect
+
+source  ../kernel_config.exp
+log_file [log_file_name "$argv0"]
+send_user "Starting $argv0\n"
+set TITLE [title "$argv0"]
+
+step "Spawn kermit"
+source ../spawn_kermit.exp
+
+step "Reboot the kernel."
+source ../reboot_kernel.exp
+
+step "Start testing."
+sleep 10
+set case_num 0
+
+send "ifconfig eth0 $targetip up\r"
+expect -re $kernel_prompt
+
+incr case_num
+if [ catch { exec make clean } ] {
+    send_user "\nFAIL: Clean src directory\n"
+    send_user "$errorInfo\n"
+    case_fail $case_num
+} else {
+    send_user "\nPASS: Clean src directory\n"
+}
+
+incr case_num
+spawn make
+while 1 {
+    expect {
+        -re "\[eE]rror" {
+            send_user "\nFAIL: Build test program\n"
+            case_fail $case_num
+        }
+        eof {
+            send_user "\nPASS: Build test program\n"
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+incr case_num
+if [ catch { exec rcp libhelloworld.so root@$targetip:/lib/. } ] {
+    send_user "\nFAIL: Copy libhelloworld.so to target board\n"
+    send_user "$errorInfo\n"
+    case_fail $case_num
+} else {
+    send_user "\nPASS: Copy libhelloworld.so to target board\n"
+}
+
+if [ catch { exec rcp libhelloworldcpp.so root@$targetip:/lib/. } ] {
+    send_user "\nFAIL: Copy libhelloworldcpp.so to target board\n"
+    send_user "$errorInfo\n"
+    case_fail $case_num
+} else {
+    send_user "\nPASS: Copy libhelloworldcpp.so to target board\n"
+}
+
+if [ catch { exec rcp test_helloworld root@$targetip:/. } ] {
+    send_user "\nFAIL: Copy test_helloworld to target board\n"
+    send_user "$errorInfo\n"
+    case_fail $case_num
+} else {
+    send_user "\nPASS: Copy test_helloworld to target board\n\n"
+}
+
+set spawn_id $kermit_spawn_id
+
+incr case_num
+set timeout 5
+send "taskset 1 ./test_helloworld\r"
+while 1 {
+    expect {
+        -re "FAIL.*$kernel_prompt" {
+            send_user "\nTest for data and instruction fail\n"
+            case_fail $case_num
+        }
+        -re "TEST PASS.*TEST PASS.*TEST PASS.*TEST PASS\r\n$kernel_prompt" {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+all_pass
+send_user "Ending $argv0\n"
+log_file

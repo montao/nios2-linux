@@ -1,0 +1,2 @@
+/home/developer/altera/nios2-linux/linux-2.6/mm/mincore.c: In function 'sys_mincore':
+/home/developer/altera/nios2-linux/linux-2.6/mm/mincore.c:299: warning: comparison of distinct pointer types lacks a cast

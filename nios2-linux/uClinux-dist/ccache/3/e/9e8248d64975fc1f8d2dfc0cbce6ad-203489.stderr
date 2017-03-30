@@ -1,0 +1,2 @@
+inetd.c: In function 'handle_incoming_fds':
+inetd.c:283: warning: pointer targets in passing argument 3 of 'accept' differ in signedness

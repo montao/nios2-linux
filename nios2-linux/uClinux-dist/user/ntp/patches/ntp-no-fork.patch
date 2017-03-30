@@ -1,0 +1,83 @@
+https://support.ntp.org/bugs/show_bug.cgi?id=1308
+
+--- ntp-4.2.4p7/configure.ac
++++ ntp-4.2.4p7/configure.ac
+@@ -403,8 +403,15 @@ dnl so only use one of them.  Linux (gli
+ dnl does Strange Things with extra processes using the Posix-compatibility
+ dnl real-time library, so we don't want to use it.
+ 
++AC_CHECK_FUNC(fork)
++
+ case "$host" in
+- *-*-*linux*) ;;
++ *-*-*linux*)
++    if test "x$ac_cv_func_fork" = "xno"; then
++        AC_SEARCH_LIBS([pthread_create], [pthread],
++            AC_DEFINE(HAVE_PTHREAD_CREATE, ,[Do we have pthread support]))
++    fi
++    ;;
+  *)
+     AC_CHECK_LIB(rt, sched_setscheduler, ,
+ 	AC_CHECK_LIB(posix4, sched_setscheduler))
+--- ntp-4.2.4p7/sntp/libopts/makeshell.c
++++ ntp-4.2.4p7/sntp/libopts/makeshell.c
+@@ -506,7 +506,7 @@ textToVariable( tOptions* pOpts, teTextT
+       static char const*  apzTTNames[] = { TEXTTO_TABLE };
+ #   undef _TT_
+ 
+-#if defined(__windows__) && !defined(__CYGWIN__)
++#if defined(__windows__) && !defined(__CYGWIN__) || !defined(HAVE_FORK)
+     printf( "%1$s_%2$s_TEXT='no %2$s text'\n",
+             pOpts->pzPROGNAME, apzTTNames[ whichVar ]);
+ #else
+@@ -1036,7 +1036,7 @@ openOutput( char const* pzFile )
+ void
+ genshelloptUsage( tOptions*  pOpts, int exitCode )
+ {
+-#if defined(__windows__) && !defined(__CYGWIN__)
++#if defined(__windows__) && !defined(__CYGWIN__) || !defined(HAVE_FORK)
+     optionUsage( pOpts, exitCode );
+ #else
+     /*
+--- ntp-4.2.4p7/ntpd/ntp_config.c
++++ ntp-4.2.4p7/ntpd/ntp_config.c
+@@ -2436,7 +2436,18 @@ do_resolve_internal(void)
+ #ifndef SYS_WINNT
+ 	(void) signal_no_reset(SIGCHLD, catchchild);
+ 
+-#ifndef SYS_VXWORKS
++#if !defined(HAVE_FORK) && defined(HAVE_PTHREAD_CREATE)
++	/* The system lacks fork() like no-mmu Linux, so use threads */
++	{
++		pthread_t tid;
++		fflush(stdout);
++		i = pthread_create(&tid, NULL, (void *)ntp_intres, NULL);
++		if (i) {
++			msyslog(LOG_ERR, "pthread_create() failed, can't start ntp_intres: %m");
++			abort_resolve();
++		}
++	}
++#elif !defined(SYS_VXWORKS)
+ 	/* the parent process will write to the pipe
+ 	 * in order to wake up to child process
+ 	 * which may be waiting in a select() call
+--- ntp-4.2.4p7/libopts/makeshell.c
++++ ntp-4.2.4p7/libopts/makeshell.c
+@@ -506,7 +506,7 @@ textToVariable( tOptions* pOpts, teTextT
+       static char const*  apzTTNames[] = { TEXTTO_TABLE };
+ #   undef _TT_
+ 
+-#if defined(__windows__) && !defined(__CYGWIN__)
++#if defined(__windows__) && !defined(__CYGWIN__) || !defined(HAVE_FORK)
+     printf( "%1$s_%2$s_TEXT='no %2$s text'\n",
+             pOpts->pzPROGNAME, apzTTNames[ whichVar ]);
+ #else
+@@ -1036,7 +1036,7 @@ openOutput( char const* pzFile )
+ void
+ genshelloptUsage( tOptions*  pOpts, int exitCode )
+ {
+-#if defined(__windows__) && !defined(__CYGWIN__)
++#if defined(__windows__) && !defined(__CYGWIN__) || !defined(HAVE_FORK)
+     optionUsage( pOpts, exitCode );
+ #else
+     /*

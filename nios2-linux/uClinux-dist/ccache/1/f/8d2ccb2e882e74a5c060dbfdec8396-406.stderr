@@ -1,0 +1,2 @@
+conftest.cpp: In function 'int main()':
+conftest.cpp:67: warning: unused variable 'i'

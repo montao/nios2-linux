@@ -1,0 +1,121 @@
+#
+#   This script is an error checking wrapper for the subsequent TCL script that
+#   it executes in quartus_sh.
+#
+#   Script:
+#       
+#       add_project_assignments.shinc
+#   
+#   Input Arguments:
+#   
+#       PROJECT_NAME        : the name of the project
+#       ASSIGNMENTS_FILE    : the name the assignments file
+#
+#   Output Results:
+#   
+#       script returns a status of success if the Quartus project assignments
+#       are added successfully, otherwise it returns a status of error
+#
+#   Return Status:
+#       
+#       success         : 0
+#       error           : 1
+#       bad argument    : no return, exits with status 1
+#
+#   Required Environment Variables
+#   
+#       ABS_PATH_TO_PROJECT_DIR     : this is a path to the quartus project
+#                                     directory
+#       ABS_PATH_TO_BUILD_UTILS_DIR : this is a path to the build script utils
+#                                     directory
+#       ABS_PATH_TO_BUILD_SRC_DIR   : this is a path to the build script src
+#                                     directory
+#
+
+add_project_assignments () {
+    
+    #
+    # validate the input arguments
+    #
+    if [ $# -ne 2 ] ; then
+        
+        echo ""
+        echo "ERROR: wrong number of arguments passed into this function"
+        echo "Expected 2 arguments, but got $#"
+        echo ""
+        echo "USAGE: add_project_assignments <PROJECT_NAME> <ASSIGNMENTS_FILE>"
+        echo ""
+        
+        exit 1
+        
+    fi
+    
+    #
+    # validate the required environment variables
+    #
+    PATH_2_PROJECT_DIR=${ABS_PATH_TO_PROJECT_DIR:?environment variable is required...}
+    PATH_2_BUILD_UTILS_DIR=${ABS_PATH_TO_BUILD_UTILS_DIR:?environment variable is required...}
+    PATH_2_BUILD_SRC_DIR=${ABS_PATH_TO_BUILD_SRC_DIR:?environment variable is required...}
+    
+    #
+    # validate that the quartus_sh TCL script exists
+    #
+    THE_TCL_SCRIPT=add_project_assignments.tcl
+    if [ ! -e "${PATH_2_BUILD_UTILS_DIR}/${THE_TCL_SCRIPT}" ] ; then
+    
+        echo ""
+        echo "ERROR: Cannot locate TCL script \"${PATH_2_BUILD_UTILS_DIR}/${THE_TCL_SCRIPT}\""
+        echo ""
+        exit 1
+    
+    fi
+
+    #
+    # extract the input arguments that we need
+    #
+    PROJECT_NAME=${1}
+    ASSIGNMENTS_FILE=${2}
+    
+    #
+    # validate that the assignments TCL script exists
+    #
+    if [ ! -e "${PATH_2_BUILD_SRC_DIR}/${ASSIGNMENTS_FILE}" ] ; then
+    
+        echo ""
+        echo "ERROR: Cannot locate assignments TCL script \"${PATH_2_BUILD_SRC_DIR}/${ASSIGNMENTS_FILE}\""
+        echo ""
+        exit 1
+    
+    fi
+
+    echo ""
+    echo "Attempting to run the project assignments script \"${ASSIGNMENTS_FILE}\""
+    echo ""
+    
+    #
+    # execute the quartus_sh TCL script
+    #
+    pushd ${PATH_2_PROJECT_DIR} >> /dev/null
+        quartus_sh -t "${PATH_2_BUILD_UTILS_DIR}/${THE_TCL_SCRIPT}" "${PROJECT_NAME}" "${PATH_2_BUILD_SRC_DIR}/${ASSIGNMENTS_FILE}"
+        RESULT=$?
+    popd >> /dev/null
+    
+    if [ ${RESULT} -ne 0 ] ; then
+        
+        echo ""
+        echo "Quartus project assignments were NOT added successfully..."
+        echo ""
+        echo "Please make sure that the project exists before running this script."
+        echo ""
+        return 1
+        
+    else
+        
+        echo ""
+        echo "Quartus project assignments were added successfully..."
+        echo ""
+        return 0
+        
+    fi
+
+}

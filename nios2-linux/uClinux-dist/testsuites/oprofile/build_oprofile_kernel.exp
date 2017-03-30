@@ -1,0 +1,122 @@
+#!/usr/bin/expect --
+
+#
+# Build Kernel for Oprofile test
+#
+
+source ../kernel_config.exp
+source  ../board_info.exp
+log_file [log_file_name "$argv0"]
+send_user "Starting $argv0\n"
+
+set format [lindex $argv 1]
+send_log "\n#### binary_format is $format\n"
+
+if { $argc < 2} {
+    puts "Please input: board_type, binary_format(fdpic, flat or shared-flat)"
+    exit
+}
+
+if { $board_type == "BF548-EZKIT" } {
+    set env(EXT2_BLOCKS) "18864"
+} else {
+    set env(EXT2_BLOCKS) "12288"
+}
+
+cd $uclinux_path/testsuites
+step "Make clean."
+if { [source make_clean.exp] != 0 } {
+    send_user "\n\nFail to make clean. Exit!\n\n"
+    exit
+}
+
+cd $uclinux_path/testsuites
+step "Make config."
+source  make_default_config.exp
+
+# Following make specific configuration for this case.
+cd $uclinux_path
+set timeout 300
+spawn make config
+while 1 {
+    expect {
+        -re "Customize Kernel Settings.*DEFAULTS_KERNEL.*\\\[.*]" {
+            send "y\r"
+        }
+
+        -re "Customize Application/Library Settings.*DEFAULTS_VENDOR.*\\\[.*]" {
+            send "y\r"
+        }
+
+        -re "Profiling support.*PROFILING.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "OProfile system profiling.*OPROFILE.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "oprofile.*USER_OPROFILE.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Compile the kernel with debug info.*DEBUG_INFO.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "whetstone benchmark.*USER_WHETSTONE_WHETSTONE.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Binary format.*FLAT.*Shared-FLAT.*FDPIC.*\\\[.*]" {
+            if { $format == "fdpic" } {
+                send  "4\r"
+            } elseif { $format == "flat" } {
+                send  "1\r"
+            } elseif { $format == "shared-flat" } {
+                send  "3\r"
+            } else {
+                send "1\r"
+            }
+        }
+
+        -nocase -re "\\\[\[^\r]*] (\[ymn])|choice\\\[.*]: \[0-9]+\r" {
+            continue
+        }
+
+        "\\\(*) \\\[*]" {
+            sleep .01
+            send "\r"
+        }
+
+        -re "\[cC]hoice\\\[.*]:" {
+            send "\r"
+        }
+
+        eof {
+            puts "End of configuration"
+            break
+        }
+
+        timeout {
+            puts "\n\nFATAL ERROR: config prompt timeout in make config"
+            break
+        }
+    }
+}
+
+cd $uclinux_path/testsuites
+
+step "Make"
+
+source  make_kernel.exp
+
+cd $uclinux_path/testsuites
+
+step "Copy linux"
+
+source   copy_image.exp
+
+send_user "Ending $argv0\n"
+
+log_file

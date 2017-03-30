@@ -1,0 +1,2 @@
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/mm/vmalloc.c: In function '__vmalloc_area_node':
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/mm/vmalloc.c:1623: warning: format '%ld' expects type 'long int', but argument 4 has type 'unsigned int'

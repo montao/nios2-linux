@@ -1,0 +1,16 @@
+fix from upstream
+http://www.draisberghof.de/usb_modeswitch/bb/viewtopic.php?t=384
+
+--- usb-modeswitch-1.1.3/usb_modeswitch.c
++++ usb-modeswitch-1.1.3/usb_modeswitch.c
+@@ -658,8 +658,10 @@ int deviceInquire ()
+ 
+ out:
+ 	if (strlen(MessageContent) == 0)
++	{
+ 		usb_clear_halt(devh, MessageEndpoint);
+ 		usb_release_interface(devh, Interface);
++	}
+ 	free(command);
+ 	return ret;
+ }

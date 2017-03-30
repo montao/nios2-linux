@@ -1,0 +1,2 @@
+main.c: In function 'main':
+main.c:109: warning: unused variable 'sp'

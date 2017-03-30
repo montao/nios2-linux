@@ -1,0 +1,5 @@
+smbumount.c: In function 'main':
+smbumount.c:117: warning: unused variable 'new_mtab'
+smbumount.c:116: warning: unused variable 'mtab'
+smbumount.c:115: warning: unused variable 'mnt'
+smbumount.c:111: warning: unused variable 'fd'

@@ -1,0 +1,23 @@
+../net.c: In function 'AddAllowedSender':
+../net.c:203: warning: cast increases required alignment of target type
+../net.c:212: warning: cast increases required alignment of target type
+../net.c:280: warning: cast increases required alignment of target type
+../net.c:280: warning: cast increases required alignment of target type
+../net.c:280: warning: cast increases required alignment of target type
+../net.c:290: warning: cast increases required alignment of target type
+../net.c:294: warning: cast increases required alignment of target type
+../net.c:295: warning: cast increases required alignment of target type
+../net.c:296: warning: cast increases required alignment of target type
+../net.c: In function 'MaskCmp':
+../net.c:491: warning: cast increases required alignment of target type
+../net.c:492: warning: cast increases required alignment of target type
+../net.c:502: warning: cast increases required alignment of target type
+../net.c:503: warning: cast increases required alignment of target type
+../net.c:512: warning: cast increases required alignment of target type
+../net.c:513: warning: cast increases required alignment of target type
+../net.c:513: warning: cast increases required alignment of target type
+../net.c:516: warning: cast increases required alignment of target type
+../net.c:517: warning: cast increases required alignment of target type
+../net.c: In function 'debugListenInfo':
+../net.c:739: warning: cast increases required alignment of target type
+../net.c:744: warning: cast increases required alignment of target type

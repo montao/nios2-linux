@@ -1,0 +1,2 @@
+getent.c:35: warning: 'sccsid' defined but not used
+getent.c:40: warning: 'area' defined but not used

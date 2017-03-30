@@ -1,0 +1,2 @@
+/data/dwesterg/nios2-linux/nios2-linux/uClinux-dist/user/netperf/netperf-2.4.1/src/netperf.c: In function 'main':
+/data/dwesterg/nios2-linux/nios2-linux/uClinux-dist/user/netperf/netperf-2.4.1/src/netperf.c:128: warning: implicit declaration of function 'strcasecmp'

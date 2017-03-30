@@ -1,0 +1,175 @@
+#!/usr/bin/expect
+
+source ../kernel_config.exp
+source ../board_info.exp
+log_file [log_file_name "$argv0"]
+send_user "Starting $argv0\n"
+
+cd $uclinux_path/testsuites
+step "Make config."
+source make_default_config.exp
+
+cd $uclinux_path
+set timeout 300
+set baud_rate_done_flag 0
+spawn make config
+
+#puts "Begin the interactive process of configuration"
+while 1 {
+    expect {
+        -re "Customize Kernel Settings.*DEFAULTS_KERNEL.*\\\[.*]" {
+            send "y\r"
+        }
+
+        -re "Customize Application/Library Settings.*DEFAULTS_VENDOR.*\\\[.*]" {
+            send "y\r"
+        }
+
+        -re "Re-program Clocks while Kernel boots.*BFIN_KERNEL_CLOCK.*\\\[././.]" {
+            send "Y\r"
+        }
+
+        -re "VCO Multiplier \\\(VCO_MULT\\\) \\\[.*]" {
+            send "20\r"
+        }
+
+        -re "Core Clock Divider.*choice\\\[1-4\\\?]\\\:" {
+            send "1\r"
+        }
+
+        -re "System Clock Divider \\\(SCLK_DIV\\\) \\\[.*]" {
+            send "8\r"
+        }
+
+        -re "Sound card support.*SOUND.*\\\[.*]" {
+            #avoid GPIO confliction with ad1836
+            send "N\r"
+        }
+
+#PCMCIA
+        -re "PCCard \\\(PCMCIA/CardBus\\\) support.*PCCARD.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "16-bit PCMCIA support.*PCMCIA.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Load CIS updates from userspace.*PCMCIA_LOAD_CIS.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Blackfin CompactFlash PCMCIA Driver.*BFIN_CFPCMCIA.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Bank 3.*\\\(BANK_3\\\).*\\\[.*]" {
+            send -s "0xFFC3\r"
+        }
+
+#wireless stack
+        -re "Wireless \\\(WIRELESS\\\) \\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "cfg80211 - wireless configuration API.*CFG80211.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Wireless extensions sysfs files.*WIRELESS_EXT_SYSFS.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Generic IEEE 802.11 Networking Stack \\\(mac80211\\\).*MAC80211.*\\\[.*]" {
+            send "Y\r"
+        }
+
+#wireless driver
+        -re "Wireless LAN.*WLAN.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Hermes chipset 802.11b support.*Orinoco.Prism2.Symbol.*HERMES.*\\\[.*]" {
+            send "M\r"
+        }
+
+        -re "Support Prism.*HERMES_PRISM.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Cache Hermes firmware on driver initialisation.*HERMES_CACHE_FW_ON_INIT.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Hermes PCMCIA card support.*PCMCIA_HERMES.*\\\[.*]" {
+            send "M\r"
+        }
+
+#tools
+        -re "netperf.*USER_NETPERF_NETPERF.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "netserver.*USER_NETPERF_NETSERVER.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "wireless_tools support.*USER_WIRELESS_TOOLS.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "iwconfig.*USER_WIRELESS_TOOLS_IWCONFIG.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "iwgetid.*USER_WIRELESS_TOOLS_IWGETID.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "iwlist.*USER_WIRELESS_TOOLS_IWLIST.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "iwpriv.*USER_WIRELESS_TOOLS_IWPRIV.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "iwspy.*USER_WIRELESS_TOOLS_IWSPY.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -nocase -re "\\\[\[^\r]*] (\[ymn])|choice\\\[.*]: \[0-9]+\r" {
+            continue
+        }
+
+        "\\\(*) \\\[*]" {
+            sleep .01
+            send "\r"
+        }
+
+        -re "\[cC]hoice\\\[.*]:" {
+            send "\r"
+        }
+
+        eof {
+            puts "End of configuration"
+            break
+        }
+
+        timeout {
+            puts "\n\nFATAL ERROR: config prompt timeout in make config"
+            break
+        }
+    }
+}
+
+cd $uclinux_path/testsuites
+step "Make"
+source make_kernel.exp
+
+cd $uclinux_path/testsuites
+step "Copy linux"
+source copy_image.exp
+
+send_user "Ending $argv0\n"
+log_file

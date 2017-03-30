@@ -1,0 +1,11 @@
+network.c: In function 'init_network':
+network.c:63: warning: implicit declaration of function 'exit'
+network.c:63: warning: incompatible implicit declaration of built-in function 'exit'
+network.c:66: warning: incompatible implicit declaration of built-in function 'exit'
+network.c: In function 'stilloob':
+network.c:92: warning: implicit declaration of function 'quit'
+network.c: In function 'netflush':
+network.c:132: warning: implicit declaration of function 'ring_at_mark'
+network.c:150: warning: implicit declaration of function 'NetClose'
+network.c: At top level:
+network.c:35: warning: 'sccsid' defined but not used

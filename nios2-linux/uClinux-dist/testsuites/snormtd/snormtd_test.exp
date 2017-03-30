@@ -1,0 +1,358 @@
+#!/usr/bin/expect
+#
+#To use dataflash(df), remember to pass in "df"  as the second parameter like: ./spi_flash.exp BF537-STAMP df
+#
+# Add-on board jumper is IC3.
+
+source ../kernel_config.exp
+source ../board_info.exp
+
+set mode pio
+set spi_board_type normal
+
+if { $argc >= 2} {
+set mode [lindex $argv 1]
+}
+
+if { $argc >= 3} {
+set spi_board_type [lindex $argv 2]
+  if { $spi_board_type == "df" } {
+      set spi_rootfs_num 2
+      set page_size  512
+      set erase_size 8192
+}
+}
+log_file [log_file_name "$argv0.$mode.$spi_board_type"]
+send_user "Starting $argv0\n"
+set TITLE [title "$argv0"]
+append TITLE " ($mode $spi_board_type)"
+set page_size  4096
+set erase_size 65536
+
+
+step "Start kermit."
+source ../spawn_kermit.exp
+
+step "Reboot the kernel."
+source ../reboot_kernel.exp
+
+set TEST_PASS               "pass"
+set TEST_FAIL               "fail"
+
+step "MTD test"
+
+set case_num 0
+
+incr case_num
+
+set timeout 5
+set mtd_temp_result $TEST_FAIL
+set mtd_result $TEST_FAIL
+#send -s "\r"
+send -s "cat /proc/mtd \r"
+while 1 {
+    expect {
+
+	"mtd$spi_rootfs_num" {
+		set mtd_temp_result $TEST_PASS
+		expect  -re $kernel_prompt
+                case_pass $case_num
+		break
+	}
+
+	timeout {
+                case_fail $case_num
+		exit
+	}
+    }
+}
+
+incr case_num
+
+step "Mount MTD "	
+set mtd_temp_result $TEST_FAIL
+set timeout 60
+send -s "mount -t jffs2 /dev/mtdblock$spi_rootfs_num /mnt\n"
+while 1 {
+    expect {    
+         -re $kernel_prompt {
+                set mtd_temp_result $TEST_PASS
+                case_pass $case_num
+		break
+        }
+
+        "failed" {
+                case_fail $case_num
+                exit
+        }
+                                                                                                                                                             
+        timeout {
+                case_fail $case_num
+		exit
+        }
+    }
+}
+
+step "Reading MTD "	
+set mtd_temp_result $TEST_FAIL
+set timeout 60
+send -s "ls /mnt\n"
+while 1 {
+    expect {    
+        "home" {
+		break
+        }
+         
+        "test" {
+                break
+        }
+                                                                                                                                                    
+        timeout {
+		break
+        }
+    }
+}
+
+expect ">"
+     
+incr case_num
+
+step "Reading MTD "	
+set mtd_temp_result $TEST_FAIL
+set timeout 60
+send -s "umount /mnt\n"
+while 1 {
+    expect {    
+        ">" {
+                set mtd_temp_result $TEST_PASS
+                case_pass $case_num
+		break
+        }
+                                                                                                                                                             
+        timeout {
+                case_fail $case_num
+		exit
+        }
+    }
+} 
+                                                                                                                                                      
+if { $mtd_temp_result!=$TEST_PASS } {
+	exit
+}
+sleep 1
+
+incr case_num
+
+step "Erase MTD "
+set mtd_temp_result $TEST_FAIL
+set timeout 180
+send -s "flash_erase /dev/mtd$spi_rootfs_num 0 0\r"
+while 1 {
+    expect {
+	
+	 -re $kernel_prompt {
+		set mtd_temp_result $TEST_PASS
+                case_pass $case_num
+		break
+	}
+
+	timeout {
+                case_fail $case_num
+		exit
+	}
+    }
+}
+
+if  { $mtd_temp_result!=$TEST_PASS } {
+	exit
+}
+
+step "Make jffs2 image"
+
+send_log " \n1)create file system directory\n"
+send -s "mkdir -p rootfs\r"
+expect ">"
+send_log " \n2)create test file\n"
+send -s "echo This is test for mtd driver > rootfs/test\r"
+expect  -re $kernel_prompt
+send_log " \n3)create JFFS2 image\n"
+send -s "mkfs.jffs2 -n -r rootfs -s $page_size -e $erase_size -o mtd.img\r"
+expect ">"
+
+incr case_num
+
+step "Writing MTD"
+set mtd_temp_result $TEST_FAIL
+set timeout 60
+send -s "cp mtd.img /dev/mtd$spi_rootfs_num\r"
+while 1 {
+    expect {
+	
+	 -re $kernel_prompt {
+		set mtd_temp_result $TEST_PASS
+                case_pass $case_num
+		break
+	}
+
+       "error" {
+                case_fail $case_num
+                exit
+        }
+	
+	timeout {
+                case_fail $case_num
+		exit
+	}
+    }
+}
+
+if  { $mtd_temp_result!=$TEST_PASS } {
+        exit
+}
+
+incr case_num
+
+step "Reading MTD "	
+set mtd_temp_result $TEST_FAIL
+set timeout 60
+send -s "mount -t jffs2 /dev/mtdblock$spi_rootfs_num /mnt\n"
+while 1 {
+    expect {    
+         -re $kernel_prompt {
+                set mtd_temp_result $TEST_PASS
+                case_pass $case_num
+		break
+        }
+
+       "failed" {
+                case_fail $case_num
+                exit
+        }
+
+        timeout {
+                case_fail $case_num
+		exit
+        }
+    }
+}
+                                                                                                                                                             
+if  { $mtd_temp_result!=$TEST_PASS } {
+        exit
+}
+
+incr case_num
+step "cp version to JFFS."
+set jffs_temp_result $TEST_FAIL
+
+set timeout 200
+send -s "cp /bin/version /mnt\r"
+while 1 {
+    expect {
+         -re $kernel_prompt {
+                case_pass $case_num
+                break
+        }
+
+        timeout {
+                case_fail $case_num
+                exit
+        }
+    }
+}
+
+sleep 1
+
+step "JFFS Validating data integrity"
+set jffs_temp_result $TEST_FAIL
+incr case_num
+
+set timeout 60
+send "while \[ 1 \]; do md5sum /mnt/version ; done\r"
+while 1 {
+   expect {
+      -re "\[0-9a-z]+  /mnt/version" {
+                sleep 3
+                send "\3"
+                case_pass $case_num
+                break
+      }
+
+      timeout {
+                case_fail $case_num
+                exit
+         }
+     }
+}
+
+expect ">"
+
+incr case_num
+
+step "Verify "
+set timeout 2
+send -s "cmp /rootfs/test /mnt/test\r"
+while 1 {
+    expect {
+	"differ" {
+                case_fail $case_num
+		exit
+	}
+
+        "No such file or directory" {
+                case_fail $case_num
+                exit
+        }
+
+	timeout {
+		set mtd_results $TEST_PASS
+                case_pass $case_num
+		break
+	}
+    }
+}
+
+incr case_num
+set timeout 80
+expect  -re $kernel_prompt
+send -s "umount /mnt\r"
+while 1 {
+    expect {
+
+       -re $kernel_prompt {
+                break
+        }
+
+       "failed" {
+                case_fail $case_num
+                exit
+        }
+
+        timeout {
+                case_fail $case_num
+                exit
+        }
+    }
+}
+send -s "ls /mnt\r"
+while 1 {
+    expect {
+
+        "test" {
+                case_fail $case_num
+                exit
+        }
+
+        timeout {
+                case_pass $case_num
+                break
+        }
+    }
+}
+
+send_log "\n"
+send_log "\n$TITLE ............\[PASS\]\n"
+
+exit
+log_file
+ 
+send_user "\nEnding snormtd_test.exp\n"

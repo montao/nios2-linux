@@ -1,0 +1,1 @@
+error "You must generate this example in SOPC Builder before you compile it in Quartus."

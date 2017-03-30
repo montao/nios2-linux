@@ -1,0 +1,1387 @@
+TODO $Id: TODO 11866 2009-01-24 23:10:05Z fyodor $ -*-text-*-
+
+o Further investigate SCTP functionality, as some people reported
+  problems (see this thread:
+  http://seclists.org/nmap-dev/2009/q2/0669.html)
+
+===FEATURES FOR NEXT STABLE VERSION GO ABOVE THIS POINT===
+
+o Get set up for Coverity scan of latest version to see if it catches
+  any important issues before stable release. [Fyodor,David]
+ 
+o Once we go into deep stability freeze mode, create an nmap-exp
+  development branches for changes we plan to integrate after the
+  stable release. [Fyodor]
+
+o Device categorization improvements
+  o Examine Nmap's device categorization in nmap-os-deb and
+    nmap-service-probes.  Decide if some small categories which have
+    never really took off should be consolidated, or whether others
+    should be split off.  For example, maybe there are some groups in
+    'specialized' or other misc. categories which are now large enough
+    to split off.  Personally, I wouldn't give anything its own
+    category unless there are at least half a dozen of them and no
+    other category really fits them well.  We should use a combined
+    system for nmap-os-db and nmap-service-probes.
+  o Add a classification sect1 to os-detection.xml
+    (http://nmap.org/book/osdetect.html) to cover how Nmap handles OS
+    classification.  It should include a list with descriptions of
+    each device type recognized by Nmap.  Version-detection.xml should
+    reference (link to) it in the approprate place.
+    [Doug has done some initial work on this.  For example, see
+     nmap/docs/device-types.txt]
+
+o [NSE] Resolve ssh2.lua buffering problems
+  (http://seclists.org/nmap-dev/2009/q2/0673.html) [Joao]
+
+o [NSE] Track active sockets in the nsock library binding and don't
+  rely on garbage collection for reallocation. Can probably wait until
+  post-stable release for integration. [Patrick]
+  - Patrick has a patch and is waiting on dev branch to check it in.
+
+o Consider the open proxy scripts more carefully
+ - How should we test whether the proxy attempt was successful?  Right
+   now we look for a google-specific Server header after trying to
+   reach http://www.google.com through the proxy.  Maybe we should let
+   users specify their own pattern if they specify their own URL.
+  [ Joao is nearly done, will be checking into dev tree]
+
+
+o Update scripts which use table args to use pseudo-table format
+  "name.arg" rather than requiring the user to create a Lua table
+  themselves. On the lua side, it's not really being stored in a
+  table, but just an arg named "name.arg". [Joao]
+  - Look at all our existing scripts which use tables
+    (dns-zone-transfer, whois, the proxy scripts, etc.) and change as
+    appropriate.  Remember to change the usage throughout the script
+    and also change the nsedoc script arguments and example usage.
+    For the existing scripts, try to retain the table version check
+    for now to avoid breaing backward compatability if possible.  Just
+    add the newer style check as well.
+  - Is taking arguments in a table specific to a script a good idea?
+    The example in the socks-open-proxy nsedoc of "--script-args
+    openproxy={host=<host>}" is a bit of a mess and I'm not sure the
+    best way to document that in the script argument list.  Note that
+    this is the standard way we've handled it for some other scripts,
+    so it's not an open-proxy-script-specific problem.
+
+o Consider making it easier to tell whether scripts were specified by
+  name on the command-line (rather than default or by class) so they
+  have the option of providing extra verbosity in that case.  For
+  example, see http://seclists.org/nmap-dev/2009/q2/0563.html.  We
+  could either provide a special function for scripts to determine
+  that, or we could magically adjust nmap.verbosity() when called by
+  those scripts. [David]
+
+o [Ncat] Maybe --chat should imply -l.  And Maybe --broker should too?
+  - OTOH, we might want to extend --chat for connect mode in the
+    future.
+
+o [NSE] Make sure all our HTTP scripts transparently support SSL
+  servers too. [ready for checkin to dev]
+
+o [NSE] Make NSE work better for SSL tunneled services in general by
+  supporting them easily in the libraries.  For example, I don't think
+  irc-info.nse currently works against all the servers which tunnel
+  over SSL.  Maybe augment comm library, etc. [tryssl basically done,
+  doing some more work to augment http.request to use tryssl]
+
+o For at least our UDP ping probes, Nmap should probably notice if it
+  is a very well known service port such as 53, 161, or 137 and send
+  an appropriate probe packet (server status for DNS, public community
+  string query for SNMP, etc) rather than empty data in that case.
+  This is similar to the way our IP protocol probes automatically
+  include common headers such as TCP and UDP if that common protocol
+  is given.  Good probes for these services are already available in
+  nmap-service-probes, though we might want to make a custom file for
+  this.  We should probably do this for port scanning as well.
+
+o Look at etc/payloads.conf in unicornscan-0.4.7 and see if they have
+  any which we don't have, but should, for our version detection.
+  They have a decent collection there.
+
+o [Ncat] In verbose mode, I'd like to see clock time and maybe in/out
+  traffic stats when a client connection ends.  Maybe it could use a
+  format similar to what Nmap provides.
+
+o Change Nsock to give an error if you try to FD_SET a fd larger than
+  FD_SETSIZE. [Brandon]
+
+o Decide what to do about ncat source code headers -- maybe just use
+  the Nmap ones.
+
+o Change Nsock so that it is able to take advantage of more modern
+  interfaces to dealing with large sockets, rather than just select.
+  Perhaps we should look at poll(), Windows completion ports, and some
+  of the advanced Linux APIs.  Select() limits us to descriptors no
+  higher than FD_SETSIZE, and it may not performa all that well.  We
+  should do some benchmarking and decide on the interface to use for
+  each platform.
+
+o Scanning through proxies
+ o Nmap should be able to scan through proxy servers, particularly now
+   that we have an NSE script for detectiong open proxies and now that
+   Ncat can act as proxy client or server.
+ o Requirements:
+   o Should be able to chain through multiple proxy servers of different
+     types
+   o Support IPv4 and v6
+   o Need to figure out how to get good performance.  Pool of
+     connections to proxy or proxies for concurrency?  HTTP pipelining?
+   o Support the different varieties of proxies: socks4, socks4a,
+     socks5, HTTP GET (if possible), HTTP CONNECT.  Note that GET
+     proxies present some challenges since the error messages may not
+     be standard, etc.
+   o Maybe auto-detect the proxy type so that Nmap can try the most
+     efficient scanning method first?
+   o I've been asked to support basic, ntlm, and digest authentication
+    if possible.
+ o Implementation ideas: 
+   o There is a patch by Zoltan Panczel (http://nmap-dev.fw.hu) and it
+     has been improved by Jacob Appelbaum in nmap-exp/ioerror/ .  This
+     patch doesn't handle things like parallelization, but it may be a
+     great proof of concept.
+   o This might not be appropriate for ultra_scan ... perhaps would be
+     better to write a general scanning engine for abusing
+     applications for port scanning purposes.  This could handle
+     scanning through proxies and the existing FTP bounce scan would
+     also be ported to this engine.  rembrandt at jpberlin.de tells me
+     that you can also do this with the "forwarding" commands on IMAP
+     servers.  Whoever does this should probably start by reading the
+     code for the main port scanning engine (ultra_scan()) and also
+     the version detection code (service_scan()).  And the version
+     detection paper at http://nmap.org/book/vscan.html.  If you
+     understand all that, you may be ready for this project :).  This
+     is important, because it is easy to do poorly.  The tough part is
+     high performance and clean code which is general enough that all
+     these different applications can be scanned through using the
+     same basic engine.  You should run your ideas by nmap-dev in as
+     much detail as possible before starting.
+
+o Get better password data for unpw/ncrack
+  o perhaps from Solar Designer.
+  o perhaps add phpbb hack data (there is at least a list of 28,635
+    passwords in phpbb_users.sql, and possibly more in other files.
+
+o [Ncat] Support SCTP now that Nmap does. 
+  - See client support patch by Daniel Roethlisberger: 
+    http://seclists.org/nmap-dev/2009/q2/0609.html
+  - Server support?
+
+o [NSE] Optimize NSE Performance--e.g. measure the current performance and
+  see what can be improved in terms of scheduling scan threads,
+  determining how many to run concurrently, looking at CPU load items,
+  etc.
+
+o [NSE] Consider whether we should include some sort of NSE debugger.  Or we
+  could include something simpler.  For example, some developers (such
+  as Ron) already make use of Patrick's traceback.nse in their
+  experimental trees.  For some inspiration/ideas, look at Diman's NSE
+  debugger (http://seclists.org/nmap-dev/2008/q1/0228.html) and also
+  Patrick's traceback.nse 
+
+o [NSE] Look into moving packet module to C for better performance
+  [Patrick]
+
+o Add Nmap web board.
+ 
+o Create Nmap wiki
+
+o [NSE] Consider whether we need script.db for performance reasons at
+  all or should just read through all the scripts and parse on the fly.
+  See: [http://seclists.org/nmap-dev/2009/q2/0221.html]
+
+o [NSE] We may want to consider a better exception handling method --
+  one which doesn't require wrapping every I/O line in its own try
+  function call.  David says "Lua has an internal "exception handling"
+  mechanism based on a function called pcall, which is implemented
+  with setjmp/longjmp.  You can wrap a function call in it and the
+  function will return there whenever there's an unhandled error.
+  Something based on that would be better [than the current system], I
+  think."
+
+o [NSE] Consider HTTP request caching.
+
+o [NSE] Support routing http requests through proxies.
+
+o [NSE] http improvements
+ o Spidering library+scripts?  How should the spider store the results
+   and make them available to other scripts?  How do we limit
+   bandwidth consumption and total amount of data stored?  Might want
+   to look at enumeration script at
+   http://seclists.org/nmap-dev/2009/q1/0889.html
+ o URL grinder checks for existence of applications in common/default
+   paths. Scanning http paths to see if they exist is in some ways
+   similar to scanning to see which ports are open.
+ o Cookie suppport?  Might be useful for spidering sites which use it
+   for authentication/authorization/personalization.
+ o HTTP keepalive? May make spidering/grinding/auth cracking more efficient
+ o Pipeliing? May make spidering/grinding/auth cracking more efficient
+ o Consider POST/HEAD support. See
+   http://seclists.org/nmap-dev/2009/q1/0889.html.
+
+o Dependency licensing issues (OpenSSL, Python, GTK+, etc.)
+ o We should do an audit to ensure that we are in complete compliance for the
+ licenses of all the software we ship in any of our downloads, as some
+ licenses have special clauses for things like including their
+ license/copyright file, mentioning them in our documentation, etc.
+ And of course we want to credit them properly even where the license
+ doesn't require it.  We should probably make a list of these in our
+ docs/ directory along with any special information/requirements of
+ their license.  And maybe we should put the current licenses in a
+ subdir too.  In particular, these come to mind:
+ o libpcre
+ o lua
+ o OpenSSL
+ o libpcap
+ o GTK+/Glib/ATK/Pango/PyGTK (Win/Mac versions of Zenmap link to
+   PyGTK)
+ o SQLite
+ o Python (Win/Mac versions of Zenmap link to Python)
+ o X.org libraries (Mac version links to them)
+ o libdnet
+
+o [NSE] Improve username/password library (the database files
+  themselves).  We don't have very good lists at the moment.  Maybe
+  work in combination with Ncrack dev.
+
+o [NSE] High speed brute force HTTP authentication.  Possibly POST and
+   GET/HEAD brute force cracking.
+
+o [NSE] BasicHTML/XML parser?  For example, Sven Klemm wrote a script
+  which uses libxml2: http://seclists.org/nmap-dev/2008/q3/0462.html
+
+o [NSE] Would be great if NSE scripts could be made to NOT
+  run as root if they don't have to.
+
+o [NSE] NFS query script for checking exports, etc.?
+
+o [NSE] Finish (or write new) favicon fingerprinting script. See
+  http://seclists.org/nmap-dev/2008/q4/0583.html .  May need to do
+  some more scanning and increase the DB size a bit.  May or may not
+  want to later combine this as part of a larger webapp fingerprinting
+  script.
+
+o [NSE] Web application fingerprinting script.  Would be great to be
+  able to take a URL and determine things like "this is Joomla" or
+  "this is Plone" or "Mediawiki" or whatever. Rather than hard code
+  regular expressions or other tests in a script, it should use a
+  signature file like Nmap OS and version detection do.  Might work in
+  combination with URL grinder to check for applications at
+  default/common locations. See also a script that does favicon
+  scanning TODO item.
+
+o Deadlock identification and correction:
+ o Plan of action: implement freeing of script mutexes when scripts
+ exit without freeing them (done and in /nmap now). And then if it
+ continues to be a problem we'll consider this other stuff:
+  o Add detection for deadlocks and print which threads are involved.
+  o use above results to make a strategy for automatic deadlock resolution.
+  o Original entry: Figure out what to do about NSE mutexes:
+  http://seclists.org/nmap-dev/2008/q3/0276.html . In particular, they
+  are not currently cleaned up if a thread dies or otherwise exits
+  without unlocking them and can cause endless deadlocks which are
+  annoying to users and can be difficult to debug :(.  Patrick has
+  some ideas for this in his SoC09 proposal:
+   "Adding a cleanup system for NSE that is called periodically
+    similar to nsock_loop. There would be a registration system
+    allowing C libraries to register a Lua function that will run
+    periodically to check for irresolvable deadlock or simply dead
+    resources. For example, the nmap library would register a mutex
+    cleanup handler which would inspect all mutexes looking for a dead
+    thread or circular dependencies. The nsock library could register
+    a handler that checks for unused sockets. The nsock may save a
+    strong reference to the thread that owns the socket and inspect it
+    to determine if the thread is dead."
+  David later says: "After some discussion we decided to start more
+  modestly, first by ensuring that a scripts mutexes are released when
+  it dies for whatever reason. I have a hunch that this is the cause
+  of most deadlocks. It was certainly the cause of two whois.nse
+  deadlocks I found. Then, the next step if deadlocks continue to be a
+  problem, is to do automatic detection and just print out a list of
+  what scripts are involved. It could be that several smb scripts are
+  deadlocked, or as in the case I observed where whois.nse was locked
+  with itself."
+
+o [NSE] Figure out a way to support people who want to do script scan,
+  but not port scan or ping scan.  One option would be to allow
+  --script to list scan (-sL), but perhaps a better option is to
+  provide a way to disable port scanning in the same way as we offer
+  -PN to disable ping scanning.  As an example of this need, David had
+  to write special code to avoid ping/port scanning when doing a
+  whois.nse survey for
+  http://www.bamsoftware.com/wiki/Nmap/EffectivenessOfPingProbes.  The
+  key for this task is to figure out how to do it from a user
+  interface perspective and then implement and document it.  We've
+  already been going in the direction of allowing script scanning in
+  more types of scans--a while back we started allowing it with -sP
+  ping scans due to high demand.
+
+o [NSE] Security Review
+ o Consider what, if any, vulnerabilities or security risks NSE has
+   with respect to buffer overflows, format string bugs, any other
+   maliciously formatted responses from target systems, etc.  Maybe
+   address the known risk of malicious scripts too.
+ o Consider that NSE runs scripts as root
+
+o Ncat SSLv2 issues.  See
+  http://seclists.org/nmap-dev/2009/q1/0319.html.  A big part of it is
+  done, which was enhanced version detection probes to detect more SSL
+  servers, The defect that remains is that Nsock can't connect to a
+  small fraction of servers (including some of the ones detected by
+  the new version probe). They are the servers that do only SSLv3 or
+  TLSv1 and don't respond to a SSLv2-compatible ClientHello.  Even
+  though most servers don't support SSLv2, they usually respond to the
+  ClientHello and just don't offer any SSLv2 features.
+
+o Figure out and document (in at least the Ncat user's guide) the best
+  way to use Ncat for chaining through proxies.  One option is this
+  sort of thing:
+  ncat -l localhost 1234 --sh-exec "ncat --proxy A.A.A.A B.B.B.B"
+  ncat --proxy localhost:1234 C.C.C.C
+  If you had two proxies A.A.A.A and B.B.B.B, connecting to C.C.C.C.
+  With another listener/--sh-exec pair for each additional proxy.
+  But perhaps we can make it easier by adding it to the syntax.
+
+o Consider converting this file to emacs org-mode
+  (http://orgmode.org/) format. [Fyodor]
+  o That format is still plain text and can be read/edited by vi
+    users, etc.
+
+o [Zenmap] The Search dialogue is helpful for finding a certain scan
+  you've performed recently, but we should probably also offer a similar
+  function for searching for certain applications/hosts within a scan
+  (e.g. find all the hosts running Apache).  This new functionality
+  might be a find option or some other mechanism rather than being
+  part of the Search dialogue proper.
+
+o [Zenmap] More complete implementation of ZenmapCommandLine/profile
+  editor improvement ideas. See
+  http://www.bamsoftware.com/wiki/Nmap/ZenmapCommandLine. [David]
+
+o Look into whether we should loosen/change the global congestion
+  control system to address possible cases of one target host with many
+  dropped packets slowing down the whole group.  See
+  http://seclists.org/nmap-dev/2008/q1/0096.html .
+  * Related possibility: Fix --nogcc to gracefully handle ping scans.
+    Right now it seems to go WAY TOO FAST (e.g. several thousand
+    packets per second on my DSL line).
+
+o [nsock] Fix Makefile to handle dependencies correctly (if that turns
+  out to be the problem).  See
+  http://seclists.org/nmap-dev/2009/q1/0629.html.
+  o Or it may be related to SVN timestampling.  See
+  http://seclists.org/nmap-dev/2009/q1/0632.html.
+
+o We should document an official way to compile/test refguide.xml so
+  people can more easily test their changes to it.  This will probably
+  involve moving legal-notices.xml into /nmap/docs, among other
+  things.
+
+o Make Zenmap settings get upgraded when the Zenmap executable is
+  upgraded. The per-user configuration files such as scan_profile.usp
+  and zenmap.conf are never overwritten once installed by Zenmap, so
+  changes and fixes to those files don't reach anyone who has
+  installed Zenmap already. This is most noticeable with changes to
+  profiles and highlight definitions are notably affected. This fix
+  may involve hard-coding settings that are not normally configured by
+  users (like highlighting) or updating the per-user files at startup
+  (only those parts that haven't been changed by the user).
+
+o Look into memory consumption of UDP scans with -p- and large
+  hostgroups.  See if there is a way to prevent them from eating up gigs
+  of RAM.
+
+o Zenmap should be able to export normal Nmap output
+
+o Zenmanp should perhaps be able to print Nmap output (if not too much
+  of a pain to implement.)
+
+o Start project to make Nmap a Featured Article on Wikipedia.
+
+o Consider rethinking Nmap's -s* syntax for specifing scan types
+  o Current problems with this -s syntax:
+    o We already use like 20 of the 26 letters, so we end up with
+      things like SCTP scan using -sY
+    o Can make Nmap command lines hard to read, particularly given
+      that we often need to improvise to find a letter which isn't
+      taken.
+    o Problematic for scan types -sI and -b which require arguments
+    o Inconsistencies.  For example, -sC and -sV do script scan and
+    version detection, respectively, and yet for OS detection we use
+    -O.
+  o Possible solution:
+    o We might want to just give them normal option strings, so you
+      could do --maimon instead of -sM, for example.  For extremely
+      common options such as SYN scan, UDP scan, version detection, we
+      could perhaps find good single letter options as an alias to the
+      longer one.
+    o Another idea is to use something like --scantype syn,udp,sctp,
+      which is a lot longer for single-type scans, but shorter when
+      you're combining mulitiple ones.  Doesn't allow for individual
+      scan arguments easily.  I (Fyodor) think I prefer the idea above
+      of just givem them top level arguments.
+  o Obviously this will take some discussion/brainstorming on nmap-dev.
+
+o libnmap organization for UNIX and Windows
+  o Then change Nmap and Zenmap to simply call this library
+
+o Perhaps --traceroute should set currenths->distance because right
+  now, I do an -O scan against scanme.nmap.org, and it does not figure
+  out the distance.  So the fingerprint shows no distance element and
+  Nmap doesn't print "Network Distance" in the results line.  That may
+  be OK (Nmap probably isn't receiving the probe response needed for
+  this, and maybe doesn't want to print the TG), but even when I do
+  --traceroute I get no distance printed.  Yet Nmap clearly knows the
+  distance since the traceroute shows all the hops up to and including
+  the target (scanme.nmap.org).
+
+o Improve the "run Zenmap as root" menu item to work on distributions
+  without su-to-root.  We might even want to improve Zenmap so that it
+  itself does not have to run as root, and just executes Nmap that
+  way.  Rather than not showing Zenmap as root on the Menu of
+  non-working systems, it might be better to have it but let it give
+  an error message (and then, perhaps, run as nonroot) so that users
+  of those distributions are more likely to contribute a fix.  We also
+  might want to look at how the distributions themselves package Zenmap.
+
+o Consider enhancing the new OS Assist system to handle version
+  detection too. [SOC task?]
+
+o Do -p- Internet UDP scans.
+
+o Look a bit more at default version detection timing.  Particularly
+  deciding the number of probes to run in parallel.
+
+o Deal with UDP retransmission for version detection ( I think I
+  should just do a second run of all probes for UDP if it fails to
+  match anything).  The advantage there is that no retransmissions are
+  neccessary if the service is found.  Then again, per-probe
+  retransmission would let us redo the most likely probes (the one(s)
+  that match the port number) quickly.  Lost packets should probably
+  affect ideal_parallelism.
+
+o Nmaprc-related - Create a system to store Nmap defaults/preferences
+  in an nmaprc file.
+  o nmaprc should be in ~/.nmap on UNIX
+  o On Windows, we may need a registry key to find the .nmaprc
+  o Obtain Nmap data directory information from nmaprc at runtime rather than
+    compiled in -- among other advantages this is needed to make
+    relocateable rpm.
+  o Make RPM relocatable (requires somehow avoiding storing paths in the
+    binary)
+  o Perhaps Lua could be used as the format?
+  o .nmaprc for keeping defaults, etc.
+    o Nmaprc infrastructure, hook to new timing variables
+    o Nmaprc man page
+    o Default timing mode
+    o Default NSE arguments, such as user agent
+    o Maybe Default source IP (-S) argument
+    o should be a way to specify your own .nmaprc
+    o Maybe lets you add a directory and template for saving all
+     scans. 
+
+o Search for nmap on google news, on google web, and add appropriate
+  links to press page and the like.
+
+o Nping -- like hping3 but uses Nmap infrastructure and to a
+  large degree the same command-line options as Nmap.
+
+o Website: Create shr (shared) directory in svn, which will contain
+  directories shared between the Insecure.org network of sites
+  (e.g. templates, error, css).  Then sites such as sectools,
+  nmap.org, insecure.org can just check that out via externals
+  declaration (or, I suppose, symlink).  CSS directives will then use
+  /shr/css/insecdb.css etc. ). [Fyodor]
+
+o Zenmap script selection interface for deciding which NSE scripts to
+  run.
+
+o Get new Zenmap logo
+ o consider putting back on top-right of command constructor wizard
+ (there used to be umit logo there).
+ o Maybe that can be done after the release by soliciting ideas.
+
+o Make Zenmap splash screen
+
+o nmap.cgi web interface for Nmap
+  -- Should have "demo" mode that only allows users to scan their own addy
+
+o Create or collect some great ./configure ascii art.
+
+o Add randomizer to configure script so that a random ASCII art from
+  docs/leet-nmap-ascii-art*.txt is printed.  I think I'll start naming
+  them leet-nmap-ascii-art-submittername.txt.
+
+o Add general regression unit testing system to Nmap
+
+o Talk to Libpcap folks about incorporating (at least some of) my
+  changes from libpcap/NMAP_MODIFICATIONS.
+
+o Add --evil to set the RFC3514 evil bit.
+  ftp://ftp.rfc-editor.org/in-notes/rfc3514.txt
+  o We're not going to add this right now.
+
+o The Nmap web page is beginning to show its age.  Ah, who am I
+  kidding, it was showing its age 5 years ago :).  It could do with an
+  upgrade to XHTML+CSS.  It could also do with a whole redesign, but I
+  think that can be done as a second step after converting to
+  XHTML+CSS with roughly the same look.  Though adding a few more
+  modern touches (like hover interaction on the menu bar) wouldn't
+  hurt.  This is a moderatly big project, which will involve: o
+  Designing the new XHTML+CSS to look similar to the current HTML
+  pages, but be extensible enough that it can be redesigned in the
+  (near) future by mostly just changing the CSS and graphics.  
+    o Converting the existing Nmap pages to the new XHTML format.
+      This will likely include using open source programs and likely
+      modifying them or creating your own scripts to help with the
+      process.  To apply for this task, you need to have some web
+      development experience and an example XHTML+CSS web page you
+      have created online.
+
+o Provide an option to send a comment in scan packet data for target
+  network.  Examples: --comment "Scan conducted by Marc Reis from
+  SecOps, extension 2147" or --comment "pH33r my l3eT
+  s|&lt;iLLz!  I'll 0wN UR b0x!"
+  o Note, this shouldn't be implemented yet.
+
+o I should add code to Nmap to bail if sizeof(char) isn't 1.
+  Otherwise there could be security risks if it is not one on any
+  platforms.
+
+o Consider implementing RPC scan with ultra_scan or something else.
+  Right now it is the only program using pos_scan.  On the other hand,
+  I'm not sure TCP rpc scanning is appropriate for ultra_scan.
+
+o Look at all the pcap functions, there are some like
+  pcap_findalldevs() which could be quite useful.  There are mails to
+  the Nmap list relating to suggested improvements --
+  http://seclists.org/lists/nmap-dev/2004/Apr-Jun/0024.html .
+  Actually I do indirectly use that for Windows. I wonder if they work
+  for UNIX?
+
+o perhaps each 'match' line in nmap-service-probes should have a
+  maximum lines, bytes, and/or time by which a response should be
+  available.  Once that much time (or many bytes or lines) have passed,
+  that match can be considered 'failed' and ignored in subsequent runs.
+  Once all matches are considered failed, that probe is done.  This
+  could be a useful optimization and is arguably better than the less
+  granular 'totalwaitms'.  Or I could just have a simple function that
+  looks at whether a given regex could possibly match something
+  starting with the received data (not too hard since almost all of
+  the current regexes are anchored).  But before doing this, I should
+  look long and hard at how many of the probes have every match
+  capable of doing this.  In particular, many of the softmatch lines
+  don't offer many chars anchored at the front.
+
+o Add detection of duplicate machines via IP.ID uber-technique.
+   Maybe I should use uptime timestamps too.  Oh, and MAC addresses too.
+
+o Separate nbase into its own Windows library in the same way as Andy did
+   with iphlpapi .
+
+o Look into iplog ( http://ojnk.sourceforge.net/ ) -z option which is 
+  supposed to fool OS detection.
+
+o security audit of Nmap code
+
+o Nmap / Nmap-hackers FAQ
+
+o random tip database
+
+DONE:
+
+o Update CHANGELOG for latest changes [Fyodor]
+
+o Release 4.85BETA10
+
+o [NSE] Open proxy detection scripts
+  o We have http-open-proxy.nse, but we should probably either extrand
+  that to handle other types of proxies (such as SOCKS and HTTP
+  CONNECT) or create more scripts to handle those other proxy
+  types. [Joao, David]
+  o Joao has written scripts, just need to finish up, evaluate, integrate.
+
+o Determine whether zenmap.spec.in can currently require
+  "python-sqlite" rather than "python-sqlite2", or if it at least can
+  be easily made to do so. The former seems more compatible since
+  RHEL/CentOS 5.3 has a "python-sqlite" package, but not
+  "python-sqlite2".  Meanwhile, Fedora 10 provides the "python-sqlite"
+  capability as long as you have the Python 2.5 package installed
+  (python-2.5.2-1.fc10).  Fedora 10 does also make a
+  python-sqlite2 package available.
+
+o [Ncat] Solve EOF issues which crop up when piping to an external
+  command. See http://seclists.org/nmap-dev/2009/q2/0528.html. It
+  sounds like we will go with Daniel's patch [Daniel, David]
+
+o Look into building RPMs with SSL support. Statically linking to
+  OpenSSL on Linux for the RPMs didn't work for me last time I
+  tried. [Fyodor]
+  o Static linking of Nmap to OpenSSL does not seem to work on Fedora
+    10 or CentOS 5.3.  The problem appears to relate to the OpenSSL
+    krb5 support.
+  o Could build my own OpenSSL libraries on the build system
+    (w/o Kerberos support) and link to those.
+  o At some point, we might want to consider including OpenSSL with
+    Nmap tarball.  The problem is that it is rather big.  Would
+    increase Nmap .tar.bz2 size from about 9 megs to about 12.  OTOH,
+    OpenSSL is only going to get more and more important.  Maybe we
+    can include a stripped down version?
+  o If we don't integrate OpenSSL (or until we do), we might consider
+    a more prominent configure warning for when SSL is not detected.
+    We could suggest that users run "yum install libopenssl-devel" or
+    "apt-get install libssl-dev" commands or whatever is appropriate
+    and then reconfigure.  Or we could point them to a page or
+    nmap-dev posting URL with instructions.
+
+o Figure out why I [Fyodor] get a bunch of "Operation not permitted" errors
+when I launch a scan on SYN such as: 
+  - I'm going to ignore this for now unless it causes me trouble
+  again, as this is an old machine that will be replaced soon anyway.
+  And we haven't been hearing of the problems from others lately.
+   /home/fyodor/nmap-exp/fyodor-perf/nmap -nogcc -T4 -n -v -p- --portpingfreq 250 -oA /home/fyodor/nmap-misc/logs/WorldScan/portpingfreq/logs/portpingfreq-250-1%T-%D 67.15.236.34 67.15.236.36 81.174.236.66 81.174.236.119 170.140.20.160 170.140.20.174 202.138.180.9 202.138.180.17 202.138.180.132 209.20.64.112
+   The errors look like:
+sendto in send_ip_packet: sendto(7, packet, 44, 0, 170.140.20.174, 16) => Operation not permitted
+Offending packet: TCP 64.13.134.4:59820 > 170.140.20.174:59120 S ttl=39 id=19927 iplen=44  seq=2425535549 win=4096 <mss 1460>
+sendto in send_ip_packet: sendto(7, packet, 44, 0, 67.15.236.36, 16) => Operation not permitted
+Offending packet: TCP 64.13.134.4:59820 > 67.15.236.36:15030 S ttl=57 id=50640 iplen=44  seq=2425535549 win=2048 <mss 1460>
+Discovered open port 49394/tcp on 170.140.20.174
+sendto in send_ip_packet: sendto(7, packet, 44, 0, 170.140.20.174, 16) => Operation not permitted
+Offending packet: TCP 64.13.134.4:59819 > 170.140.20.174:8256 S ttl=48 id=38510 iplen=44  seq=2425601084 win=1024 <mss 1460>
+   May be related to connection tracking and high scan rates. See
+   http://seclists.org/nmap-dev/2008/q4/0652.html
+   http://www.shorewall.net/FAQ.htm#faq26
+   Others have reported similar issues even without connection tracking.  See
+   http://seclists.org/nmap-dev/2006/q3/0277.html
+   http://seclists.org/nmap-dev/2007/q2/0292.html
+
+
+o -PO1 and "-sO -p1" seem to send ICMP ping packets with an ICMP ID
+  field of 0, which we found that a small percentage of hosts drop
+  (61.13% responded with 0, 62% with a random value).  So we might as
+  well randomize them in these cases. [Josh Marlow]
+
+o Some of the -PS443 scans (and maybe other ones) we've been running
+  have been missing the Nmap line telling how many packets were
+  sent/received, even though we had verbose mode. [David/Josh]
+
+o Deal with Ncat newline problem.  See this thread:
+  http://seclists.org/nmap-dev/2009/q2/0325.html [David,Jah]
+
+o Integrate SCTP scanning support.  See Daniel Roethlisberger's branch
+  in nmap-exp/daniel/nmap-sctp.  As of 4/30/09, he is nearing
+  completion.  See http://seclists.org/nmap-dev/2009/q2/0270.html.
+
+o [NSE] Release mutexes upon script death to prevent certain deadlocks
+  [Patrick, David]
+
+o Consider whether to let Zenmap Topology graph export the images to
+  svg/png/etc.  Also think about printing.  Note that João Medeiros
+  has written a Umit patch to do this: [Joao, David]
+  http://trac.umitproject.org/ticket/316.
+  - Now he has Nmap patch:
+    http://seclists.org/nmap-dev/2009/q2/0409.html
+  - Consider integrating.
+  - Integrated!
+
+o Ensure that when I build a distribution package on UNIX (e.g. make
+  distro), it builds what is in the Nmap directory I am calling it
+  from rather than a particular SVN version.  I'm going to start
+  building packages from a special "clean" directory which is
+  different than the one I do development work in.  Also, I want to be
+  sure that any changes in that dir are included in the release, even
+  if they aren't check in yet. [Fyodor]
+
+o Nmap UNIX distro build script should regenerate script.db. [Fyodor]
+ o Now it is in make prerelease
+
+o Nmap build system should be split into [Fyodor]
+ o prerelease -> generates version files, man pages, script.db
+   etc. That has to be done on one system, and then results checked in
+   before doing a make release.  It does this stuff based on the
+   directory it is run in rather than some set dirname or a pure SVN
+   version
+ o release-tarballs -> does any system-dependent building and creates
+   the source tarballs.  It does this stuff based on the directory it
+   is run in rather than some set dirname or a pure SVN version
+ o release-rpms -> Same as above, but also uses the created tarballs
+   to build the Linux RPM binaries for the current platform based on the
+   tarballs.
+
+o Build x86 and x86-64 VM instances for RPM building. [Fyodor]
+ * I think I'll use CentOS 5.3
+
+o [NSE] Script scanning does not seem to work on Fyodor's Linux
+  machines after being installed from latest SVN (or 4.85BETA9) and run
+  as a non-root user (it works fine as root).  The command "nmap -sC
+  localhost" leads to NSE failure messages which differ based on the
+  exact version run. [Was a relatively simple permissions problem in
+  our Makefile.in -- I fixed it]
+
+o [NSE] Release socket locks on connection failure or
+  timeout. [Patrick]
+
+o Update Nmap entry on Linux Online -
+  http://www.linux.org/apps/AppId_1979.html
+  - Screw it, the site does not seem to be maintained at all.  They
+  aren't taking updates as of 6/2/09, and even Firefox shows latest
+  update as 0.9.1.
+
+o [Ncat] In verbose mode, print when an SSL connection is established
+  successfully and give the leaf certificate hash to make it easier to
+  verify when connecting to a machine where you can't or don't want to
+  use --ssl-verify (e.g. connecting to an ncat ssl server where it
+  created its own key).  While we're at it, we might want to print
+  some other information from the leaf node, such as organizationName
+  and maybe localityName, countryName or something.  We don't want to
+  be too verbose, but 1 line would be great and 2-3 might be
+  acceptable. [David]
+
+o Fix NSEdoc to better escape single-quotes in fields.  If we can't do
+  that for some reason, we need to document it better.  For example,
+  when we initially tried generating nsedoc for
+  http-webdav-unicode-bypass.nse, NSEdoc was listing it as a module
+  named "s auxiliary module", apparently because this line exited in
+  the description field:
+  This module is based on Metasplit's auxiliary module, modules/auxiliary/scanner/http/wmap_dir_webdav_unicode_bypass.rb. 
+  (For full example, see scripts/http-webdav-unicode-bypass.nse
+  r13345) [David/SoC]
+
+o --script-args should allow a wider range of characters, and should
+  give a more useful error message if it receives chars it really
+  can't handle for some reason.  For an example, try
+  "--script-args=smbuser=admin,smbpass=pass^word".  For more details,
+  see Ron's report at
+  http://seclists.org/nmap-dev/2009/q2/0378.html.
+
+o [Ncat] Have --ssl-cert and --ssl-key send a certificate in connect
+  mode so that client certificate auth can be done. [David/Venkat]
+
+o Once we're done with host discovery empirical research, add it to
+  host-discovery.xml.  Would be great to show the best combinations to
+  use for a given number of probes, the efficiency of the common probes
+  by themselves, etc.
+
+o Consider making the ping scan default be more comprehensive.  Note
+  that I got 23% more Internet boxes found out of a 50K sample (see host
+  enumeration chapter of my book for details).  Maybe I should
+  experiment a bit more to ensure they are real boxes and not network
+  artifacts and figure out exactly which tests are helping the most.
+  If I do this change, I'll have to update the host enumeration
+  chapter.  For UDP probing purposes, we should test whether including
+  extra data in the packet (e.g. --data-length) helps in general, and
+  for services such as 53 and 137, we should probably send proper
+  protocol headers (e.g. a DNS server status message) so that we
+  receive responses from listening services.
+
+o We should probably check for a system Lua in a "lua5.1" directory
+  rather than just "lua", as Debian and also my Fedora 10 systems seem
+  to have that.  See
+  http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=527997. [Note,
+  Fyodor asked the bug reporter Jan Nordholz on 5/14/09 if he could
+  write a patch. Jan sent in a patch, it worked, Fyodor checked it in.]
+
+o [NSE] Get rid of ceil so that floating point NSE runlevels work
+  again (some scripts, including (smb-brute) rely on this.  They got
+  broken with the NSE core lua rewrite. [David].
+
+o NSE script logical operator stuff is now documented in
+  scripting.xml--add to refguide.xml as well. [David/Patrick]
+
+o [NSE] Correct nsock_connect to unlock the socket slot if the
+  connection fails.  When a socket is closed, it is unlocked so the
+  arbitrator can potentially open up a socket for another thread. But
+  Patrick discovered that a socket is not automatically unlocked when
+  a connection fails or times out, only when it is closed
+  explicitly. So that could hold up socket allocation for other
+  threads until garbage collection.  May be a cause of slowness or
+  possibly deadlocks. [Patrick]
+
+o [NSE] Solve segfault issue which occurs when Nsock events call back
+  on a thread that has already ended (e.g. timeout, crash, early exit,
+  whatever) and been garbage collected.  May want to just nsi_delete
+  all nsock sockets immediately upon thread ending.  For an example of
+  this type of segfault, see
+  http://seclists.org/nmap-dev/2009/q2/0289.html. David says " I think
+  in the interests of getting this in a stable release, we should use
+  that strategy of closing all a thread's sockets. That ought to fix
+  all the problems above.  Not to rule out a more thoughtful redesign
+  in the future." [David,Patrick]
+
+o We added the SEQ.CI value in Feb 2009 with 0 matchpoints.  At some
+  point (once we have some real-life values) we need to evaluate whether
+  we want to give it points.  A good time to do that would be when we
+  next do fingerprint integration, so we will actually have examples
+  of .CI in the nmap-os-db. [David]
+
+o [NSE] Make it a warning rather than error if a script in script.db
+   can't be found. [Patrick]
+
+o Add version detection signature for Ncat chat once we finalize the
+  announce format. [David]
+
+o Change Nmap signature files to use the .sig extension rather than
+  .gpg.txt, as that seems to be what gpg recommends.  In fact, gpg
+  will automatically verify the right file if it exists after dropping
+  the .sig (or .asc) extension.  I may need to configure .htaccess to
+  serve .sig files properly.  Update nmap-install.xml
+  accordingly. Suggested by tic at eternalrealm.net by email on
+  7/13/08. [Fyodor]
+  * Rename existing files, add symlink from the old .gpg.txt to .asc
+    versions
+  * Add appropriate .htaccess content type if needed for downloads
+   - not needed since I decided on .asc extension rather than .sig
+  * Update the generation scripts
+  * Update the book documentation -
+    http://nmap.org/book/install.html#inst-integrity
+
+o Ask Coverity if they'll scan latest version of Nmap. [Fyodor asked
+  David Maxwell on 5/14/09 ]
+
+o Make 4.85BETA9 release [Fyodor]
+
+o [Zenmap] Make a way to start a scan from the profile editor without
+  creating a profile, then remove the command wizard.  This is partial
+  implementation of
+  http://www.bamsoftware.com/wiki/Nmap/ZenmapCommandLine. [David]
+
+o [Ncat] Make proxy server mode work on Windows (this is the last
+  remaining fork() dependency in Ncat).
+
+o Do an OS detection integration run -- last was based on
+  1/8/09. [David]
+
+o [Ncat] Maybe we should create an SSL cert with no passphrase during
+  Ncat compilation or install process so that if someone specifies
+  Ncat -l and --ssl with no --ssl-cert and --ssl-key, we already have
+  one for them, and it is a slightly better one (since the private key
+  isn't known) than if we distributed a key.  Obviously it is still
+  subject to MITM attacks since there is no domain validation going
+  on.  But people who need that will have to buy a key from a
+  certificate authority in any case.  We could create the key by using
+  the "openssl" command line tool as shown in
+  http://nmap.org/ncat/guide/ncat-advanced.html#ncat-ssl, or maybe
+  better to have a way for ncat to do it using openssl calls. [David]
+
+o [Zenmap] Should probably give some sort of widget indication that a
+  scan is running.  Now that we can start multiple scans at once, the
+  "scan" button goes back to being unpressed while the scan is
+  running.  As some scans take minutes or more to show output, it is
+  not always clear whether they are still properly running.  We should
+  probably have some sort of widget, such as the throbber used in web
+  browsers, to show that Nmap is still running.  It could be fore a
+  specific scan (kind of like how you have a separate throbber for
+  each tab on a web browser), or a global one which means at least one
+  scan is running.  Or maybe a different sort of indication is in
+  order (like a timer). [David]
+
+o Further investigate Nmap Proxy patch by Zoltan Panczel and Ferenc
+  Spala.  See http://nmap-dev.fw.hu/ and
+  http://seclists.org/nmap-dev/2009/q1/0255.html . [Discussed it and
+  then added new proxy feature item]
+
+o Wherever practical, fix compiler warnings when compiling Nmap with
+  VC++ 2008 Express SP1 (there aren't many). [David]
+
+o [NSE] Consider adding boolean expressions to --script arguments.  For
+  example, see Patrick's implementation at
+  http://seclists.org/nmap-dev/2008/q3/0300.html .
+
+o Generate a list of trusted SSL certificates to ship with Ncat (by
+  extracting f rom Mozilla or similar), and install them with
+  Ncat. Decide how these certificat es should be preferred to any
+  system-provided certs, if any. [David]
+
+o [NSE] Add desired SoC09 infrastructure ideas to this TODO to the
+  extent they don't already exist.
+
+o [Ncat] Consider supporting server certificate verification when used
+  in client SSL mode.
+  o For now we document in user's guide that it is not secure.
+  o Maybe we can do an ssh-style approach where we just print the
+    fingerprint and expect the ncat client user to ensure it is the
+    right one?
+  o If we're going to verify cert's etc., we need to also make sure we
+    are actually using secure ciphers.  We may need to update nsock to
+    support cipher selection, because we want fast ones for version
+    detection, but usually want secure ones for NSE and/or ncat.
+  o Do we want to check all this by default, or offer an option for
+    it?  Doing it by default is more secure, though it can be annoying
+    when a certificate has expired, is self-signed, you connect to
+    domain.com when the certificate is for www.domain.com, etc.  If it
+    is done by deault, we might just print an error message.  Whreas
+    if we have a special option, it may be OK to exit and refuse the
+    connection.
+  o What certs should we allow?  Same as the browsers do?  Maybe get
+    rid of Comodo?  Maybe we should fail to recognize any certs with MD5
+    in the trust chain?
+  o What about people who are running their own SSL service and just
+    want to specify the cert file they use, because they generated it
+    themself and not from a trusted CA.
+  o Need to check expiration, domain, etc. if we're checking certs at
+    all.
+  o We can probably get away with not doing revocation checking, as
+    long as we document that we don't.
+
+o consider changing status field from "up" and "down" to "online" and
+  "offline".  Actually, maybe we don't want this after all.
+  online/offline look pretty similar, and they're longer too.  I'm
+  taking this out of the TODO.
+
+o [Ncat] When acting as an HTTP proxy, we should support GET mode as
+  well as CONNECT so that it works as a non-SSL proxy in browsers such
+  as firefox. [David]
+
+o Finalize GSoC applicant research, communication, and selection
+  [David, Fyodor]
+
+o Go through all the SoC applicants and decide who we want to accept
+  and start communicating with them. [David,Fyodor]
+ o Decide which applicants we want, and who would be best for
+    mentoring them.
+
+o Document that U1.RID gives "G" as long as all the data bytes in the
+  echoed response data are "C" as expected.  This G code is still
+  given even when the response is truncated, including if there are 0
+  bytes echoed. [David]
+
+o [Ndiff] Rethink the output format. David says: In particular, I
+  would like to always have the old state on the left and the new
+  state on the right: "was filtered, is open," not "is open, was
+  filtered." I also like the context diff output of MadHat's
+  nmap-diff. [David]
+
+
+o Canonicalize the "host up" messages for port scan and ping scan so
+  that instead of things like "Host scanme.nmap.org (64.13.134.52)
+  appears to be up ... good." we standardize in both cases on
+  something like: "Host scanme.nmap.org (64.13.134.52) is up (.75s
+  latency)".  Note the addition of the latency value, which is our
+  srtt value for the host.  This will only show in ping scan and
+  verbose port scan because the line doesn't appear without verbose
+  mode. [David]
+
+o Ping scans always seem to say "0 [hosts] undergoing Ping Scan" when
+  you request stats, rather than the proper number.  For an example,
+  try a command such as "nmap -iR 10000 -sP -n" and then press enter
+  during the scan.  Here are some examples of the bad output: Stats:
+  25:34:33 elapsed; 991232 hosts completed (72530 up), 0 undergoing
+  Ping Scan Ping Scan Timing: About 53.69% done; ETC: 22:49 (0:00:09
+  remaining) Stats: 0:01:10 elapsed; 0 hosts completed (0 up), 0
+  undergoing Ping Scan Ping Scan Timing: About 24.03% done; ETC: 22:42
+  (0:03:41 remaining) Stats: 0:03:28 elapsed; 4096 hosts completed
+  (284 up), 0 undergoing Ping Scan Ping Scan Timing: About 3.06% done;
+  ETC: 22:44 (0:03:07 remaining) [David]
+
+
+o Remove obsolete tests from nmap-os-db itself. [David]
+
+o Prepare for Summer of Code
+ * Brainstorm for ideas
+ * Create new ideas page
+ * Apply to participate in program again
+ * Advertise for applicants
+ * Evaluate applicants
+
+o NSEDoc script/module documentation pages should probably provide a
+  link to the script/module source code (except for C modules).  The
+  link format should probably be of the form
+  http://nmap.org/data/scripts/[script].nse and
+  /data/nselib/[module].lua.  NSEdoc can assume they already exist
+  there, as we'll probably put them there using the same system we use
+  to copy other stuff to the data dir.
+
+o [Ncat] Let people set up authenticated proxies using
+  --listen and --proxy-auth together (right now we don't support
+  that). [David]
+
+o When you specify multiple comma-separated arguments to --script,
+  those arguments seem to get lost when the Nmap command is printed in
+  Nmap's output files.  For example, I run the command:
+  nmap -oN - --script=discovery,intrusive scanme.nmap.org
+  The output includes:
+  # Nmap 4.85BETA4 scan initiated Thu Mar 26 15:40:05 2009 as: ./nmap
+    -oN - --script=discovery scanme.nmap.org
+  Note the missing ",intrusive" in the script argument. [David]
+
+o Merge patrick/nse-lua-merge for easier-to-maintain and simpler
+  codebase once David and Patrick are happy with it. [David]
+
+o SVN check out /nmap as an external in a directory named svn or src
+  or nmapsvn or something under nmap.org web tree.  Then redirect the
+  individual nmap.org/data/ files, where needed, to the nmapsvn
+  instead.  and update nmap-dev Makefile not to copy them to the
+  /data/ dir anymore. Then update the nsedoc system to generate proper
+  links to the new script/nselib locations. [Fyodor]
+
+o Improvements to presentation of version detection
+  information. [Brandon]
+  o Allow longer strings.  Right now it can be 128 chars for the
+    fullversion info, I think.  But that isn't enough for this useful
+    information-packed string: "Apache httpd 2.0.52 ((Red Hat)
+    mod_perl/1.99_16 Perl/v5.8.5 DAV/2 mod_jk/1.2.19 PHP/4.3.9
+    mod_python/3.1.3 Python/2.3.4 mod_ssl/2.0.52 OpenSSL/0.9.7a)".
+    After discussion w/Brandon, we're going to allow 160 chars total.
+  o Instead of omitting all information when version info string too
+    long, we're going to truncate and allow 157 characters, plus
+    ellipses (...)
+  o Brandon says: "my final gripe is that the full version string is
+    constructed as <product><space><version><space>(<extrainfo>).
+    but, even if product or version are blank, the spaces are still
+    there"
+
+o I need an output-autoflush option of some sort.  This could be
+  useful to ensure I get all the --packet_trace and debug data before
+  Nmap crashes.  Actually, I'm not sure that is so critical.
+  o Killing it for now, not sure that it even is needed.
+
+o Fix the directory function(s) in nse_fs.cc to be usable by scripts and
+  improve flexibility. [this entry added by Patrick]
+
+o [Ncat] The sys_wrap.c/.h code contains a whole bunch of capitalized
+  versions of system calls (Fork(), Socket(), Sscanf(), etc.) which
+  are mostly the same as the standard version except that they cause
+  ncat to quit if they are triggered.  They also may be used partially
+  for portability.  The main issues are:
+   1) Because the function quits in the case of errors, it doesn't
+      always have the context to print a useful error message (and
+      even when it does, it often doesn't -- for example Fopen could
+      print the filename, but doesn't.)  Also, sometimes these
+      functions are called when quitting really isn't the desired
+      outcome of an error.
+   2) Some could be replaced by code in nbase, for example, Malloc
+      basically does the same thing as our safe_malloc already used
+      throughout Nmap.
+  So we should probably consider simplifying/removing this code to the
+  extent possible.  But we need to remember to add error detection to
+  the callers where necessary rather than blindly switching from
+  (e.g.) Connect() to connect(). [Kris or David]
+
+o With --version-trace (may be a problem with other uses of nsock
+  tracing too), I often get dozens of "wait_for_events" reports in a
+  row in a very short period, flooding the logs.  For example, with
+  the command "nmap -sV --version-trace www.google.com", I get:
+  NSOCK (22.3570s) Callback: WRITE SUCCESS for EID 283 [74.125.19.147:443]
+  NSOCK (22.3570s) msevent_delete (IOD #4) (EID #283)
+  NSOCK (22.3570s) wait_for_events
+  NSOCK (22.3570s) wait_for_events
+  NSOCK (22.3570s) wait_for_events
+  NSOCK (22.3570s) wait_for_events
+  NSOCK (22.3570s) wait_for_events
+  NSOCK (22.3570s) wait_for_events
+  NSOCK (22.3570s) wait_for_events
+  NSOCK (22.3570s) wait_for_events
+  NSOCK (22.3570s) wait_for_events
+  [Goes on for pages]
+
+o NSE memory issues (and gh_list assert failure) [David]
+  o See this thread: http://seclists.org/nmap-dev/2009/q1/0532.html
+  o We're taking this out for now since the new nse-lua-merge
+  tenatively looks like it fixes this.
+
+o [Ncat] Why does Ncat require enclosure in a while loop to answer
+  repeated UDP queries, but not TCP?  For example, see the "Emulating
+  Diagnostic Services" section of the Ncat user's guide.
+  o Note: http://seclists.org/nmap-dev/2009/q1/0133.html
+
+o Determine what we should do about the IE.DLI OS detection test [David]
+  o All of the 1656 results for this test in nmap-os-db are DLI=S.
+    o Is the test not working right (producing the proper results
+      against targets), or is it just a generally useless test for
+      which virtually all targets respond the same way?
+  o Are there other "useless" tests in nmap-os-db?  It is worth
+    checking, IMHO.
+  o We're going to get rid of IE.DLI, IE.SI, U1.RUL, and maybe TOS and
+    TOSI tests.
+
+o When you do ncat -h, Ncat should probably show the Nmap version
+  number rather than (currently) 0.2.  Also ncat in -v mode should
+  show that same header. [David]
+
+o Ncat verbose mode (-v) should probably only give important messages,
+  such as perhaps a message once you connect successfully to a port,
+  or a message if the connection attempt times out.  An Ncat version
+  banner (with URL) like Nmap has might be warranted (in verbose
+  mode).  Currently, Ncat floods you with (mostly) useless debugging
+  information like this with a single -v (this output, on the other
+  hand, might be useful for a debugging option): [David]
+  # ncat -C -v scanme.nmap.org 80
+  NSOCK (0.0000s) TCP connection requested to 64.13.134.52:80 (IOD #1) EID 8
+  NSOCK (0.0200s) Callback: CONNECT SUCCESS for EID 8 [64.13.134.52:80]
+  NSOCK (0.0200s) Read request from IOD #1 [64.13.134.52:80] (timeout: -1ms) EID 18
+  NSOCK (0.0200s) Read request for 0 bytes from IOD #2 (peer unspecified) EID 26
+  GET / HTTP/1.0
+  NSOCK (4.4280s) Callback READ SUCCESS for EID 26 (peer unspecified) (15 bytes)
+  NSOCK (4.4280s) Write request for 16 bytes to IOD #1 EID 35 [64.13.134.52:80]
+  NSOCK (4.4280s) Callback: WRITE SUCCESS for EID 35 [64.13.134.52:80]
+  NSOCK (4.4280s) Read request for 0 bytes from IOD #2 (peer unspecified) EID 42
+  For comparison, here is what Eric Jackson's nc (The nc available in
+  Fedora 10's package repository) shows in verbose mode for the same
+  connection:
+  # nc -v scanme.nmap.org 80
+  Connection to scanme.nmap.org 80 port [tcp/http] succeeded!
+  GET / HTTP/1.0 [David]
+
+o Final polishing of our GSoC pages. [Fyodor]
+
+o Advertise widely for Nmap GSoC applicants [Fyodor]
+
+o [Ncat] We should (maybe) consider a way for people to choose
+  usernames in --chat.
+  o Removing this for now.  We can add it back if we decide we really
+    want this.
+
+o Deal with new Python 2.6 Zenmap build warnings:
+  C:\Python26\lib\site-packages\py2exe\build_exe.py:16: DeprecationWarning: the sets module is deprecated
+  import sets
+  http://sourceforge.net/tracker/index.php?func=detail&aid=2314799&group_id=15583&atid=115583
+  [Bug in py2exe, will probably be fixed with a new version of py2exe
+  once it is released and we upgrade.  This isn't causing us any major
+  problem anyway.]
+
+o When I scan large groups of hosts with OS detection enabled, I get
+  groups of warnings like:
+  Insufficient responses for TCP sequencing (0), OS detection may be less accurate
+  Insufficient responses for TCP sequencing (0), OS detection may be less accurate
+  Insufficient responses for TCP sequencing (0), OS detection may be less accurate
+  Insufficient responses for TCP sequencing (0), OS detection may be less accurate
+  Insufficient responses for TCP sequencing (0), OS detection may be less accurate
+  Note how it doesn't even tell the relevant IP address, and it isn't
+  included in an individual host section.  We should probably either
+  include it in the section for an individual host, like we do with
+  "OSScan results may be unreliable because we could not find at least
+  1 open and 1 closed port", or (not quite as
+  good) include the relevant IP address in the error message.  And we
+  may or may not want to require verbose mode.
+
+o Ncat chat should bomine the "already connected" user list into one
+  line, like:
+  <announce> already connected: 69.232.238.42 is connected as <user5>, 206.81.65.43 as <user4>, 69.232.238.42 as <user6>
+
+o [Ndiff] Maybe Ndiff should display changes to version detection and
+  OS detection information? [David]
+ o Version detection done, now just needs OS detection.
+
+o When I start ncat chat with this tcsh command:
+  ncat -l --chat scanme.nmap.org < /dev/null >& /dev/null &
+  The first client to connect to the chat becomes user0 and doesn't
+  work quite right.  Messages user0 type get transmitted to other
+  clients, but user0 does not see their messages.  Nore does user0 get
+  the normal connection announcement upon connecting.  If I quit
+  user0, the next client to connect becomes user0 again and has the
+  same problem.  If I start ncat on the server with "ncat -l --chat
+  scanme.nmap.org" (no redirection), other clients can connect with no problems.
+
+o Ncat --chat should probably announce to everyone (including the new
+  person) when someone connects.  This tells the new person their
+  username, and lets everyone else know about the new connection. [David]
+  o We should also tell the new person (and possibly everyone on the
+   channel) the list of existing participants.
+
+o SoC ideas page [Fyodor]
+
+o Nmap 4.85BETA4 release [Fyodor]
+
+o [Ncat] Wouldn't it be nice if we could support --exec (and maybe
+  some sort of partial-emulated --sh-exec) on Windows? [David]
+  o Almost working!  We found some problems with "ncat.exe -v -l
+  --sh-exec "ncat -v scanme.nmap.org"
+
+o [Ncat] Can we use it as an IPv4 <-> IPv6 gateway?  If so (or if we
+  can add it), it should be added to the ncat guide feature list.
+  o Yes, David tried it with --sh-exec and it worked.
+
+o [Ncat] We should probably make it work without OpenSSL.  When I try
+  ./configure --without-openssl on latest svn Nmap, Ncat build fails
+  with:
+       gcc -MM -I../libpcap -DHAVE_CONFIG_H -D_FORTIFY_SOURCE=2 -I. -I.. -I../nsock/include/ -I../nbase ncat_main.c ncat_connect.c ncat_core.c ncat_listen.c ncat_proxy.c ncat_broker.c ncat_hostmatch.c ncat_ssl.c util.c sys_wrap.c > makefile.dep
+       make[2]: Leaving directory `/mondo/fyodor/nmap/ncat'
+       make[2]: Entering directory `/mondo/fyodor/nmap/ncat'
+       gcc -I../libpcap -DHAVE_CONFIG_H -D_FORTIFY_SOURCE=2 -I. -I.. -I../nsock/include/ -I../nbase  -c ncat_main.c -o ncat_main.o
+       ncat_main.c: In function ‘main’:
+       ncat_main.c:536: error: ‘struct options’ has no member named ‘ssl’
+       ncat_main.c: In function ‘ncat_listen_mode’:
+       ncat_main.c:646: error: ‘struct options’ has no member named ‘ssl’
+       ncat_main.c:646: error: ‘struct options’ has no member named ‘sslcert’
+       ncat_main.c:646: error: ‘struct options’ has no member named ‘sslkey’
+       make[2]: *** [ncat_main.o] Error 1
+       make[2]: Leaving directory `/mondo/fyodor/nmap/ncat'
+       make[1]: *** [ncat_build] Error 2
+       make[1]: Leaving directory `/mondo/fyodor/nmap'
+       make: *** [static] Error 2
+
+o [Ncat] Defensive coding review of Ncat --chat (talk)
+
+o [Ncat] As SSL server it should not crash when someone connects in
+  w/o SSL and does ^C.  When David tried it during our chat, the ncat
+  servr "ncat --broker --ssl-key test-key.pem --ssl-cert test-cert.pem
+  --ssl --chat -l"  crashed with: SSL_accept():
+  error:00000000:lib(0):func(0):reason(0).  Also, when a Windows SSL
+  clients joined and then left, the server died with "Broken pipe
+
+o [Ncat] --chat should probably only allow reasonable chars, to avoid
+  cntrl-chars, etc.
+
+o Nmap should treat ports named "unknown" in nmap-services the same
+  way (from a naming perspective) as it treats ports which are not
+  listed at all.  See http://seclists.org/nmap-dev/2009/q1/0589.html.
+
+o Ncat user guide "Emulating Diagnostic Services" page has a very long
+  UDP chargen server line which causes wrapping problems in web browsers
+  (e.g. it widens the page substantially).  It should probably be
+  split into multiple lines. [David]
+
+o Ncat user guide proxying section says "The only exception is when
+  listing a proxy host by IPv6 address; then the port is required."
+  Why would we require a port number for IPv6 rather than just use the
+  same defaults as we do for IPv4?
+  [David explained that this is because to do otherwise would be
+  ambiguous because IPv6 uses : for separaters, so we wouldn't know
+  how to handle things like FF::10:80]
+
+o [Ncat] Perhaps we should make --ssl work in --chat.  If nothing
+  else, it might be useful if you want to reduce the number of people
+  connecting with telnet, etc. rather than ncat.
+
+o [Ncat] --talk should probably be changed (in the code and
+  documentation) to --chat, as Ncat chat has a
+  much nicer ring to it, IMHO.  --talk should remain as an alias to
+  --chat, but we don't need to document it. [David]
+
+o Ncat Windows issue where you make a connection and then take several
+  seconds to type in a line to the server, Ncat wrongly times out when
+  trying to write your line to the remote server. [David]
+
+o Ncat write timeout problems cause client to quit due to write
+  timeout sometimes. [David]
+  Examples:
+   o yes | ncat localhost
+   o when we paste a few lines into the terminal window in an Ncat chat
+
+o Defensive coding review of ncat_proxy.* [David]
+
+o Process the latest version detection submissions.  We now have more
+  than 1,700 of them queued up. [Doug]
+
+o Write Ncat users' guide, demonstrating all the neat stuff you can do
+  with it.  This should probably be in DocBook XML so it can be an NNS
+  chapter.  You might want to query nmap-dev for list of neat things
+  people do with ncat (or look around for what people do with nc).
+  Testing it out for examples might expose areas for improvement as
+  well. [David]
+
+o Look at Dario Ciccarone's email from 5/1/07 about IPID sequence
+  issues, and consider adding IPID sequence test for closed-port-tcp as
+  they apparently can be different. [David]
+  o Also fix bug which causes SEQ to not be printed if the TCP open
+    port tests fail to produce results, even though the II and
+    (upcoming) CI tests may have useful results. [David]
+
+o NSE should offer some way to sleep/yield for a given amount of
+  time.  This would allow other scripts to run while a script has
+  nothing to do.  Possible uses:
+  o Many services have rate limits (or you might just want to use them
+    for politeness).  For example, a web site spidering application
+    might want to limit HTTP requests to some number per second to avoid
+    pissing off the target webmaster more than is necessary (or prevent
+    getting auto-blocked).  Similarly, whois servers often will block
+    IPs which query them too often in a short period.  Or maybe you
+    don't want to exceed the threshold limits of an IDS.
+  o Example current scripts which might benefit: sql-injection, whois
+    (possibly), pop3-brute, etc.
+  o If we don't currently have a way for a cpu-bound NSE script to
+    yield, then perhaps this could help us implement such a mechanism.
+    But maybe coroutine.yield already does the trick.
+  o The mechanism needs to be documented, and ideally should be
+    implemented in at least one of the scripts shipped with Nmap.
+
+o Consider adding a way for requesting timing status updates at a
+  given interval (such as every 5 seconds) to XML and/or normal
+  output.  This would be useful for people who run Nmap from scripts
+  or other higher level applications. [David]
+
+o Ncat --allow/--deny bug: "--allow and --deny only support host
+  specification by IP address, and give no warning when you use
+  another form such as a host name." Should probably use same syntax
+  as --exclude. We also want to at least do verification at the
+  beginning to make sure all the entries are legitimately formed.  We
+  probably want to do things like DNS resolution at the beginning
+  too. Otherwise we might have a DNS failure when we actually get a
+  connection and perhaps have to reject the connection wrongly, or
+  risk a false negative.  [David]
+
+o Fix this overflow:
+  Stats: 93:57:40 elapsed; 254868 hosts completed (2048 up), 2048 undergoing UDP Scan
+  UDP Scan Timing: About 11.34% done; ETC: 03:21 (-688:-41:-48 remaining)
+  [Done by David and Henri Doreau]
+
+o Ncat -- perhaps connection brokering should support UDP as well as
+  (its existing support for) TCP?  Actually this does raise issues
+  such as deciding what list of UDP systems to forward a packet too.
+  Its obviously not like TCP where you have a list of open
+  connections.  Ncat could build such a list, but, for example, would
+  never know when to remove the host.  For now, David is just going to
+  adjust the error message to encourage people to email nmap-dev
+  describing their usage scenario if they want this feature.
+
+o Ncat documentation should note that no SSL certificate verification
+  is done (maybe we should offer an option to do so, if OpenSSL makes
+  that easy).
+  o Done in the new Ncat user's guide
+
+o Fix dns-zone-transfer infinite recursion bug described at
+  http://seclists.org/nmap-dev/2009/q1/0317.html.  It sounds like the
+  best approach is to use our dns.lua library rather than having
+  dns-zone-transfer do its own DNS packet parsing.
+
+o Fix XML escaping issue so that improper chars from NSE scripts or
+  elsewhere can't cause corrupt XML files.  See
+  http://seclists.org/nmap-dev/2009/q1/0316.html for an example. [David]
+
+o Look into whether we should increase the frequency of port scan
+  pings.  See http://seclists.org/nmap-dev/2008/q1/0096.html . Note
+  that Fyodor already increased them a bit in 2008.  Might not need
+  more.  [David did extensive testing of this one already]
+
+o Find way to document NSE library script arguments and perhaps have
+  them bubble up to scripts themselves.  For example, I had to read
+  the SNMP library source code to determine the script argument to
+  specify the SNMP community name for snmp-sysdescr
+  (http://nmap.org/nsedoc/scripts/snmp-sysdescr.html).  Maybe we could
+  just standardize on something like we do with SMB library and the
+  scripts which call it (http://nmap.org/nsedoc/modules/smb.html,
+  http://nmap.org/nsedoc/scripts/smb-check-vulns.html). [David]
+
+o If it wouldn't bloat things too much, it would be nice to include
+  ndiff in the Nmap win32 zip distribution files.
+
+o Reported NSE crash:
+  "Assertion failed - file ..\nse_main.cc line 314
+   lua_gettop(L_script_scan) == 0"
+  o He says: "After looking at this closer, it appears the assertion
+    occurs if I include the IP where the scan is run from. For us, I'm
+    running this on IP 57, which is a VMware Windows Server image.  If
+    I eliminate that IP from the range it successfully completed the
+    scan for all other devices."
+  o Seems to be fixed.  He can no longer reproduce the problem with
+    4.85BETA3.
+
+o Deal with GTK DLL problem with Nmap 4.85BETA1: [Fyodor]
+  o David's installer seems to work--he's using a different GTK
+    distribution.  I'll try that.  Works!  Done!
+  o Details on problem: http://seclists.org/nmap-dev/2009/q1/0207.html
+  o Quick workaround done for 4.85BETA2, but better solution needed.
+
+o "SCRIPT ENGINE (250.600s): ./scripts/rpcinfo.nse against
+  a.b.c.d:<port> ended with error: ./nselib/datafiles.lua:114: attempt
+  to index global 'arg' (a nil value)"
+  -- http://seclists.org/nmap-dev/2009/q1/0227.html [Patrick]
+
+o Consider making the TODO list public
+  o Done: http://seclists.org/nmap-dev/2009/q1/0175.html
+  o Probably remove all of the "done" items since that is easier than
+    reviewing them.
+  o Might as well add to insecure.org/nmap/data/
+  o Maybe a bug tracker is a better approach.
+

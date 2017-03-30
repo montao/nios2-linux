@@ -1,0 +1,3 @@
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/fs/proc/task_mmu.c: In function 'show_smap':
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/fs/proc/task_mmu.c:474: warning: format '%8lu' expects type 'long unsigned int', but argument 14 has type 'int'
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/fs/proc/task_mmu.c:474: warning: format '%8lu' expects type 'long unsigned int', but argument 15 has type 'int'

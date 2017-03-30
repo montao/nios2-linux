@@ -1,0 +1,2 @@
+conftest.c: In function 'main':
+conftest.c:35: warning: statement with no effect

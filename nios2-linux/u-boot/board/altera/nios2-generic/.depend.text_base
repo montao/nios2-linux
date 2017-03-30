@@ -1,0 +1,8 @@
+text_base.o: text_base.S \
+  /data/dwesterg/nios2-linux/nios2-linux/u-boot/include/config.h \
+  /data/dwesterg/nios2-linux/nios2-linux/u-boot/include/config_cmd_defaults.h \
+  /data/dwesterg/nios2-linux/nios2-linux/u-boot/include/config_defaults.h \
+  /data/dwesterg/nios2-linux/nios2-linux/u-boot/include/configs/symm_ghrd_4s230gx.h \
+  /data/dwesterg/nios2-linux/nios2-linux/u-boot/include/../board/altera/nios2-generic/custom_fpga_symm.h \
+  /data/dwesterg/nios2-linux/nios2-linux/u-boot/include/config_cmd_default.h \
+  /data/dwesterg/nios2-linux/nios2-linux/u-boot/include/asm/config.h

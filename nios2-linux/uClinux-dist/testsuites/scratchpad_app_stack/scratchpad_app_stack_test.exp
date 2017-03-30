@@ -1,0 +1,66 @@
+#!/usr/bin/expect
+
+source  ../kernel_config.exp
+log_file [log_file_name "$argv0"]
+send_user "Starting $argv0\n"
+set TITLE [title "$argv0"]
+
+step "Spawn kermit"
+source ../spawn_kermit.exp
+
+step "Reboot the kernel."
+source ../reboot_kernel.exp 
+
+step "Start testing."
+sleep 10
+
+set case_num 0
+
+incr case_num
+if [ catch {exec bfin-uclinux-gcc -g -o helloworld helloworld.c -Wl,-elf2flt} ] {
+    send_user "$errorInfo\n"
+    case_fail $case_num
+} else {
+    send_user "Build helloworld done."
+    case_pass $case_num
+}
+
+incr case_num
+if [ catch {exec bfin-uclinux-flthdr -u -s 2000 helloworld} ] {
+    send_user "$errorInfo\n"
+    case_fail $case_num
+} else {
+    send_user "\nPut helloworld stack in l1 scratchpad done."
+    case_pass $case_num
+}
+
+incr case_num
+if [ catch {exec rcp helloworld root@$targetip:/} ] {
+    send_user "$errorInfo\n"
+    case_fail $case_num
+} else {
+    send_user "\nCopy helloworld to target board done."
+    case_pass $case_num
+}
+
+set timeout 5
+incr case_num
+send "/helloworld\r"
+while 1 {
+    expect {
+        -re "FAIL" {
+            case_fail $case_num
+        }
+        -re "ALL TESTS PASS.*$kernel_prompt" {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+all_pass
+send_user "Ending $argv0\n"
+log_file

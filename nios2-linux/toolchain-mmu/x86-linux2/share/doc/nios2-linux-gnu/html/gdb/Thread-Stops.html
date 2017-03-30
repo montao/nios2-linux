@@ -1,0 +1,140 @@
+<html lang="en">
+<head>
+<title>Thread Stops - Debugging with GDB</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="Debugging with GDB">
+<meta name="generator" content="makeinfo 4.8">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="up" href="Stopping.html#Stopping" title="Stopping">
+<link rel="prev" href="Signals.html#Signals" title="Signals">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<p>
+<a name="Thread-Stops"></a>
+Previous:&nbsp;<a rel="previous" accesskey="p" href="Signals.html#Signals">Signals</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="Stopping.html#Stopping">Stopping</a>
+<hr>
+</div>
+
+<h3 class="section">5.4 Stopping and Starting Multi-thread Programs</h3>
+
+<p>When your program has multiple threads (see <a href="Threads.html#Threads">Debugging Programs with Multiple Threads</a>), you can choose whether to set
+breakpoints on all threads, or on a particular thread.
+
+     
+<a name="index-breakpoints-and-threads-286"></a>
+<a name="index-thread-breakpoints-287"></a>
+<a name="index-break-_0040dots_007b_007d-thread-_0040var_007bthreadno_007d-288"></a>
+<dl><dt><code>break </code><var>linespec</var><code> thread </code><var>threadno</var><dt><code>break </code><var>linespec</var><code> thread </code><var>threadno</var><code> if ...</code><dd><var>linespec</var> specifies source lines; there are several ways of
+writing them, but the effect is always to specify some source line.
+
+     <p>Use the qualifier `<samp><span class="samp">thread </span><var>threadno</var></samp>' with a breakpoint command
+to specify that you only want <span class="sc">gdb</span> to stop the program when a
+particular thread reaches this breakpoint.  <var>threadno</var> is one of the
+numeric thread identifiers assigned by <span class="sc">gdb</span>, shown in the first
+column of the `<samp><span class="samp">info threads</span></samp>' display.
+
+     <p>If you do not specify `<samp><span class="samp">thread </span><var>threadno</var></samp>' when you set a
+breakpoint, the breakpoint applies to <em>all</em> threads of your
+program.
+
+     <p>You can use the <code>thread</code> qualifier on conditional breakpoints as
+well; in this case, place `<samp><span class="samp">thread </span><var>threadno</var></samp>' before the
+breakpoint condition, like this:
+
+     <pre class="smallexample">          (gdb) break frik.c:13 thread 28 if bartab &gt; lim
+     </pre>
+     </dl>
+
+   <p><a name="index-stopped-threads-289"></a><a name="index-threads_002c-stopped-290"></a>Whenever your program stops under <span class="sc">gdb</span> for any reason,
+<em>all</em> threads of execution stop, not just the current thread.  This
+allows you to examine the overall state of the program, including
+switching between threads, without worrying that things may change
+underfoot.
+
+   <p><a name="index-thread-breakpoints-and-system-calls-291"></a><a name="index-system-calls-and-thread-breakpoints-292"></a><a name="index-premature-return-from-system-calls-293"></a>There is an unfortunate side effect.  If one thread stops for a
+breakpoint, or for some other reason, and another thread is blocked in a
+system call, then the system call may return prematurely.  This is a
+consequence of the interaction between multiple threads and the signals
+that <span class="sc">gdb</span> uses to implement breakpoints and other events that
+stop execution.
+
+   <p>To handle this problem, your program should check the return value of
+each system call and react appropriately.  This is good programming
+style anyways.
+
+   <p>For example, do not write code like this:
+
+<pre class="smallexample">       sleep (10);
+</pre>
+   <p>The call to <code>sleep</code> will return early if a different thread stops
+at a breakpoint or for some other reason.
+
+   <p>Instead, write this:
+
+<pre class="smallexample">       int unslept = 10;
+       while (unslept &gt; 0)
+         unslept = sleep (unslept);
+</pre>
+   <p>A system call is allowed to return early, so the system is still
+conforming to its specification.  But <span class="sc">gdb</span> does cause your
+multi-threaded program to behave differently than it would without
+<span class="sc">gdb</span>.
+
+   <p>Also, <span class="sc">gdb</span> uses internal breakpoints in the thread library to
+monitor certain events such as thread creation and thread destruction. 
+When such an event happens, a system call in another thread may return
+prematurely, even though your program does not appear to stop.
+
+   <p><a name="index-continuing-threads-294"></a><a name="index-threads_002c-continuing-295"></a>Conversely, whenever you restart the program, <em>all</em> threads start
+executing.  <em>This is true even when single-stepping</em> with commands
+like <code>step</code> or <code>next</code>.
+
+   <p>In particular, <span class="sc">gdb</span> cannot single-step all threads in lockstep. 
+Since thread scheduling is up to your debugging target's operating
+system (not controlled by <span class="sc">gdb</span>), other threads may
+execute more than one statement while the current thread completes a
+single step.  Moreover, in general other threads stop in the middle of a
+statement, rather than at a clean statement boundary, when the program
+stops.
+
+   <p>You might even find your program stopped in another thread after
+continuing or even single-stepping.  This happens whenever some other
+thread runs into a breakpoint, a signal, or an exception before the
+first thread completes whatever you requested.
+
+   <p>On some OSes, you can lock the OS scheduler and thus allow only a single
+thread to run.
+
+     <dl>
+<dt><code>set scheduler-locking </code><var>mode</var><dd><a name="index-scheduler-locking-mode-296"></a><a name="index-lock-scheduler-297"></a>Set the scheduler locking mode.  If it is <code>off</code>, then there is no
+locking and any thread may run at any time.  If <code>on</code>, then only the
+current thread may run when the inferior is resumed.  The <code>step</code>
+mode optimizes for single-stepping.  It stops other threads from
+&ldquo;seizing the prompt&rdquo; by preempting the current thread while you are
+stepping.  Other threads will only rarely (or never) get a chance to run
+when you step.  They are more likely to run when you `<samp><span class="samp">next</span></samp>' over a
+function call, and they are completely free to run when you use commands
+like `<samp><span class="samp">continue</span></samp>', `<samp><span class="samp">until</span></samp>', or `<samp><span class="samp">finish</span></samp>'.  However, unless another
+thread hits a breakpoint during its timeslice, they will never steal the
+<span class="sc">gdb</span> prompt away from the thread that you are debugging.
+
+     <br><dt><code>show scheduler-locking</code><dd>Display the current scheduler locking mode. 
+</dl>
+
+   </body></html>
+

@@ -1,0 +1,138 @@
+#!/usr/bin/expect --
+
+#
+# Build Kernel for BF548-EZKIT and BF527-EZKIT USB device power test
+#
+
+source ../kernel_config.exp
+log_file [log_file_name "$argv0"]
+send_user "Starting $argv0\n"
+
+set musb_mode [lindex $argv 1]
+send_log "\n#### musb_mode is $musb_mode\n"
+
+if { $argc < 2} {
+    puts "Please input: board_type, musb_mode(pio or dma)"
+    exit
+}
+
+cd $uclinux_path/testsuites
+step "Make config."
+source make_default_config.exp
+
+cd $uclinux_path/testsuites
+step "Config musb driver"
+source make_config_musb.exp
+
+# Following make specific configuration for this case.
+cd $uclinux_path
+set timeout 300
+spawn make config
+while 1 {
+    expect {
+        -re "Customize Kernel Settings.*DEFAULTS_KERNEL.*\\\[.*]" {
+            send "y\r"
+        }
+
+        -re "Customize Application/Library Settings.*DEFAULTS_VENDOR.*\\\[.*]" {
+            send "y\r"
+        }
+
+        -nocase -re "\\\[\[^\r]*] (\\\(NEW\\\) )?(\[ymn])|choice\\\[.*]: \[0-9]+\r" {
+            continue
+        }
+
+        -re "Virtual terminal.*VT.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "USB Peripheral Controller \\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Platform Glue Layer \\\[.*]" {
+            send "Y\r"
+        }
+
+        -re " (\[0-9]+). Inventra.*USB_INVENTRA_DMA.* (\[0-9]+). Disable DMA.*MUSB_PIO_ONLY.*\[cC]hoice.*\\\[.*]" {
+            if { $musb_mode == "dma" } {
+                send "$expect_out(1,string)\r"
+            } elseif { $musb_mode == "pio" } {
+                send "$expect_out(2,string)\r"
+            } else {
+                send "\r"
+            }
+        }
+
+        -re "USB Gadget Drivers \\\[.*]" {
+            send "M\r"
+        }
+
+        -re "Gadget Zero.*USB_ZERO.*\\\[.*]" {
+            send "M\r"
+        }
+
+        -re "Ethernet Gadget.*USB_ETH.*\\\[.*]" {
+            send "M\r"
+        }
+
+        -re "RNDIS support.*USB_ETH_RNDIS.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Gadget Filesystem.*USB_GADGETFS.*\\\[.*]" {
+            send "M\r"
+        }
+
+        -re "File-backed Storage Gadget.*\\\(USB_FILE_STORAGE\\\).*\\\[.*]" {
+            send "M\r"
+        }
+
+        -re "File-backed Storage Gadget testing version.*USB_FILE_STORAGE_TEST.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Serial Gadget.*USB_G_SERIAL.*\\\[.*]" {
+            send "M\r"
+        }
+
+#Power Management
+        -re "Suspend to RAM and standby \\\(SUSPEND\\\) \\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "rtcwake.*USER_BUSYBOX_RTCWAKE.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        "\\\(*) \\\[*]" {
+            sleep .05
+            send "\r"
+        }
+
+        -re "\[cC]hoice\\\[.*]:" {
+            send "\r"
+        }
+
+        eof {
+            send_user "\nEnd of configuration\n"
+            break
+        }
+
+        timeout {
+            send_user "\n\nFATAL ERROR: config prompt timeout in make config\n\n"
+            exit
+        }
+    }
+}
+
+cd $uclinux_path/testsuites
+step "Make"
+source make_kernel.exp
+
+cd $uclinux_path/testsuites
+step "Copy linux"
+source copy_image.exp
+
+send_user "Ending $argv0\n"
+log_file

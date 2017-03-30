@@ -1,0 +1,146 @@
+#!/usr/bin/expect
+
+#
+#Test program to stress the system.
+#
+
+source ../kernel_config.exp
+log_file [log_file_name "$argv0"]
+send_user "Starting $argv0\n"
+set TITLE [title "$argv0"]
+
+step "Start kermit."
+source ../spawn_kermit.exp
+
+step "Reboot the kernel."
+source ../reboot_kernel.exp
+
+step "Start the stress testing."
+
+set case_num 0
+
+incr case_num
+
+send "ifconfig eth0 $targetip\r"
+while 1 {
+   sleep 3
+   expect {
+      ">" {
+         puts "ifconfig set success.\n"
+         break
+      }
+
+      timeout {
+            puts "Fail ifconfig. "
+            break
+         }
+     }
+}
+ 
+   log_file
+  
+   set timeout 40
+   spawn ./ftp_test.exp $targetip
+   set ftp_test_id $spawn_id
+   expect "Ftp is tested"
+ 
+   spawn ./telnet_test.exp $targetip
+   set telnet_test_id $spawn_id
+   expect "Telnet is tested"
+   
+   set timeout [expr $PING_COUNT * 1.5]
+    
+   log_file [log_file_name "$argv0"]
+   
+   set spawn_id $kermit_spawn_id
+   send -s "ping $serverip\r"
+   while 1 {
+      expect {
+	"seq=$PING_COUNT" {
+		send -s "\3"
+		break
+	}
+
+         timeout {
+                case_fail $case_num
+		exit
+         }
+      }
+   }
+
+   set timeout 5
+   while 1 {
+      expect {
+	 "> " {
+        	break
+      	}
+
+      	timeout {
+                case_fail $case_num
+		exit
+	}
+      }
+   }
+   
+   set timeout 5
+   set found 0
+   spawn /bin/sh
+   expect -re  "$sh_prompt"
+   send -s "ps a | grep ftp_test.exp | grep -v grep\r"
+   expect   "\r"
+   while 1 {
+      expect {
+	-re "defunct" {
+		set found 0
+		break
+	}
+	
+	-re "expect.*ftp_test" {
+		incr found
+                send_log "\nftp_test is running. Found is $found.\n"                
+		break
+	}
+	
+        timeout {
+	 	break
+        }
+      }
+   }
+   
+   expect -re  "$sh_prompt"
+   send -s "ps a | grep telnet_test.exp | grep -v grep\r"
+   expect "\r"
+   while 1 {
+      expect {
+	-re "defunct" {
+		set found 0
+		break
+	}
+	
+	-re "expect.*telnet_test" {
+		incr found
+                send_log "\ntelnet_test is running. Found is $found .\n"                
+		break
+	}
+	
+        timeout {
+	 	break
+        }
+      }
+   }
+
+   if {$found == 2} {
+		set spawn_id $telnet_test_id
+		send -s "\3"
+		set spawn_id $ftp_test_id
+		send -s "\3"
+   } else {
+                case_fail $case_num
+   }
+
+send_log "\n$TITLE ............\[PASS\]\n"
+
+send_user "Ending $argv0\n"
+log_file
+
+

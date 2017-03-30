@@ -1,0 +1,6 @@
+srcdir = ../$(VER)/squashfs-tools
+override INCLUDEDIR = $(srcdir)
+include $(srcdir)/Makefile
+VPATH = $(srcdir)
+
+CPPFLAGS += -include ../get_nprocs.h

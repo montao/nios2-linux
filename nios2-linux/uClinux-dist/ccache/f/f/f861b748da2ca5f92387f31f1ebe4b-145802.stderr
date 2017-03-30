@@ -1,0 +1,2 @@
+In file included from fdiskbsdlabel.c:62:
+fdisk.h:87: warning: type qualifiers ignored on function return type

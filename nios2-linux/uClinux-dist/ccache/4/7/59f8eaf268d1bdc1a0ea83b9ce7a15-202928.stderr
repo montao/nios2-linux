@@ -1,0 +1,6 @@
+ftpcmd.y: In function 'yylex':
+ftpcmd.y:1024: warning: assignment discards qualifiers from pointer target type
+ftpcmd.y:1050: warning: assignment discards qualifiers from pointer target type
+ftpcmd.y:1068: warning: operation on 'state' may be undefined
+ftpcmd.y: At top level:
+ftpcmd.y:40: warning: 'sccsid' defined but not used

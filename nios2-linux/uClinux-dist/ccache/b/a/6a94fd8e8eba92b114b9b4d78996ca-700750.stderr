@@ -1,0 +1,9 @@
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/mm/rmap.c: In function 'try_to_unmap_cluster':
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/mm/rmap.c:1332: warning: comparison of distinct pointer types lacks a cast
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/mm/rmap.c:1333: warning: comparison of distinct pointer types lacks a cast
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/mm/rmap.c: In function 'try_to_unmap_file':
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/mm/rmap.c:1548: warning: comparison of distinct pointer types lacks a cast
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/mm/rmap.c:1548: warning: comparison of distinct pointer types lacks a cast
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/mm/rmap.c:1550: warning: comparison of distinct pointer types lacks a cast
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/mm/rmap.c:1561: warning: comparison of distinct pointer types lacks a cast
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/mm/rmap.c:1569: warning: comparison of distinct pointer types lacks a cast

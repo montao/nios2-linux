@@ -1,0 +1,38 @@
+Index: cardmgr/cardmgr.c
+===================================================================
+--- cardmgr/cardmgr.c	(revision 9116)
++++ cardmgr/cardmgr.c	(working copy)
+@@ -1301,15 +1301,7 @@
+ 
+ static void fork_now(void)
+ {
+-    int ret;
+-    if ((ret = fork()) > 0) {
+-	cleanup_files = 0;
+-	exit(0);
+-    }
+-    if (ret == -1)
+-	syslog(LOG_ERR, "forking: %m");
+-    if (setsid() < 0)
+-	syslog(LOG_ERR, "detaching from tty: %m");
++    daemon(1, 1);
+ }    
+ 
+ static void done(void)
+Index: cardmgr/cardinfo.c
+===================================================================
+--- cardmgr/cardinfo.c	(revision 9116)
++++ cardmgr/cardinfo.c	(working copy)
+@@ -486,11 +486,7 @@
+     setuid(getuid());
+ #endif
+ 
+-    if ((ret = fork()) > 0) exit(0);
+-    if (ret == -1)
+-	perror("forking");
+-    if (setsid() < 0)
+-	perror("detaching from tty");
++    daemon(1, 0);
+ 
+ #if (FL_REVISION >= 80)
+     fl_flip_yorigin();

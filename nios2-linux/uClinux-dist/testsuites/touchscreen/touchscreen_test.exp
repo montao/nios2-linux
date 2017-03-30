@@ -1,0 +1,67 @@
+#!/usr/bin/expect
+
+source ../kernel_config.exp
+log_file [log_file_name "$argv0"]
+send_user "Starting $argv0\n"
+set TITLE [title "$argv0"]
+
+step "Start kermit."
+source ../spawn_kermit.exp
+
+step "Reboot the kernel."
+source ../reboot_kernel.exp
+
+step "Starting test."
+sleep 4
+set case_num 0
+
+incr case_num
+set timeout 10 
+send -s "event_test /dev/input/event0\r" 
+while 1 {
+    expect {
+        -re "Input device name.*AD7877 Touchscreen.*Testing.*exit" { 
+            case_pass $case_num
+            break
+        }
+        timeout {                           
+            case_fail $case_num
+        }
+    }
+}
+
+puts "\nPlease touch the keypad...\n"	 
+incr case_num
+while 1 {
+    expect {
+        -re "Event: time.*type.*code.*value" { 
+            sleep 1
+            case_pass $case_num
+            break
+        }
+        timeout {                           
+            case_fail $case_num
+        }
+    }
+}
+
+sleep 5
+incr case_num
+send -s "\3"
+while 1 {
+    expect {
+         -re $kernel_prompt {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+send_log "\n"
+send_log "\n$TITLE ............\[PASS\]\n"
+
+send_user "Ending $argv0\n"
+log_file

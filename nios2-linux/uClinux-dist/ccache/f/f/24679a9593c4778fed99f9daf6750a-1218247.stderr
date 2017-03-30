@@ -1,0 +1,2 @@
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/net/packet/af_packet.c: In function 'tpacket_fill_skb':
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/net/packet/af_packet.c:2024: warning: format '%lu' expects type 'long unsigned int', but argument 2 has type 'int'

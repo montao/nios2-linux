@@ -1,0 +1,16 @@
+client.c: In function 'classIDsetup':
+client.c:340: warning: pointer targets in passing argument 1 of 'snprintf' differ in signedness
+client.c: In function 'dhcpConfig':
+client.c:894: warning: pointer targets in passing argument 1 of '__builtin_strncpy' differ in signedness
+client.c:601: warning: unused variable 'cmd'
+client.c: In function 'readDhcpCache':
+client.c:1154: warning: pointer targets in passing argument 1 of 'strlen' differ in signedness
+client.c:1154: warning: pointer targets in passing argument 1 of 'strlen' differ in signedness
+client.c:1154: warning: pointer targets in passing argument 1 of '__builtin_strcmp' differ in signedness
+client.c:1154: warning: pointer targets in passing argument 1 of 'strlen' differ in signedness
+client.c:1154: warning: pointer targets in passing argument 1 of '__builtin_strcmp' differ in signedness
+client.c:1154: warning: pointer targets in passing argument 1 of '__builtin_strcmp' differ in signedness
+client.c:1154: warning: pointer targets in passing argument 1 of '__builtin_strcmp' differ in signedness
+client.c:1154: warning: pointer targets in passing argument 1 of 'strncmp' differ in signedness
+client.c: In function 'openSocket':
+client.c:1184: warning: implicit declaration of function 'deletePidFile'

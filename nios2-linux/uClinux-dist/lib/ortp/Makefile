@@ -1,0 +1,11 @@
+VER = ortp-0.16.0
+
+CONF_OPTS = --disable-strict
+
+# disable generation of documentation
+export ac_cv_path_DOXYGEN = false
+
+include $(ROOTDIR)/tools/autotools.mk
+
+romfs:
+	$(ROMFSINST) -d -e CONFIG_FMT_USE_FDPIC_ELF $(STAGEDIR)/usr/lib/libortp.so.8 /usr/lib/libortp.so.8

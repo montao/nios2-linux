@@ -1,0 +1,203 @@
+#!/usr/bin/expect
+
+source ../kernel_config.exp
+log_file [log_file_name "$argv0"]
+send_user "Starting $argv0\n"
+set TITLE [title "$argv0"]
+
+step "Change config file in /vender folder."
+
+cd $uclinux_path
+sleep 3
+ set timeout 2
+      spawn ex testsuites/webserver/testcase/simple/Simple.conf
+      expect {
+         "Entering Ex mode*Normal mode." { }
+
+         "already exists!" {
+            send "e\r"
+            sleep 1
+         }
+      }
+      sleep 1
+      send "/serverip=\r"
+      expect "serverip="
+      send "d\r"
+      expect ":"
+      send "d\r"
+      expect ":"
+      send "i\r"
+      sleep .5
+      send "serverip=$targetip\r"
+      sleep .5
+      send "url=https://$targetip/test\r"
+      sleep .5
+      send ".\r"
+      expect ":"
+      
+      send "/sleep_time_max\r"
+      expect "sleep_time_max"
+      send "d\r"
+      expect ":"
+      send "i\r"
+      sleep .5
+      send "sleep_time_max = 1\r"
+      sleep .5
+      send ".\r"
+      expect ":"
+      send "wq\r"
+      expect eof
+
+cd $uclinux_path/testsuites/pound
+
+step "Start kermit."
+source ../spawn_kermit.exp
+
+step "Reboot the kernel."
+source ../reboot_kernel.exp
+
+step "Start testing."
+
+set case_num 0
+
+incr case_num
+
+set timeout 8
+
+send "ls /etc/pound/mycert.pem\r"
+expect    -re $kernel_prompt
+send "ls /usr/local/etc/pound.cfg\r"
+expect    -re $kernel_prompt
+
+set flag 0
+send "ifconfig eth0 $targetip\r" 
+while 1 {
+   sleep 3
+   expect {
+      ">" {
+         set flag 1
+         puts "ifconfig set success.\n"
+         break
+      }
+
+      timeout {
+            puts "Fail ifconfig. "
+            break
+         }
+     }
+}
+
+#send "flthdr -s 32000 /bin/boa\r"
+#expect    -re $kernel_prompt
+#send "flthdr -p /bin/boa\r"
+#while 1 {
+#  sleep 3
+#   expect {
+#      ">" {
+#         set flag 1
+#         puts "ifconfig set success.\n"
+#         break
+#      }
+#
+#      timeout {
+#            puts "Fail ifconfig. "
+#            break
+#         }
+#     }
+#}
+
+
+send  "boa -c /etc &\r"
+set timeout 4000
+while 1 {
+   expect {
+      "boa: server version Boa" {
+         sleep 3
+         break
+      }
+
+      timeout {
+            puts "Failed to start boa."
+            break
+         }
+     }
+}
+
+
+send  "pound &\r"
+set timeout 10
+while 1 {
+   expect {
+       -re $kernel_prompt {         
+         break
+      }
+
+      timeout {
+           break
+         }
+     }
+}
+
+sleep 50
+
+send  "ps aux\r"
+set timeout 100
+while 1 {
+   expect {
+     -re "pound.*pound.*pound.*pound" {         
+         break
+      }
+
+      timeout {
+           break
+         }
+     }
+}
+
+set timeout 3000
+
+cd $uclinux_path/testsuites/webserver/testcase/simple/
+
+spawn fl-run-test test_Simple.py 
+
+while 1 {
+   expect {
+     -re "Cannot allocate memory.*rcp error!" {
+         send_user "No enough space for whole folder.\n"      
+      }
+      "Try 999*OK!" {
+                case_pass $case_num
+         break
+      }
+
+      timeout {
+            send_log "pound test fail to exit. "
+                case_fail $case_num
+            exit
+         }
+     }
+}
+incr case_num
+
+while 1 {
+         expect {
+         -re "Ran .* test in .*s.*OK" {
+                case_pass $case_num
+           break 
+         }
+         timeout {
+           send_log "pound test fail to exit. "
+                case_fail $case_num
+           exit
+         }
+      } 
+}
+
+send_log "\n"
+send_log "\n$TITLE ............\[PASS\]\n"
+
+send_user "Ending $argv0\n"
+log_file
+
+
+

@@ -1,0 +1,124 @@
+#!/usr/bin/expect
+
+#
+#Test program to test reboot.
+#
+source ../kernel_config.exp
+source ../board_info.exp
+log_file [log_file_name "$argv0"]
+send_user "Starting $argv0\n"
+set TITLE [title "$argv0"]
+
+step "Start kermit."
+source ../spawn_kermit.exp
+
+step "Reset the uboot."
+source ../reset_to_uboot.exp
+
+step "Start testing"
+send -s "reset\r"
+
+for {set case_num 1} {$case_num <= $count} {incr case_num} {
+    set timeout 100
+    expect {
+        "Hit any key" {}
+        timeout {}
+    }
+
+    sleep 1
+    set timeout 2
+    while 1 {
+        send -s "\r"
+        expect {
+            -re $uboot_prompt {
+                break
+            }
+            timeout {
+                case_fail $case_num
+            }
+        }
+    }
+
+    send -s "\r"
+    expect -re $uboot_prompt
+    sleep 4
+    set timeout 50
+    send -s "bootm $kernel_start_addr\r"
+    while 1 {
+        expect {
+            -re "\"physmap-flash\.0\":\[^\n]+\[\n](0x\[0-9a-fA-F]+)-0x\[0-9a-fA-F]+\[\x20\t]+:\[^0-9]*\[\r\n](0x\[0-9a-fA-F]+)-0x\[0-9a-fA-F]+\[\x20\t]+:\[^0-9]*\[\r\n](0x\[0-9a-fA-F]+)-0x\[0-9a-fA-F]+\[\x20\t]+:\[^0-9]*\[\r\n]" {
+                set run_kernel_start_addr $expect_out(2,string)
+                set run_rootfs_start_addr $expect_out(3,string)
+                if { [format "%08x" [expr $mtd_base_addr + $run_kernel_start_addr]] == $kernel_start_addr && [format "%08x" [expr $mtd_base_addr + $run_rootfs_start_addr]] == $rootfs_start_addr } {
+                    send_log "\nThe two address are equal.\nkernel_start_addr [format "%08x" [expr $mtd_base_addr + $run_kernel_start_addr]], rootfs_start_addr [format "%08x" [expr $mtd_base_addr + $run_rootfs_start_addr]] \n"
+                } else {
+                    send_log "\nThe two address are not equal.\n kernel_start_addr [format "%08x" [expr $mtd_base_addr + $run_kernel_start_addr]], rootfs_start_addr [format "%08x" [expr $mtd_base_addr + $run_rootfs_start_addr]] \n"
+                    case_fail $case_num
+                }
+	     }
+
+            -re "Trace:.*\r\n" {
+                expect -re "$kernel_prompt"
+                send_user "\nKernel booting up with dump info\n"
+                case_fail $case_num
+            }
+            -re "Linux version" {
+                break
+            }
+            timeout {
+                case_fail $case_num
+            }
+        }
+    }
+
+    sleep 10
+
+    set timeout 10
+    send -s "ls\r"
+    while 1 {
+        expect {
+            -re "home.*$kernel_prompt" {
+                case_pass $case_num
+                break
+            }
+            timeout {
+                case_fail $case_num
+            }
+        }
+    }
+
+    send_user "Wait for 1 minutes before reboot.\r"
+    sleep 60
+
+    set timeout 10
+    send -s "cat /proc/cmdline\r"
+    while 1 {
+        expect {
+            -re "root=.*$kernel_prompt" {
+                break
+            }
+            timeout {
+                case_fail $case_num
+            }
+        }
+    }
+
+    send -s "reboot\r"
+}
+
+all_pass
+send_user "Ending $argv0\n"
+log_file
+
+while 1 {
+    expect {
+        "Hit any key " {
+            send "\r"
+            expect ">"
+            break
+        }
+        timeout {
+            break
+        }
+    }
+}

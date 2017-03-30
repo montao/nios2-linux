@@ -1,0 +1,286 @@
+#!/usr/bin/expect
+
+source ../kernel_config.exp
+source ../board_info.exp
+log_file [log_file_name "$argv0"]
+send_user "Starting $argv0\n"
+set TITLE [title "$argv0"]
+
+step "Start kermit."
+source ../spawn_kermit.exp
+
+step "Reboot the kernel."
+set bootargs  $bootargs_param11
+source ../reboot_kernel.exp
+
+step "Starting test"
+set timeout 8
+
+#set allcases { msg1 msg2 }
+set allcases {msg1  msg2  pkt1  pkt2  pkt3  scl1  scl2}
+
+set all_bin_num [llength $allcases]
+
+send_user "all_bin_num=$all_bin_num\n"
+
+proc print_lastlog { } {
+
+global targetip
+global kernel_prompt 
+sleep 1
+set timeout 10
+expect ">"
+send -s "cat /tmp/* \; dmesg\r"
+  while 1 {
+           expect {
+            -re "COREB.*$kernel_prompt" {
+            send_log "\nPrinting last log finished.\n"
+            break
+            }
+
+            timeout {
+            send_log "\nprint log time out!!\n"
+            break
+            }
+            }  
+  }
+}
+
+set case_num 0
+
+send -s "cd /bin\r"
+while 1 {
+   expect {
+      "root:/bin>" {
+            break
+      }
+
+      timeout {
+         break
+         }
+     }
+}
+send -s "echo 1 > /proc/sys/kernel/printk\r"
+
+#### Test linux two core cases. ####
+ 
+incr case_num
+set spawn_id $kermit_spawn_id 
+
+expect "root:/bin>"
+send -s "./icc_loader -l ./icc \r"
+while 1 {
+   expect {
+     -re "OK.*$kernel_prompt" {
+                case_pass $case_num
+                break
+      }
+
+     -re "Hardware Trace" {
+         case_fail $case_num
+         break
+      }
+
+      timeout {
+                case_fail $case_num
+                exit
+      }
+      }
+}
+send -s "\r"
+expect {
+       -re  "root:/bin>" {
+       }
+
+       timeout {
+                case_fail $case_num
+                exit
+       }
+}
+# There are 3 parts of testcases testing rounds. 
+# 1 part: allcases run one time respectively.
+# 2 part: allcases run $test_round times respectively. case one, case one,... case two, case two,...
+# 3 part: allcases run $test_round times one by one continously. case one, case two,... case one, case two,...
+
+for {set t 0} {$t < 3} {incr t} { 
+
+# Here is the test_round value that can be changed to control the test rounding.
+if { $t == 0 } {
+set test_round 1
+} elseif { $t ==1} {
+set test_round 5 
+} elseif { $t ==2 } {
+set test_round 30 
+}
+
+if { $t < 2 } {
+set bin_num 1 
+} else {
+set bin_num $all_bin_num 
+}
+
+for {set i 0} {$i < $all_bin_num*$test_round} {incr i} {
+
+set spawn_id $kermit_spawn_id 
+
+if { $t == 0 || $t == 2 } {
+set test_case_num [ expr $i % $all_bin_num ] 
+} else {
+set test_case_num [ expr $i / $test_round ] 
+}
+
+set case_name [lindex $allcases $test_case_num ]
+
+send -s "\r"
+expect -re $kernel_prompt
+
+if { $t == 0 } {
+send_log "\n!!!!!##### 1. Case_name: $case_name, the [ expr $t+ 1 ] part , the [ expr $i / $all_bin_num + 1 ] time testing (total $test_round) ! t = $t, i = $i ! \n"
+} elseif { $t == 1 } {
+send_log "\n!!!!!##### 2. Case_name: $case_name, the [ expr $t+ 1 ] part , the [ expr $i - [ expr $i / $test_round  ]*$test_round + 1 ] time testing (total $test_round) ! t = $t, i = $i ! \n"
+} elseif { $t == 2 } {
+send_log "\n!!!!!##### 3. Case_name: $case_name, the [ expr $t+ 1 ] part , the [ expr [ expr $i / $all_bin_num ] + 1 ] time testing (total $test_round) ! t = $t, i = $i ! \n"
+}
+
+incr case_num
+set timeout 60
+send -s "./icc_loader -e ./mcapi_$case_name \r"
+while 1 {
+   expect {
+     -re "\[icc_task_init\]" {
+               expect {
+	       -re  "root:/bin>" {
+               		break
+	       }
+	
+	  #      -re "execption" {
+	  #              case_fail $case_num
+	  #              exit
+	  #     }
+	        timeout {
+	                case_fail $case_num
+	       }
+  	       }
+
+      }
+
+     -re "Hardware Trace" {
+         case_fail $case_num
+         break
+      }
+
+    # -re "execption" {
+    #     case_fail $case_num
+    #  }
+
+      timeout {
+                case_fail $case_num
+      }
+      }
+}
+
+send -s "\r"
+expect -re $kernel_prompt
+set timeout 1000
+
+send -s "rm /tmp/* 2> /dev/null; dmesg -c > /dev/null\r"
+#sleep 3
+expect -re $kernel_prompt
+
+set corea_case_status  0
+set coreb_case_status  0
+set execption_count  0
+#spawn  /bin/sh -c "rsh -l root $targetip ' $case_name > /tmp/corea.log  2>&1 \; cat /tmp/* \; sleep 2 \; dmesg ' "
+send -s "$case_name > /tmp/corea.log  2>&1 \; cat /tmp/*\r"
+while 1 {
+   expect {
+     -re "CoreA Test PASSED" {
+         send_log "CoreA test pass detected\n"
+         set corea_case_status  1
+      }
+
+     -re "Hardware Trace" {
+         send_log "Hardware Trace!!!\n"
+         #case_fail $case_num
+      }
+
+     -re "execption" {
+         send_log "execption!!!\n"
+         incr execption_count
+      }
+
+      timeout {
+         send_log "time out!!!\n"
+         print_lastlog
+         case_fail $case_num
+      }
+
+      -re $kernel_prompt {
+         send_log "corea_case_status: $corea_case_status !!\n"
+         if { $corea_case_status != 1 } { 
+         send_log "Core A case fail!!!\n"
+         print_lastlog
+         case_fail $case_num
+         } else {
+         send_log "Core A case pass!!!\n"
+	 }
+         break
+      }
+      }
+}
+
+if { $corea_case_status == 1 } { 
+send -s "dmesg;date\r"
+while 1 {
+   expect {
+
+     -re "CoreB Test PASSED" {
+         send_log "CoreB test pass detected!\n"
+         set coreb_case_status  1
+      }
+
+     -re "Hardware Trace" {
+         send_log "Hardware Trace!!!\n"
+         #case_fail $case_num
+      }
+
+     -re "execption" {
+         send_log "execption!!!\n"
+         incr execption_count
+      }
+
+      timeout {
+         send_log "time out!!!\n"
+         print_lastlog
+         case_fail $case_num
+      }
+
+      -re $kernel_prompt {
+         send_log "The case is ending!! corea_case_status: $corea_case_status, coreb_case_status $coreb_case_status , execption_count $execption_count!!\n"
+         if { $coreb_case_status != 1 } { 
+         send_log "Core B case fail!!!\n"
+         print_lastlog
+         case_fail $case_num
+         } else {
+         send_log "Core B case pass!!!\n"
+         case_pass $case_num
+	 }
+         break
+      }
+      }
+}
+
+}
+}
+}
+#print_lastlog
+
+send_log "\n"
+send_log "\n$TITLE ............\[PASS\]\n"
+
+send_user "Ending $argv0\n"
+log_file
+
+
+
+

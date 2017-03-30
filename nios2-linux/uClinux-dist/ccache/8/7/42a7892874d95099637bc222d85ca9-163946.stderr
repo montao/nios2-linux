@@ -1,0 +1,2 @@
+/data/dwesterg/nios2-linux/nios2-linux/uClinux-dist/user/e2fsprogs/e2fsprogs-1.41.12/lib/uuid/gen_uuid.c:419: warning: 'read_all' defined but not used
+/data/dwesterg/nios2-linux/nios2-linux/uClinux-dist/user/e2fsprogs/e2fsprogs-1.41.12/lib/uuid/gen_uuid.c:446: warning: 'close_all_fds' defined but not used

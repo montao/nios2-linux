@@ -1,0 +1,172 @@
+#!/bin/sh --
+
+if [ $# -ne 1 ]; then
+    echo "Usage: $0 toolchain_version"
+    echo "Please choose toolchain version: 4.1 or 4.3"
+    exit 1
+fi
+
+USER=/home/test/work/cruise
+CHECKOUT=$USER/checkouts
+TOOLCHAIN_VERSION=$1
+#TOOLCHAINBUILD=$USER/test_scripts/toolchain/toolchain-build.$TOOLCHAIN_VERSION
+TOOLCHAINBUILD=$USER/test_scripts/toolchain/toolchain-build
+TOOLCHAIN_SRC=$CHECKOUT/toolchain
+UBOOT_SRC=$CHECKOUT/u-boot
+SILICON_TYPE=bf537
+SILICON_VERSION=0.2
+UCLINUX_DIST_SCRIPTS=$USER/test_scripts/uclinux-dist
+LASTRUN=lastrun
+THISRUN=thisrun
+
+BOARD_CONFIG=BF537-STAMP-PERF
+CPU=BF5xx
+UCLINUX_DIST_PATH=$USER/checkouts/uclinux-dist
+BINARY_FORMAT=flat
+ALLOCATOR=slab\(p2\)
+ICACHE=on
+DCACHE=on
+POLICY=write_back
+UART_MODE=dma
+SMP=off
+MPU=off
+XENOMAI=off
+LOG_DIR="$USER/test_scripts/uclinux-dist/logs"
+IPADDR=`/sbin/ifconfig|grep "10.99"|awk '{print $2}'|awk -F: '{print $2}'`
+
+SENDER="vivi.li@analog.com"
+RECEIVER="toolchain-devel@blackfin.uclinux.org"
+MTA="10.99.22.250"
+
+if [ ! -d $USER/test_scripts/uclinux-dist ] ; then
+    mkdir $USER/test_scripts/uclinux-dist
+fi
+
+## build toolchain
+TIMESTAMP=`date +%Y_%b_%d_%H_%M`
+BUILD=$TOOLCHAINBUILD/toolchain-$TIMESTAMP
+mkdir -p $BUILD
+
+if [ ! -d /opt/uClinux ] ; then
+    echo "Need to create folder /opt/uClinux and change owner to test:users"
+    exit
+fi
+
+cat <<EOF
+echo "************* Update toolchain *************"
+`cd $TOOLCHAIN_SRC;svn up;svn info`
+echo "************* Update u-boot ********************"
+`cd $UBOOT_SRC;git pull; git log -1 | head -3`
+echo "************* Update uclinux-dist *************"
+`cd $UCLINUX_DIST_PATH; svn up ; svn info`
+echo "************* Update linux ********************"
+`cd $UCLINUX_DIST_PATH/linux-2.6.x ; git pull; git log -1 | head -3`
+EOF
+
+UBOOT_VER=$(cd $UBOOT_SRC; ls -d u-boot-* | sort -n | tail -n 1)
+cd $TOOLCHAIN_SRC/buildscript
+./BuildToolChain -j 1 -w -s $TOOLCHAIN_SRC -b $BUILD -k $CHECKOUT/uclinux-dist/linux-2.6.x -u $UBOOT_SRC/$UBOOT_VER  -c $TOOLCHAIN_VERSION > $BUILD/toolchain_test_log.$TIMESTAMP  2>&1
+
+TIMESTAMP=`date +%Y_%b_%d_%H_%M`
+echo -e "\n\n$TIMESTAMP" >> $UCLINUX_DIST_SCRIPTS/toolchain_ver
+if [ "`cat $BUILD/toolchain_test_log* |grep -c "\*\*\* Done"`" -eq 1 ] ; then
+    rm -fr /opt/uClinux/*
+    cp -fr $BUILD/bfin-uclinux /opt/uClinux/
+    cp -fr $BUILD/bfin-elf /opt/uClinux/
+    cp -fr $BUILD/bfin-linux-uclibc /opt/uClinux/
+    echo "########################################################" >> $UCLINUX_DIST_SCRIPTS/toolchain_ver
+    echo "#Build toolchain success! Test kernel with new toolchain" >> $UCLINUX_DIST_SCRIPTS/toolchain_ver
+    echo "########################################################" >> $UCLINUX_DIST_SCRIPTS/toolchain_ver
+else
+    echo "######################################################" >> $UCLINUX_DIST_SCRIPTS/toolchain_ver
+    echo "Build toolchain failed. Test kernel with old toolchain" >> $UCLINUX_DIST_SCRIPTS/toolchain_ver
+    echo "######################################################" >> $UCLINUX_DIST_SCRIPTS/toolchain_ver
+fi
+
+echo -n "toolchain svn " >> $UCLINUX_DIST_SCRIPTS/toolchain_ver
+svn info $TOOLCHAIN_SRC |grep Revision >> $UCLINUX_DIST_SCRIPTS/toolchain_ver
+if [ "`cat $BUILD/toolchain_test_log* |grep -c "\*\*\* Done"`" -eq 0 ] ; then
+    mv $BUILD/toolchain_test_log* $BUILD/..
+    rm -fr $BUILD
+fi
+echo -n "u-boot git " >> $UCLINUX_DIST_SCRIPTS/toolchain_ver
+git log -1|grep "^commit" >> $UCLINUX_DIST_SCRIPTS/toolchain_ver
+echo -n "uclinux-dist svn " >> $UCLINUX_DIST_SCRIPTS/toolchain_ver
+svn info $CHECKOUT/uclinux-dist |grep Revision >> $UCLINUX_DIST_SCRIPTS/toolchain_ver
+echo -n "linux kernel git " >> $UCLINUX_DIST_SCRIPTS/toolchain_ver
+cd $CHECKOUT/uclinux-dist/linux-2.6.x
+git log -1|grep "^commit" >> $UCLINUX_DIST_SCRIPTS/toolchain_ver
+
+## build and run kernel tests
+THIS_LOG=$LOG_DIR/$TIMESTAMP
+mkdir -p $THIS_LOG
+
+cd $LOG_DIR
+rm -rf $THISRUN
+ln -s $THIS_LOG $THISRUN
+
+echo "Testing on $IPADDR with $BOARD_CONFIG ($CPU) $BINARY_FORMAT $ALLOCATOR ICACHE($ICACHE) DCACHE($DCACHE) $POLICY $UART_MODE SMP($SMP) MPU($MPU) XENOMAI($XENOMAI)"
+
+cp  $UCLINUX_DIST_PATH/testsuites/kernel_test $UCLINUX_DIST_SCRIPTS
+# cp  $UCLINUX_DIST_SCRIPTS/kernel_config.exp $UCLINUX_DIST_PATH/testsuites/
+
+cd $UCLINUX_DIST_SCRIPTS
+time_control_pid=`ps ax |grep "\.\/test_runtime_control" |awk '{print $1}'`
+sleep_pid=`ps ax |grep -E "[^]] sleep (12|36)00"|awk '{print $1}'`
+if [ "$time_control_pid" == "" ] && [ "$sleep_pid" == "" ] ; then
+    ./test_runtime_control &
+else
+    if [ "$time_control_pid" != "" ] ; then
+        kill -9 $time_control_pid
+        sleep_pid=`ps ax |grep -E "[^]] sleep 1200"|awk '{print $1}'`
+        if [ "$sleep_pid" != "" ] ; then
+            kill -9 $sleep_pid
+        fi
+        sleep_pid=`ps ax |grep -E "[^]] sleep 3600"|awk '{print $1}'`
+        if [ "$sleep_pid" != "" ] ; then
+            kill -9 $sleep_pid
+        fi
+    fi
+fi
+###### ./kernel_test BF533-STAMP-STD bf533 0.0 /home/test/checkouts/uclinux-dist flat slab\(p2\) on on write_through dma
+######  THIS_LOG
+./kernel_test  $BOARD_CONFIG $CPU 0.0 $UCLINUX_DIST_PATH  $BINARY_FORMAT $ALLOCATOR $ICACHE $DCACHE $POLICY $UART_MODE $SMP $MPU $XENOMAI $THIS_LOG > kernel_test_log \
+2>&1
+
+cd $UCLINUX_DIST_PATH 
+rm -rf testsuites/*/*log  testsuites/*log  romfs/ images/
+cp $UCLINUX_DIST_SCRIPTS/kernel_test_log $THIS_LOG
+
+echo "Here is the difference between lastrun and thisrun test results: "
+echo  " "
+
+cd $UCLINUX_DIST_SCRIPTS
+$UCLINUX_DIST_SCRIPTS/get_test_summary $THIS_LOG
+$UCLINUX_DIST_SCRIPTS/get_benchmark_result $THIS_LOG > $THIS_LOG/get_benchmark_result_log 2>&1
+if [ $? -ne 0 ]; then
+    echo "Mail the results of benchmarks!"
+    cat $THIS_LOG/benchmark_result_log | mail -s "Benchmark Test Results ($TIMESTAMP)" -a plt/dhrystone/dhrystone.png -a edn.png -a lmbench.png -a nbench.png -a plt/whetstone/whetstone.png -r $SENDER $RECEIVER
+#    ./send_mail.exp $MTA $SENDER $RECEIVER $THIS_LOG/benchmark_result_log
+else
+    echo "No results for benchmarks!"
+fi
+
+$UCLINUX_DIST_SCRIPTS/compare_kernel_results $LOG_DIR/lastrun/test_summary  $LOG_DIR/thisrun/test_summary 
+if [ $? = 0 ] ; then
+    echo  "success" > $LOG_DIR/thisrun/test_summary/test_results
+else
+    echo  "failed" > $LOG_DIR/thisrun/test_summary/test_results
+fi
+
+echo  " "
+echo "#########Test Summary #############"
+echo  " "
+cat $LOG_DIR/thisrun/test_summary/summary
+echo  " "
+echo "#########Test Log #################"
+echo  " "
+cat $UCLINUX_DIST_SCRIPTS/kernel_test_log
+
+cd $LOG_DIR
+rm -rf $LASTRUN
+ln -s $THIS_LOG $LASTRUN

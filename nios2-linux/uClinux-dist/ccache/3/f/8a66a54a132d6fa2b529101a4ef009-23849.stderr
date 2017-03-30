@@ -1,0 +1,2 @@
+conftest.c: In function 'main':
+conftest.c:266: warning: unused variable 'lastlog'

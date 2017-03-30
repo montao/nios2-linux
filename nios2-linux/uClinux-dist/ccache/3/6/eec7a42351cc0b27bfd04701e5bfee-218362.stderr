@@ -1,0 +1,2 @@
+arp.c: In function 'arp_getdevhw':
+arp.c:253: warning: pointer targets in passing argument 1 of 'xhw->print' differ in signedness

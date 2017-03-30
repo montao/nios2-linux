@@ -1,0 +1,215 @@
+#!/bin/sh -x
+
+if [ $# -gt 0 ] ; then
+    LOG_PATH=$1
+    TIMESTAMP=`basename $LOG_PATH`
+    TIMESTAMP=`echo ${TIMESTAMP:0:11}`
+else
+    LOG_PATH=`pwd`
+    TIMESTAMP=`date +%Y_%b_%d`
+fi
+
+PLT_PATH="/home/test/work/cruise/test_scripts/uclinux-dist/plt"
+LOG_NAME="$LOG_PATH/benchmark_result_log"
+LOG_RES=0
+
+cd $LOG_PATH
+
+/opt/uClinux/bfin-uclinux/bin/bfin-uclinux-gcc -v 2> $LOG_NAME
+echo -e "\n\n" >> $LOG_NAME
+
+TESTCASE="whetstone"
+if [ -e build_${TESTCASE}_kernel_log ]; then
+    if [ `grep -c "Copy linux" ./build_${TESTCASE}_kernel_log` == 1 ]; then
+        if [ `grep -c "WHETSTONE TEST ............\[PASS\]" ./${TESTCASE}_test_log` == 1 ]; then
+            echo "Test result of $TESTCASE" >> $LOG_NAME
+            echo "##############################" >> $LOG_NAME
+            grep "^^" ${TESTCASE}_test_log >> $LOG_NAME
+            grep "^|" ${TESTCASE}_test_log | sort -rn -t "|" +4 >> $LOG_NAME
+
+            column="6"
+            data=""
+            for level in O{s,0,1,2,3}{""," \-fomit\-frame\-pointer"}{""," \-ffast\-math"}{""," \-mfast\-fp"} ; do
+                data="$data\t`grep "${level}[^ ]" ${TESTCASE}_test_log | awk -F "|" "{print \\\$$column}"`"
+            done
+            echo -e "$TIMESTAMP$data" >> $PLT_PATH/${TESTCASE}/${TESTCASE}_data
+
+            cd $PLT_PATH/${TESTCASE}/
+            gnuplot $PLT_PATH/${TESTCASE}/${TESTCASE}.plt
+            cd $LOG_PATH
+            let "LOG_RES+=1"
+        else
+            echo "##################" >> $LOG_NAME
+            echo "${TESTCASE} fail!" >> $LOG_NAME
+            echo "##################" >> $LOG_NAME
+        fi
+    else
+        echo "##############################" >> $LOG_NAME
+        echo "Build test case ${TESTCASE} fail!" >> $LOG_NAME
+        echo "##############################" >> $LOG_NAME
+    fi
+else
+    echo "#########################################" >> $LOG_NAME
+    echo "No such file: build_${TESTCASE}_kernel_log!" >> $LOG_NAME
+    echo "#########################################" >> $LOG_NAME
+fi
+echo -e "\n\n" >> $LOG_NAME
+
+cd $LOG_PATH
+TESTCASE="dhrystone"
+if [ -e build_${TESTCASE}_kernel_log ]; then
+    if [ `grep -c "Copy linux" ./build_${TESTCASE}_kernel_log` == 1 ]; then
+        if [ `grep -c "DHRYSTONE TEST ............\[PASS\]" ./${TESTCASE}_test_log` == 1 ]; then
+            echo "Test result of $TESTCASE" >> $LOG_NAME
+            echo "##############################" >> $LOG_NAME
+            grep "^^" ${TESTCASE}_test_log >> $LOG_NAME
+            grep "^|" ${TESTCASE}_test_log >> $LOG_NAME
+
+            column="6"
+            for result in `seq 1 3` ; do
+                data=""
+                for level in O{s,0,1,2,3}{""," \-fomit\-frame\-pointer"}{""," \-ffast\-math"}{""," \-funroll\-loops"}{""," \-funsafe\-loop\-optimizations"} ; do
+                    data="$data\t`grep "${level}[^ ]" ${TESTCASE}_test_log | awk -F "|" "{print \\\$$column}"`"
+                done
+                let "column+=1"
+                echo -e "$TIMESTAMP$data" >> $PLT_PATH/${TESTCASE}/${TESTCASE}_data_$result
+            done
+
+            cd $PLT_PATH/${TESTCASE}/
+            gnuplot $PLT_PATH/${TESTCASE}/${TESTCASE}.plt
+            cd $LOG_PATH
+            let "LOG_RES+=1"
+        else
+            echo "##################" >> $LOG_NAME
+            echo "${TESTCASE} fail!" >> $LOG_NAME
+            echo "##################" >> $LOG_NAME
+        fi
+    else
+        echo "##############################" >> $LOG_NAME
+        echo "Build test case ${TESTCASE} fail!" >> $LOG_NAME
+        echo "##############################" >> $LOG_NAME
+    fi
+else
+    echo "#########################################" >> $LOG_NAME
+    echo "No such file: build_${TESTCASE}_kernel_log!" >> $LOG_NAME
+    echo "#########################################" >> $LOG_NAME
+fi
+echo -e "\n\n" >> $LOG_NAME
+
+TESTCASE="nbench"
+if [ -e build_${TESTCASE}_kernel_log ]; then
+    if [ `grep -c "Copy linux" ./build_${TESTCASE}_kernel_log` == 1 ]; then
+        if [ `grep -c "NBENCH TEST ............\[PASS\]" ./${TESTCASE}_test_log` == 1 ]; then
+            echo "Results of $TESTCASE" >> $LOG_NAME
+            echo "##############################" >> $LOG_NAME
+            sed -n '/Benchmark/,/Trademarks/p' ${TESTCASE}_test_log >> $LOG_NAME
+            data=`grep "NUMERIC" ${TESTCASE}_test_log | awk -F : '{print $2}' | tr -d " "`
+            data="$data\t`grep "STRING" ${TESTCASE}_test_log | awk -F : '{print $2}' | tr -d " "`"
+            data="$data\t`grep "BITFIELD" ${TESTCASE}_test_log | awk -F : '{print $2}' | tr -d " "`"
+            data="$data\t`grep "FP" ${TESTCASE}_test_log | awk -F : '{print $2}' | tr -d " "`"
+            data="$data\t`grep "FOURIER" ${TESTCASE}_test_log | awk -F : '{print $2}' | tr -d " "`"
+            data="$data\t`grep "ASSIGNMENT" ${TESTCASE}_test_log | awk -F : '{print $2}' | tr -d " "`"
+            data="$data\t`grep "IDEA" ${TESTCASE}_test_log | awk -F : '{print $2}' | tr -d " "`"
+            data="$data\t`grep "HUFFMAN" ${TESTCASE}_test_log | awk -F : '{print $2}' | tr -d " "`"
+            data="$data\t`grep "NEURAL" ${TESTCASE}_test_log | awk -F : '{print $2}' | tr -d " "`"
+            data="$data\t`grep "LU" ${TESTCASE}_test_log | awk -F : '{print $2}' | tr -d " "`"
+            echo -e "$TIMESTAMP\t$data" >> ../../${TESTCASE}_data
+            cd ../..
+            gnuplot ${TESTCASE}.plt
+            cd $LOG_PATH
+            let "LOG_RES+=1"
+        else
+            echo "##################" >> $LOG_NAME
+            echo "${TESTCASE} fail!" >> $LOG_NAME
+            echo "##################" >> $LOG_NAME
+        fi
+    else
+        echo "##############################" >> $LOG_NAME
+        echo "Build test case ${TESTCASE} fail!" >> $LOG_NAME
+        echo "##############################" >> $LOG_NAME
+    fi
+else
+    echo "#########################################" >> $LOG_NAME
+    echo "No such file: build_${TESTCASE}_kernel_log!" >> $LOG_NAME
+    echo "#########################################" >> $LOG_NAME
+fi
+echo -e "\n\n" >> $LOG_NAME
+
+TESTCASE="edn"
+if [ -e build_${TESTCASE}_kernel_log ]; then
+    if [ `grep -c "Copy linux" ./build_${TESTCASE}_kernel_log` == 1 ]; then
+        if [ `grep -c "EDN TEST ............\[PASS\]" ./${TESTCASE}_test_log` == 1 ]; then
+            dos2unix ${TESTCASE}_test_log
+            echo "Results of $TESTCASE" >> $LOG_NAME
+            echo "##############################" >> $LOG_NAME
+            sed -n '/System used/,/jpegdct/p' ${TESTCASE}_test_log >> $LOG_NAME
+            data=`grep "overhead" ${TESTCASE}_test_log | awk '{print $2}'`
+            data="$data\t`grep "vec_mpy1" ${TESTCASE}_test_log | awk '{print $2}'`"
+            data="$data\t`grep "^mac" ${TESTCASE}_test_log | awk '{print $2}'`"
+            data="$data\t`grep "\<fir\>" ${TESTCASE}_test_log | awk '{print $2}'`"
+            data="$data\t`grep "fir_no_red_ld" ${TESTCASE}_test_log | awk '{print $2}'`"
+            data="$data\t`grep "latsynth" ${TESTCASE}_test_log | awk '{print $2}'`"
+            data="$data\t`grep "iir1" ${TESTCASE}_test_log | awk '{print $2}'`"
+            data="$data\t`grep "codebook" ${TESTCASE}_test_log | awk '{print $2}'`"
+            data="$data\t`grep "jpegdct" ${TESTCASE}_test_log | awk '{print $2}'`"
+            echo -e "$TIMESTAMP\t$data" >> ../../${TESTCASE}_data
+            cd ../..
+            gnuplot ${TESTCASE}.plt
+            cd $LOG_PATH
+            let "LOG_RES+=1"
+        else
+            echo "##################" >> $LOG_NAME
+            echo "${TESTCASE} fail!" >> $LOG_NAME
+            echo "##################" >> $LOG_NAME
+        fi
+    else
+        echo "##############################" >> $LOG_NAME
+        echo "Build test case ${TESTCASE} fail!" >> $LOG_NAME
+        echo "##############################" >> $LOG_NAME
+    fi
+else
+    echo "#########################################" >> $LOG_NAME
+    echo "No such file: build_${TESTCASE}_kernel_log!" >> $LOG_NAME
+    echo "#########################################" >> $LOG_NAME
+fi
+echo -e "\n\n" >> $LOG_NAME
+
+
+TESTCASE="lmbench"
+if [ -e build_${TESTCASE}_kernel_log ]; then
+    if [ `grep -c "Copy linux" ./build_${TESTCASE}_kernel_log` == 1 ]; then
+        if [ `grep -c "LMBENCH TEST ............\[PASS\]" ./${TESTCASE}_test_log` == 1 ]; then
+            dos2unix ${TESTCASE}_test_log
+            echo "Results of $TESTCASE (run lat_ctx)" >> $LOG_NAME
+            echo "##############################" >> $LOG_NAME
+            sed -n '/lat_ctx/,/LMBENCH TEST/p' ${TESTCASE}_test_log |grep -v PASS|grep -v lat_ctx|grep -v root >> $LOG_NAME
+            data_size0="$TIMESTAMP `grep -A 3 "size=0" ${TESTCASE}_test_log | grep -v "=" | awk '{print $2}'`"
+            data_size16="$TIMESTAMP `grep -A 3 "size=16" ${TESTCASE}_test_log | grep -v "=" | awk '{print $2}'`"
+            data_size64="$TIMESTAMP `grep -A 3 "size=64" ${TESTCASE}_test_log | grep -v "=" | awk '{print $2}'`"
+            echo $data_size0 | tr " " "\t" >> ../../${TESTCASE}_data_size0
+            echo $data_size16 | tr " " "\t" >> ../../${TESTCASE}_data_size16
+            echo $data_size64 | tr " " "\t" >> ../../${TESTCASE}_data_size64
+            cd ../..
+            gnuplot ${TESTCASE}.plt
+            cd $LOG_PATH
+            let "LOG_RES+=1"
+        else
+            echo "##################" >> $LOG_NAME
+            echo "${TESTCASE} fail!" >> $LOG_NAME
+            echo "##################" >> $LOG_NAME
+        fi
+    else
+        echo "##############################" >> $LOG_NAME
+        echo "Build test case ${TESTCASE} fail!" >> $LOG_NAME
+        echo "##############################" >> $LOG_NAME
+    fi
+else
+    echo "#########################################" >> $LOG_NAME
+    echo "No such file: build_${TESTCASE}_kernel_log!" >> $LOG_NAME
+    echo "#########################################" >> $LOG_NAME
+fi
+
+
+dos2unix $LOG_NAME
+
+exit $LOG_RES

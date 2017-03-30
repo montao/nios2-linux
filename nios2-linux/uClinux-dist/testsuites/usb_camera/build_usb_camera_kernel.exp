@@ -1,0 +1,267 @@
+#!/usr/bin/expect --
+
+#
+# Build Kernel for USB camera test
+#
+
+source ../kernel_config.exp
+log_file [log_file_name "$argv0"]
+send_user "Starting $argv0\n"
+
+set env(EXT2_BLOCKS) "16384"
+set HAVE_KERNEL_ONLY_IMAGE 1
+
+cd $uclinux_path/testsuites
+step "Make clean."
+if { [source make_clean.exp] != 0 } {
+    send_user "\n\nFail to make clean. Exit!\n\n"
+    exit
+}
+
+cd $uclinux_path/testsuites
+step "Make config."
+source make_default_config.exp
+
+cd $uclinux_path/testsuites
+step "Config to reduce memory size"
+source make_config_reserve_mem.exp
+
+cd $uclinux_path/testsuites
+step "Config musb driver"
+source make_config_musb.exp
+
+# Following make specific configuration for this case.
+cd $uclinux_path
+set timeout 300
+spawn make config
+while 1 {
+    expect {
+        -re "Customize Kernel Settings.*DEFAULTS_KERNEL.*\\\[.*]" {
+            send "y\r"
+        }
+
+        -re "Customize Application/Library Settings.*DEFAULTS_VENDOR.*\\\[.*]" {
+            send "y\r"
+        }
+
+        -nocase -re "\\\[\[^\r]*] (\\\(NEW\\\) )?(\[ymn])|choice\\\[.*]: \[0-9]+\r" {
+            continue
+        }
+
+#Multimedia support
+        -re "Multimedia support.*MEDIA_SUPPORT.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Video For Linux.*VIDEO_DEV.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Video capture adapters.*VIDEO_CAPTURE_DRIVERS.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "USB Video Class.*USB_VIDEO_CLASS.*\\\[.*]" {
+            send "Y\r"
+        }
+
+# USB support
+        -re "USB Peripheral Controller \\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Platform Glue Layer \\\[.*]" {
+            send "Y\r"
+        }
+
+        -re " (\[0-9]+). Inventra.*USB_INVENTRA_DMA.* (\[0-9]+). Disable DMA.*MUSB_PIO_ONLY.*\[cC]hoice.*\\\[.*]" {
+            send "\r"
+        }
+
+        -re "USB Mass Storage support.*USB_STORAGE.*\\\[./././.]" {
+            send "Y\r"
+        }
+
+        -re "USB Peripheral Controller \\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "USB Gadget Drivers \\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "USB Gadget Drivers.* (\[0-9]+). Gadget Zero.*USB_ZERO.*\[cC]hoice\\\[.*]" {
+            send "$expect_out(1,string)\r"
+        }
+
+# enable ATAPI hard disk
+        -re "Serial ATA \\\(prod\\\) and Parallel ATA \\\(experimental\\\) drivers.*ATA.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Blackfin 54x ATAPI support.*PATA_BF54X.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "SCSI target support.*SCSI_TGT.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "SCSI disk support.*BLK_DEV_SD.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "SCSI CDROM support.*BLK_DEV_SR.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Second extended fs support.*EXT2_FS.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "MSDOS fs support.*MSDOS_FS.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "VFAT \\\(Windows-95\\\) fs support.*VFAT_FS.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Codepage 437 \\\(United States, Canada\\\).*NLS_CODEPAGE_437.*\\\[.*]" {
+            send "Y\r"
+        }
+
+#TFT LCD
+        -re "Support for generic platform NAND driver.*MTD_NAND_PLATFORM.*\\\[.*]" {
+            #conflict with TFT LCD
+            send "N\r"
+        }
+
+        -re "Support for frame buffer devices.*FB.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Backlight & LCD device support.*BACKLIGHT_LCD_SUPPORT.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Lowlevel LCD controls.*LCD_CLASS_DEVICE.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Lowlevel Backlight controls.*BACKLIGHT_CLASS_DEVICE.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "SHARP LQ043 TFT LCD.*BF548 EZKIT.*\\\[.*]" {
+            if { $board_type == "BF548-EZKIT" } {
+                send "Y\r"
+            } else {
+                send "N\r"
+            }
+        }
+
+        -re "Varitronix COG-T350MCQB TFT LCD display.*FB_BFIN_T350MCQB.*\\\[.*]" {
+            if { $board_type == "BF527-EZKIT" } {
+                send "Y\r"
+            } else {
+                send "N\r"
+            }
+        }
+
+        -re "SHARP LQ035Q1DH02 TFT LCD.*FB_BFIN_LQ035Q1.*\\\[.*]" {
+            if { $board_type == "BF527-EZKIT-V2" } {
+                send "Y\r"
+            } else {
+                send "N\r"
+            }
+        }
+
+#Virtual terminal & frame buffer
+#Set SW5.1-SW5.3 to off, or no display on screen.
+        -re "I2C support \\\(I2C\\\) \\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Blackfin TWI I2C support.*I2C_BLACKFIN_TWI.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Virtual terminal.*VT.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Framebuffer Console support.*FRAMEBUFFER_CONSOLE.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Select compiled-in fonts.*FONTS.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Mac console 6x11 font.*FONT_6x11.*\\\[.*]" {
+            send "Y\r"
+        }
+
+# Application used
+        -re "Binary format.*FLAT.*Shared-FLAT.*FDPIC.*\\\[.*]" {
+            # Use FDPIC format to save ram size
+            send "4\r"
+        }
+
+        -re "Build libSDL.*LIB_LIBSDL.*\\\[.*]" {
+            # libsdl is required for ffplayer
+            send "Y\r"
+        }
+
+        -re "FFmpeg and FFserver.*USER_FFMPEG_APPS.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "fdisk.*USER_FDISK_FDISK.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "fdisk.*USER_BUSYBOX_FDISK.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "mke2fs.*USER_E2FSPROGS_MISC_MKE2FS.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "$anomalous_option" {
+            send "\r"
+        }
+
+        "\\\(*) \\\[*]" {
+            sleep .01
+            send "\r"
+        }
+
+        -re "\[cC]hoice\\\[.*]:" {
+            send "\r"
+        }
+
+        eof {
+            send_user "\nEnd of configuration\n"
+            break
+        }
+
+        timeout {
+            send_user "\n\nFATAL ERROR: config prompt timeout in make config\n\n"
+            exit
+        }
+    }
+}
+
+cd $uclinux_path/testsuites
+step "Make"
+source make_kernel.exp
+
+cd $uclinux_path/testsuites
+step "Copy linux"
+source copy_image.exp
+
+send_user "Ending $argv0\n"
+log_file

@@ -1,0 +1,109 @@
+#!/usr/bin/expect
+
+cd $uclinux_path
+spawn make clean -C user/busybox
+set timeout 120
+while 1 {
+    expect {
+        "Error" {
+            send_user "make clean of busybox error"
+        }
+        eof {
+            break
+        }
+    }
+}
+
+cd $uclinux_path
+set timeout 300
+spawn make config
+while 1 {
+    expect {
+        -re "Customize Kernel Settings.*DEFAULTS_KERNEL.*\\\[.*]" {
+            send "n\r"
+        }
+
+        -re "Customize Application/Library Settings.*DEFAULTS_VENDOR.*\\\[.*]" {
+            send "y\r"
+        }
+
+        -nocase -re "\\\[\[^\r]*] (\[ymn])|choice\\\[.*]: \[0-9]+\r" {
+            continue
+        }
+
+        -re "awk.*USER_BUSYBOX_AWK.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "cmp.*USER_BUSYBOX_CMP.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "diff.*USER_BUSYBOX_DIFF.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "fdisk.*USER_BUSYBOX_FDISK.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "wget.*USER_BUSYBOX_WGET.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "traceroute.*USER_BUSYBOX_TRACEROUTE.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "top.*USER_BUSYBOX_TOP.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "sed.*USER_BUSYBOX_SED.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "vi.*USER_BUSYBOX_VI.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "find.*USER_BUSYBOX_FIND.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "bunzip2.*USER_BUSYBOX_BUNZIP2.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "gunzip.*USER_BUSYBOX_GUNZIP.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "gzip.*USER_BUSYBOX_GZIP.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "tar.*USER_BUSYBOX_TAR.*\\\[.*]" {
+            send "N\r"
+        }
+
+        "\\\(*) \\\[*]" {
+            sleep .01
+            send "\r"
+        }
+
+        -re "\[cC]hoice\\\[.*]:" {
+            send "\r"
+        }
+
+        eof {
+            puts "End of configuration"
+            break
+        }
+
+        timeout {
+            puts "\n\nFATAL ERROR: config prompt timeout in make config"
+            break
+        }
+    }
+}

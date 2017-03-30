@@ -1,0 +1,60 @@
+Index: srUtils.c
+===================================================================
+--- srUtils.c	(revision 9093)
++++ srUtils.c	(working copy)
+@@ -230,7 +230,11 @@
+ 	struct sigaction sigAct;
+ 
+ 	dbgprintf("exec program '%s' with param '%s'\n", program, arg);
++#ifdef __uClinux__
++        pid = vfork();
++#else
+         pid = fork();
++#endif
+         if (pid < 0) {
+                 return 0;
+         }
+Index: syslogd.c
+===================================================================
+--- syslogd.c	(revision 9093)
++++ syslogd.c	(working copy)
+@@ -3260,7 +3260,11 @@
+ 			sigAct.sa_handler = doexit;
+ 			sigaction(SIGTERM, &sigAct, NULL);
+ 
++#ifdef __uClinux__
++			if (vfork()) {
++#else
+ 			if (fork()) {
++#endif
+ 				/*
+ 				 * Parent process
+ 				 */
+Index: omusrmsg.c
+===================================================================
+--- omusrmsg.c	(revision 9093)
++++ omusrmsg.c	(working copy)
+@@ -182,7 +182,11 @@
+ 	 * Might as well fork instead of using nonblocking I/O
+ 	 * and doing notty().
+ 	 */
++#ifdef __uClinux__
++	if (vfork() == 0) {
++#else
+ 	if (fork() == 0) {
++#endif
+ 		memset(&sigAct, 0, sizeof(sigAct));
+ 		sigemptyset(&sigAct.sa_mask);
+ 		sigAct.sa_handler = SIG_DFL;
+@@ -254,7 +258,11 @@
+ 			}
+ 			(void) alarm(0);
+ 		}
++#ifdef __uClinux__
++		_exit(0);
++#else
+ 		exit(0); /* "good" exit - this terminates the child forked just for message delivery */
++#endif
+ 	}
+ 	/* close the user login file */
+ 	endutent();

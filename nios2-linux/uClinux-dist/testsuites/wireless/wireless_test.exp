@@ -1,0 +1,167 @@
+#!/usr/bin/expect
+#
+# Test script for CF interface wifi test.
+#
+# Usage:
+#   ./wireless_test.exp  board_type  essid  key  ping_ipaddr
+#
+# Example:
+#   ./wireless_test.exp  BF537-STAMP linksys 1234567890 192.168.1.100
+#
+
+
+source  ../kernel_config.exp
+log_file [log_file_name "$argv0"]
+send_user "Starting $argv0\n"
+set TITLE [title "$argv0"]
+
+set argc [llength $argv]
+if { $argc < 3} {
+   puts "Usage:  $argv0  board_type  essid  key  ping_ipaddr"
+   puts ""
+   exit
+}
+set essid [lindex $argv 1]
+set key   [lindex $argv 2]
+set ping_ipaddr [lindex $argv 3]
+
+step "Spawn kermit"
+source ../spawn_kermit.exp
+
+step "Reboot the kernel."
+source ../reboot_kernel.exp
+
+set case_num 0
+step "Start testing."
+
+incr case_num
+set timeout 10
+step "Load orinoco_cs Module"
+send -s "modprobe orinoco_cs\r"
+while 1 {
+    expect {
+        -re "orinoco_cs.*WEP supported.*$kernel_prompt" {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            send_user "\nmodprobe orinoco_cs timeout\n"
+            case_fail $case_num
+        }
+    }
+}
+
+incr case_num
+set timeout 20
+send -s "ifconfig -a\r"
+while 1 {
+    expect {
+        -re "eth1.*$kernel_prompt" {
+            send_user "Load orinoco_cs Module successfully\n"
+            case_pass $case_num
+            break
+        }
+        timeout {
+            send_user "\nLoad orinoco_cs Module failed\n"
+            case_fail $case_num
+        }
+    }
+}
+
+incr case_num
+step "Set key in hex digits"
+set timeout 2
+send "iwconfig eth1 essid $essid key $key\r"
+while 1 {
+   expect {
+       -re $kernel_prompt {
+         send_user "\nSet key done\n"
+         case_pass $case_num
+         break
+      }
+      timeout {
+         send_user "\nSet key timeout\n"
+         case_fail $case_num
+      }
+   }
+}
+
+incr case_num
+step "dhcpcd eth1"
+set timeout 30
+send "dhcpcd eth1 &\r"
+while 1 {
+   expect {
+      -re $kernel_prompt {
+         case_pass $case_num
+         break
+      }
+      timeout {
+         send_user "\nStart dhcpcd timeout\n"
+         case_fail $case_num
+      }
+   }
+}
+
+sleep 2
+
+step "iwconfig"
+incr case_num
+set timeout 2
+send "iwconfig\r"
+sleep 2
+while 1 {
+   expect {
+      -re "ESSID:\"$essid\".*$kernel_prompt" {
+         case_pass $case_num
+      }
+      timeout {
+         break
+      }
+   }
+}
+
+sleep 10
+send_user "\nWaiting for network up\n"
+
+step "ifconfig"
+set timeout 10
+incr case_num
+send "ifconfig eth1\r"
+while 1 {
+   expect {
+      -re "inet addr:\[0-9].*>" {
+         send_user "\nGet ipaddr for wireless link\n"
+         case_pass $case_num
+         break
+      }
+
+      timeout {
+         send_log "\nifconfig timeout\n"
+         case_fail $case_num
+      }
+   }
+}
+
+step "begin test"
+incr case_num
+send "ping $ping_ipaddr\r"
+sleep 5
+send "\03\r"
+while 1 {
+   expect {
+      -re ".* 0% packet loss.*>" {
+         send_user "\nping remote host: pass\n"
+         case_pass $case_num
+         break
+      }
+      timeout {
+         send_user "\nping fail\n"
+         case_fail $case_num
+      }
+   }
+}
+
+all_pass
+send_user "Ending $argv0\n"
+log_file

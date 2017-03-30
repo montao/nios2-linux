@@ -1,0 +1,1 @@
+cmd_arch/nios2/boot/compressed/piggy.o := nios2-linux-gnu-ld  -mnios2elf   -r --format binary --oformat elf32-littlenios2 -T /home/developer/altera/nios2-linux/linux-2.6/arch/nios2/boot/compressed/vmlinux.scr arch/nios2/boot/compressed/../vmlinux.gz -o arch/nios2/boot/compressed/piggy.o 

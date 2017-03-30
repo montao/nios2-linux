@@ -1,0 +1,243 @@
+#!/usr/bin/expect
+
+source  ../kernel_config.exp
+log_file [log_file_name "$argv0"]
+send_user "Starting $argv0\n"
+set TITLE [title "$argv0"]
+
+step "Spawn kermit"
+source ../spawn_kermit.exp
+
+step "Reboot the kernel."
+source ../reboot_kernel.exp 
+
+step "Start testing"
+sleep 5
+send "\r"
+expect  -re $kernel_prompt
+
+set case_num 0
+incr case_num
+
+set timeout 60
+send "modprobe isp1760\r"
+while 1 {
+    expect {
+       -re "\[eE]rror|\[fF]ail|Hardware Trace|SIGSEGV" {
+           case_fail $case_num
+       }
+       -re "ISP1760.*sda: sda1 sda2.*Attached SCSI removable disk" {
+           send "\r"
+           expect -re $kernel_prompt
+           case_pass $case_num
+           break
+       }
+       timeout {
+           case_fail $case_num
+       }
+    }
+}
+
+sleep 5
+incr case_num
+set timeout 5
+send "mount -t vfat /dev/sda2 /mnt\r"
+while 1 {
+    expect {
+        -re "\[fF]ail|\[eE]rror" {
+            send_user "mount usb flash disk failed\n"
+            case_fail $case_num
+        }
+        -re $kernel_prompt {
+            send_user "mount usb flash disk\n"
+            break
+        }
+        timeout {
+            send -s "\3"
+            send_user "mount usb flash disk timeout\n"
+            break
+        }
+    }
+}
+
+set timeout 5
+send "mount\r"
+while 1 {
+    expect {
+        -re "/dev/sda2 on /mnt type vfat.*$kernel_prompt" {
+            send_user "mount succeeds\n"
+            case_pass $case_num
+            break
+        }
+        timeout {
+            send_user "mount failed\n"
+            case_fail $case_num
+        }
+    }
+}
+
+incr case_num
+set timeout 5
+send "echo teststring > /mnt/usbhost_testfile; cat /mnt/usbhost_testfile\r"
+while 1 {
+    expect {
+        -re "teststring\r\n$kernel_prompt" {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+incr case_num
+set timeout 30
+send "time dd conv=fsync if=/dev/zero of=/mnt/10m.bin bs=1M count=10\r"
+while 1 {
+    expect {
+        -re "records in.*records out.*real.*user.*sys.*$kernel_prompt" {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            send_user "Generate a 10M file timeout, test fail\n"
+            case_fail $case_num
+        }
+    }
+}
+
+incr case_num
+set timeout 5
+send "rm /mnt/usbhost_testfile; rm /mnt/*.bin\r"
+while 1 {
+    expect {
+        -re "rm:.*$kernel_prompt" {
+            case_fail $case_num
+        }
+        -re $kernel_prompt {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+send "ls /mnt/\r"
+set timeout 2
+while 1 {
+    expect {
+        -re "usbhost_testfile|10m\.bin" {
+            case_fail $case_num
+            break
+        }
+        -re $kernel_prompt {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+incr case_num
+send "umount /mnt\r"
+while 1 {
+    expect {
+        -re "umount:.*$kernel_prompt" {
+            send_user "umount error\n"
+            case_fail $case_num
+        }
+        -re $kernel_prompt {
+            break
+        }
+        timeout {
+            send -s "\3"
+            send_user "umount timeout\n"
+            break
+        }
+    }
+}
+
+send "mount\r"
+while 1 {
+    expect {
+        -re "/dev/sda2 on /mnt type vfat.*" {
+            send_user "umount failed"
+            case_fail $case_num
+        }
+        -re $kernel_prompt {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            send_user "umount timeout"
+            case_fail $case_num
+        }
+    }
+}
+
+
+step "Start bonnie++ test"
+
+incr case_num
+set timeout 60
+send "mke2fs /dev/sda1\r"
+while 1 {
+    expect {
+        -re "done.*done.*$kernel_prompt" {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+incr case_num
+set timeout 5
+send "mount -t ext2 /dev/sda1 /mnt\r"
+while 1 {
+    expect {
+        -re "(mount:|\[fF]ail|\[eE]rror).*$kernel_prompt" {
+            case_fail $case_num
+        }
+        -re $kernel_prompt {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            break
+        }
+    }
+}
+
+set timeout 3600
+incr case_num
+send "time bonnie++ -u root -d /mnt\r"
+while 1 {
+    expect {
+        -re "Hardware Trace" {
+            send_user "bonnie++ failed\n"
+            case_fail $case_num
+        }
+        -re "Latency.*$kernel_prompt" {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            send_user "bonnie++ timeout\n"
+            case_fail $case_num
+        }
+    }
+}
+
+all_pass
+
+send_user "Ending $argv0\n"
+
+log_file

@@ -1,0 +1,2 @@
+../expr.c: In function 'exprConstructFinalize':
+../expr.c:339: warning: unused parameter 'pThis'

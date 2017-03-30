@@ -1,0 +1,12 @@
+https://bugzilla.samba.org/show_bug.cgi?id=6848
+
+--- samba-3.4.2/source3/client/mtab.c
++++ samba-3.4.2/source3/client/mtab.c
+@@ -37,6 +37,7 @@
+ #include <mntent.h>
+ #include <stdlib.h>
+ #include <signal.h>
++#include <sys/stat.h>
+ #include "mount.h"
+ 
+ 

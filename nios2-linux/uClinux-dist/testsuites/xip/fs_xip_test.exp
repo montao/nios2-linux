@@ -1,0 +1,192 @@
+#!/usr/bin/expect
+
+source  ../kernel_config.exp
+log_file [log_file_name "$argv0"]
+send_user "Starting $argv0\n"
+set TITLE [title "$argv0"]
+
+set format [lindex $argv 1]
+send_user "\n#### binary format is $format\n"
+
+if { $argc < 2} {
+    puts "Please input:board_type, binary format (FDPIC or SHARED-FLAT)"
+    exit
+}
+append TITLE " ($format)"
+
+step "Spawn kermit"
+source ../spawn_kermit.exp
+
+step "Start testing."
+set case_num 0
+set timeout 10
+
+incr case_num
+send_user "Try to figure out if we are in u-boot or the kernel"
+set where_are_we 0
+send "version\r"
+set timeout 20
+expect {
+    "U-Boot" {
+        send_user "We are in u-boot\n"
+        set where_are_we "uboot"
+    }
+    "Linux" {
+        send_user "We are in the kernel\n"
+        set where_are_we "kernel"
+    }
+    timeout {
+        case_fail $case_num
+        send_user "Can't tell if we are in u-boot or the kernel\n"
+    }
+}
+
+if { $where_are_we == "uboot" } {
+    set timeout 50
+    expect -re $uboot_prompt
+    send_user "sending reset\n"
+    send "reset\r"
+} else {
+    if { $where_are_we == "kernel" } {
+        set timeout 60
+        expect -re $kernel_prompt
+        send_user "sending reboot\n"
+        send "reboot\r"
+    } else {
+        set timeout 10
+        expect "*"
+        expect "*"
+        send_user "sending control-C\n"
+        send "\3"
+        sleep 1
+        send "\r"
+    }
+}
+
+while 1 {
+    expect {
+        "Hit any key " {
+            send "\r"
+        }
+        -re $uboot_prompt {
+            send_user "successful reset attemp\n"
+            break
+        }
+        timeout {
+            send_user "failed reset attemp\n"
+            case_fail $case_num
+        }
+    }
+}
+
+incr case_num
+set timeout 30
+send -s "tftpboot 0x1000000 $romfs_rootfs_image\r"
+while 1 {
+    expect {
+        -re "Bytes transferred = \[0-9]+ \\\((\[0-9a-fA-F]+) hex\\\).*$uboot_prompt" {
+            set image_size 0x$expect_out(1,string)
+            send_user "Image size is $image_size\n"
+            case_pass $case_num
+            break
+        }
+        timeout {
+            send_user "ERROR: Uboot locked up during tftp\n"
+            case_fail $case_num
+        }
+    }
+}
+
+#Bug [#5958]: there is a hardware anomaly in async bank4 instruction pre-fetch, so readjust partitions.
+set new_rootfs_start_addr $kernel_start_addr
+set new_rootfs_end_addr [format "%08x" [expr 0x$rootfs_end_addr - 0x100000]]
+
+incr case_num
+set timeout 80
+send -s "protect off $new_rootfs_start_addr $new_rootfs_end_addr\r"
+while 1 {
+    expect {
+        -re "Un-Protected.*$uboot_prompt" {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            send_user "ERROR: unprotect failed\n"
+            case_fail $case_num
+        }
+    }
+}
+
+incr case_num
+set timeout 240
+send -s "erase $new_rootfs_start_addr $new_rootfs_end_addr\r"
+while 1 {
+    expect {
+        -re "Erased.*$uboot_prompt" {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            send_user "ERROR: erase failed\n"
+            case_fail $case_num
+        }
+    }
+}
+
+incr case_num
+set timeout 300
+send -s "cp.b 0x1000000 $new_rootfs_start_addr $image_size\r"
+while 1 {
+    expect {
+        -re "done.*$uboot_prompt" {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            send_user "ERROR: cp failed\n"
+            case_fail $case_num
+        }
+    }
+}
+
+incr case_num
+set timeout 30
+send -s "tftpboot 0x1000000 $compressed_kernel_only_image\r"
+while 1 {
+    expect {
+        -re "Bytes transferred = \[0-9]+ \\\((\[0-9a-fA-F]+) hex\\\).*$uboot_prompt" {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            send_user "ERROR: Uboot locked up during tftp\n"
+            case_fail $case_num
+        }
+    }
+}
+
+send -s "set bootargs root=/dev/mtdblock1 rootfstype=romfs ro console=ttyBF$def_uart_port,57600\r"
+expect -re $uboot_prompt
+
+incr case_num
+set timeout 180
+send "bootm 0x1000000\r"
+while 1 {
+    expect {
+        -re "Kernel panic|Hardware Trace:" {
+            sleep 5
+            case_fail $case_num
+        }
+        -re "VFS: Mounted root.*romfs filesystem.*$kernel_prompt" {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+all_pass
+send_user "Ending $argv0\n"
+log_file

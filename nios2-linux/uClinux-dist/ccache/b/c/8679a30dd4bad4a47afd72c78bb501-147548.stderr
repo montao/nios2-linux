@@ -1,0 +1,2 @@
+server_mode.c: In function 'server_mode':
+server_mode.c:149: warning: pointer targets in passing argument 3 of 'accept' differ in signedness

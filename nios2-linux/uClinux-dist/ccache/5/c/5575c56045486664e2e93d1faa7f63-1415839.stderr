@@ -1,0 +1,2 @@
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/net/ipv4/af_inet.c: In function 'build_ehash_secret':
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/net/ipv4/af_inet.c:240: warning: value computed is not used

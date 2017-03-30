@@ -1,0 +1,7 @@
+Altera GPIO
+
+Required properties:
+- compatible : should be "ALTR,pio-1.0".
+Optional properties:
+- resetvalue : the reset value of the output port.
+- width : the width of the port in number of bits.

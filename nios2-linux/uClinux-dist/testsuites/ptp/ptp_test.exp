@@ -1,0 +1,369 @@
+#!/usr/bin/expect
+
+source ../kernel_config.exp
+source ../board_info.exp
+log_file [log_file_name "$argv0"]
+send_user "Starting $argv0\n"
+set TITLE [title "$argv0"]
+
+step "Start kermit."
+set kermit_ttydev $ttyUSBdev
+send_user "Please make sure the slave ipaddr and ethaddr are reset to 10.100.4.51 and specific mac address!"
+set targetip 10.100.4.51
+source ../spawn_kermit.exp
+
+step "Reboot the kernel."
+source ../reboot_kernel.exp
+
+set case_num 0
+set ptp_board_targetip 10.100.4.51
+
+set first_target_id $spawn_id
+
+incr case_num
+send -s "ifconfig eth0 $ptp_board_targetip \r" 
+while 1 {
+   expect {
+     -re "$kernel_prompt" {
+	 puts "ifconfig success.\n"
+         case_pass $case_num
+         break
+      }
+
+      timeout { 
+         break
+         }
+     }
+}
+
+send_user "Start another machine to test canbus."
+
+step "Start kermit."
+set kermit_ttydev $ttydev
+set targetip 10.100.4.50
+source ../spawn_kermit.exp
+
+step "Reboot the kernel."
+source ../reboot_kernel.exp
+
+set second_target_id $kermit_spawn_id
+
+send -s "ifconfig eth0 $targetip \r" 
+while 1 {
+   expect {
+     -re "$kernel_prompt" {
+	 puts "ifconfig success.\n"
+         case_pass $case_num
+         break
+      }
+
+      timeout { 
+         break
+         }
+     }
+}
+for {set i 0} {$i < 1 } {incr i} {
+
+if { $i == 0 } {
+set ptp_cmd "ptpd -z linux_hw"
+set year "2011"
+} elseif { $i == 1 } {
+set ptp_cmd "ptpd2 -d"
+set year "2012"
+}
+
+set spawn_id $second_target_id 
+
+incr case_num
+send_user "\nOn the master machine setting time .\n"
+send -s "\r"
+expect  -re $kernel_prompt
+
+set timeout 8
+
+incr case_num
+send -s "ifconfig eth0 \r" 
+while 1 {
+   expect {
+     -re "$kernel_prompt" {
+	 puts "ifconfig success.\n"
+         case_pass $case_num
+         break
+      }
+
+      timeout { 
+         break
+         }
+     }
+}
+incr case_num
+
+send -s "version \r" 
+while 1 {
+   expect {
+      -re "$kernel_prompt" { 
+                case_pass $case_num
+         break
+      }
+
+      timeout {                           
+                case_fail $case_num
+      exit
+         }
+     }
+}
+send -s "ps auxf | grep ptpd | grep -v grep | head -1\r" 
+while 1 {
+   expect {
+      -re " (\[0-9]+) +root.*ptpd.*$kernel_prompt" {
+         set process_id $expect_out(1,string)
+                case_pass $case_num
+	 break
+	}
+
+      timeout {                          
+         break 
+         }
+     }
+}
+
+if { [ info exists process_id ] } {
+send_user "\nprocess_id: $process_id \n"
+send -s  "kill -9 $process_id\r"
+while 1 {
+         expect {
+         -re "$kernel_prompt" {
+                break
+         }
+
+         timeout {
+                exit
+         }
+         }
+}
+}
+
+incr case_num
+send -s "date -s $year.11.14-17:15:10\r" 
+while 1 {
+   expect {
+      -re "$kernel_prompt" { 
+                case_pass $case_num
+         break
+      }
+
+      timeout {                           
+                case_fail $case_num
+      exit
+         }
+     }
+}
+
+send -s "date \r" 
+while 1 {
+   expect {
+      -re "$kernel_prompt" { 
+                case_pass $case_num
+         break
+      }
+
+      timeout {                           
+                case_fail $case_num
+      exit
+         }
+     }
+}
+incr case_num
+
+send -s "$ptp_cmd -f log.master\r" 
+while 1 {
+   expect {
+      -re "$kernel_prompt" { 
+                case_pass $case_num
+         break
+      }
+
+      timeout {                           
+                case_fail $case_num
+      exit
+         }
+     }
+}
+
+incr case_num
+
+send -s "ps auxf\r" 
+while 1 {
+   expect {
+      -re " (\[0-9]+) +root.*ptpd.*$kernel_prompt" {
+         set process_id $expect_out(1,string)
+	#send_user "\nprocess_id: $process_id"
+                case_pass $case_num
+	 break
+	}
+
+      timeout {                           
+                case_fail $case_num
+      exit
+         }
+     }
+}
+
+send_user "\nSleep to wait for sync... .\n"
+sleep 20
+
+send_user "\nOn the slave machine sync time .\n"
+set spawn_id $first_target_id
+
+send -s "ifconfig eth0 \r" 
+while 1 {
+   expect {
+     -re "$kernel_prompt" {
+	 puts "ifconfig success.\n"
+         case_pass $case_num
+         break
+      }
+
+      timeout { 
+         break
+         }
+     }
+}
+
+send -s "version \r" 
+while 1 {
+   expect {
+      -re "$kernel_prompt" { 
+                case_pass $case_num
+         break
+      }
+
+      timeout {                           
+                case_fail $case_num
+      exit
+         }
+     }
+}
+send -s "date \r" 
+while 1 {
+   expect {
+      -re "$kernel_prompt" { 
+                case_pass $case_num
+         break
+      }
+
+      timeout {                           
+                case_fail $case_num
+      exit
+         }
+     }
+}
+incr case_num
+
+send -s "$ptp_cmd -g -f log.slave\r" 
+while 1 {
+   expect {
+      -re "$kernel_prompt" { 
+                case_pass $case_num
+         break
+      }
+
+      timeout {                           
+                case_fail $case_num
+      exit
+         }
+     }
+}
+
+sleep 60
+incr case_num
+
+send -s "ps auxf\r" 
+while 1 {
+   expect {
+      -re " (\[0-9]+) +root.*ptpd.*$kernel_prompt" {
+         set process_id $expect_out(1,string)
+	#send_user "\nprocess_id: $process_id"
+                case_pass $case_num
+	 break
+	}
+
+      timeout {                           
+                case_fail $case_num
+      exit
+         }
+     }
+}
+incr case_num
+
+send -s "date \r" 
+while 1 {
+   expect {
+      -re "$year.*$kernel_prompt" { 
+                case_pass $case_num
+         break
+      }
+
+      timeout {                           
+                case_fail $case_num
+      exit
+         }
+     }
+}
+
+send -s "cat log.slave \r" 
+while 1 {
+   expect {
+      -re "ptpd info.*$kernel_prompt" { 
+                case_pass $case_num
+         break
+      }
+
+#      -re "\[Ee]rror" {                           
+#                case_fail $case_num
+#      exit
+#         }
+
+      timeout {                           
+         break
+       }
+     }
+}
+send -s "ps auxf | grep ptpd | grep -v grep | head -1\r" 
+while 1 {
+   expect {
+      -re " (\[0-9]+) +root.*ptpd.*$kernel_prompt" {
+         set process_id $expect_out(1,string)
+                case_pass $case_num
+	 break
+	}
+
+      timeout {                           
+	 break
+         }
+     }
+}
+
+if { [ info exists process_id ] } {
+send_user "\nprocess_id: $process_id \n"
+send -s  "kill -9 $process_id\r"
+while 1 {
+         expect {
+         -re "$kernel_prompt" {
+                break
+         }
+
+         timeout {
+                exit
+         }
+         }
+}
+}
+}
+send_log "\n"
+send_log "\n$TITLE ............\[PASS\]\n"
+
+send_user "Ending $argv0\n"
+log_file
+ 
+

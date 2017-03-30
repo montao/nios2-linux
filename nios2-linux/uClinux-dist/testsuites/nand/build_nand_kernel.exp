@@ -1,0 +1,159 @@
+#!/usr/bin/expect
+
+source ../kernel_config.exp
+source  ../board_info.exp
+log_file [log_file_name "$argv0"]
+send_user "Starting $argv0\n"
+
+set HAVE_KERNEL_ONLY_IMAGE 1
+set env(EXT2_BLOCKS) "20480"
+set env(UBIFS_LEB_SIZE) "129024"
+
+cd $uclinux_path/testsuites
+step "Make config."
+source  make_default_config.exp
+
+# Following make specific configuration for this case.
+
+cd $uclinux_path/testsuites
+source  make_mtd_config.exp
+
+cd $uclinux_path
+set timeout 300
+set baud_rate_done_flag 0
+spawn make config
+#puts "Begin the interactive process of configuration"
+while 1 {
+    expect {
+        -re "Customize Kernel Settings.*DEFAULTS_KERNEL.*\\\[.*]" {
+            send "y\r"
+        }
+
+        -re "Customize Application/Library Settings.*DEFAULTS_VENDOR.*\\\[.*]" {
+            send "y\r"
+        }
+
+        -re "Initial RAM filesystem and RAM disk.*initramfs/initrd.*support.*BLK_DEV_INITRD.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "NAND Device Support.*MTD_NAND.*\\\[.*]" {
+            send -s "Y\r"
+        }
+
+        -re "Blackfin on-chip NAND Flash Controller driver.*MTD_NAND_BF5XX.*\\\[.*]" {
+            if { $board_type == "BF548-EZKIT" || [string match "BF527-EZKIT*" $board_type] || $board_type == "BF526-EZBRD" } {
+                send -s "Y\r"
+            } else {
+                send -s "\r"
+            }
+        }
+
+        -re "BF5XX NAND Hardware ECC.*MTD_NAND_BF5XX_HWECC.*\\\[.*]" {
+            if { $board_type == "BF548-EZKIT" } {
+                send "N\r"
+            } else {
+                send "\r"
+            }
+        }
+
+        -re "Blackfin on-chip MAC support.*BFIN_MAC.*\\\[.*]" {
+            if { [string match "BF527-EZKIT*" $board_type] || $board_type == "BF526-EZBRD" } {
+                send -s "M\r"
+            } else {
+                send -s "\r"
+            }
+        }
+
+        -re "Support for generic platform NAND driver.*MTD_NAND_PLATFORM.*\\\[.*]" {
+            if { $board_type == "BF537-STAMP" } {
+                send -s "Y\r"
+            } else {
+                send -s "N\r"
+            }
+        }
+
+        -re "Generic uClinux RAM/ROM filesystem support.*MTD_UCLINUX.*\\\[.*]" {
+            send -s "N\r"
+        }
+
+        -re "Enable UBI.*MTD_UBI.*\\\[.*]" {
+            send -s "Y\r"
+        }
+
+        -re "MTD devices emulation driver.*MTD_UBI_GLUEBI.*\\\[.*]" {
+            send -s "Y\r"
+        }
+
+        -re "UBIFS file system support.*UBIFS_FS.*\\\[.*]" {
+            send -s "Y\r"
+        }
+
+        -re "mtd-utils.*USER_MTDUTILS.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "ubifs utilities.*USER_MTDUTILS_UBIUTILS.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -nocase -re "\\\[\[^\r]*] (\[ymn])|choice\\\[.*]: \[0-9]+\r" {
+            continue
+        }
+
+        "\\\(*) \\\[*]" {
+            sleep .05
+            send "\r"
+        }
+
+        -re "\[cC]hoice\\\[.*]:" {
+            send "\r"
+        }
+
+        eof {
+            puts "End of configuration"
+            break
+        }
+
+        timeout {
+            puts "\n\nFATAL ERROR: config prompt timeout in make config"
+            break
+        }
+    }
+}
+
+cd $uclinux_path/testsuites
+step "Make"
+source  make_kernel.exp
+
+if [ catch {exec cp $uclinux_path/images/$ubifs_rootfs_image  $uclinux_path/romfs} ] {
+    send_user "copy file to romfs fail\n"
+    send_user "$errorInfo\n"
+}
+
+step "Make images again."
+
+cd $uclinux_path
+spawn make image
+set timeout 1200
+set bfin_make_status failure
+while 1 {
+    expect {
+        "Entering directory" { }
+        "Leaving directory" { set bfin_make_status success }
+        "Error" {set bfin_make_status failure }
+        "/bin/sh" { }
+        eof { break }
+    }
+}
+
+if { $bfin_make_status == "failure" } {
+    puts "ERROR: Error somewhere during make"
+}
+
+cd $uclinux_path/testsuites
+step "Copy linux"
+source copy_image.exp
+
+send_user "Ending $argv0\n"
+log_file

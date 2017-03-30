@@ -1,0 +1,2489 @@
+commit f1619c5c192b57f5bf1f144d21f6fd401d5ef465
+Author: Michael Olbrich <m.olbrich@pengutronix.de>
+Date:   Tue Dec 29 12:23:27 2009 -0600
+
+    cyclictest: add command line option for unbuffered output
+    
+    When reading the output from cyclictest with another program, the data is
+    buffered by default. This prevents nice 'live' display.
+    This patch adds an command line option to force the output to always be
+    unbuffered.
+    
+    Signed-off-by: Michael Olbrich <m.olbrich@pengutronix.de>
+    Signed-off-by: Wolfram Sang <w.sang@pengutronix.de>
+    Signed-off-by: Clark Williams <williams@redhat.com>
+
+commit 2fc5d42f862fad58ee92dca1effdfe926a25c36b
+Author: Carsten Emde <Carsten.Emde@osadl.org>
+Date:   Wed Dec 23 23:52:39 2009 +0100
+
+    rt-tests: Add a new test pip - priority inheritance with processes
+    
+    John,
+    
+    When creating an RPM package with the newly provided test pip, the message
+    error: Installed (but unpackaged) file(s) found:
+       /usr/bin/pip
+    appeared, and rpmbuild refused to finish building the package.
+    
+    	Carsten.
+    
+    -=--------------------------------------------------------------------=-
+    
+    Prevent rpmbuild from finding installed but unpackaged files.
+    
+    Signed-off-by: Carsten Emde <C.Emde@osadl.org>
+
+commit 7e2594ba90cd01f2fbb9ca6f9c95bb31a87414f1
+Author: John Kacur <jkacur@redhat.com>
+Date:   Wed Dec 23 16:50:37 2009 +0100
+
+    rt-tests: Add a "make tags" option.
+    
+    Add a "make tags" option to the Makefile
+    
+    Signed-off-by: John Kacur <jkacur@redhat.com>
+
+commit 20b8b253f3892ee04d5aae82f83c8e49acc1b75c
+Author: John Kacur <jkacur@redhat.com>
+Date:   Wed Dec 23 16:41:12 2009 +0100
+
+    rt-tests: pip - Use check_privs() from the rt-utils library.
+    
+    Use check_privs() from the rt-utils library to make sure that the user is
+    running with real-time privileges for the pip test program.
+    
+    Signed-off-by: John Kacur <jkacur@redhat.com>
+
+commit 3dec3c9e0421f7fd38ecb321faad1eacec740cc0
+Author: John Kacur <jkacur@redhat.com>
+Date:   Wed Dec 23 16:26:49 2009 +0100
+
+    rt-tests: Move header files from src/lib to src/include
+    
+    Move header files from src/lib to src/include and adjust the Makefile to
+    reflect this change.
+    
+    Signed-off-by: John Kacur <jkacur@redhat.com>
+
+commit 3b0dcdaefcdb654bc89b96d9f7f5ddbc31f6887e
+Author: John Kacur <jkacur@redhat.com>
+Date:   Wed Dec 23 16:01:17 2009 +0100
+
+    rt-tests: Add a new test pip - priority inheritance with processes
+    
+    This test is similar to pi_stress in that it purpursely triggers a priority-
+    inversion. However, instead of using pthreads it uses processes.
+    Since pthread_mutex_t are the only objects backed by priority inheritance
+    this is accomplished by having the processes use a pthread_mutex_t in
+    shared memory. See the header of pip.c for more information as well as the
+    code of course.
+    
+    In addition this patch starts a src/include directory as a common place
+    to put header files.
+    
+    Signed-off-by: John Kacur <jkacur@redhat.com>
+
+commit aee58a288f0ab71c0eafaec6b86f26b94e012af2
+Author: John Kacur <jkacur@redhat.com>
+Date:   Wed Dec 23 14:43:54 2009 +0100
+
+    rt-tests: Add error routines to the library
+    
+    Add error routines, similar to those found in Advanced Programming in the
+    UNIX Environment 2nd ed. for use by all rt test programs
+    
+    Signed-off-by: John Kacur <jkacur@redhat.com>
+
+commit 3115847ca0f16757a1283e58d15db5d652df28ce
+Author: Clark Williams <williams@redhat.com>
+Date:   Tue Dec 22 16:27:15 2009 -0600
+
+    version bump to 0.59
+    
+    Signed-off-by: Clark Williams <williams@redhat.com>
+
+commit 8ab7958d06b3c6b93a42ac9a4599361aa15c2ce1
+Author: Clark Williams <williams@redhat.com>
+Date:   Tue Dec 22 16:22:11 2009 -0600
+
+    deleted classic_pi program
+    
+    classic_pi was the original proof of concept for a Priority
+    Inheritance mutex demonstration, but pi_stress does that much
+    better now.
+    
+    Signed-off-by: Clark Williams <williams@redhat.com>
+
+commit d3f77dcefc40ba5e4a78937f600fc730902b4199
+Author: John Kacur <jkacur@redhat.com>
+Date:   Tue Dec 22 22:54:00 2009 +0100
+
+    rt-tests: Add help screen info about -M / refresh_on_max in cyclictest
+    
+    Signed-off-by: David Sommerseth <davids@redhat.com>
+    Signed-off-by: John Kacur <jkacur@redhat.com>
+
+commit 61b13092851db335a06eedc46043394c09b52450
+Author: David Sommerseth <davids@redhat.com>
+Date:   Tue Dec 22 16:47:36 2009 +0100
+
+    Missing parsing of --mlockall in signaltest
+    
+    Signed-off-by: David Sommerseth <davids@redhat.com>
+
+commit 2e2c1eb6ae2147ae68f1af4a0cc90066ad3c4bd0
+Author: David Sommerseth <davids@redhat.com>
+Date:   Tue Dec 22 16:47:35 2009 +0100
+
+    Fixed missing parsing of short arguments in classic_pi (David)
+    - Added the '+' back to the arguments (John)
+    
+    Signed-off-by: David Sommerseth <davids@redhat.com>
+    Signed-off-by: John Kacur <jkacur@redhat.com>
+
+commit 77c00420d06ec5010a251d4ecac1f74201cd20ca
+Author: Carsten Emde <C.Emde@osadl.org>
+Date:   Tue Dec 22 00:58:59 2009 +0100
+
+    rt-tests: Better explanation in the kernel module
+    
+    Signed-off-by: Carsten Emde <C.Emde@osadl.org>
+    Signed-off-by: John Kacur <jkacur@redhat.com>
+
+commit b1ff404d5545dd69ecc44b0055efb5478ec624f6
+Author: John Kacur <jkacur@redhat.com>
+Date:   Tue Dec 22 00:43:04 2009 +0100
+
+    rt-tests: Clean-up, Fix the comment part of the #endif protecting include files
+    
+    Clean-up, Fix the comment part of the #endif protecting include files
+    
+    Signed-off-by: John Kacur <jkacur@redhat.com>
+
+commit c663bf76dd10593c07b3fd95e3842c5e93c09ad8
+Author: Clark Williams <williams@redhat.com>
+Date:   Mon Dec 21 16:11:09 2009 -0600
+
+    version bump to 0.58
+
+commit e3c3bab1c668a5132bafcb254989daf40a1cb558
+Author: Clark Williams <williams@redhat.com>
+Date:   Mon Dec 21 16:04:41 2009 -0600
+
+    fixed missing function invocation in cyclictest
+    
+    Added missing () to get_debugfileprefix in cyclictest.
+    
+    Signed-off-by: Clark Williams <williams@redhat.com>
+
+commit 1c6c5896060d79b4617469f61d696f66e1f76667
+Author: Clark Williams <williams@redhat.com>
+Date:   Mon Dec 21 16:02:21 2009 -0600
+
+    move guard macros into implementor namespace
+    
+    renamed the guard macros in rt-get_cpu.h and rt-utils.h to
+    have leading double underscores which takes them out of the
+    application namespace. Also changed a '.' in the rt-get_cpu.h
+    guard macro to an underscore.
+    
+    Signed-off-by: Clark Williams <williams@redhat.com>
+
+commit d6e8606c2464206d90f6f43fdb7b5cf03d57747f
+Author: Carsten Emde <C.Emde@osadl.org>
+Date:   Mon Dec 21 22:36:55 2009 +0100
+
+    Completely remove VERSION_STRING until we have a better solution.
+    
+    Signed-off-by: Carsten Emde <C.Emde@osadl.org>
+    Signed-off-by: John Kacur <jkacur@redhat.com>
+
+commit 738ab3ea95aecdff6b469278f7071727ac0dc3f9
+Author: John Kacur <jkacur@redhat.com>
+Date:   Mon Dec 21 22:17:59 2009 +0100
+
+    rt-tests: Clean-up - protect rt-utils.h
+    
+    Clean-up: Protect rt-utils.h with #ifndef RT_UTILS_H
+    
+    Signed-off-by: John Kacur <jkacur@redhat.com>
+
+commit 2d85600632d69cae6f6886e2a18ff6b17908eb98
+Author: John Kacur <jkacur@redhat.com>
+Date:   Mon Dec 21 21:04:10 2009 +0100
+
+    rt-tests: Add a get_cpu() function to the library.
+    
+    Add a get_cpu() function to the library.
+    Most platforms will simply use sched_getcpu()
+    However, if you have a glibc < 2.6 then
+    64-bits will use vsyscall for getcpu (if available).
+    32-bits will use getcpu() (if available)
+    
+    Signed-off-by: John Kacur <jkacur@redhat.com>
+
+commit 5ee3c0f0372a338dac57123a23a00d03a3c85804
+Author: John Kacur <jkacur@redhat.com>
+Date:   Mon Dec 21 19:23:56 2009 +0100
+
+    rt-tests: Makefile - Changes to unify and simplify the Makefile
+    
+    - These changes simplify the Makefile. For example, notice that we no
+    longer need to specify the full path to the source file
+    - These changes also unify the Makefile, for example, every program
+    gets VERSION_STRING as an floating point number.
+    - Due to the above change I had to make a number of changes in the programs
+    that expected VERSION_STRING as a string.
+    - By unifying what we CFLAGS, to include -D_GNU_SOURCE, I had to remove
+    __USE_GNU which is reduncant in a number of files.
+    
+    Signed-off-by: John Kacur <jkacur@redhat.com>
+
+commit 273aa36231320c1473c1cc34dc8d6ba03c261455
+Merge: 2e1f658 1c3c9e3
+Author: John Kacur <jkacur@redhat.com>
+Date:   Mon Dec 21 17:48:20 2009 +0100
+
+    Merge remote branch 'clrk/master' into rt-tests-dev
+    
+    Conflicts:
+    	src/backfire/sendme.c
+
+commit 1c3c9e34d65b6774e9f56d9d49fdbe101d42dc6c
+Author: Clark Williams <williams@redhat.com>
+Date:   Mon Dec 21 10:27:18 2009 -0600
+
+    convert source back to unix text (was DOS text)
+    
+    Somehow the last set of tests added got converted to DOS text
+    (CRLF line terminators). Change them back
+    
+    Signed-off-by: Clark Williams <williams@redhat.com>
+
+commit 2e1f65816117a190b630e8311e12524d52816232
+Merge: 116a02e ff74d0e
+Author: John Kacur <jkacur@redhat.com>
+Date:   Tue Dec 15 23:21:00 2009 +0100
+
+    Merge commit 'clrk/master' into rt-tests-dev
+    
+    Conflicts:
+    	rt-tests.spec-in
+
+commit ff74d0eb70973fb13811eeb17be8f596291a9d7c
+Author: Clark Williams <williams@redhat.com>
+Date:   Tue Dec 15 13:48:37 2009 -0600
+
+    version bump to 0.57
+
+commit 116a02e456401241b1d2af050b7e6a2ec75d7d9c
+Author: Carsten Emde <c.emde@osadl.org>
+Date:   Tue Dec 15 02:23:48 2009 +0100
+
+    Add the following new tests - ptsematest - sigwaittest - svsematest - sendme
+    
+    John,
+    
+    thanks a lot for taking care of the new tests.
+    
+    By some reason, the spec file was not included in the patch. This
+    patch is needed to prevent the rpm build from finding installed
+    but unpackaged files.
+    
+    Signed-off-by: Carsten Emde <C.Emde@osadl.org>
+
+commit a6010f928e7026b1dc640f7a4072d865f7736702
+Author: Carsten Emde <C.Emde@osadl.org>
+Date:   Tue Dec 15 00:04:34 2009 +0100
+
+    Explain that the backfire kernel module may need building.
+    
+    Do a better job of explaining that the backfire kernel module may need
+    building in the sendme program.
+    
+    Signed-off-by: Carsten Emde <C.Emde@osadl.org>
+    Signed-off-by: John Kacur <jkacur@redhat.com>
+
+commit e9007a0edd52b391ad7d731dca3bd258c620c2f2
+Author: John Kacur <jkacur@redhat.com>
+Date:   Mon Dec 14 22:31:08 2009 +0100
+
+    Add a .gitignore file in the backfire directory for generated files.
+    
+    Add a .gitignore file in the backfire directory for generated files
+    that are created when making the kernel module.
+    
+    Signed-off-by: John Kacur <jkacur@redhat.com>
+
+commit 863280b7d569126c6dddf515776deb6889414330
+Author: John Kacur <jkacur@redhat.com>
+Date:   Mon Dec 14 21:44:19 2009 +0100
+
+    Remove making of backfire kernel module from the rt-tests makefile
+    The kernel module can be made by cding to src/backfire and doing
+    make modules
+    sudo make modules_install
+    
+    Signed-off-by: John Kacur <jkacur@redhat.com>
+
+commit 1a29a37968458329c05a7df3c1bfe66ee38a41b2
+Author: John Kacur <jkacur@redhat.com>
+Date:   Mon Dec 14 21:14:28 2009 +0100
+
+    The PHONY target for install is incorrectly specified as "all"
+    
+    Change the PHONY target for install to install
+    
+    Signed-off-by: John Kacur <jkacur@redhat.com>
+
+commit 2c4267ff9adcba69aaa6d4157f16b68fddc14ba2
+Author: John Kacur <jkacur@redhat.com>
+Date:   Mon Dec 14 16:19:59 2009 +0100
+
+    The version of check_privs that got added to the library must have come
+    from signaltest - because it doesn't have the fix that check_privs in
+    cyclictest has - to return the sched_priority to 0
+    
+    This is a good example of why common functions should be put into libraries -
+    so all programs benefit from fixes.
+    
+    Signed-off-by: John Kacur <jkacur@redhat.com>
+
+commit 150f680979d590ed0314f954c32c308eee7b476d
+Author: John Kacur <jkacur@redhat.com>
+Date:   Mon Dec 14 16:15:11 2009 +0100
+
+    Add the new tests to .gitignore
+    
+    Signed-off-by: John Kacur <jkacur@redhat.com>
+
+commit a017e969b3e07c726ea472b9294d899d11822d67
+Author: John Kacur <jkacur@redhat.com>
+Date:   Mon Dec 14 16:13:09 2009 +0100
+
+    Use sched_getcpu
+    - sched_getcpu is available since glibc 2.6
+    - the current tests were broken in anycase.
+    
+    Signed-off-by: John Kacur <jkacur@redhat.com>
+
+commit 92b0181ce8006c52cc19139dabfa155cca69e9f1
+Author: Carsten Emde <carsten.emde@osadl.org>
+Date:   Mon Dec 14 15:53:20 2009 +0100
+
+    Add the following new tests
+    - ptsematest
+    - sigwaittest
+    - svsematest
+    - sendme
+    
+    Signed-off-by: Carsten Emde <carsten.emde@osadl.org>
+    Signed-off-by: John Kacur <jkacur@redhat.com>
+
+commit da4e86522577ac413395dfb32d0b7411028e8dd8
+Author: Carsten Emde <carsten.emde@osadl.org>
+Date:   Mon Dec 14 14:58:52 2009 +0100
+
+    Make use of the new library functions in signaltest.
+    
+    Signed-off-by: Carsten Emde <carsten.emde@osadl.org>
+    Signed-off-by: John Kacur <jkacur@redhat.com>
+
+commit c51afec7fda2c43e760d43c5d76f4bfe4880c7f4
+Author: Carsten Emde <carsten.emde@osadl.org>
+Date:   Mon Dec 14 14:47:59 2009 +0100
+
+    Make use of the library functions in cyclic test.
+    
+    Signed-off-by: Carsten Emde <carsten.emde@osadl.org>
+    Signed-off-by: John Kacur <jkacur@redhat.com>
+
+commit dce15eefef03154a684d5274aebe5a036ed45f99
+Author: Carsten Emde <carsten.emde@osadl.org>
+Date:   Mon Dec 14 14:19:03 2009 +0100
+
+    Start a separate library of functions for the rt-test suite.
+    The first couple are taken from cyclictest.
+    
+    Signed-off-by: Carsten Emde <carsten.emde@osadl.org>
+    Signed-off-by: John Kacur <jkacur@redhat.com>
+
+commit a6d367302e932b3a1d1865adf64a1a29b4d54ee4
+Merge: 3085482 996e0f5
+Author: John Kacur <jkacur@starship.(none)>
+Date:   Fri Dec 11 14:45:27 2009 +0100
+
+    Merge commit 'v0.56' into rt-tests-dev
+
+commit 996e0f5e4de4824162757049f0814e5a007a4f33
+Author: Clark Williams <williams@redhat.com>
+Date:   Thu Dec 10 14:33:40 2009 -0600
+
+    version bump to 0.56
+    
+    Signed-off-by: Clark Williams <williams@redhat.com>
+
+commit 93989ec0d61e5220ff14475a9ec44ba4ebfcf1a1
+Author: Clark Williams <williams@redhat.com>
+Date:   Thu Dec 10 14:17:34 2009 -0600
+
+    [cyclictest] print thread ids when breaktracing
+    
+    This commit adds some output then the -b option is used to break on
+    exceeding a threshold. the thread id of the thread that exceeded the
+    threshold is printed for use when looking at the trace log.
+    
+    Signed-off-by: Clark Williams <williams@redhat.com>
+
+commit 3085482cff7a5b7f3d099259d7d2618aed5a72c6
+Merge: 2712903 4176f24
+Author: John Kacur <jkacur@redhat.com>
+Date:   Thu Nov 19 23:31:29 2009 +0100
+
+    Merge commit 'v0.55' into rt-tests-dev
+
+commit 4176f242c2eeeb4657f51183f55862e3dcd228db
+Author: Clark Williams <williams@redhat.com>
+Date:   Thu Nov 19 15:04:43 2009 -0600
+
+    version bump to 0.55
+
+commit 0b34a7b2bfdd889c808fb36a3797048cb800bb7e
+Author: Clark Williams <williams@redhat.com>
+Date:   Thu Nov 19 14:16:07 2009 -0600
+
+    rt-tests: pi_stress: cosmetic newline added
+    
+    Add a second newline to the "Low thread priority" display line
+    so that updating number of inversions doesn't overwrite it.
+    
+    Signed-off-by: Clark Williams <williams@redhat.com>
+
+commit d2ad7c750602b35b805003fc9ccc78337bc5b114
+Author: John Kacur <jkacur@redhat.com>
+Date:   Thu Nov 19 16:24:07 2009 +0100
+
+    rt-tests: pi_stress: Remove racy state variables that cause watchdog to trigger
+    
+    When using pthread_barrier_wait, it is important that barriers are called
+    the correct number of times. That is - the same number given as the count
+    when initializing the barrier.
+    
+    There was a do-while loop around elevate_barrier in the med priority thread.
+    On most machines, it actually never looped.
+    
+    On threads with enough processors (nehelam for example), there was a racy
+    situation in which the high priority thread could come out of the finish
+    barrier, and before it could set high_has_run = 0, the medium priority
+    thread would test the value and call the elevate barrier an extra time.
+    
+    This patch removes the bogus loop and related state variables and fixes
+    the hang.
+    
+    Signed-off-by: John Kacur <jkacur@redhat.com>
+
+commit cf46ad44b92c937779a618bbc9c10507fe4f6473
+Author: John Kacur <jkacur@redhat.com>
+Date:   Thu Nov 19 12:02:52 2009 +0100
+
+    rt-tests: pi_stress: Check whether quiet is set, before taking shutdown_mtx
+    
+    - Check whether quiet is set, before taking shutdown_mtx
+    - Add quiet to the help menu.
+    - Remove unused "signal" from struct options
+    
+    Signed-off-by: John Kacur <jkacur@redhat.com>
+
+commit 9ee4dcad0346e9870bf76cc8c1bf8b48292afdca
+Author: John Kacur <jkacur@redhat.com>
+Date:   Thu Nov 19 11:50:10 2009 +0100
+
+    rt-tests: pi_stress: Use a pthread_mutex_t for the global variable shutdown
+    
+    - Use a pthread_mutex_t for the global variable shutdown.
+    - Remove the volatile qualifier from shutdown. (Since the original author
+    probably simply meant the variable should be atomic which we effectively
+    get through the mutex.
+    
+    Signed-off-by: John Kacur <jkacur@redhat.com>
+
+commit 2712903a40560378cb61336994258780cfbb83d9
+Author: John Kacur <jkacur@redhat.com>
+Date:   Thu Nov 19 16:24:07 2009 +0100
+
+    rt-tests: pi_stress: Remove racy state variables that cause watchdog to trigger
+    
+    When using pthread_barrier_wait, it is important that barriers are called
+    the correct number of times. That is - the same number given as the count
+    when initializing the barrier.
+    
+    There was a do-while loop around elevate_barrier in the med priority thread.
+    On most machines, it actually never looped.
+    
+    On threads with enough processors (nehelam for example), there was a racy
+    situation in which the high priority thread could come out of the finish
+    barrier, and before it could set high_has_run = 0, the medium priority
+    thread would test the value and call the elevate barrier an extra time.
+    
+    This patch removes the bogus loop and related state variables and fixes
+    the hang.
+    
+    Signed-off-by: John Kacur <jkacur@redhat.com>
+
+commit 9093a5de51964f3a9ab1454a77181fad2d3e7217
+Author: John Kacur <jkacur@redhat.com>
+Date:   Thu Nov 19 12:02:52 2009 +0100
+
+    rt-tests: pi_stress: Check whether quiet is set, before taking shutdown_mtx
+    
+    - Check whether quiet is set, before taking shutdown_mtx
+    - Add quiet to the help menu.
+    - Remove unused "signal" from struct options
+    
+    Signed-off-by: John Kacur <jkacur@redhat.com>
+
+commit 97dbb3cebd200a4d45d89d8e264e43b119b2cbcf
+Author: John Kacur <jkacur@redhat.com>
+Date:   Thu Nov 19 11:50:10 2009 +0100
+
+    rt-tests: pi_stress: Use a pthread_mutex_t for the global variable shutdown
+    
+    - Use a pthread_mutex_t for the global variable shutdown.
+    - Remove the volatile qualifier from shutdown. (Since the original author
+    probably simply meant the variable should be atomic which we effectively
+    get through the mutex.
+    
+    Signed-off-by: John Kacur <jkacur@redhat.com>
+
+commit 8f9ffd3750ce2aa68bab10bdbf8e1c5da0d5e9fc
+Merge: 4fc1a43 c8fdec1
+Author: John Kacur <jkacur@redhat.com>
+Date:   Wed Nov 18 10:21:47 2009 +0100
+
+    Merge branch 'master' into rt-tests-dev
+
+commit c8fdec1e0793c18b08b2b3d1e3548015505c3764
+Author: Clark Williams <williams@redhat.com>
+Date:   Tue Nov 17 17:01:37 2009 -0600
+
+    version bump to 0.54
+
+commit edce3be0484f4f73533166c9ad61aae6c5a44650
+Author: John Kacur <jkacur@redhat.com>
+Date:   Mon Nov 16 22:18:56 2009 +0100
+
+    rt-tests: Makefile - rt-tests.spec is not a PHONY target
+    
+    Reported-by: Uwe Kleine-König <u.kleine-koenig@pengutronix.de>
+    Signed-off-by: John Kacur <jkacur@redhat.com>
+    Signed-off-by: Clark Williams <williams@redhat.com>
+
+commit 168f2a35ebc52a75a445841344c152d6ca1b776c
+Author: John Kacur <jkacur@redhat.com>
+Date:   Mon Nov 16 20:28:39 2009 +0100
+
+    pi_stress: Convert c-plus style comments to c-style comments
+    
+    Signed-off-by: John Kacur <jkacur@redhat.com>
+    Signed-off-by: Clark Williams <williams@redhat.com>
+
+commit a95740e5de9141f8e33c570c3587254773c9c318
+Author: John Kacur <jkacur@redhat.com>
+Date:   Mon Nov 16 20:22:23 2009 +0100
+
+    pi_stress: Fix trailing-whitespace warnings.
+    
+    Signed-off-by: John Kacur <jkacur@redhat.com>
+    Signed-off-by: Clark Williams <williams@redhat.com>
+
+commit 72bffb255a4541fb94bb52fcac0bccbc3ba1caea
+Author: John Kacur <jkacur@redhat.com>
+Date:   Mon Nov 16 20:14:46 2009 +0100
+
+    pi_stress: Fix indentation problems with Lindent from the kernel
+    
+    Signed-off-by: John Kacur <jkacur@redhat.com>
+    Signed-off-by: Clark Williams <williams@redhat.com>
+
+commit e3f61d1e8c23ea0239636dc3e4c892fd2f22b8f7
+Author: John Kacur <jkacur@redhat.com>
+Date:   Mon Nov 16 16:14:25 2009 +0100
+
+    rt-tests: Makefile - Add a DEBUG option to the Makefile
+    
+    This allows you to do
+    make DEBUG=0
+    which changes CFLAGS from -Wall -Wno-nonnull -O2
+    to -Wall -Wno-nonnull -O0 -g
+    
+    Signed-off-by: John Kacur <jkacur@redhat.com>
+    Signed-off-by: Clark Williams <williams@redhat.com>
+
+commit 502ab0b3e49d1c691bdd3b6975d90e9f5450196e
+Author: John Kacur <jkacur@redhat.com>
+Date:   Mon Nov 16 15:47:01 2009 +0100
+
+    rt-tests: Makefile - Specify when a target is a PHONY target.
+    
+    Signed-off-by: John Kacur: <jkacur@redhat.com>
+    Signed-off-by: Clark Williams <williams@redhat.com>
+
+commit 1c436a1d755c456dd8f2caea7e7548df7f1b4e0d
+Author: John Kacur <jkacur@redhat.com>
+Date:   Mon Nov 16 15:37:49 2009 +0100
+
+    rt-tests: Makefile - Change FLAGS to CFLAGS
+    
+    Change FLAGS to CFLAGS as this is the standard
+    
+    Signed-off-by: John Kacur <jkacur@redhat.com>
+    Signed-off-by: Clark Williams <williams@redhat.com>
+
+commit 4fc1a432aa373948546d52121c69f7e27626d434
+Author: John Kacur <jkacur@redhat.com>
+Date:   Mon Nov 16 22:14:25 2009 +0100
+
+    rt-tests: Makefile - rt-tests.spec is not a PHONY target
+    
+    Reported-by: Uwe Kleine-König <u.kleine-koenig@pengutronix.de>
+    Signed-off-by: John Kacur <jkacur@redhat.com>
+
+commit f517718bb680aa1e93f72c29910bc65c13c82a05
+Author: John Kacur <jkacur@redhat.com>
+Date:   Mon Nov 16 20:28:39 2009 +0100
+
+    pi_stress: Convert c-plus style comments to c-style comments
+    
+    Signed-off-by: John Kacur <jkacur@redhat.com>
+
+commit 76a7fa9c102631a34f88ec399c119ea542ae81a4
+Author: Clark Williams <williams@redhat.com>
+Date:   Mon Nov 16 13:32:36 2009 -0600
+
+    added back dist macro
+    
+    Added the dist macro back for distribution differentiation
+    
+    Signed-off-by: Clark Williams <williams@redhat.com>
+
+commit a41df95177ff19bd3185a5673aa598c353a5774d
+Author: John Kacur <jkacur@redhat.com>
+Date:   Mon Nov 16 20:22:23 2009 +0100
+
+    pi_stress: Fix trailing-whitespace warnings.
+    
+    Signed-off-by: John Kacur <jkacur@redhat.com>
+
+commit c6a804f6c38d5b7f6150123febe0b305ded6f21a
+Author: John Kacur <jkacur@redhat.com>
+Date:   Mon Nov 16 20:14:46 2009 +0100
+
+    pi_stress: Fix indentation problems with Lindent from the kernel
+    
+    Signed-off-by: John Kacur <jkacur@redhat.com>
+
+commit 7ea849f942f7e5b02d2be9ee50e2584635cd7be4
+Author: John Kacur <jkacur@redhat.com>
+Date:   Mon Nov 16 16:14:25 2009 +0100
+
+    rt-tests: Makefile - Add a DEBUG option to the Makefile
+    
+    This allows you to do
+    make DEBUG=0
+    which changes CFLAGS from -Wall -Wno-nonnull -O2
+    to -Wall -Wno-nonnull -O0 -g
+    
+    Signed-off-by: John Kacur <jkacur@redhat.com>
+
+commit 14806d13a0b84220fa17d38bdb32559610434794
+Author: John Kacur <jkacur@redhat.com>
+Date:   Mon Nov 16 15:47:01 2009 +0100
+
+    rt-tests: Makefile - Specify when a target is a PHONY target.
+    
+    Signed-off-by: John Kacur: <jkacur@redhat.com>
+
+commit e2a22de97709513b3d541f65280db51e44431a3e
+Author: John Kacur <jkacur@redhat.com>
+Date:   Mon Nov 16 15:37:49 2009 +0100
+
+    rt-tests: Makefile - Change FLAGS to CFLAGS
+    
+    Change FLAGS to CFLAGS as this is the standard
+    
+    Signed-off-by: John Kacur <jkacur@redhat.com>
+
+commit d0a65eb5a016d789edcc50ea7f94506cf6751730
+Author: Clark Williams <williams@redhat.com>
+Date:   Wed Oct 7 09:14:20 2009 -0500
+
+    patch from Hans-Peter Bock <Hans-Peter.Bock@isw.uni-stuttgart.de>
+    correcting units in help message for cyclictest
+
+commit 82ca52c27b60b5c57a78dbd8b2352609960e43dd
+Author: Clark Williams <williams@redhat.com>
+Date:   Tue Oct 6 14:21:04 2009 -0500
+
+    version bump to 0.53
+
+commit 6d54794d16310389f3a9f822038d9e9f24265d96
+Author: Clark Williams <williams@redhat.com>
+Date:   Tue Oct 6 14:17:18 2009 -0500
+
+    fixed incorrect format in hwlatdetect.py
+
+commit de34dc90a4f3edb0e5ca6b2efcde23b778eadedb
+Author: Clark Williams <williams@redhat.com>
+Date:   Mon Sep 21 19:30:38 2009 -0500
+
+    add new file doc/realease-checklist.txt
+
+commit b4eaf442855f56e16ebc37ace394bc8d17db158a
+Author: Clark Williams <williams@redhat.com>
+Date:   Mon Sep 21 16:57:25 2009 -0500
+
+    version bump to 0.52
+
+commit 99557d7360d66e25538756c82a3078d0892f51fc
+Author: Clark Williams <williams@redhat.com>
+Date:   Mon Sep 21 16:48:49 2009 -0500
+
+    cleanups for rt-migrate-test
+
+commit 7ca2d46e60caf611668309bba5060f928afd03f9
+Author: Clark Williams <williams@redhat.com>
+Date:   Mon Sep 21 10:30:10 2009 -0500
+
+    added Steven Rostedt's rt-migrate-test
+
+commit 16707573007db383859cd551c2415afb13be9739
+Author: John Kacur <jkacur@redhat.com>
+Date:   Mon Sep 14 16:33:31 2009 +0200
+
+    pi_stress clean-ups, fix hang.
+    
+    From f17765e52e248b3a738f5206cb4b97bdcc1a0204 Mon Sep 17 00:00:00 2001
+    From: John Kacur <jkacur@redhat.com>
+    Date: Tue, 1 Sep 2009 15:24:23 +0200
+    Subject: [PATCH] Add tags and TAGS to .gitignore
+    
+    Add tags and TAGS to .gitignore, to prepare for a make tags option
+
+commit 42ab9e7cd259fae674dc2b2aa2962caaf8f09409
+Author: Clark Williams <williams@redhat.com>
+Date:   Thu Sep 3 15:11:05 2009 -0500
+
+    documented -M option
+
+commit 64fce51cb8366a3462bfa55d3de250fb5564eadc
+Author: Clark Williams <williams@redhat.com>
+Date:   Thu Sep 3 15:07:42 2009 -0500
+
+    version bump to 0.51
+
+commit 34fca025a60b2340a76f1f9972cdce68629c9065
+Merge: fc96b72 ab88708
+Author: Clark Williams <williams@redhat.com>
+Date:   Thu Sep 3 14:57:42 2009 -0500
+
+    Merge commit 'uwe/for-clark'
+
+commit ab887085b4ba080eb698c903fdf33e02724fbd2f
+Author: Uwe Kleine-König <u.kleine-koenig@pengutronix.de>
+Date:   Thu Sep 3 21:02:19 2009 +0200
+
+    cyclictest.8: make description of --policy consistent to other options
+    
+    Signed-off-by: Uwe Kleine-König <u.kleine-koenig@pengutronix.de>
+
+commit ba788f073122b88d93ba6a288c21a08c26b4ba10
+Author: Uwe Kleine-König <u.kleine-koenig@pengutronix.de>
+Date:   Thu Sep 3 20:56:14 2009 +0200
+
+    manpages: fix lintian warning hyphen-used-as-minus-sign
+    
+    "-" must be escaped ("\-") to be interpreted as minus, otherwise they
+    might be rendered as hyphen which makes it impossible to search for or
+    to cut'n'paste.
+    
+    See http://lintian.debian.org/tags/hyphen-used-as-minus-sign.html for a
+    detailed explanation.
+    
+    Signed-off-by: Uwe Kleine-König <u.kleine-koenig@pengutronix.de>
+
+commit fc96b72126e79a732e6265d76a11c4e807368642
+Author: Arnaldo Carvalho de Melo <acme@redhat.com>
+Date:   Wed Aug 26 17:31:34 2009 -0300
+
+    cyclictest: add --update_on_max option
+    
+    Note: the previous one sucked rockz, please try this one instead.
+    
+    When running on a machine with not enough bandwidth it can be helpful to
+    only update the status when a new max is hit.
+    
+    Signed-off-by: Arnaldo Carvalho de Melo <acme@redhat.com>
+
+commit 3eba62854f39c2e107ecfc8673b88fcd9b04f7a6
+Author: Clark Williams <williams@redhat.com>
+Date:   Thu Jul 16 10:46:39 2009 -0500
+
+    added extra status prints to scripts/do-git-push
+    added pushtest target to Makefile
+    fixed incorrect argument to git push
+
+commit a55242cc96107b13d328923b31d723e521a8683b
+Author: Clark Williams <williams@redhat.com>
+Date:   Thu Jul 16 10:42:01 2009 -0500
+
+    version bump to 0.50
+
+commit 62ef8a98a75a08d2f6621a21aedfb5846657dab5
+Author: Clark Williams <williams@redhat.com>
+Date:   Wed Jul 15 20:43:21 2009 -0500
+
+    major rewrite of hwlatdetect.py to handle old smi_detector module
+    as well as current hwlat_detector
+
+commit b7ba8bc3c72a5c4d4cbdc4fc84c480ee6b74eb4a
+Author: Clark Williams <williams@redhat.com>
+Date:   Wed Jul 15 20:41:37 2009 -0500
+
+    removed redirect to /dev/null and added --dryrun push
+
+commit a8a69c7e96f541004c5f9fdc600096cd20bdcd97
+Merge: 960adc4 b2554ef
+Author: Clark Williams <williams@redhat.com>
+Date:   Mon Jul 13 12:35:02 2009 -0500
+
+    Merge branch 'clark'
+
+commit b2554ef475ce34c7d7afa888df2d5b2b22068b8f
+Author: Clark Williams <williams@redhat.com>
+Date:   Mon Jul 13 12:34:10 2009 -0500
+
+    small tweaks to Uwe's changes to scripts/do-push-git
+    added testing mode to scripts/do-push-git
+
+commit edcaf949455641e4052616da60f7a574d8d85015
+Author: Uwe Kleine-König <u.kleine-koenig@pengutronix.de>
+Date:   Fri Jul 10 20:32:32 2009 +0200
+
+    scripts/do-git-push: optimize a few forks away
+    
+    As I'm not Clark I cannot test my changes, so this is completly
+    untested :-)
+    
+    Signed-off-by: Uwe Kleine-König <u.kleine-koenig@pengutronix.de>
+    Signed-off-by: Clark Williams <williams@redhat.com>
+
+commit 960adc44a228c7b71007028afad64febbbf3055e
+Author: Clark Williams <williams@redhat.com>
+Date:   Mon Jul 13 10:07:24 2009 -0500
+
+    version bump to 0.49
+
+commit e5d7ca1ac58ad2908850d8c11062a0a49a031df2
+Author: Sebastian Andrzej Siewior <bigeasy@linutronix.de>
+Date:   Mon Jul 13 14:34:48 2009 +0200
+
+    cyclictest: process option before checking for permissions
+    
+    so a normal user is able to take a look on the available options
+    
+    Signed-off-by: Sebastian Andrzej Siewior <bigeasy@linutronix.de>
+    Signed-off-by: Clark Williams <williams@redhat.com>
+
+commit 47e87a456c66f8fcea3cfbca914a5ab7f82e4cfc
+Author: Sebastian Andrzej Siewior <bigeasy@linutronix.de>
+Date:   Mon Jul 13 09:40:46 2009 -0500
+
+    cyclictest: exit with an error code in error case
+    
+    if cyclictest is started with invalid arguments or $SOMETHING, then it
+    prints the help screen and the exit code is 0 which is wrong.
+    
+    Signed-off-by: Sebastian Andrzej Siewior <bigeasy@linutronix.de>
+    Signed-off-by: Clark Williams <williams@redhat.com>
+
+commit 2ba1f87e05d59287fd09520f4a20d990411888e6
+Author: Clark Williams <williams@redhat.com>
+Date:   Tue Jul 7 17:15:21 2009 -0500
+
+    version bump to 0.48
+    added push target to Makefile
+
+commit c6efd5be12756d23a6a1d818a9f1a1283e5ec4ee
+Author: Clark Williams <williams@redhat.com>
+Date:   Tue Jul 7 17:14:46 2009 -0500
+
+    moved to scripts directory
+
+commit f8b121ddd8ae47d8dbb0d15e4d3888bcd32c29d5
+Author: Clark Williams <williams@redhat.com>
+Date:   Tue Jul 7 17:13:53 2009 -0500
+
+    Added sanity checks and comments to scripts/do-git-push
+
+commit 03f8afd84564f67dc66eb493abdd62f346e11f30
+Author: Clark Williams <williams@redhat.com>
+Date:   Tue Jul 7 16:26:42 2009 -0500
+
+    added do-git-push script
+
+commit d4e64bdf64076fcff82e1efa6d6e8a6fa9d371ff
+Author: Clark Williams <williams@redhat.com>
+Date:   Sun Jul 5 16:14:57 2009 -0500
+
+    version bump to 0.47
+
+commit a64d952c2ccf48bd90e7241b1f1e8f3532a3731f
+Author: Clark Williams <williams@redhat.com>
+Date:   Sun Jul 5 16:14:43 2009 -0500
+
+    updated change log
+
+commit 1b7ecf004ba2cb196b066603e0d43511d84a725f
+Author: Clark Williams <williams@redhat.com>
+Date:   Sun Jul 5 13:33:52 2009 -0500
+
+    change options for --policy to be string names rather than integers
+    moved policy display from individual threads to header with load average
+    did some sanity checking so that policy and priority match
+    
+    Signed-off-by: Clark Williams <williams@redhat.com>
+
+commit de70815ad04ac2726d23331bd3d7f4472106b6e5
+Author: Clark Williams <williams@redhat.com>
+Date:   Sun Jul 5 12:58:51 2009 -0500
+
+    Subject: [PATCH]cyclictest: Arrange alphabetically for readability of
+    	"cyclictest --help".
+    From: GeunSik Lim <leemgs1@gmail.com>
+    Reply-To: leemgs1@gmail.com
+    To: williams <williams@redhat.com>
+    Cc: linux-rt-users <linux-rt-users@vger.kernel.org>, tglx <tglx@linutronix.de>
+    
+    When we use "#> cyclictest --help" command, we are confusing because of
+    random order of many options. Arrange alphabetically.
+    
+    After Patch)
+    [root@fedora11 rt-tests]# ./cyclictest  --help
+    cyclictest V 0.46
+    Usage:
+    cyclictest <options>
+    
+    -a [NUM] --affinity        run thread #N on processor #N, if possible
+                               with NUM pin all threads to the processor NUM
+    -b USEC  --breaktrace=USEC send break trace command when latency > USEC
+    -B       --preemptirqs     both preempt and irqsoff tracing (used with -b)
+    -c CLOCK --clock=CLOCK     select clock
+                               0 = CLOCK_MONOTONIC (default)
+                               1 = CLOCK_REALTIME
+    -C       --context         context switch tracing (used with -b)
+    -d DIST  --distance=DIST   distance of thread intervals in us default=500
+    -D       --duration=t      specify a length for the test run
+                               default is in seconds, but 'm', 'h', or 'd' maybe added
+                               to modify value to minutes, hours or days
+    -E       --event           event tracing (used with -b)
+    -f       --ftrace          function trace (when -b is active)
+    -h       --histogram=US    dump a latency histogram to stdout after the run
+                               (with same priority about many threads)
+                               US is the max time to be be tracked in microseconds
+    -i INTV  --interval=INTV   base interval of thread in us default=1000
+    -I       --irqsoff         Irqsoff tracing (used with -b)
+    -l LOOPS --loops=LOOPS     number of loops: default=0(endless)
+    -m       --mlockall        lock current and future memory allocations
+    -n       --nanosleep       use clock_nanosleep
+    -N       --nsecs           print results in ns instead of ms (default ms)
+    -o RED   --oscope=RED      oscilloscope mode, reduce verbose output by RED
+    -O TOPT  --traceopt=TOPT   trace option
+    -p PRIO  --prio=PRIO       priority of highest prio thread
+    -P       --preemptoff      Preempt off tracing (used with -b)
+    -q       --quiet           print only a summary on exit
+    -r       --relative        use relative timer instead of absolute
+    -s       --system          use sys_nanosleep and sys_setitimer
+    -t       --threads         one thread per available processor
+    -t [NUM] --threads=NUM     number of threads:
+                               without NUM, threads = max_cpus
+                               without -t default = 1
+    -T TRACE --tracer=TRACER   set tracing function
+        configured tracers: unavailable (debugfs not mounted)
+    -v       --verbose         output values on stdout for statistics
+                               format: n:c:v n=tasknum c=count v=value in us
+    -w       --wakeup          task wakeup tracing (used with -b)
+    -W       --wakeuprt        rt task wakeup tracing (used with -b)
+    -y POLI  --policy=POLI     policy of realtime thread (1:FIFO, 2:RR)
+                               format: --policy=1(default) or --policy=2
+    
+          Signed-by-off: GeunSik Lim <geunsik.lim@samsung.com>
+    
+    Signed-off-by: Clark Williams <williams@redhat.com>
+
+commit 1926b984397dc9f7f8c8d1ce327048531ca2d06d
+Author: Clark Williams <williams@redhat.com>
+Date:   Sun Jul 5 12:58:27 2009 -0500
+
+    Subject: [PATCH] cyclictest: Add policy option to support FIFO or RR by
+    	users
+    From: GeunSik Lim <leemgs1@gmail.com>
+    To: williams <williams@redhat.com>
+    Cc: linux-rt-users <linux-rt-users@vger.kernel.org>, tglx <tglx@linutronix.de>
+    
+    
+    Current cyclictest support FIFO policy for static priority of
+    RT threads only. Append policy option to support FIFO or RR by user.
+    
+    After this patch.
+    1) with FIFO about RT threads(default)
+       ./cyclictest -t 5 -p 50
+    or ./cyclictest -t 5 -p 50 -y 1
+    or ./cyclictest -t 5 -p 50 --policy 1
+    
+    2) with RR about RT threads(default)
+       ./cyclictest -t 5 -p 50 -y 2
+    or ./cyclictest -t 5 -p 50 --policy 2
+    
+    This is screenshot of threads using cyclictest & tuna utility after patch.
+    http://blogfiles6.naver.net/20090703_5/invain_1246588185266_sc7zEq_PNG/cyclictest-tuna-policy.PNG
+    
+            Signed-off-by: GeunSik Lim <geunsik.lim@samsung.com>
+    
+    Signed-off-by: Clark Williams <williams@redhat.com>
+
+commit 78ae63b635dd1d495cadc87731b6b3404c4cff47
+Author: Clark Williams <williams@redhat.com>
+Date:   Sun Jul 5 12:58:01 2009 -0500
+
+    Subject: [PATCH] cyclictest : Appended man & usage about the same priority
+    	of many threads with -h
+    From: GeunSik Lim <leemgs1@gmail.com>
+    Reply-To: leemgs1@gmail.com
+    To: williams <williams@redhat.com>
+    Cc: linux-rt-users <linux-rt-users@vger.kernel.org>, tglx <tglx@linutronix.de>,
+            sdietrich@suse.de
+    
+    
+    If we run a many threads with -t option, "priority--" rt priority will assign
+    per thread in sequence. But, If we use -h option, all threads is same priority.
+    
+    Append man page and cyclictest usage about the same priority of many threads
+    with -h option.
+    
+    ex) cyclictest -t 5 -p 50        [enter] <-- without -h
+    ex) cyclictest -t 5 -p 50 -h 100 [enter] <-- with    -h
+    
+            Signed-off-by: GeunSik Lim <geunsik.lim@samsung.com>
+            Acked-by     : Sven-Thorsten Dietrich <sdietrich@suse.de>
+    
+    Signed-off-by: Clark Williams <williams@redhat.com>
+
+commit 581a864672741a2ba10813ae524a218bac51f261
+Author: Clark Williams <williams@redhat.com>
+Date:   Sun Jul 5 12:57:27 2009 -0500
+
+    changed smidetect to hwlatdetect in .gitignore
+
+commit 802855c693684fb56ee40af72f6dcffe4a5796c8
+Author: Clark Williams <williams@redhat.com>
+Date:   Thu Jul 2 17:13:39 2009 -0500
+
+    added fix from Daniel Gollub <dgollub@suse.de> for doomsday latency
+    version bump to 0.46
+
+commit 4b1bc6a9bb82faa91842d111ed31fe84877aaa8c
+Author: Daniel Gollub <dgollub@suse.de>
+Date:   Wed Jul 1 19:16:29 2009 -0700
+
+    Subject: Handle doomsday latency for cyclictest in histogram mode
+    
+    Don't miss latency which exceed the histogram limit -
+    instead sample limit exceeding latency in the last bucket.
+    
+    This is a leftover from cyclictest_histogram.patch:
+    -> Todo: Currently cyclictest does not report the number of samples
+    -> that exceeded the histogram max latency.
+    
+    Handle OOM.
+    
+    Signed-off-by: Daniel Gollub <dgollub@suse.de>
+    Reviewed-by: Sven-Thorsten Dietrich <sdietrich@suse.de>
+    --
+
+commit 81b30e4c384049414d2c9edfc77192d8465e7590
+Author: Clark Williams <williams@redhat.com>
+Date:   Thu Jul 2 09:42:30 2009 -0500
+
+    updated changelog for 0.45
+
+commit 190a00e14e7aba6495a1c7d433c2cfa260e9e939
+Author: Clark Williams <williams@redhat.com>
+Date:   Thu Jul 2 09:36:52 2009 -0500
+
+    version bump to 0.45; added help target to Makefile
+
+commit 63cf2a4809a2895dace125ba2ce88a2984769731
+Author: Sven-Thorsten Dietrich <sdietrich@suse.de>
+Date:   Sat Mar 21 16:41:40 2009 -0700
+
+    Change output format to allow 6 digits.
+    
+    This is useful when testing PREEMPT_NONE Kernels with cyclictest,
+    where latencies approaching 1 second can be observed.
+    
+    Signed-off-by: Sven-Thorsten Dietrich <sdietrich@suse.de>
+
+commit 66fb1db24ec16a26e248fc7742d84002efc9135e
+Author: Clark Williams <williams@redhat.com>
+Date:   Thu Jul 2 09:29:11 2009 -0500
+
+    added debug prints and retry logic to hwlatdetect enable/disable code and detection code
+
+commit 6092f3b705fd3207ffac7dff681e78033af1cddb
+Author: Daniel Gollub <dgollub@suse.de>
+Date:   Wed Jul 1 18:57:43 2009 -0700
+
+    Avoid segfault of cyclictest if it gets immediately interrupted.
+    
+    If clock_nanosleep() gets interrupted this could result in a negative
+    time diff from calcdiff().
+    
+    With the histogram patch this leads to a segfault, since the time diff
+    is used as index for the histogram array:
+    
+    Core was generated by `/usr/bin/cyclictest -n -q -p 99 -t 2 -i 500 -l
+    1000000 -h
+     20000'.
+     Program terminated with signal 11, Segmentation fault.
+    #0  0x0000000000402324 in timerthread (param=<value optimized out>)
+         at src/cyclictest/cyclictest.c:339
+         339                             stat->hist_array[diff] += 1;
+         (gdb) p diff
+         $1 = -751974
+    
+    Signed-off-by: Daniel Gollub <dgollub@suse.de>
+    Acked-by: Sven-Thorsten Dietrich <sdietrich@suse.de>
+
+commit a778639f31e064419511a39d7ce5401d709514fa
+Author: Clark Williams <williams@redhat.com>
+Date:   Tue Jun 30 13:36:50 2009 -0500
+
+    version bump to v0.44
+
+commit 68b947acc1ff25dc0b66b10591ca461d1fc22424
+Author: Clark Williams <williams@redhat.com>
+Date:   Tue Jun 30 13:36:35 2009 -0500
+
+    renamed smidetect to hwlatdetect in specfile template
+
+commit f247fd753a307b0ceae7941a282a93ccc614f529
+Author: Clark Williams <williams@redhat.com>
+Date:   Tue Jun 30 13:36:06 2009 -0500
+
+    added code to resize window/width when setting the other to a smaller value
+
+commit 803a41737827db85a89b8ae3822c3a1c7b64916b
+Author: Clark Williams <williams@redhat.com>
+Date:   Thu Jun 25 09:15:40 2009 -0500
+
+    version bump to 0.43
+
+commit 2a1cf80ccca269a33557216514e2553cd07e2782
+Author: Uwe Kleine-König <u.kleine-koenig@pengutronix.de>
+Date:   Wed Jun 24 00:21:08 2009 +0200
+
+    hwlatdetect.8: There is no macro .R
+    
+    You might wonder if this wasn't already fixed.  Yes it was (in
+    f16ec27fb3), but the change was undone by 3e04327f7f.
+    
+    While at it add an .br which makes the paragraph look a bit nicer.
+    
+    Signed-off-by: Uwe Kleine-König <u.kleine-koenig@pengutronix.de>
+
+commit 219d5b48b1725a145f1973d61bf31db1c168dea4
+Author: Clark Williams <williams@redhat.com>
+Date:   Fri Jun 12 15:48:18 2009 -0500
+
+    version bump to 0.42
+
+commit eb0c42a27c02ebd11962427e0298d4de9eafd5d3
+Author: Clark Williams <williams@redhat.com>
+Date:   Fri Jun 12 15:47:59 2009 -0500
+
+    added copyright header to hwlatdetect.py
+
+commit 652127181ca45efff2e08182ae2ab169057d48cf
+Author: Clark Williams <williams@redhat.com>
+Date:   Fri Jun 12 15:47:35 2009 -0500
+
+    updated hwlatdetect.8 to reflect new options/behavior
+
+commit 3e04327f7fc0be0ee2cb3d8157a4faf43e4b00cb
+Merge: c7deee8 11f68bd
+Author: Clark Williams <williams@redhat.com>
+Date:   Fri Jun 12 13:20:17 2009 -0500
+
+    merge resolution
+
+commit 11f68bd172b13866666837fc9534c0f7b5eb338e
+Author: Clark Williams <williams@redhat.com>
+Date:   Fri Jun 12 13:15:45 2009 -0500
+
+    added hwlatdetect remove in clean target of Makefile
+
+commit ad5a12cb08843bdfade4a6be7fe338a08fe2bf50
+Author: Clark Williams <williams@redhat.com>
+Date:   Fri Jun 12 13:06:12 2009 -0500
+
+    removed internal defaults (went with module defaults); added debugging code; make sure window set before width
+
+commit c7deee8c38a08e173a5e5282280c2abb362c9370
+Author: Uwe Kleine-König <u.kleine-koenig@pengutronix.de>
+Date:   Fri Jun 12 15:32:35 2009 +0200
+
+    Make comment describing set_debugfileprefix a bit clearer
+    
+    This was noticed by GeunSik Lim.
+    
+    Signed-off-by: Uwe Kleine-König <u.kleine-koenig@pengutronix.de>
+    Cc: GeunSik Lim <leemgs1@gmail.com>
+    Cc: Luis Claudio R. Goncalves <lclaudio@uudg.org>
+    Cc: Clark Williams <williams@redhat.com>
+
+commit 556a10971ca338586cf1efd473b503ff80c58aa8
+Author: Clark Williams <williams@redhat.com>
+Date:   Wed Jun 10 23:32:41 2009 -0500
+
+    handled module changes
+
+commit 77dc91b0669256056b9b0605bae66968e7070e3d
+Author: Clark Williams <williams@redhat.com>
+Date:   Wed Jun 10 13:53:18 2009 -0500
+
+    updated distclean target
+
+commit 446ff919908144b0d1b5fafa8e02f865abe70e84
+Author: Clark Williams <williams@redhat.com>
+Date:   Wed Jun 10 13:50:02 2009 -0500
+
+    the great renaming: smidetect -> hwlat
+
+commit 7bb717b666059e1846f0fee55819f09c17a9d521
+Author: Clark Williams <williams@redhat.com>
+Date:   Tue Jun 9 12:47:07 2009 -0500
+
+    added smidetect and generated spec file to .gitignore
+
+commit 758df9730855c963542e89d998ec14100e6021f4
+Author: Clark Williams <williams@redhat.com>
+Date:   Tue Jun 9 12:45:58 2009 -0500
+
+    added non-blocking open+polling read to handle new module logic; added debug statements
+
+commit 30edd0b4abaa4413a22e5e69c9ee187d41e55e6c
+Author: Clark Williams <williams@redhat.com>
+Date:   Sat May 30 10:30:49 2009 -0500
+
+    rewrite to match updated smi_detector module
+
+commit 0884033338909b8052c0179a2ab971e79bf43bca
+Author: Stefan Agner <stefan@agner.ch>
+Date:   Wed May 27 23:53:07 2009 +0200
+
+    cyclictest: calcdiff calculated wrong seconds if the difference was bigger than 2147s
+    
+    Hello,
+    
+    My first fix didn't took into account that long is 4 byte long on ARM. Therefor
+    I changed it to long long now, which works on my ARM board...
+    
+    Signed-off-by: Stefan Agner <stefan@agner.ch>
+    Signed-off-by: Clark Williams <williams@redhat.com>
+
+commit f16ec27fb37579f336426eed6b29aaf1ee1850be
+Author: Uwe Kleine-König <u.kleine-koenig@pengutronix.de>
+Date:   Thu May 14 01:06:38 2009 +0200
+
+    smidetect.8: There is no macro .R
+    
+    For a normal font just use nothing.
+    
+    Signed-off-by: Uwe Kleine-König <u.kleine-koenig@pengutronix.de>
+
+commit 5aac188d853c78f483342255303086992a533b64
+Author: Clark Williams <williams@redhat.com>
+Date:   Wed May 13 13:57:11 2009 -0500
+
+    added smidetect
+
+commit 934e60da538dfba0793ee91b4e3b2121e7a1376c
+Author: Clark Williams <williams@redhat.com>
+Date:   Tue May 12 16:56:37 2009 -0500
+
+    added rule to ignore emacs backupfiles
+
+commit e8711b5cb9eb1e564aac131f31df42bacabd7d3f
+Author: Clark Williams <williams@redhat.com>
+Date:   Tue May 12 16:54:06 2009 -0500
+
+    initial checkin
+
+commit 45d0c73f332c93dc5c0df737a65c833c6522e252
+Author: Clark Williams <williams@redhat.com>
+Date:   Tue May 12 16:54:03 2009 -0500
+
+    initial checkin
+
+commit 337bf38f80a5af14a0927285fa7329d7626467f2
+Author: Clark Williams <williams@redhat.com>
+Date:   Tue May 12 16:53:59 2009 -0500
+
+    initial checkin
+
+commit 9153c383ec7f7b08fd7d50f35d39a1a6c933b579
+Author: Clark Williams <williams@redhat.com>
+Date:   Wed May 6 09:35:23 2009 -0500
+
+    version bump to 0.39
+
+commit ec536d0454b77944776384c2760e318d4f8a2609
+Author: Uwe Kleine-König <u.kleine-koenig@pengutronix.de>
+Date:   Sat May 2 20:25:53 2009 +0200
+
+    Makefile: don't override DESTDIR, prefix, bindir and mandir
+    
+    This eases packaging rt-tests and shouldn't have any further impact.
+    
+    Signed-off-by: Uwe Kleine-König <u.kleine-koenig@pengutronix.de>
+
+commit c289046965e17b623b1f1de802283d1584a33af9
+Author: Uwe Kleine-König <u.kleine-koenig@pengutronix.de>
+Date:   Sat May 2 20:02:37 2009 +0200
+
+    signaltest: fix typo in copyright header
+    
+    Signed-off-by: Uwe Kleine-König <u.kleine-koenig@pengutronix.de>
+    Cc: Thomas Gleixner <tglx@linutronix.de>
+
+commit 8565bd61b4725760e07c5c3c9c7b5333630ca647
+Author: Uwe Kleine-König <u.kleine-koenig@pengutronix.de>
+Date:   Sat May 2 17:56:03 2009 +0200
+
+    escape minus signs in manpages
+    
+    '-' chars are interpreted as hyphens by groff, not as minus signs.  This
+    means that if you're using an UTF-8 locale searching for '-' to find
+    options doesn't work.
+    
+    Signed-off-by: Uwe Kleine-König <u.kleine-koenig@pengutronix.de>
+
+commit 1b81d40771d977a3eb36dd4f17b7e87e69e5777e
+Author: Clark Williams <williams@redhat.com>
+Date:   Thu Apr 30 15:28:32 2009 -0500
+
+    version bump to 0.38
+
+commit 95bd88ca5a69195466d476b104ced8b5ab352a38
+Author: Clark Williams <williams@redhat.com>
+Date:   Thu Apr 30 15:27:15 2009 -0500
+
+    added code to usage message to show configured tracers if debugfs mounted
+    
+    Signed-off-by: Clark Williams <williams@redhat.com>
+
+commit 3fc59347e83bb9b8397b0508190b416d0dd53fdc
+Author: Tobias Klauser <tklauser@distanz.ch>
+Date:   Thu Apr 30 11:05:55 2009 +0200
+
+    cyclictest: Remove duplicate entry for -m from manpage
+    
+    Hi Thomas,
+    
+    The patch below removes the duplicate entry for the -m/--mlockall option from
+    the cyclictest manpage. Patch is againnst current HEAD of rt-tests.git
+    
+    Cheers, Tobias
+    
+    Signed-off-by: Tobias Klauser <tklauser@distanz.ch>
+
+commit 986688b00b97507fe9ea92c70d9d99f1bc71abca
+Author: Clark Williams <williams@redhat.com>
+Date:   Wed Apr 29 15:31:10 2009 -0500
+
+    updated version string to 0.37
+
+commit 9187c3944ba8f5021c771e593311f5087ef49771
+Author: Clark Williams <williams@redhat.com>
+Date:   Wed Apr 29 15:30:44 2009 -0500
+
+    added --tracer and --traceopt options
+
+commit 552bd1a203041e2ac083b50fe1f0fbf49624a86f
+Author: Clark Williams <williams@redhat.com>
+Date:   Wed Apr 29 15:23:22 2009 -0500
+
+    added --tracer and --traceopt options
+
+commit 9abe9601f7b39db5ae71d010a2a1b4598f2f7966
+Author: Clark Williams <williams@redhat.com>
+Date:   Fri Apr 24 15:35:27 2009 -0500
+
+    correct usage message for -w and -W
+
+commit 54623d8d7e513585f65cc00b7d919e120adbbbd0
+Author: Clark Williams <williams@redhat.com>
+Date:   Fri Apr 24 15:35:04 2009 -0500
+
+    add -w and -W
+
+commit 870347de963c97e8a753de0341521e533ff96493
+Author: GeunSik Lim <leemgs1@gmail.com>
+Date:   Fri Apr 24 15:20:50 2009 -0500
+
+        [PATCH] cyclictest: Add tracing function about wakeup and wakeup_rt of ftrace.
+    
+        This is patch to support wakeup & wakeup_rt tracing at the argument of
+        cyclictest additionally. Current cyclictest support three tracing
+        like PREEMPTOFF, IRQSOFF, PREEMPTIRQSOFF just.
+    
+        This additional function will help wakeup related tracing
+        about sleep api [ex: nanosleep() , usleep] of cyclictest.
+    
+        Practically speaking, wakeup(+wakeup-rt) tracing by steven rostedt is useful
+        in the linux based embedded product development.
+    
+        After patching,
+        Fedora9#> cat /debug/tracing/available_tracers
+        syscall blk kmemtrace power branch function_graph mmiotrace wakeup_rt wakeup \
+        preemptirqsoff preemptoff irqsoff function sched_switch initcall nop
+        Fedora9#> cyclictest -t 5 -p 80 -b 1000 -w -D 10 [enter] <--- tracing wakeup
+        Fedora9#> cat /debug/tracing/trace
+    
+        Fedora9#> cyclictest -t 5 -p 80 -b 1000 -W -D 10 [enter] <--- tracing wakeup-rt
+        Fedora9#> cat /debug/tracing/trace
+    
+        Signed-off-by: GeunSik Lim <geunsik.lim@samsung.com>
+    
+    Signed-off-by: Clark Williams <williams@redhat.com>
+
+commit 6d4136e50104075f8823f4e7eaa5fc7d6d617760
+Author: GeunSik Lim <leemgs1@gmail.com>
+Date:   Tue Apr 21 16:28:55 2009 +0900
+
+    cyclictest: Remove duplicated description of cyclictest usage like -h.
+    
+    Author: Lim,GeunSik <leemgs1@gmail.com>
+    Date:   Tue Apr 21 16:03:56 2009 +0900
+    
+        [PATCH] cyclictest: Remove duplicated description of cyclictest usage like -h.
+    
+        We often utilize a various options with "#>cyclictest --help" command in the terminal environment.
+        When We run "#> cyclictest --help" command, We can show duplicated description about "-h" option
+        for latency histogram.
+        Unfortunatley, Some of the users is confusing because of two options about latency histogram.
+    
+        [root@fedora9 invain]# ./cyclictest --help
+        cyclictest V 0.36
+        Usage:
+        cyclictest <options>
+    
+        -a [NUM] --affinity        run thread #N on processor #N, if possible
+                                   with NUM pin all threads to the processor NUM
+        -b USEC  --breaktrace=USEC send break trace command when latency > USEC
+        -B       --preemptirqs     both preempt and irqsoff tracing (used with -b)
+        -c CLOCK --clock=CLOCK     select clock
+                                   0 = CLOCK_MONOTONIC (default)
+                                   1 = CLOCK_REALTIME
+        -C       --context         context switch tracing (used with -b)
+        -d DIST  --distance=DIST   distance of thread intervals in us default=500
+        -E       --event           event tracing (used with -b)
+        -f       --ftrace          function trace (when -b is active)
+        -h H_MAX                   latency histogram size in us default 0 (off)
+        -i INTV  --interval=INTV   base interval of thread in us default=1000
+    
+             ................. [Middle Omission] ...................
+    
+        -v       --verbose         output values on stdout for statistics
+                                   format: n:c:v n=tasknum c=count v=value in us
+        -D       --duration=t      specify a length for the test run
+                                   default is in seconds, but 'm', 'h', or 'd' maybe added
+                                   to modify value to minutes, hours or days
+        -h       --histogram=US    dump a latency histogram to stdout after the run
+                                   US is the max time to be be tracked in microseconds
+    
+        For example,
+    
+        -h H_MAX                   latency histogram size in us default 0 (off)
+    
+        -h       --histogram=US    dump a latency histogram to stdout after the run
+                                   US is the max time to be be tracked in microseconds
+    
+        As you see, We don't need "-h H_MAX  . . . . . ." description.
+        So, I think that We have to remove old option about description of histogram function.
+    
+        Signed-off-by: GeunSik Lim <leemgs1@gmail.com>
+
+commit 0e2f1a14ffce106ca4b51a78bbd18f3aae1a8ea2
+Author: Clark Williams <williams@redhat.com>
+Date:   Mon Apr 20 14:09:12 2009 -0500
+
+    version bump to 0.36
+
+commit 5dce871f962a0821e8cd153c2353c3e1ae600d95
+Author: Clark Williams <williams@redhat.com>
+Date:   Mon Apr 20 14:07:05 2009 -0500
+
+    updated cyclictest man page with -C/--context and -E/--event options
+
+commit 7272c4d320aaf36a018711131e2176951f757b8e
+Author: GeunSik Lim <leemgs1 () gmail ! com>
+Date:   Wed Apr 8 13:49:26 2009 -0500
+
+    cyclictest: bugfix getopt_long() for -C and -F.
+    
+    Author: Lim,GeunSik <leemgs1@gmail.com>
+    Date:   Wed Apr 8 22:21:59 2009 +0900
+    
+        [patch] cyclictest: bugfix getopt_long() for -C and -F.
+    
+        We can not use -C option without --context option for tracing context switching.
+        ex) ./cyclictest -t 10 -m -b 100 -C
+        We can not use -E option without --event option for tracing events.
+        ex) ./cyclictest -t 10 -m -b 100 -E
+        Append -C and -E option on getopt_long() function to solve this problems.
+    
+        Signed-off-by: GeunSik Lim <leemgs1@gmail.com>
+    
+    Signed-off-by: Clark Williams <williams@redhat.com>
+
+commit 876c33c8a9dc3dc3249a9e0473a2a0d9663cda6b
+Author: Clark Williams <williams@redhat.com>
+Date:   Tue Apr 7 15:31:32 2009 -0500
+
+    fixed release target in Makefile so rpms will build
+    updated version string to 0.35
+    minor format tweak to make variables
+    
+    Signed-off-by: Clark Williams <williams@redhat.com>
+
+commit 4d284a272e662e8ad027c395f70ca6526cad095b
+Author: Clark Williams <williams@redhat.com>
+Date:   Tue Apr 7 15:29:27 2009 -0500
+
+    adjustedt install target to match Uwe's DESTDIR/prefix split
+    
+    Signed-off-by: Clark Williams <williams@redhat.com>
+
+commit f2e4eebd40b71c3472db0817348d4c79bc43b0e0
+Author: Uwe Kleine-König <u.kleine-koenig@pengutronix.de>
+Date:   Tue Apr 7 22:01:57 2009 +0200
+
+    split function of DESTDIR into DESTDIR + prefix
+    
+    It's more common that DESTDIR doesn't include /usr or /usr/local but
+    only the base directory for a relocated installation.  The in-tree
+    prefix is usually named "prefix".
+    
+    "usually" here means as it is done by autoconf and as it is expected by
+    the Debian package helpers.
+    
+    While at it also make the other path variables match this convention.
+    
+    Signed-off-by: Uwe Kleine-König <u.kleine-koenig@pengutronix.de>
+    Signed-off-by: Clark Williams <williams@redhat.com>
+
+commit 7453d772a0ffc65b260d0dab6cf2e01864ba52e5
+Author: Uwe Kleine-König <u.kleine-koenig at pengutronix.de>
+Date:   Tue Apr 7 15:08:17 2009 -0500
+
+    Signed-off-by: Clark Williams <williams@redhat.com>
+
+commit 6f3669db231c7497e24630069b89684fba497b26
+Author: Clark Williams <williams@redhat.com>
+Date:   Sun Apr 5 09:41:51 2009 -0500
+
+    version bump to 0.34
+
+commit 1b3ee55106c52e7d4f96a8a8d65c564f230010f0
+Author: Clark Williams <williams@redhat.com>
+Date:   Sun Apr 5 09:31:24 2009 -0500
+
+    reworked settracer()
+    
+    GeunSik Lim <leemgs1@gmail.com> found a problem with settracer()
+    in that it had a hardcoded limit to the number of tracers searched.
+    Unfortunately his patch found a bug in either fscanf or debugfs,
+    since it doesn't seem to return EOF at the end of input, so I reworked
+    the patch to read all the input and parse it using strtok.
+    
+    Signed-off-by: Clark Williams <williams@redhat.com>
+
+commit 99ba86e19c8ac18b730d40420263e7b790d18a95
+Author: Clark Williams <williams@redhat.com>
+Date:   Mon Mar 30 09:21:37 2009 -0500
+
+    version bump to 0.33
+
+commit d2532aed6035502176d44bec8bf3e0c0cb335882
+Author: Clark Williams <williams@redhat.com>
+Date:   Mon Mar 30 09:21:07 2009 -0500
+
+    fix formatting damage from nanosecond patch
+
+commit 64cca12051795663cea89d0847cbac256465d110
+Author: Clark Williams <williams@redhat.com>
+Date:   Sat Mar 28 09:39:51 2009 -0500
+
+    version bump to 0.32
+
+commit 58f08ef334c9f1c386af9744eea390ff2c18c422
+Author: Luis Henriques <henrix@sapo.pt>
+Date:   Fri Mar 20 19:43:18 2009 +0000
+
+    cyclictest: Added option for results in nanoseconds
+    
+    cyclictest results are presented in microseconds, although internal precision
+    uses nanosecond unit.  This patch adds a command-line option for keeping the
+    nanoseconds precision.  man page has also been update.
+    
+    Signed-off-by: Luis Henriques <henrix@sapo.pt>
+    Signed-off-by: Clark Williams <williams@redhat.com>
+
+commit a7bd17e188d3b8f18bafd157c1ec9aad31c99096
+Author: Thomas Gleixner <tglx@linutronix.de>
+Date:   Sat Mar 28 12:18:55 2009 +0000
+
+    cyclictest: init tracer only once
+    
+    The tracer setup happens in every thread, which is nonsense. First of
+    all it leads to a lot of irritating warnings because the things are
+    setup multiple times. The worst effect is that one tasks runs already
+    into the tracer stop condition and the next one reenables the tracer.
+    
+    Move the tracer setup into the main thread and do it only once.
+    
+    Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+    Signed-off-by: Clark Williams <williams@redhat.com>
+
+commit d4a986cb074aa11a9d0342aa55580083fdeff3f0
+Author: Thomas Gleixner <tglx@linutronix.de>
+Date:   Sat Mar 28 12:18:52 2009 +0000
+
+    cyclictest: fix priviledge test
+    
+    Switching back to SCHED_OTHER in check_priv() fails due to the param
+    argument of sched_setscheduler() set to NULL.
+    
+    Set the priority to 0 and hand in params.
+    
+    Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+    Signed-off-by: Clark Williams <williams@redhat.com>
+
+commit 9ffdc557b32b11ed551195c6214b26aa2b4c25b3
+Author: Clark Williams <williams@redhat.com>
+Date:   Sat Mar 21 09:58:57 2009 -0500
+
+    added license header to sigtest.c
+
+commit f4e80a2fb0ed71185451ebf48bbefa534cf805dc
+Author: Clark Williams <williams@redhat.com>
+Date:   Fri Mar 20 16:15:33 2009 -0500
+
+    version bump to 0.31
+
+commit f5da548e25e4b507cdfaf01b16ec49746408f4e7
+Author: Alessio Igor Bogani <abogani@texware.it>
+Date:   Tue Mar 17 21:50:42 2009 +0100
+
+    Avoid ChangeLog erasing in tarball release
+    
+    Execute a make clean into a rt-tests directory, exploded from a tarball,
+    cause erroneous erasing of the ChangeLog file. Let make do it only if it
+    executes under git tree.
+    
+    Signed-off-by: Alessio Igor Bogani <abogani@texware.it>
+    Signed-off-by: Clark Williams <williams@redhat.com>
+
+commit 7aecff931f24fa30bc5a8bef33aae7d13cff38ea
+Author: Thomas Gleixner <tglx@linutronix.de>
+Date:   Fri Feb 13 15:36:14 2009 -0600
+
+    To: rt-users <linux-rt-users@vger.kernel.org>
+    Cc: Clark Williams <williams@redhat.com>
+    Subject: [patch 2/2] cyclictest: support for latest mainline tracer
+    
+    The tracer in mainline changed the interface another time. Make it
+    work again.
+    
+    Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+    Signed-off-by: Clark Williams <williams@redhat.com>
+
+commit 2c8f2d774e611581dfca85ae5eff1175a325f11d
+Author: Thomas Gleixner <tglx@linutronix.de>
+Date:   Fri Feb 13 15:36:13 2009 -0600
+
+    To: rt-users <linux-rt-users@vger.kernel.org>
+    Cc: Clark Williams <williams@redhat.com>
+    Subject: [patch 1/2] cyclictest: code cleanup
+    
+    Started to grow whitespace and formatting sloppiness.
+    
+    Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+    Signed-off-by: Clark Williams <williams@redhat.com>
+
+commit 0a378282d4bc403cf19f8ce51fdedcfac71bebb9
+Author: Luis Henriques <henrix@sapo.pt>
+Date:   Mon Feb 9 13:18:35 2009 -0600
+
+    he help for the -C  option was being printed out inside the help of the -c
+    option.
+    
+    Signed-off-by: Luis Henriques <henrix@sapo.pt>
+    Signed-off-by: Clark Williams <williams@redhat.c m>
+
+commit 41902b4ca06dc430941820759db7ec274849a76e
+Author: Clark Williams <williams@redhat.com>
+Date:   Thu Dec 18 16:52:12 2008 -0600
+
+    corrected version bump
+
+commit 495ed19184fe739ca30f8a6673eea2caa7b78cf4
+Author: Clark Williams <williams@hs21xm-1.farm.hsv.redhat.com>
+Date:   Thu Dec 18 16:47:23 2008 -0600
+
+    bumped version string
+
+commit 724dfb46907e03738e0a7f1e74a2af42c4c666c4
+Author: Clark Williams <williams@hs21xm-1.farm.hsv.redhat.com>
+Date:   Thu Dec 18 16:46:58 2008 -0600
+
+    changed deadlock detection to be a little more flexible
+
+commit d3ae4c81ea639369104dff310227e6789b0c8340
+Author: Clark Williams <williams@hs21xm-1.farm.hsv.redhat.com>
+Date:   Thu Dec 18 15:55:10 2008 -0600
+
+    updated pi_stress option processing
+
+commit 9505ea6a6ad5e92f387773d7f3212a7215013a49
+Author: Luis Claudio R. Goncalves <lgoncalv@redhat.com>
+Date:   Thu Dec 11 10:43:22 2008 -0600
+
+    Patch to fix tracer selection in cyclictest when using -b
+
+commit 679b34e74b9ba1e50e40a88a043932464191e5ab
+Author: Clark Williams <williams@redhat.com>
+Date:   Thu Dec 11 10:38:46 2008 -0600
+
+    cyclictest fixup for tracing
+
+commit 5164e0178abe65907965ec3ac66108a4b929f9f7
+Author: Clark Williams <williams@redhat.com>
+Date:   Thu Dec 11 10:26:15 2008 -0600
+
+    Return-Path: <linux-rt-users-owner@vger.kernel.org>
+    Received: from pobox-2.corp.redhat.com ([unix socket])
+    	 by pobox-2.corp.redhat.com (Cyrus v2.2.12-Invoca-RPM-2.2.12-8.1.RHEL4) with LMTPA;
+    	 Tue, 03 Jun 2008 11:50:56 -0400
+    X-Sieve: CMU Sieve 2.2
+    Received: from int-mx1.corp.redhat.com (int-mx1.corp.redhat.com [172.16.52.254])
+    	by pobox-2.corp.redhat.com (8.13.1/8.13.1) with ESMTP id m53FoulP004003
+    	for <williams@pobox-2.corp.redhat.com>; Tue, 3 Jun 2008 11:50:56 -0400
+    Received: from mx1.redhat.com (mx1.redhat.com [172.16.48.31])
+    	by int-mx1.corp.redhat.com (8.13.1/8.13.1) with ESMTP id m53Foth3012071;
+    	Tue, 3 Jun 2008 11:50:55 -0400
+    Received: from vger.kernel.org (vger.kernel.org [209.132.176.167])
+    	by mx1.redhat.com (8.13.8/8.13.8) with ESMTP id m53FOfJq012028;
+    	Tue, 3 Jun 2008 11:50:43 -0400
+    Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
+    	id S1752828AbYFCPun (ORCPT <rfc822;mschmidt@redhat.com> + 1 other);
+    	Tue, 3 Jun 2008 11:50:43 -0400
+    Received: (majordomo@vger.kernel.org) by vger.kernel.org id S1752865AbYFCPun
+    	(ORCPT <rfc822;linux-rt-users-outgoing>);
+    	Tue, 3 Jun 2008 11:50:43 -0400
+    Received: from hrndva-omtalb.mail.rr.com ([71.74.56.125]:65243 "EHLO
+    	hrndva-omtalb.mail.rr.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+    	with ESMTP id S1752828AbYFCPum (ORCPT
+    	<rfc822;linux-rt-users@vger.kernel.org>);
+    	Tue, 3 Jun 2008 11:50:42 -0400
+    Received: from gandalf ([74.74.65.243]) by hrndva-omta03.mail.rr.com
+              with ESMTP
+              id <20080603155041.URDH15997.hrndva-omta03.mail.rr.com@gandalf>;
+              Tue, 3 Jun 2008 15:50:41 +0000
+    Date: 	Tue, 3 Jun 2008 11:50:40 -0400 (EDT)
+    From: Steven Rostedt <rostedt@goodmis.org>
+    X-X-Sender: rostedt@gandalf.stny.rr.com
+    To: Thomas Gleixner <tglx@linutronix.de>
+    cc: linux-rt-users <linux-rt-users@vger.kernel.org>,
+            Darren Hart <dvhltc@us.ibm.com>,
+            Subrata Modak <subrata@linux.vnet.ibm.com>
+    Subject: [PATCH - cyclictest] handle latest ftrace
+    Message-ID: <Pine.LNX.4.58.0806031147290.22839@gandalf.stny.rr.com>
+    MIME-Version: 1.0
+    Content-Type: TEXT/PLAIN; charset=US-ASCII
+    Sender: linux-rt-users-owner@vger.kernel.org
+    Precedence: bulk
+    List-ID: <linux-rt-users.vger.kernel.org>
+    X-Mailing-List: 	linux-rt-users@vger.kernel.org
+    X-RedHat-Spam-Score: -2.195
+    X-Scanned-By: MIMEDefang 2.58 on 172.16.52.254
+    X-Scanned-By: MIMEDefang 2.63 on 172.16.48.31
+    
+    
+    This patch has cyclictest work a bit better with ftrace. Some new options
+    have been added.
+    
+    When -b is used:
+    
+      -P : use the preemptoff tracer
+      -I : use the irqsoff tracer
+      -B : use preemptirqsoff tracer
+    
+    If the above are not set, then it tries to use "events" tracer if it is
+    available (currently only available in the -rt kernel) and if that is not
+    set, it defaults to the sched-switch tracer.
+    
+    -f will enabled the function tracer.
+    
+    Signed-off-by: Steven Rostedt <srostedt@redhat.com>
+
+commit a038647f402c16ff090708c50a3afbb8eedbdf18
+Author: Alessio Igor Bogani <abogani@texware.it>
+Date:   Thu Dec 11 10:13:07 2008 -0600
+
+    Makefile patch to prevent deleting too many files in clean operation
+
+commit 5d8328bb03bdfb65a28db700ef4d87ec9215d247
+Author: Clark Williams <williams@redhat.com>
+Date:   Tue Dec 2 12:22:25 2008 -0600
+
+    changed test to not require root
+
+commit 7cc548377571d24ecde388119ce8a5d468b34f58
+Author: Clark Williams <williams@redhat.com>
+Date:   Wed Oct 22 15:02:17 2008 -0500
+
+    told git to ignore tarballs and tmpdir
+
+commit b4265a0e8e71a4f83d64c998e04683e161899bb4
+Author: Clark Williams <williams@redhat.com>
+Date:   Wed Oct 22 15:00:57 2008 -0500
+
+    changed release target in Makefile
+
+commit 3ece612bd1ca169f01e4aa7d79e07c7908a6c869
+Author: Clark Williams <williams@redhat.com>
+Date:   Wed Oct 22 14:29:33 2008 -0500
+
+    add option to run for specified duration
+    
+    Add an option (--duration or -D) to specify how long the test should run
+    
+    Signed-off-by: Clark Williams <williams@redhat.com>
+
+commit cb548199a6203a7fb70839ede9e2be55c8ca11a5
+Author: Sven-Thorsten Dietrich <sven@thebigcorporation.com>
+Date:   Wed Oct 22 14:33:48 2008 -0500
+
+    Subject: Add histogram support to cyclictest
+    
+    Add -h <size> parameter and functionality to log histograms of latencies
+    in cyclictest.
+    
+    Signed-off-by: Sven-Thorsten Dietrich <sdietrich@suse.de>
+
+commit 2e058f7f98af81c89dafb8908da2db5d27e9df7d
+Author: Clark Williams <williams@redhat.com>
+Date:   Thu Sep 25 15:13:51 2008 -0500
+
+    fixed merge breakage
+
+commit 2d45d878baf89dd13eeaa5308206349c493bea37
+Merge: 1c3872e 81523d1
+Author: Clark Williams <williams@redhat.com>
+Date:   Thu Sep 25 15:11:56 2008 -0500
+
+    Merge branch 'master' of git://git.kernel.org/pub/scm/linux/kernel/git/tglx/rt-tests
+    
+    Conflicts:
+    	src/cyclictest/cyclictest.c
+    	src/pi_tests/pi_stress.8
+
+commit 81523d18b4c324202f40f6cd88a989f8ae290c93
+Author: Thomas Gleixner <tglx@linutronix.de>
+Date:   Mon Jul 28 12:45:20 2008 +0200
+
+    Release 0.27
+    
+    Testing before release would be better !
+    
+    Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+
+commit d14c3da7c8b465f7f4cd8d51fcc78cb738dd088c
+Author: Thomas Gleixner <tglx@linutronix.de>
+Date:   Mon Jul 28 12:35:08 2008 +0200
+
+    release v0.26
+    
+    Remove the rpm spec file from git as it is autogenerated.
+    
+    Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+
+commit db07df3e98359dad9116bca0d3954d35476e4f50
+Author: Thomas Gleixner <tglx@linutronix.de>
+Date:   Sun Jul 27 22:50:56 2008 +0200
+
+    Release v0.25
+    
+    Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+
+commit 5d3ac6cb76a03695bb7d8b3a6c029a368e3cd95a
+Author: Thomas Gleixner <tglx@linutronix.de>
+Date:   Sun Jul 27 22:49:02 2008 +0200
+
+    cyclictest: remove duplicate option in help text
+    
+    Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+
+commit 69d53796da84998da7257986bf1dd06e665c44a0
+Author: Alessio Igor Bogani <abogani@texware.it>
+Date:   Thu Jul 17 11:57:07 2008 +0200
+
+    Fix typo in pi_stress manpage
+    
+    Signed-off-by: Alessio Igor Bogani <abogani@texware.it>
+    Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+
+commit 5cd772b14aab8c12493307b3c1914c3c190b1938
+Author: Alessio Igor Bogani <abogani@texware.it>
+Date:   Thu Jul 17 11:49:27 2008 +0200
+
+    Differentiate hyphen and minus in manpages
+    
+    Signed-off-by: Alessio Igor Bogani <abogani@texware.it>
+    Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+
+commit 8e30668e241be9a7b4c33c984b013232bf9a61b9
+Author: Thomas Gleixner <tglx@linutronix.de>
+Date:   Sat Jul 12 04:22:44 2008 +0200
+
+    rt-tests: v0.24
+    
+    Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+
+commit d60e13722df2762934fedbecce48d1a001560d50
+Author: Clark Williams <williams@redhat.com>
+Date:   Fri May 9 13:43:55 2008 -0500
+
+    fixed formating damage
+    
+    Signed-off-by: Clark Williams <williams@redhat.com>
+    Cc: Arnaldo Carvalho de Melo <acme@ghostprotocols.net>
+    Cc: Luis Claudio Goncalves <lclaudio@uudg.org>
+    Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+
+commit 198975b2e48dc00b39027e7c2938c41a61aa13f3
+Author: Clark Williams <williams@redhat.com>
+Date:   Fri May 9 13:40:08 2008 -0500
+
+    updated man pages for --mlockall option
+    
+    Signed-off-by: Clark Williams <williams@redhat.com>
+    Cc: Arnaldo Carvalho de Melo <acme@ghostprotocols.net>
+    Cc: Luis Claudio Goncalves <lclaudio@uudg.org>
+    Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+
+commit 1e00c7a58710e2519fa43e92d222997abf1c4ac1
+Author: Clark Williams <williams@redhat.com>
+Date:   Fri May 9 13:28:50 2008 -0500
+
+    added mlockall option
+    
+    Signed-off-by: Clark Williams <williams@redhat.com>
+    Cc: Arnaldo Carvalho de Melo <acme@ghostprotocols.net>
+    Cc: Luis Claudio Goncalves <lclaudio@uudg.org>
+    Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+
+commit 1c3872ef1dd61db5c5d9836bced3c81a90c111af
+Merge: 699c38b 4f55874
+Author: Clark Williams <williams@redhat.com>
+Date:   Tue Jul 8 08:45:51 2008 -0500
+
+    Merge branch 'master' of git://git.kernel.org/pub/scm/linux/kernel/git/tglx/rt-tests
+    
+    Conflicts:
+    
+    	src/cyclictest/cyclictest.c
+
+commit 4f55874ffdb1363cefd171568d78eb1456d582f7
+Author: Thomas Gleixner <tglx@linutronix.de>
+Date:   Sun Jul 6 19:21:42 2008 +0200
+
+    Version 0.23
+    
+    Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+
+commit 3ad6648f2c7ed281c8bd608d5be875842b1f4f78
+Author: John Kacur <jkacur@gmail.com>
+Date:   Fri Jun 27 10:10:09 2008 +0200
+
+    Fix the processing of optional options for cyclictest
+    
+    Problem: when running cyclic test, short options are not parsing
+    optional arguments correctly when followed by a space.
+    "-t3" works, but "-t 3" does not.
+    
+    - Fix the processing of options with optional parameters, so that the user
+      can write -tNUM or -t NUM and it will work as expected. This was done
+      for the -t and -a options
+    
+    - Modify the usage messages to correspond with the way the program makes use
+      of the options.
+    
+    Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+
+commit 699c38bb8d83a072a1e369c580557df8b1a1da6b
+Merge: 5587d44 7a052da
+Author: Clark Williams <williams@redhat.com>
+Date:   Thu Jun 12 19:43:21 2008 -0500
+
+    Merge branch 'master' of git://git.kernel.org/pub/scm/linux/kernel/git/tglx/rt-tests
+    
+    Conflicts:
+    
+    	.gitignore
+    	src/cyclictest/cyclictest.8
+    	src/cyclictest/cyclictest.c
+
+commit 7a052daef09a5af77815e21fbff84ef580110dee
+Author: Carsten Emde <c.emde@osadl.org>
+Date:   Thu Jun 5 02:12:40 2008 +0200
+
+    rt-tests/Makefile: Import an updated version number into RPM spec file
+    
+    Import an updated version number into RPM spec file.
+    
+    Signed-off-by: Carsten Emde <C.Emde@osadl.org>
+    Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+
+commit 6963a41f688dcd31733b6ede305009940c349ddf
+Author: Carsten Emde <c.emde@osadl.org>
+Date:   Thu Jun 5 02:07:21 2008 +0200
+
+    rt-tests/cyclictest.c: oscilloscope mode did not work correctly with >1 threads
+    
+    Data reduction (-o mode) did not work correctly with >1 threads.
+    
+    Signed-off-by: Carsten Emde <C.Emde@osadl.org>
+    Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+
+commit b0841096ce115a4b2f2125df952cb2f789bd75b2
+Author: Thomas Gleixner <tglx@linutronix.de>
+Date:   Wed Jun 4 17:30:55 2008 +0200
+
+    Version 0.22
+    
+    I'm getting old and forgetful :)
+    
+    Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+
+commit 434091fc6534d522e7260c59d149e5106bca638f
+Author: Alessio Igor Bogani <abogani@texware.it>
+Date:   Mon Apr 21 14:01:32 2008 +0200
+
+    Fix some typo in the cyclictest's man page
+
+commit 87d83b67cc75fba4ad6c0cb668b52395ae35abbd
+Author: Alessio Igor Bogani <abogani@texware.it>
+Date:   Fri Apr 18 18:05:46 2008 +0200
+
+    Add produced binary into .gitignore
+
+commit 8d09028ba3fb4025d223b535044be63f91c3559d
+Author: Thomas Gleixner <tglx@linutronix.de>
+Date:   Wed Jun 4 17:22:51 2008 +0200
+
+    Version 0.21
+    
+    Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+
+commit 894308125b2cd5e60cd6790a76fd37a0a4344512
+Author: Thomas Gleixner <tglx@linutronix.de>
+Date:   Wed Jun 4 17:21:55 2008 +0200
+
+    Make: Exclude releases subdir from release tarball
+    
+    Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+
+commit 65d1cb7079ccc68d0968950b64f1f77b6692fd7d
+Author: Steven Rostedt <rostedt@goodmis.org>
+Date:   Tue Jun 3 12:11:15 2008 -0400
+
+    cyclictest: sched_switch not sched-switch
+    
+    I noticed I had a typo on sched_switch. I tested this on linux-tip tree
+    and it works there.
+    
+    Signed-off-by: Steven Rostedt <srostedt@redhat.com>
+    Cc: Darren Hart <dvhltc@us.ibm.com>
+    Cc: Subrata Modak <subrata@linux.vnet.ibm.com>
+    Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+
+commit 9ba30e6ef2e2975ca27834e8968393ca5b07da29
+Author: Steven Rostedt <rostedt@goodmis.org>
+Date:   Tue Jun 3 11:50:40 2008 -0400
+
+    cyclictest: handle latest ftrace
+    
+    This patch has cyclictest work a bit better with ftrace. Some new options
+    have been added.
+    
+    When -b is used:
+    
+      -P : use the preemptoff tracer
+      -I : use the irqsoff tracer
+      -B : use preemptirqsoff tracer
+    
+    If the above are not set, then it tries to use "events" tracer if it is
+    available (currently only available in the -rt kernel) and if that is not
+    set, it defaults to the sched-switch tracer.
+    
+    -f will enabled the function tracer.
+    
+    Signed-off-by: Steven Rostedt <srostedt@redhat.com>
+    Cc: Darren Hart <dvhltc@us.ibm.com>
+    Cc: Subrata Modak <subrata@linux.vnet.ibm.com>
+    Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+
+commit fcee9fe2e0150e384e5335e093c962df73079239
+Author: Steven Rostedt <rostedt@goodmis.org>
+Date:   Tue Jun 3 11:47:16 2008 -0400
+
+    cyclictest: search for debugfs
+    
+    Not everyone mounts debugfs at /debug. This patch makes cyclictest search
+    for debugfs in the /proc/mounts directory.
+    
+    Signed-off-by: Steven Rostedt <srostedt@redhat.com>
+    Cc: Darren Hart <dvhltc@us.ibm.com>
+    Cc: Subrata Modak <subrata@linux.vnet.ibm.com>
+    Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+
+commit 5587d442ee5eba79325e842f5ecc70ce6fe74817
+Author: Clark Williams <williams@redhat.com>
+Date:   Fri May 9 13:43:55 2008 -0500
+
+    fixed formating damage
+
+commit f6db792ba42908b78f31d3a16cf5c170c29085b7
+Author: Clark Williams <williams@redhat.com>
+Date:   Fri May 9 13:40:08 2008 -0500
+
+    updated man pages for --mlockall option
+
+commit c4a44c163df791ec3f42075e587685fa7e5b031d
+Author: Clark Williams <williams@redhat.com>
+Date:   Fri May 9 13:28:50 2008 -0500
+
+    added mlockall option
+
+commit 1a731d646e54cac2463c0a20a00e696a8ede0ad0
+Author: Thomas Gleixner <tglx@linutronix.de>
+Date:   Fri Apr 18 14:39:41 2008 +0200
+
+    Bump version number to 0.20
+    
+    Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+
+commit 2df51a799f797df2acf2955f24ea76fc7db7e15f
+Author: Carsten Emde <c.emde@osadl.org>
+Date:   Thu Apr 17 21:25:37 2008 +0200
+
+    cyclictest: send correct cycle number in -o mode
+    
+    The appropriate cycle number of the maximum is now sent when in -o
+    mode. This is needed to more accurately determine the trace line that
+    is related to a particular latency.
+    
+    Signed-off-by: Carsten Emde <C.Emde@osadl.org>
+    Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+
+commit 6a0f073aa46c86503783ea94db7c2e10b3fcc9ce
+Author: Sebastian Siewior <bigeasy@tglx.de>
+Date:   Thu Apr 17 11:00:39 2008 +0200
+
+    cyclictest: fix "get kernel version"
+    
+    The version check in cyclic test fails if proc isn't mounted or if OS
+    name isn't Linux (uClinux isn't uncommon).  This patch fixes both
+    issues.
+    
+    Signed-off-by: Sebastian Siewior <bigeasy@linutronix.de>
+    Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+
+commit 342e3b83ee5a643984facbf232ddc7751fbd83ec
+Author: Sebastian Siewior <bigeasy@tglx.de>
+Date:   Thu Apr 17 10:59:47 2008 +0200
+
+    cyclictest: fix build on uClibc due to missing cpu affinity
+    
+    CPU affinity isn't supported by all uClibc ports right now.
+    
+    Signed-off-by: Sebastian Siewior <bigeasy@linutronix.de>
+    Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+
+commit 7f4ac71644644b01a47871036bddbf3c302d0041
+Author: Sebastian Siewior <bigeasy@tglx.de>
+Date:   Wed Apr 16 11:04:30 2008 +0200
+
+    cyclictest: fix for uClibc builds
+    
+    as of uClibc-20080416 clock_nanosleep is still not implemented.
+    
+    Signed-off-by: Sebastian Siewior <bigeasy@linutronix.de>
+    Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+
+commit 4cb277ee27fb8af44aca9e8a4fb0ac7de63e8f8b
+Author: Carsten Emde <c.emde@osadl.org>
+Date:   Mon Apr 14 13:23:51 2008 +0200
+
+    cyclictest: add -o option to reduce -v option's output speed
+    
+    When the output of the -v option is piped into another program and if
+    more data are sent than the other program can eat, data points get
+    lost. Since high latency values normally occur much less frequently
+    than average latency values, the connected program will miss many of
+    the high latency values, and the realtime capability of a given system
+    may appear much better than it is.
+    
+    Therefore, the new option -o RED was introduced. This option causes
+    cyclictest to suppress every subsequent RED number of samples and
+    replace them with the maximum of the values encountered during that
+    sampling interval.
+    
+    Signed-off-by: Carsten Emde <C.Emde@osadl.org>
+    Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+
+commit 82155e3d9e41d6df1a0902534f7240b0a99b9b8b
+Author: Carsten Emde <c.emde@osadl.org>
+Date:   Sun Apr 6 20:17:22 2008 +0200
+
+    cyclictest & kernel>=2.6.24
+    
+    - Added support for the kernel tracer as of kernel 2.6.24
+    - Options mostly identical, irrespective of the kernel version
+    - Added check whether debug fs is mounted and tracing configured
+    - -v (verbose) option additionally makes tracing more verbose
+    
+    Signed-off-by: Carsten Emde <C.Emde@osadl.org>
+    Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+
+commit f055732c1669be86d253338f8968eea2d423aa7b
+Author: Carsten Emde <c.emde@osadl.org>
+Date:   Sat Apr 5 20:24:37 2008 +0200
+
+    cyclictest: add CPU affinity
+    
+    Add CPU affinitt option to cyclictest.
+    
+    1. New option -a:
+    
+    without argument to a cyclictest spreads the threads consecutive on
+    the available CPUs. On a quad core machine we get:
+    
+    -a -t4   Thread #0 -> CPU #0
+             Thread #1 -> CPU #1
+             Thread #2 -> CPU #2
+             Thread #3 -> CPU #3
+    
+    -a -t5   Thread #0 -> CPU #0
+             Thread #1 -> CPU #1
+             Thread #2 -> CPU #2
+             Thread #3 -> CPU #3
+             Thread #4 -> CPU #0
+    
+    Adding a CPU number to the -a option all threads are pinned to
+    the given CPU:
+    
+    -a3 -t4  Thread #0 -> CPU #3
+             Thread #1 -> CPU #3
+             Thread #2 -> CPU #3
+             Thread #3 -> CPU #3
+    
+    2. extension of the -t option:
+    
+    Without argument to -t cyclictest starts as many threads as CPUs are
+    available.
+    
+    Signed-off-by: Carsten Emde <c.emde@osadl.org>
+    Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+
+commit 44b84cd87f7e94ce624bb61826c7b493b9a6cb86
+Author: Thomas Gleixner <tglx@linutronix.de>
+Date:   Fri Jan 4 09:00:33 2008 +0100
+
+    v0.19
+    
+    Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+
+commit df2bf2cfdc3bff5e90286677d450a9a1e6de0232
+Author: Clark Williams <williams@redhat.com>
+Date:   Thu Jan 3 13:33:43 2008 -0600
+
+    added Obsoletes
+
+commit 58d8df8cc8f260a313f64aa9ea9ee8ede7c20f11
+Author: Clark Williams <williams@redhat.com>
+Date:   Thu Jan 3 13:33:23 2008 -0600
+
+    added distclean target to cleanup rpm dirs
+
+commit fea12d35c39899fe6d071c006658d151845ec702
+Author: Clark Williams <williams@redhat.com>
+Date:   Thu Jan 3 13:26:22 2008 -0600
+
+    added pi_tests; added specfile for rpm generation
+
+commit 899ebf7302348a8c7161f164e68fa35048fe09e0
+Author: Alessio Igor Bogani <abogani@texware.it>
+Date:   Thu Dec 20 17:02:53 2007 +0100
+
+    Fix kernel parameters in cyclictest's manpage
+    
+    Signed-off-by: Alessio Igor Bogani <abogani@texware.it>
+    Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+
+commit ca606d3fe9ce5a6e3158e4556869ceceda454a79
+Author: Thomas Gleixner <tglx@linutronix.de>
+Date:   Fri Dec 14 15:33:12 2007 +0100
+
+    v0.18
+    
+    Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+
+commit d00cc0754aa404e1f713284a698a2ac2936ce225
+Author: Thomas Gleixner <tglx@linutronix.de>
+Date:   Fri Dec 14 15:23:51 2007 +0100
+
+    Some more Makefile updates
+    
+    - add changelog and install targets
+    - replace $(CROSS_COMPILE)gcc with $(CC)
+    
+    Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+
+commit be4a5a980797709898e5e27d553e06a69d657dae
+Author: Alessio Igor Bogani <abogani@texware.it>
+Date:   Wed Dec 12 11:56:05 2007 +0100
+
+    Unified versions into Makefile
+    
+    Packaging version control
+    
+    Signed-off-by: Alessio Igor Bogani <abogani@texware.it>
+    Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+
+commit 79ad2eca9abe2922217929e22d8e3e330a579e13
+Author: Alessio Igor Bogani <abogani@texware.it>
+Date:   Wed Dec 12 10:24:38 2007 +0100
+
+    COPYING file and cyclictest's man page added
+    
+    Signed-off-by: Alessio Igor Bogani <abogani@texware.it>
+    Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+
+commit e6b72071152c6e4edfd7a163826c291aa720c976
+Author: Alessio Igor Bogani <abogani@texware.it>
+Date:   Wed Dec 12 10:20:17 2007 +0100
+
+    Re-organized sources
+    
+    Move code around to make packaging easier.
+    
+    Signed-off-by: Alessio Igor Bogani <abogani@texware.it>
+    Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+
+commit 9a10305f0d5964146c0f9c8003645a83d33c91cf
+Author: Thomas Gleixner <tglx@linutronix.de>
+Date:   Thu Oct 18 19:20:05 2007 +0200
+
+    Bump version number
+    
+    Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+
+commit 4ee3b82d4ec2e7939e57e62bfa258fbac477552c
+Author: Clark Williams <williams@redhat.com>
+Date:   Thu Oct 18 09:31:24 2007 -0500
+
+    Fix to cyclictest (from signaltest fix)
+    
+    This is a patch that's a ripple from the bug in signaltest that Luis and Jeff Burke
+    were working on. Looks like there's a race where a variable can be used
+    uninitialized, depending on thread scheduling circumstances. Probably not major, but
+    hey, can't hurt :).
+    
+    Signed-off-by: Clark Williams <williams@redhat.com>
+    Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+
+commit 854cd3eae2a224e0dbb698c7587226d0a92c7341
+Author: Thomas Gleixner <tglx@linutronix.de>
+Date:   Thu Oct 18 00:19:07 2007 +0200
+
+    Bump version number
+    
+    Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+
+commit b1bb85c51fe096aa69d04bf2e68668059d77d499
+Author: Luis Claudio R. Goncalves <lclaudio@uudg.org>
+Date:   Wed Oct 17 20:00:18 2007 -0400
+
+    Signaltest: initialize stat[i].threadstarted before using
+    
+    Signaltest was hanging in a wide variety of kernel versions, in some cases
+    after a few iterations and in other cases right after being called on the
+    command line. We created a bugzilla ticket for this issue:
+    
+    	https://bugzilla.redhat.com/show_bug.cgi?id=308231
+    
+    After a few debug sessions we realized that a shared variable used to
+    synchronize the work between threads, stat[i].threadstarted, could end up
+    being used before initialization depending on the scheduling of the
+    threads.
+    
+    The fix is a one-liner.
+    
+    Signed-off-by: Luis Claudio R. Goncalves <lclaudio@uudg.org>
+    Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+
+commit afb46d37f279ac1503e1039fefacf306a895b134
+Author: Thomas Gleixner <tglx@inhell4.(none)>
+Date:   Fri May 11 21:49:27 2007 +0200
+
+    Bump version number
+    
+    Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+
+commit dfbefb8056e363bca648a50274abe9983bee2da3
+Author: Thomas Gleixner <tglx@inhell4.(none)>
+Date:   Fri May 11 21:32:51 2007 +0200
+
+    Check if highres timers are enabled
+    
+    Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+
+commit f22379d0a40ef301a67e1eeae3923549b0eb582f
+Author: Carsten Emde <ce@ceag.ch>
+Date:   Fri May 11 21:11:46 2007 +0200
+
+    Save and restore the tracer variables
+    
+    Signed-off-by: Carsten Emde <ce@ceag.ch>
+    Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+
+commit fa892122f3b56913a53299c9c12e710b3e45316b
+Author: Thomas Gleixner <tglx@inhell4.(none)>
+Date:   Fri May 11 21:01:04 2007 +0200
+
+    Initial import

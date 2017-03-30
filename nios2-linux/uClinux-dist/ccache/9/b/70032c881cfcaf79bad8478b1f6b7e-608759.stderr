@@ -1,0 +1,2 @@
+/home/developer/altera/nios2-linux/linux-2.6/drivers/mtd/chips/cfi_cmdset_0002.c: In function 'chip_good':
+/home/developer/altera/nios2-linux/linux-2.6/drivers/mtd/chips/cfi_cmdset_0002.c:687: warning: unused variable 'oldd'

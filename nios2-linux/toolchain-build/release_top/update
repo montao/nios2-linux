@@ -1,0 +1,9 @@
+for i in \
+binutils gcc3 linux-2.6 toolchain-build uClibc elf2flt \
+insight u-boot uClinux-dist
+do
+cd $i
+echo update $i..
+git pull
+cd ..
+done

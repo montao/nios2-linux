@@ -1,0 +1,133 @@
+#!/usr/bin/expect
+set file_name $argv0
+
+send_user "\nConfig musb step 1\n\n"
+cd $uclinux_path
+set timeout 300
+spawn make config
+while 1 {
+    expect {
+        -re "Customize Kernel Settings.*DEFAULTS_KERNEL.*\\\[.*]" {
+            send "y\r"
+        }
+
+        -re "Customize Application/Library Settings.*DEFAULTS_VENDOR.*\\\[.*]" {
+            send "n\r"
+        }
+
+        -nocase -re "\\\[\[^\r]*] (\\\(new\\\) )?(\[ymn])|choice\\\[.*]: \[0-9]+\r" {
+            continue
+        }
+
+        -re "USB support.*USB_SUPPORT.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Support for Host-side USB.*USB.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "USB Gadget Support.*USB_GADGET.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "USB Peripheral Controller \\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "USB Gadget Drivers \\\[.*]" {
+            send "M\r"
+        }
+
+        "\\\(*) \\\[*]" {
+            sleep .01
+            send "\r"
+        }
+
+        -re "\[cC]hoice\\\[.*]:" {
+            send "\r"
+        }
+
+        eof {
+            send_user "\nEnd of configuration\n"
+            break
+        }
+
+        timeout {
+            send_user "\n\nFATAL ERROR: config prompt timeout in make config\n\n"
+            exit
+        }
+    }
+}
+
+send_user "\nConfig musb step 2\n\n"
+cd $uclinux_path
+set timeout 300
+spawn make config
+while 1 {
+    expect {
+        -re "Customize Kernel Settings.*DEFAULTS_KERNEL.*\\\[.*]" {
+            send "y\r"
+        }
+
+        -re "Customize Application/Library Settings.*DEFAULTS_VENDOR.*\\\[.*]" {
+            send "n\r"
+        }
+
+        -nocase -re "\\\[\[^\r]*] (\\\(new\\\) )?(\[ymn])|choice\\\[.*]: \[0-9]+\r" {
+            continue
+        }
+
+        -re "Inventra Highspeed Dual Role Controller.*USB_MUSB_HDRC.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Platform Glue Layer \\\[.*]" {
+            send "Y\r"
+        }
+
+        -re " (\[0-9]+). Blackfin.*USB_MUSB_BLACKFIN.*\[cC]hoice.*\\\[.*]" {
+            send "$expect_out(1,string)\r"
+        }
+
+        -re "Driver Mode.*(\[0-9]+). USB Peripheral.*USB_MUSB_PERIPHERAL.*\[cC]hoice\\\[.*]" {
+            send "$expect_out(1,string)\r"
+        }
+
+        -re " (\[0-9]+). Inventra.*USB_INVENTRA_DMA.* (\[0-9]+). Disable DMA.*MUSB_PIO_ONLY.*\[cC]hoice.*\\\[.*]" {
+            send "\r"
+        }
+
+        -re "USB Peripheral Controller \\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "USB Peripheral Controller.*(\[0-9]+). Inventra HDRC USB Peripheral.*USB_GADGET_MUSB_HDRC.*\[cC]hoice\\\[.*]" {
+            send "$expect_out(1,string)\r"
+        }
+
+        -re "USB Gadget Drivers \\\[.*]" {
+            send "M\r"
+        }
+
+        "\\\(*) \\\[*]" {
+            sleep .01
+            send "\r"
+        }
+
+        -re "\[cC]hoice\\\[.*]:" {
+            send "\r"
+        }
+
+        eof {
+            send_user "\nEnd of configuration\n"
+            break
+        }
+
+        timeout {
+            send_user "\n\nFATAL ERROR: config prompt timeout in make config\n\n"
+            exit
+        }
+    }
+}
+

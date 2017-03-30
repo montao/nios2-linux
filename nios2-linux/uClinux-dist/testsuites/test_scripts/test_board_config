@@ -1,0 +1,15 @@
+#!/bin/sh
+
+BOARD_CONFIG=BF537-STAMP-AD73322
+CPU=BF5xx
+REVISION=default
+UCLINUX_DIST_PATH=$USER/checkouts/uclinux-dist
+BINARY_FORMAT=flat
+ALLOCATOR=slab\(p2\)
+ICACHE=on
+DCACHE=on
+POLICY=write_back
+UART_MODE=dma
+SMP=off
+MPU=off
+XENOMAI=off

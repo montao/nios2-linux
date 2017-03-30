@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<generate_set>
+
+    <!-- This "subroutine" generates the system.h text for the
+         altera_avalon_uart class of components.  It expects the following
+         variables to have been exported:
+                MODULE
+                MODULE_NAME
+                MODULE_SLAVE_NAME_UPPER
+                BASE_ADDRESS
+                HAS_IRQ
+                IRQ
+     -->
+
+    <set_variable variable="MODULE_CLASS" to="cal_avalon_uart"/>
+    <export variable="MODULE_CLASS"/>
+    <call gtf="%GTF_DIR%/system.h_component_output.gtf"/>
+
+    <!-- this is not in the WIZARD_SCRIPT_ARGUMENTS for an cal_avalon_uart,
+         which is why we need this GTF -->
+    <text>#define %MODULE_SLAVE_NAME_UPPER%_FREQ %CLOCK_FREQ%
+    </text>
+
+</generate_set>

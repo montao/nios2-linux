@@ -1,0 +1,139 @@
+#!/usr/bin/expect
+#
+#Test program to test reboot.
+#
+
+source ../kernel_config.exp
+
+if { $argc >= 2} {
+set spi_board_type [lindex $argv 1]
+}
+log_file [log_file_name "$argv0.$spi_board_type"]
+
+send_user "Starting $argv0\n"
+set TITLE [title "$argv0"]
+
+step "Start kermit."
+source ../spawn_kermit.exp
+
+step "Reset the uboot."
+source ../reset_to_uboot.exp
+
+
+send_log "*********************************\r"
+send_log "Start $TITLE\r"
+send_log "*********************************\r"
+
+send -s "reset\r"
+
+for {set case_num 0} {$case_num < $count} {incr case_num} {
+
+set timeout 5
+expect {
+	"Hit any key" {
+	}
+	timeout {
+	}
+}
+
+sleep 1
+
+set timeout 2
+while 1 {
+   send -s "\r"
+   expect {
+      ">" {
+         break
+      }
+	timeout {
+                case_fail $case_num
+		exit
+	}
+   }
+}
+
+set timeout 30
+send -s "tftp 0x1000000 vmImage\r"
+while 1 {
+expect {
+	
+	"done" {
+	        expect ">"		
+		break
+	}
+	
+		
+	timeout {
+                case_fail $case_num
+		exit
+	}
+}
+}
+
+set timeout 5
+send -s "bootm 0x1000000\r"
+while 1 {
+   expect {
+      "Linux version" {
+         break
+      }
+   }
+}
+
+set timeout 30
+while 1 {
+   expect {
+	-re $kernel_prompt {
+                case_pass $case_num
+		break
+	}
+
+         timeout {
+                case_fail $case_num
+		exit
+         }
+   }
+}
+
+send_log "Wait for 1 minutes before reboot.\r"
+sleep 60
+
+set timeout 5
+send -s "cat /proc/mtd\r"
+while 1 {
+   expect {
+	">" {   
+                case_pass $case_num
+		break
+	}
+
+         timeout {
+                case_fail $case_num
+		exit
+         }
+   }
+}
+
+send -s "reboot\r"
+
+}
+
+send_log "\n$TITLE ............\[PASS\]\n"
+
+log_file
+ 
+while 1 {
+       expect {
+         "Hit any key " {
+             send "\r"
+             expect ">"
+             break
+         }
+
+         timeout {
+             break
+         }
+      }
+   }
+
+send_user "\nEnding jffs2_reboot_test.exp\n"

@@ -1,0 +1,68 @@
+http://lists.nongnu.org/archive/html/confuse-devel/2010-01/msg00001.html
+
+--- confuse-2.6/src/Makefile.in
++++ confuse-2.6/src/Makefile.in
+@@ -196,7 +196,7 @@ lib_LTLIBRARIES = libconfuse.la
+ libconfuse_la_SOURCES = confuse.c lexer.l
+ libconfuse_la_LIBADD = $(LTLIBINTL)
+ include_HEADERS = confuse.h
+-@cc_is_gcc_TRUE@AM_CFLAGS = -Wall -Werror
++@cc_is_gcc_TRUE@AM_CFLAGS = -Wall 
+ CLEANFILES = *~ \#*\#
+ AM_LFLAGS = -Pcfg_yy -olex.yy.c
+ all: all-am
+--- confuse-2.6/src/Makefile.am
++++ confuse-2.6/src/Makefile.am
+@@ -10,7 +10,7 @@ localedir = $(datadir)/locale
+ DEFS = -DLOCALEDIR=\"$(localedir)\" @DEFS@
+ 
+ if cc_is_gcc
+-AM_CFLAGS=-Wall -Werror
++AM_CFLAGS=-Wall 
+ endif
+ 
+ LIBS = @LIBS@
+--- confuse-2.6/tests/Makefile.in
++++ confuse-2.6/tests/Makefile.in
+@@ -244,7 +244,7 @@ TESTS = suite_single suite_dup suite_fun
+ LDADD = -L../src ../src/libconfuse.la $(LTLIBINTL)
+ EXTRA_DIST = a.conf b.conf check_confuse.h
+ CLEANFILES = *~
+-@cc_is_gcc_TRUE@AM_CFLAGS = -Wall -Werror
++@cc_is_gcc_TRUE@AM_CFLAGS = -Wall 
+ all: all-am
+ 
+ .SUFFIXES:
+--- confuse-2.6/tests/Makefile.am
++++ confuse-2.6/tests/Makefile.am
+@@ -9,7 +9,7 @@ EXTRA_DIST=a.conf b.conf check_confuse.h
+ CLEANFILES=*~
+ 
+ if cc_is_gcc
+-AM_CFLAGS=-Wall -Werror
++AM_CFLAGS=-Wall 
+ endif
+ 
+ celan: clean
+--- confuse-2.6/doc/Makefile.in
++++ confuse-2.6/doc/Makefile.in
+@@ -173,7 +173,7 @@ EXTRA_DIST = doxygen-footer.html doxygen
+ LDADD = ../src/libconfuse.la
+ INCLUDES = -I$(top_srcdir)/src
+ AM_LDFLAGS = -L../src/
+-@cc_is_gcc_TRUE@AM_CFLAGS = -Wall -Werror
++@cc_is_gcc_TRUE@AM_CFLAGS = -Wall 
+ TUTORIAL_CSOURCES = listing1.c listing2.c listing3.c listing4.c \
+ 		    listing5.c listing6.c listing7.c listing8.c
+ 
+--- confuse-2.6/doc/Makefile.am
++++ confuse-2.6/doc/Makefile.am
+@@ -10,7 +10,7 @@ AM_LDFLAGS = -L../src/
+ LIBS = $(LTLIBINTL)
+ 
+ if cc_is_gcc
+-AM_CFLAGS=-Wall -Werror
++AM_CFLAGS=-Wall 
+ endif
+ 
+ TUTORIAL_CSOURCES = listing1.c listing2.c listing3.c listing4.c \

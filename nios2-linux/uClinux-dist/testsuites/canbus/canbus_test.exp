@@ -1,0 +1,296 @@
+#!/usr/bin/expect
+
+source ../kernel_config.exp
+log_file [log_file_name "$argv0"]
+send_user "Starting $argv0\n"
+set TITLE [title "$argv0"]
+
+step "Start kermit."
+set kermit_ttydev $ttyUSBdev
+set targetip 10.100.4.51
+source ../spawn_kermit.exp
+
+step "Reboot the kernel."
+source ../reboot_kernel.exp
+
+set case_num 0
+
+set first_target_id $spawn_id
+
+incr case_num
+send -s "ifconfig \r" 
+while 1 {
+   expect {
+     -re "$kernel_prompt" {
+	 puts "ifconfig success.\n"
+         case_pass $case_num
+         break
+      }
+
+      timeout { 
+         break
+         }
+     }
+}
+
+send_user "Start another machine to test canbus."
+
+step "Start kermit."
+set kermit_ttydev $ttydev
+set targetip 10.100.4.50
+source ../spawn_kermit.exp
+
+step "Reboot the kernel."
+source ../reboot_kernel.exp
+set second_target_id $kermit_spawn_id
+
+step "Starting test."
+set timeout 8
+
+#send -s "modprobe bfin_can\r" 
+#while 1 {
+#   expect {
+#     -re "bfin_can device" {
+#	 puts "module insert success.\n"
+#         break
+#      }
+#
+#      timeout { 
+#         puts "module probe failed.\n"                  
+#         break
+#         }
+#     }
+#}
+#expect  -re $kernel_prompt
+#send -s "lsmod\r" 
+#while 1 {
+#   expect {
+#      "bfin_can" {
+#	 puts "module ls success.\n"
+#         break
+#      }
+#
+#      timeout { 
+#         puts "module ls failed.\n"                  
+#         break
+#         }
+#     }
+#}
+
+for {set i 0} {$i < 2 } {incr i} {
+
+if { $i == 0 } {
+set can_freq 125000
+} elseif { $i == 1 } {
+set can_freq 1000000
+}
+
+set spawn_id $first_target_id
+
+incr case_num
+send_log "On the machine receiving data .\r"
+send -s "\r"
+expect  -re $kernel_prompt
+
+send -s "ifconfig can0 down\r" 
+while 1 {
+   expect {
+     -re "$kernel_prompt" {
+	 puts "ifconfig down success.\n"
+         break
+      }
+
+      timeout { 
+         puts "ifconfig failed.\n"                  
+         break
+         }
+     }
+}
+
+send -s "ip link set can0 type can bitrate $can_freq\r" 
+while 1 {
+   expect {
+     -re "bfin_can.*set.*$kernel_prompt" {
+	 puts "set bitrate success.\n"
+         case_pass $case_num
+         break
+      }
+
+      timeout { 
+         puts "set bitrate failed.\n"                  
+         break
+         
+     }
+}
+}
+
+send -s "ifconfig can0 up\r" 
+while 1 {
+   expect {
+     -re "$kernel_prompt" {
+	 puts "ifconfig up success.\n"
+         break
+      }
+
+      timeout { 
+         puts "ifconfig failed.\n"                  
+         break
+         }
+     }
+}
+
+send -s "candump can0\r" 
+while 1 {
+   expect {
+     -re "can0 .*" { 
+         send -s "\3"
+         case_fail $case_num
+         break
+      }
+
+      timeout {                           
+         case_pass $case_num
+         break
+         }
+     }
+}
+
+set spawn_id $second_target_id
+
+send_log "Switch to the machine sending data through can bus.\r"
+send -s "\r"
+expect  -re $kernel_prompt
+
+send -s "ifconfig can0 down\r" 
+while 1 {
+   expect {
+     -re "$kernel_prompt" {
+	 puts "ifconfig down success.\n"
+         break
+      }
+
+      timeout { 
+         puts "ifconfig failed.\n"                  
+         break
+         }
+     }
+}
+
+incr case_num
+send -s "ip link set can0 type can bitrate $can_freq\r" 
+while 1 {
+   expect {
+     -re "bfin_can.*set.*$kernel_prompt" {
+	 puts "set bitrate success.\n"
+         case_pass $case_num
+         break
+      }
+
+      timeout { 
+         puts "set bitrate failed.\n"                  
+         break
+         
+     }
+}
+}
+
+send -s "ifconfig can0 up\r" 
+while 1 {
+   expect {
+     -re "$kernel_prompt" {
+	 puts "ifconfig up success.\n"
+         break
+      }
+
+      timeout { 
+         puts "ifconfig failed.\n"                  
+         break
+         }
+     }
+}
+incr case_num
+send -s "cansend can0 123#AABBCCDD\r" 
+while 1 {
+   sleep 3
+   expect {
+       -re $kernel_prompt { 
+         case_pass $case_num
+         break
+      }
+
+      timeout {                           
+         break
+         }
+     }
+}
+
+incr case_num
+send -s "cansend can0 12345678#1122334455667788\r" 
+while 1 {
+   sleep 3
+   expect {
+       -re $kernel_prompt { 
+         case_pass $case_num
+         break
+      }
+
+      timeout {                           
+         break
+         }
+     }
+}
+
+send -s "cangen can0\r" 
+while 1 {
+   sleep 3
+   expect {
+       -re $kernel_prompt { 
+         case_pass $case_num
+         break
+      }
+
+      timeout {                           
+         break
+         }
+     }
+}
+
+#send -s "rmmod bfin_can\r"
+#while 1 {
+#   expect {
+#      "bfin_can" {
+#         puts "module ls failed.\n"
+#         break
+#      }
+#
+#      timeout {
+#         puts "module ls success.\n"
+#         break
+#      }
+#     }
+#}
+
+set spawn_id $first_target_id
+send "\3"
+while 1 {
+   expect {
+       -re "12345678.*$kernel_prompt" { 
+         case_pass $case_num
+         break
+      }
+
+      timeout {                           
+         case_fail $case_num
+         break
+         }
+     }
+}
+
+}
+send_log "\n"
+send_log "\n$TITLE ............\[PASS\]\n"
+
+send_user "Ending $argv0\n"
+log_file
+ 
+

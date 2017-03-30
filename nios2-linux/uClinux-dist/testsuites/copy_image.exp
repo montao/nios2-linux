@@ -1,0 +1,20 @@
+#!/usr/bin/expect
+
+set timeout 8
+cd $uclinux_path
+catch {exec cp images/$boot_image  /tftpboot}
+
+if { $HAVE_JFFS2_IMAGE == "1" } {
+    catch {exec cp images/$compressed_kernel_only_image  /tftpboot}
+    catch {exec cp images/$jffs2_rootfs_image  /tftpboot}
+}
+
+if { $HAVE_KERNEL_ONLY_IMAGE == "1" } {
+    catch {exec cp images/$compressed_kernel_only_image /tftpboot}
+}
+
+if { $HAVE_ROMFS_IMAGE == "1" } {
+    exec cp images/$romfs_rootfs_image  /tftpboot
+}
+
+send_log "Copy Images Finished!\n"

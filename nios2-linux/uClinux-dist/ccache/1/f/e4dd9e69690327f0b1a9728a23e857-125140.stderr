@@ -1,0 +1,10 @@
+ps.c: In function 'dev_to_name':
+ps.c:51: warning: format '%d' expects type 'int', but argument 3 has type 'dev_t'
+ps.c:53: warning: format '%d' expects type 'int', but argument 3 has type 'dev_t'
+ps.c:55: warning: format '%x' expects type 'unsigned int', but argument 4 has type 'dev_t'
+ps.c: In function 'do_ps':
+ps.c:92: warning: implicit declaration of function 'read'
+ps.c:94: warning: implicit declaration of function 'close'
+ps.c:118: warning: suggest parentheses around assignment used as truth value
+ps.c:73: warning: unused variable 'idle_secs'
+ps.c:64: warning: unused variable 'max'

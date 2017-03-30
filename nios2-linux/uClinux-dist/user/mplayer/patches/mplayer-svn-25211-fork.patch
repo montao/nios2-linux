@@ -1,0 +1,31 @@
+Index: mplayer-svn-25211/stream/cache2.c
+===================================================================
+--- mplayer-svn-25211/stream/cache2.c	(revision 9061)
++++ mplayer-svn-25211/stream/cache2.c	(working copy)
+@@ -275,7 +275,9 @@
+      min = s->buffer_size - s->fill_limit;
+   }
+   
+-#ifndef WIN32  
++#if defined(__uClinux__)
++  if((stream->cache_pid=vfork())){
++#elif !defined(WIN32)
+   if((stream->cache_pid=fork())){
+ #else
+   {
+Index: mplayer-svn-25211/command.c
+===================================================================
+--- mplayer-svn-25211/command.c	(revision 9061)
++++ mplayer-svn-25211/command.c	(working copy)
+@@ -2884,7 +2884,11 @@
+ 
+ 	case MP_CMD_RUN:
+ #ifndef __MINGW32__
++# ifdef __uClinux__
++	    if (!vfork()) {
++# else
+ 	    if (!fork()) {
++# endif
+ 		execl("/bin/sh", "sh", "-c", cmd->args[0].v.s, NULL);
+ 		exit(0);
+ 	    }

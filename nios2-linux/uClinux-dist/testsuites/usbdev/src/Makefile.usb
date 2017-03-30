@@ -1,0 +1,9 @@
+#Makefile for usb test
+
+all: usb
+
+usb :
+	bfin-linux-uclibc-gcc -Wall -g -o usb usb.c usbstring.c -lpthread
+
+clean :
+	rm -rf usb

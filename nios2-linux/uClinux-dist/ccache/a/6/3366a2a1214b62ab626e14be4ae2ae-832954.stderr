@@ -1,0 +1,2 @@
+constructor.cpp: In function 'int main(int, char**)':
+constructor.cpp:34: warning: unused variable 'foo'

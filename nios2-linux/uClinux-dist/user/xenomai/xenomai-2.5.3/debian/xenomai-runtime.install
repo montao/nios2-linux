@@ -1,0 +1,5 @@
+usr/bin
+usr/sbin
+usr/share/man
+usr/share/xenomai
+usr/lib/xenomai

@@ -1,0 +1,269 @@
+#!/usr/bin/expect
+
+source  ../kernel_config.exp
+source ../board_info.exp
+
+log_file [log_file_name "$argv0"]
+send_user "Starting $argv0\n"
+set TITLE [title "$argv0"]
+
+step "Spawn kermit"
+source ../spawn_kermit.exp
+
+set governor userspace
+
+step "Reboot the kernel."
+# To add following line here to indicate that if the bootargs is different,
+# it could be set here. If the bootargs value is 0, it needn't be stated, 
+# for it is the default value.
+# set bootargs 	$bootargs_param0   
+source ../reboot_kernel.exp 
+
+set SMP_STATUS 0
+
+if { $board_type == "BF533-STAMP" || $board_type == "BF518F-EZBRD" || $board_type == "BF526-EZBRD" } {
+   set std_clock 398
+} else {
+   set std_clock 500 
+}
+
+step "Start testing."
+
+sleep 20
+
+set timeout 5
+
+set case_num 0
+incr case_num
+
+send -s  "dmesg\r"
+while 1 {
+    expect {
+        -re "SMP" {
+            set SMP_STATUS 1 
+            send_log "Linux kernel SMP status is $SMP_STATUS .\r"
+        }
+        -re "Processor Speed: (.*) MHz core clock and (.*) MHz System Clock" {
+            set core_clock $expect_out(1,string)
+            set system_clock $expect_out(2,string)
+            expect -re "$kernel_prompt"
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+            exit
+        }
+    }
+}
+
+if { $core_clock >= $std_clock } {
+    send "cd /usr/bin\r"
+    while 1 {
+        expect {
+            "bin" {
+                break
+            }
+            timeout {
+                case_fail $case_num
+                exit
+            }
+        }
+    }
+
+    incr case_num
+    send -s  "cpufreq-info\r" 
+    while 1 {
+        expect {
+            -re "cpufrequtils.*driver: bfin cpufreq.*cpufreq stats" {         
+                expect -re "$kernel_prompt"
+                case_pass $case_num
+                break
+            }
+            timeout {
+                case_fail $case_num
+                exit
+            }
+        }
+    }
+
+    incr case_num
+    send -s  "cat /proc/cpuinfo\r"
+    while 1 {
+        expect {
+            -re "cpu MHz\[\x20\t]+: (\[0-9]+\.\[0-9]{3}).*/.*Calibration\[\x20\t]+: (\[0-9]+) loops" {
+                set exact_core_clock $expect_out(1,string)
+                set calibration_before $expect_out(2,string)
+                     
+                             if { 0 <= [expr $exact_core_clock - $core_clock] && [expr $exact_core_clock - $core_clock] < 1 } {
+                                    send_log "\n exact_core_clock $exact_core_clock\n"
+                                    send_log "\n calibration_before $calibration_before\n"
+                                    send_log "\ncat cpuinfo case pass!\n"
+                                    expect  -re "$kernel_prompt"
+                                    case_pass $case_num
+                                    break
+                                } else {
+                                    case_fail $case_num
+                                }
+            }
+            timeout {
+                case_fail $case_num
+                exit
+            }
+        }
+    }
+
+    set core_clock_inK [ expr $core_clock * 1000 ] 
+    set new_core_clock_inK [ expr $core_clock_inK / 2 ]
+    incr case_num
+    send -s  "cpufreq-set -f $new_core_clock_inK\r"
+    while 1 {
+        expect {
+            -re "$kernel_prompt" {
+                case_pass $case_num
+                break
+            }
+            timeout {
+                case_fail $case_num
+                exit
+            }
+        }
+    }
+
+    set new_core_clock [ expr $new_core_clock_inK / 1000 ] 
+    set calibration_after [ expr $calibration_before / 2 ]
+ 
+    incr case_num
+    send -s  "cat /proc/cpuinfo\r"
+    while 1 {
+        expect {
+            -re "cpu MHz\[\x20\t]+: $new_core_clock\.\[0-9]{3}.*/.*Calibration\[\x20\t]+: $calibration_after loops" {
+                send_log "\nMatched new_core_clock and calibration.\n"
+
+                if { $SMP_STATUS == 1 } {
+                     expect {
+                                  -re "cpu MHz\[\x20\t]+: $new_core_clock\.\[0-9]{3}.*/.*Calibration\[\x20\t]+: $calibration_after loops" {
+                                    send_log "The second core is detected!\r"
+                                    case_pass $case_num
+                                    }
+
+                                  timeout {
+                                    case_fail $case_num
+                                    exit
+                                  }
+                     }
+                }
+                expect  -re "$kernel_prompt"
+                case_pass $case_num
+                break
+            }
+            timeout {
+                case_fail $case_num
+                exit
+            }
+        }
+    }
+
+    incr case_num
+    send -s  "cpufreq-set -f $core_clock_inK\r"
+    while 1 {
+        expect {
+            -re "$kernel_prompt" {
+                case_pass $case_num
+                break
+            }
+            timeout {
+                case_fail $case_num
+                exit
+            }
+        }
+    }
+
+    incr case_num
+    send -s  "cat /proc/cpuinfo\r"
+    while 1 {
+        expect {
+            -re "cpu MHz\[\x20\t]+: $core_clock\.\[0-9]{3}.*/.*Calibration\[\x20\t]+: $calibration_before loops" {
+                send_log "\nMatched core_clock and calibration.\n"
+
+                if { $SMP_STATUS == 1 } {
+                     expect {
+                                  -re "cpu MHz\[\x20\t]+: $core_clock\.\[0-9]{3}.*/.*Calibration\[\x20\t]+: $calibration_before loops" {
+                                    send_log "The second core is detected and freq is changed back!\r"
+                                    case_pass $case_num
+                                    }
+
+                                  timeout {
+                                    case_fail $case_num
+                                    exit
+                                  }
+                     }
+                }
+
+                expect  -re "$kernel_prompt"
+                case_pass $case_num
+                break
+            }
+            timeout {
+                case_fail $case_num
+                exit
+            }
+        }
+    }
+} else {
+    send_user "The original cpu core clock is not as required.\n"
+    case_fail $case_num
+    exit
+}
+
+send "cd /sys/devices/system/cpu/cpu0/cpufreq/\r"
+while 1 {
+    expect {
+        "cpufreq" {
+            expect  -re "$kernel_prompt"
+            break
+        }
+        timeout {
+            case_fail $case_num
+            exit
+        }
+    }
+}
+
+incr case_num
+send -s  "cat scaling_governor\r"
+while 1 {
+    expect {
+        -re "$governor" {
+            expect  -re "$kernel_prompt"
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+            exit
+        }
+    }
+}
+
+incr case_num
+send -s  "cat stats/*\r"
+while 1 {
+    expect {
+        -re "$core_clock.*$new_core_clock" {
+            expect  -re "$kernel_prompt"
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+            exit
+        }
+    }
+}
+
+send_log "\n"
+send_log "\n$TITLE ............\[PASS\]\n"
+send_user "Ending $argv0\n"
+
+log_file

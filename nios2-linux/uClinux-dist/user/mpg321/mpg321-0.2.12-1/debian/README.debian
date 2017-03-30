@@ -1,0 +1,4 @@
+The mpg321 package installs an alternative to mpg123 when it's installing.
+This means that mpg321 will actually be called if you run mpg123, 
+even if you have mpg123 installed. If you want to override this default,
+see update-alternatives(8) ('man update-alternatives').

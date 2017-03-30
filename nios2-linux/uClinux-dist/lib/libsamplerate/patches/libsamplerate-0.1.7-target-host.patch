@@ -1,0 +1,192 @@
+diff -ur -x .svn -x Makefile.in -x config.sub -x config.guess -x configure -x compile -x depcomp -x install-sh -x ltmain.sh -x missing -x INSTALL -x '*.m4' -x config.h.in f/libsamplerate-0.1.7/configure.ac libsamplerate-0.1.7/configure.ac
+--- f/libsamplerate-0.1.7/configure.ac	2009-02-14 06:23:09.000000000 -0500
++++ libsamplerate-0.1.7/configure.ac	2010-03-25 13:11:19.000000000 -0400
+@@ -9,7 +9,7 @@
+ AC_CONFIG_AUX_DIR(Cfg)
+ 
+ AC_CONFIG_SRCDIR([src/samplerate.c])
+-AC_CANONICAL_TARGET([])
++AC_CANONICAL_HOST([])
+ 
+ AC_CONFIG_MACRO_DIR([M4])
+ 
+@@ -54,11 +54,13 @@
+ AC_PROG_LN_S
+ AC_PROG_MKDIR_P
+ 
+-if test "x-$build_os-$host_os-$target_os" = x-mingw32-mingw32-mingw32 ; then
+-	AC_CHECK_PROG(DLLTOOL, dlltool, dlltool)
+-	AC_CHECK_PROG(DLLWRAP, dllwrap, dllwrap)
+-	AC_CHECK_PROG(PEXPORTS, pexports, pexports)
+-	fi
++case $host_os in
++	mingw*|*-mingw*)
++		AC_CHECK_TOOL(DLLTOOL, dlltool, dlltool)
++		AC_CHECK_TOOL(DLLWRAP, dllwrap, dllwrap)
++		AC_CHECK_TOOL(PEXPORTS, pexports, pexports)
++		;;
++	esac
+ 
+ AC_HEADER_STDC
+ 
+@@ -101,14 +103,21 @@
+ AC_CHECK_SIZEOF(double,8)
+ 
+ #====================================================================================
+-# Determine endian-ness of target processor.
++# Determine endian-ness of host processor.
+ 
+-AC_C_FIND_ENDIAN
++ac_cv_c_big_endian=0
++ac_cv_c_little_endian=0
++AC_C_BIGENDIAN
++if test "x$ac_cv_c_bigendian" = true ; then
++	ac_cv_c_big_endian=1
++else
++	ac_cv_c_little_endian=1
++fi
+ 
+ AC_DEFINE_UNQUOTED(CPU_IS_BIG_ENDIAN, ${ac_cv_c_big_endian},
+-        [Target processor is big endian.])
++        [Host processor is big endian.])
+ AC_DEFINE_UNQUOTED(CPU_IS_LITTLE_ENDIAN, ${ac_cv_c_little_endian},
+-        [Target processor is little endian.])
++        [Host processor is little endian.])
+ 
+ #====================================================================================
+ # Check for functions.
+@@ -145,9 +154,9 @@
+ 	fi
+ 
+ AC_DEFINE_UNQUOTED(CPU_CLIPS_POSITIVE, ${ac_cv_c_clip_positive},
+-	[Target processor clips on positive float to int conversion.])
++	[Host processor clips on positive float to int conversion.])
+ AC_DEFINE_UNQUOTED(CPU_CLIPS_NEGATIVE, ${ac_cv_c_clip_negative},
+-	[Target processor clips on negative float to int conversion.])
++	[Host processor clips on negative float to int conversion.])
+ 
+ #====================================================================================
+ # Check for libsndfile which is required for the test and example programs.
+@@ -196,6 +205,12 @@
+ #====================================================================================
+ # GCC stuff.
+ 
++case $host_cpu in
++	bfin*) SYMBOL_PREFIX=_ ;;
++	*) SYMBOL_PREFIX= ;;
++esac
++AC_SUBST(SYMBOL_PREFIX, $SYMBOL_PREFIX)
++
+ if test $ac_cv_c_compiler_gnu = yes ; then
+ 	CFLAGS="$CFLAGS -std=gnu99 -W -Wstrict-prototypes -Wmissing-prototypes -Wall -Waggregate-return -Wcast-align -Wcast-qual -Wnested-externs -Wshadow -Wpointer-arith"
+ 	# -Wundef -Wbad-function-cast -Wmissing-declarations -Wconversion -Winline"
+@@ -207,12 +222,12 @@
+ 
+ 	# Disable -Wall for Apple Darwin/Rhapsody.
+ 	# System headers on these systems are broken.
+-	case "$target_os" in
++	case "$host_os" in
+ 		darwin* | rhapsody*)
+ 			temp_CFLAGS=`echo $CFLAGS | sed "s/-Wall//"`
+ 			CFLAGS=$temp_CFLAGS
+ 			;;
+-		linux*)
++		*linux*)
+ 			SHLIB_VERSION_ARG="-Wl,--version-script=Version_script"
+ 			;;
+ 		*)
+@@ -232,12 +247,12 @@
+ 	fi
+ 
+ #====================================================================================
+-# Find known target OS.
++# Find known host OS.
+ 
+ OS_SPECIFIC_INCLUDES=""
+ os_is_win32=0
+ 
+-case "$target_os" in
++case "$host_os" in
+ 	darwin* | rhapsody*)
+ 		OS_SPECIFIC_INCLUDES="-fpascal-strings -I/Developer/Headers/FlatCarbon"
+ 		OS_SPECIFIC_LINKS="-framework CoreAudio"
+Only in libsamplerate-0.1.7/src: config.h.in~
+diff -ur -x .svn -x Makefile.in -x config.sub -x config.guess -x configure -x compile -x depcomp -x install-sh -x ltmain.sh -x missing -x INSTALL -x '*.m4' -x config.h.in f/libsamplerate-0.1.7/src/Version_script.in libsamplerate-0.1.7/src/Version_script.in
+--- f/libsamplerate-0.1.7/src/Version_script.in	2008-01-16 05:55:23.000000000 -0500
++++ libsamplerate-0.1.7/src/Version_script.in	2010-03-25 13:11:19.000000000 -0400
+@@ -8,18 +8,18 @@
+ @PACKAGE@.so.0.0
+ {
+ 	global:
+-		src_new ;
+-		src_delete ;
+-		src_get_name ;
+-		src_get_description ;
+-		src_get_version ;
+-		src_process ;
+-		src_reset ;
+-		src_error ;
+-		src_strerror ;
+-		src_simple ;
+-		src_is_valid_ratio ;
+-		src_set_ratio ;
++		@SYMBOL_PREFIX@src_new ;
++		@SYMBOL_PREFIX@src_delete ;
++		@SYMBOL_PREFIX@src_get_name ;
++		@SYMBOL_PREFIX@src_get_description ;
++		@SYMBOL_PREFIX@src_get_version ;
++		@SYMBOL_PREFIX@src_process ;
++		@SYMBOL_PREFIX@src_reset ;
++		@SYMBOL_PREFIX@src_error ;
++		@SYMBOL_PREFIX@src_strerror ;
++		@SYMBOL_PREFIX@src_simple ;
++		@SYMBOL_PREFIX@src_is_valid_ratio ;
++		@SYMBOL_PREFIX@src_set_ratio ;
+ 		
+ 	local:
+ 		*;
+@@ -28,26 +28,26 @@
+ @PACKAGE@.so.0.1
+ {
+ 	global:
+-		src_new ;
+-		src_delete ;
+-		src_get_name ;
+-		src_get_description ;
+-		src_get_version ;
+-		src_process ;
+-		src_reset ;
+-		src_error ;
+-		src_strerror ;
+-		src_simple ;
+-		src_is_valid_ratio ;
+-		src_set_ratio ;
++		@SYMBOL_PREFIX@src_new ;
++		@SYMBOL_PREFIX@src_delete ;
++		@SYMBOL_PREFIX@src_get_name ;
++		@SYMBOL_PREFIX@src_get_description ;
++		@SYMBOL_PREFIX@src_get_version ;
++		@SYMBOL_PREFIX@src_process ;
++		@SYMBOL_PREFIX@src_reset ;
++		@SYMBOL_PREFIX@src_error ;
++		@SYMBOL_PREFIX@src_strerror ;
++		@SYMBOL_PREFIX@src_simple ;
++		@SYMBOL_PREFIX@src_is_valid_ratio ;
++		@SYMBOL_PREFIX@src_set_ratio ;
+ 		
+-		src_callback_new ;
+-		src_callback_read ;
++		@SYMBOL_PREFIX@src_callback_new ;
++		@SYMBOL_PREFIX@src_callback_read ;
+ 
+-		src_short_to_float_array ;
+-		src_float_to_short_array ;
+-		src_int_to_float_array ;
+-		src_float_to_int_array ;
++		@SYMBOL_PREFIX@src_short_to_float_array ;
++		@SYMBOL_PREFIX@src_float_to_short_array ;
++		@SYMBOL_PREFIX@src_int_to_float_array ;
++		@SYMBOL_PREFIX@src_float_to_int_array ;
+ 	local:
+ 		*;
+ };

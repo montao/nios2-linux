@@ -1,0 +1,175 @@
+#!/usr/bin/expect --
+
+#
+# Build Kernel for power test with ethernet and video driver
+#
+
+source  ../kernel_config.exp
+source  ../board_info.exp
+log_file [log_file_name "$argv0"]
+send_user "Starting $argv0\n"
+
+cd $uclinux_path/testsuites
+step "Make clean."
+if { [source make_clean.exp] != 0 } {
+    send_user "\n\nFail to make clean. Exit!\n\n"
+    exit
+}
+
+cd $uclinux_path/testsuites
+step "Make default config."
+source  make_default_config.exp
+
+step "Make config"
+cd $uclinux_path
+set timeout 300
+spawn make config
+while 1 {
+    expect {
+
+        -re "Customize Kernel Settings.*DEFAULTS_KERNEL.*\\\[.*]" {
+            send "y\r"
+        }
+
+        -re "Customize Application/Library Settings.*DEFAULTS_VENDOR.*\\\[.*]" {
+            send "y\r"
+        }
+
+        -nocase -re "\\\[\[^\r]*] (\[ymn])|choice\\\[.*]: \[0-9]+\r" {
+            continue
+        }
+
+        -re "Hardware error interrupt debugging \\\(DEBUG_HWERR\\\).*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "Virtual terminal.*VT.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "USB support.*USB_SUPPORT.*\\\[.*]" {
+            #USB driver now doesn't support power function
+            send "N\r"
+        }
+
+
+#Power Management
+        -re "Power Management support \\\(PM\\\) \\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Suspend to RAM and standby \\\(SUSPEND\\\) \\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Allow Wakeup from Standby by GPIO.*PM_WAKEUP_BY_GPIO.*\\\[.*]" {
+            send "N\r"
+        }
+
+
+#Video Output
+        -re "Support for generic platform NAND driver.*MTD_NAND_PLATFORM.*\\\[.*]" {
+            #conflict with TFT LCD
+            send "N\r"
+        }
+
+        -re "SPI controller driver for ADI Blackfin5xx.*SPI_BFIN.*\\\[.*]" {
+            if { $board_type == "BF527-EZKIT-V2" } {
+                send "Y\r"
+            } else {
+                send "M\r"
+            }
+        }
+
+        -re "Support for frame buffer devices.*FB.*\\\[.*]" {
+            if { $board_type == "BF533-EZKIT" } {
+                send "N\r"
+            } else {
+                send "Y\r"
+            }
+        }
+
+        -re "SHARP LQ035 TFT LCD.*FB_BF537_LQ035.*\\\[.*]" {
+            send "M\r"
+        }
+
+        -re "SHARP LQ043 TFT LCD.*BF548 EZKIT.*\\\[.*]" {
+            if { $board_type == "BF548-EZKIT" } {
+                send "M\r"
+            } else {
+                send "\r"
+            }
+        }
+
+        -re "Varitronix COG-T350MCQB TFT LCD display.*FB_BFIN_T350MCQB.*\\\[.*]" {
+            if { $board_type == "BF527-EZKIT" } {
+                send "M\r"
+            } else {
+                send "\r"
+            }
+        }
+
+        -re "SHARP LQ035Q1DH02 TFT LCD.*FB_BFIN_LQ035Q1.*\\\[.*]" {
+            if { $board_type == "BF527-EZKIT-V2" } {
+                send "M\r"
+            } else {
+                send "N\r"
+            }
+        }
+
+        -re "Blackfin ADV7393 Video encoder.*FB_BFIN_7393.*\\\[.*]" {
+            if { $board_type == "BF537-STAMP" || $board_type == "BF533-STAMP" } {
+                send "M\r"
+            } else {
+                send "N\r"
+            }
+        }
+
+        -re "Backlight & LCD device support.*BACKLIGHT_LCD_SUPPORT.*\\\[.*]" {
+            if { $board_type == "BF533-EZKIT" } {
+                send "N\r"
+            } else {
+                send "Y\r"
+            }
+
+        }
+
+        -re "Sound card support.*SOUND.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "rtcwake.*USER_BUSYBOX_RTCWAKE.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        "\\\(*) \\\[*]" {
+            sleep .05
+            send "\r"
+        }
+
+        -re "\[cC]hoice\\\[.*]:" {
+            send "\r"
+        }
+
+        eof {
+            puts "End of configuration"
+            break
+        }
+
+        timeout {
+            puts "\n\nFATAL ERROR: config prompt timeout in make config"
+            break
+        }
+    }
+}
+
+cd $uclinux_path/testsuites
+step "Make kernel"
+source   make_kernel.exp
+
+cd $uclinux_path/testsuites
+step "Copy linux image"
+source   copy_image.exp
+
+send_user "Ending $argv0\n"
+log_file

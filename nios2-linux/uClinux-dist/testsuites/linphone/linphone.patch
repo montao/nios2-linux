@@ -1,0 +1,12 @@
+Index: linphone-3.1.2/mediastreamer2/src/alsa.c
+===================================================================
+--- linphone-3.1.2/mediastreamer2/src/alsa.c	(revision 9615)
++++ linphone-3.1.2/mediastreamer2/src/alsa.c	(working copy)
+@@ -333,6 +333,7 @@
+ 	int err;
+ 	if ((err=snd_pcm_writei(handle,buf,nsamples))<0){
+ 		if (err==-EPIPE){
++			printf("Underrun happened!!!\n");
+ 			snd_pcm_prepare(handle);
+ #ifdef EPIPE_BUGFIX
+ 			alsa_fill_w (handle);

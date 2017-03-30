@@ -1,0 +1,89 @@
+#!/usr/bin/expect
+
+source ../kernel_config.exp
+log_file [log_file_name "$argv0"]
+send_user "Starting $argv0\n"
+
+set board_type         [lindex $argv 0]
+send_log "\n#### board_type is $board_type\n"
+set timer_frequency    [lindex $argv 1]
+send_log "\n#### timer_frequency is $timer_frequency\n"
+
+if { $argc < 2} {
+puts "Please input: board_type,timer_frequency(100, 250 or 1000Mhz)."
+exit
+}
+
+cd $uclinux_path/testsuites
+
+step "Make config."
+
+source  make_default_config.exp
+
+# Following make specific configuration for this case.
+
+cd $uclinux_path
+set timeout 300
+set baud_rate_done_flag 0
+spawn make config
+
+#puts "Begin the interactive process of configuration"
+while 1 {
+   expect {
+   
+           -re "Customize Kernel Settings.*DEFAULTS_KERNEL.*\\\[.*]" { 
+             send "y\r"
+      }
+
+           -re "Customize Application/Library Settings.*DEFAULTS_VENDOR.*\\\[.*]" {   
+             send "y\r"
+      }
+  
+          -re "Timer frequency.*choice\\\[.*]" {
+            if { $timer_frequency == "100" } {
+                       send "1\r"
+            } elseif { $timer_frequency == "250" } {
+                       send "2\r"
+            } elseif { $timer_frequency == "1000" } {
+                       send "4\r"
+            }
+      }
+
+        -nocase -re "\\\[\[^\r]*] (\[ymn])|choice\\\[.*]: \[0-9]+\r" {
+            continue
+        }
+
+        "\\\(*) \\\[*]" {
+            sleep .01
+            send "\r"
+        }
+
+      -re "\[cC]hoice\\\[.*]:" {
+             send "\r"
+      }
+
+      eof {
+	     puts "End of configuration"
+	     break
+      }
+      timeout {
+	     puts "\n\nFATAL ERROR: config prompt timeout in make config"
+           
+      }
+   }
+}
+
+cd $uclinux_path/testsuites
+
+step "Make"
+
+source  make_kernel.exp
+
+cd $uclinux_path/testsuites
+
+step "Copy linux"
+
+source   copy_image.exp
+
+send_user "Ending $argv0\n"
+log_file

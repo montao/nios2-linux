@@ -1,0 +1,221 @@
+#!/usr/bin/expect
+
+source ../kernel_config.exp
+log_file [log_file_name "$argv0"]
+send_user "Starting $argv0\n"
+set TITLE [title "$argv0"]
+
+set TEST_PASS pass
+set TEST_FAIL fail
+
+step "Start kermit."
+source ../spawn_kermit.exp
+
+step "Reboot the kernel."
+source ../reboot_kernel.exp
+
+send_log "*********************************\r"
+send_log "Start $TITLE\r"
+send_log "*********************************\r"
+set timeout 120
+set case_num 0
+
+incr case_num
+send "dmesg\r" 
+while 1 {
+   expect {
+     -re "scsi.*Direct-Access.*ATA.*WDC" {
+                expect -re "$kernel_prompt"
+                case_pass $case_num
+		break
+      }
+
+      timeout {
+                case_fail $case_num
+                exit      
+         }
+     }
+}
+
+
+
+incr case_num
+send "mount -t iso9660 /dev/sr0 /mnt\r" 
+while 1 {
+   expect {
+
+      -re "$kernel_prompt" {
+                case_pass $case_num
+		break
+      }
+
+      -re "failed|No " {
+                case_fail $case_num
+                exit
+      }
+
+      timeout {
+                case_fail $case_num
+                exit      
+         }
+     }
+}
+
+
+incr case_num
+send "ls -al /mnt\r" 
+while 1 {
+   expect {
+    -re  "$kernel_prompt" {
+                case_pass $case_num
+		break
+      }
+
+      timeout {
+                case_fail $case_num
+                exit      
+         }
+     }
+}
+
+incr case_num
+send "time cat /mnt/setup.exe > /dev/null\r"
+while 1 {
+   expect {
+     -re "real.*user.*sys" {
+                case_pass $case_num
+                expect -re "$kernel_prompt"
+                break
+      }
+
+      timeout {
+                case_fail $case_num
+                exit
+         }
+     }
+}
+
+incr case_num
+set filesystems 0
+send "cat /proc/filesystems\r"
+while 1 {
+    expect {
+        -re "vfat" {
+            incr filesystems
+        }
+
+        -re "msdos" {
+            incr filesystems
+        }
+
+        -re "iso9660" {
+            incr filesystems
+        }
+
+        -re "$kernel_prompt" {
+                                if { $filesystems == 3 } {
+                                    send_log "The three fs -- vfat,msdos and iso9660 are found!\n"
+                                    case_pass $case_num
+                                } else {
+                                    send_log "Not all of the vfat,msdos and iso9660 are found!\n"
+                                    case_fail $case_num
+                                }
+            break
+        }
+
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+
+incr case_num
+send "df\r" 
+while 1 {
+   expect {
+      "/dev/sr0" {
+                case_pass $case_num
+		break
+      }
+
+     "No such file or directory" {
+                case_fail $case_num
+                exit
+        }
+
+      timeout {
+                case_fail $case_num
+                exit      
+         }
+     }
+}
+expect -re $kernel_prompt
+incr case_num
+send "while \[ 1 \]; do md5sum /mnt/setup.exe ; done\r" 
+while 1 {
+   expect {
+      -re "\[0-9a-z]+  /mnt/setup.exe" {
+                sleep 3
+                send "\3"
+                case_pass $case_num
+		break
+      }
+
+      timeout {
+                case_fail $case_num
+                exit      
+         }
+     }
+}
+
+expect -re $kernel_prompt
+incr case_num
+send "umount /mnt\r" 
+while 1 {
+   expect {
+        -re "umount.*failed.*$kernel_prompt" {
+            send_user "umount failed, test fail\n"
+            case_fail $case_num
+        }
+        -re $kernel_prompt {
+            send_user "umount done, test pass\n"
+            case_pass $case_num
+            break
+        }
+        timeout {
+            send_user "umount timeout, test fail\n"
+            case_fail $case_num
+        }
+
+     }
+}
+
+incr case_num
+send "ls -al /mnt\r" 
+while 1 {
+   expect {
+      -re  "setup.exe" {
+                case_fail $case_num
+      }
+      -re  "$kernel_prompt" {
+                case_pass $case_num
+		break
+      }
+
+      timeout {
+                case_fail $case_num
+                exit      
+         }
+     }
+}
+
+
+send_log "                  \n"
+send_log "\n$TITLE ............\[PASS\]\n"
+                                     
+send_user "Ending $argv0\n"
+log_file
+ 
+
+

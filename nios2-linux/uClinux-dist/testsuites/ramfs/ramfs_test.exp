@@ -1,0 +1,143 @@
+#!/usr/bin/expect
+
+#
+#Test program to test reboot.
+#
+source ../kernel_config.exp
+log_file [log_file_name "$argv0"]
+send_user "Starting $argv0\n"
+set TITLE [title "$argv0"]
+
+step "Start kermit."
+source ../spawn_kermit.exp
+
+step "Reset the uboot."
+source ../reset_to_uboot.exp
+
+step "Start $TITLE\r"
+send -s "reset\r"
+
+for {set case_num 0} {$case_num < $count} {incr case_num} {
+
+set timeout 5
+expect {
+        "Hit any key" {
+        }
+        timeout {
+        }
+}
+
+
+set timeout 2
+while 1 {
+   send -s "\r"
+   expect {
+      -re $uboot_prompt {
+        send_log "Get u-boot prompt after hitting any key.\n"
+         break
+      }
+        timeout {
+                case_fail $case_num
+                exit
+        }
+   }
+}
+   
+#expect -re $uboot_prompt
+set timeout 20
+send -s "tftpboot 0x1000000 $boot_image\r"
+while 1 {
+   expect {
+      -re "done.*$uboot_prompt" {
+        send_log "Get u-boot prompt.\n"
+         break
+      }
+	timeout {
+         send_log "Timeout when getting u-boot prompt."
+                case_fail $case_num
+		exit
+	}
+   }
+}
+
+if { $boot_image == "linux" } {
+         set bootcmd bootelf
+   } elseif { $boot_image == "uImage" } {
+         set bootcmd bootm
+}
+
+set timeout 5
+send -s "$bootcmd\r"
+while 1 {
+   expect {
+      "Linux version" {
+         break
+      }
+      timeout {
+                case_fail $case_num
+		exit
+      }
+   }
+}
+sleep 30
+send -s "\r"
+expect -re $kernel_prompt
+send -s "\r"
+
+set timeout 30
+while 1 {
+   expect {
+	 -re $kernel_prompt {
+                case_pass $case_num
+		break
+	}
+
+         timeout {
+                case_fail $case_num
+		exit
+         }
+   }
+}
+
+send_log "Wait for 1 minutes before reboot.\r"
+sleep 60
+
+set timeout 5
+send -s "\r\r"
+while 1 {
+   expect {
+	-re $kernel_prompt {
+		break
+	}
+
+         timeout {
+                case_fail $case_num
+		exit
+         }
+   }
+}
+
+send -s "reboot\r"
+
+}
+
+send_log "\n$TITLE ............\[PASS\]\n"
+
+send_user "Ending $argv0\n"
+log_file
+
+while 1 {
+       expect {
+         "Hit any key " {
+             send "\r"
+             expect -re $kernel_prompt
+             break
+         }
+
+         timeout {
+             break
+         }
+      }
+   }
+
+

@@ -1,0 +1,5 @@
+masq_info.c: In function 'read_masqinfo':
+masq_info.c:101: warning: dereferencing type-punned pointer will break strict-aliasing rules
+masq_info.c:102: warning: dereferencing type-punned pointer will break strict-aliasing rules
+masq_info.c:109: warning: dereferencing type-punned pointer will break strict-aliasing rules
+masq_info.c:110: warning: dereferencing type-punned pointer will break strict-aliasing rules

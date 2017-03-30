@@ -1,0 +1,16 @@
+Index: linphone-3.1.2/console/shell.c
+===================================================================
+--- linphone-3.1.2/console/shell.c	(revision 9116)
++++ linphone-3.1.2/console/shell.c	(working copy)
+@@ -171,7 +171,11 @@
+ 	}
+ 	args[j++]=NULL;
+ 
++#ifdef __uClinux__
++	pid = vfork();
++#else
+ 	pid = fork();
++#endif
+ 	if (pid < 0){
+ 		fprintf(stderr,"Could not fork\n");
+ 		exit(-1);

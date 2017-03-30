@@ -1,0 +1,3 @@
+version=3
+http://mpg321.sourceforge.net/mpg321.html mpg321_(.*)\.tar\.gz	debian uupdate
+

@@ -1,0 +1,2 @@
+state.c: In function 'suboption':
+state.c:1049: warning: pointer targets in passing argument 1 of 'atoi' differ in signedness

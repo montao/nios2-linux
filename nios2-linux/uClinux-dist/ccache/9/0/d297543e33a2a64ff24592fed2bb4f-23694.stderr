@@ -1,0 +1,2 @@
+conftest.c: In function 'main':
+conftest.c:263: warning: unused variable 'wtmp'

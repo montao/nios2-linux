@@ -1,0 +1,4 @@
+#!/usr/bin/expect
+
+#set test_interval [expr 3600*24]
+set test_interval 3600

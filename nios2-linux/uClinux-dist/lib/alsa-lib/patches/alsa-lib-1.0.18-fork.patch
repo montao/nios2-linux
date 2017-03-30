@@ -1,0 +1,25 @@
+Index: alsa-lib-1.0.18/src/pcm/pcm_direct.c
+===================================================================
+--- alsa-lib-1.0.18/src/pcm/pcm_direct.c	(revision 9077)
++++ alsa-lib-1.0.18/src/pcm/pcm_direct.c	(working copy)
+@@ -425,12 +425,20 @@
+ 		return ret;
+ 	}
+ 	
++#ifdef __uClinux__
++	ret = vfork();
++#else
+ 	ret = fork();
++#endif
+ 	if (ret < 0) {
+ 		close(dmix->server_fd);
+ 		return ret;
+ 	} else if (ret == 0) {
++#ifdef __uClinux__
++		ret = vfork();
++#else
+ 		ret = fork();
++#endif
+ 		if (ret == 0)
+ 			server_job(dmix);
+ 		_exit(EXIT_SUCCESS);

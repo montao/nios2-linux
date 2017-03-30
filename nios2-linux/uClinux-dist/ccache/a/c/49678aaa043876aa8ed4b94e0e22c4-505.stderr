@@ -1,0 +1,2 @@
+conftest.c: In function 'main':
+conftest.c:30: warning: unused variable 'x'

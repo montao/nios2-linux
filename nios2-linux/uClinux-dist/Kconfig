@@ -1,0 +1,1585 @@
+mainmenu "Embedded Linux Configuration"
+
+config DISTVERSION
+	string
+	default 4.0
+
+menu "Vendor/Product Selection"
+
+comment "Select the Vendor you wish to target"
+
+choice
+	prompt "Vendor"
+	default DEFAULTS_ANALOGDEVICES
+
+config DEFAULTS_3COM
+  bool "3com"
+
+config DEFAULTS_ACTIONTEC
+  bool "Actiontec"
+
+config DEFAULTS_ADI
+  bool "ADI"
+
+config DEFAULTS_AGLAIA
+  bool "Aglaia"
+
+config DEFAULTS_AKIZUKI
+  bool "Akizuki"
+
+config DEFAULTS_ALTERA
+  bool "Altera"
+
+config DEFAULTS_ANALOGDEVICES
+  bool "AnalogDevices"
+
+config DEFAULTS_APPLE
+  bool "Apple"
+
+config DEFAULTS_ARCTURUS
+  bool "Arcturus"
+
+config DEFAULTS_ARNEWSH
+  bool "Arnewsh"
+
+config DEFAULTS_ATHEROS
+  bool "Atheros"
+
+config DEFAULTS_ATMARKTECHNO
+  bool "AtmarkTechno"
+
+config DEFAULTS_ATMEL
+  bool "Atmel"
+
+config DEFAULTS_AVNET
+  bool "Avnet"
+
+config DEFAULTS_BLUETECHNIX
+  bool "Bluetechnix"
+
+config DEFAULTS_CIRRUS
+  bool "Cirrus"
+
+config DEFAULTS_COGENT
+  bool "Cogent"
+
+config DEFAULTS_CONEXANT
+  bool "Conexant"
+
+config DEFAULTS_CWLINUX
+  bool "Cwlinux"
+
+config DEFAULTS_CYBERGUARD
+  bool "CyberGuard"
+
+config DEFAULTS_CYTEK
+  bool "Cytek"
+
+config DEFAULTS_EMAC
+  bool "EMAC"
+
+config DEFAULTS_ESPD
+  bool "ESPD"
+
+config DEFAULTS_EXYS
+  bool "Exys"
+
+config DEFAULTS_FEITH
+  bool "Feith"
+
+config DEFAULTS_FREESCALE
+  bool "Freescale"
+
+config DEFAULTS_FUTURE
+  bool "Future"
+
+config DEFAULTS_GDB
+  bool "GDB"
+
+config DEFAULTS_HITACHI
+  bool "Hitachi"
+
+config DEFAULTS_HVSISTEMAS
+  bool "HVSistemas"
+
+config DEFAULTS_IMT
+  bool "Imt"
+
+config DEFAULTS_INSIGHT
+  bool "Insight"
+
+config DEFAULTS_INTEC
+  bool "Intec"
+
+config DEFAULTS_INTEL
+  bool "Intel"
+
+config DEFAULTS_KENDINMICREL
+  bool "KendinMicrel"
+
+config DEFAULTS_LEOX
+  bool "LEOX"
+
+config DEFAULTS_MECEL
+  bool "Mecel"
+
+config DEFAULTS_MIDAS
+  bool "Midas"
+
+config DEFAULTS_NEC
+  bool "NEC"
+
+config DEFAULTS_NETBURNER
+  bool "Netburner"
+
+config DEFAULTS_NETSILICON
+  bool "NetSilicon"
+
+config DEFAULTS_NINTENDO
+  bool "Nintendo"
+
+config DEFAULTS_NXP
+  bool "NXP"
+
+config DEFAULTS_OPENCORES
+  bool "OPENcores"
+
+config DEFAULTS_OPENGEAR
+  bool "OpenGear"
+
+config DEFAULTS_PHILIPS
+  bool "Philips"
+
+config DEFAULTS_PROMISE
+  bool "Promise"
+
+config DEFAULTS_SAMSUNG
+  bool "Samsung"
+
+config DEFAULTS_SAVANT
+  bool "Savant"
+
+config DEFAULTS_SECURECOMPUTING
+  bool "SecureComputing"
+
+config DEFAULTS_SECUREEDGE
+  bool "SecureEdge"
+
+config DEFAULTS_SENTEC
+  bool "senTec"
+
+config DEFAULTS_SERRA
+  bool "Serra"
+
+config DEFAULTS_SIGNAL
+  bool "Signal"
+
+config DEFAULTS_SIMTEC
+  bool "Simtec"
+
+config DEFAULTS_SNAPGEAR
+  bool "SnapGear"
+
+config DEFAULTS_SNEHA
+  bool "SNEHA"
+
+config DEFAULTS_SOEKRIS
+  bool "Soekris"
+
+config DEFAULTS_SONY
+  bool "Sony"
+
+config DEFAULTS_SSV
+  bool "SSV"
+
+config DEFAULTS_STRAWBERRYLINUX
+  bool "StrawberryLinux"
+
+config DEFAULTS_SURVEYOR
+  bool "Surveyor"
+
+config DEFAULTS_SWARM
+  bool "SWARM"
+
+config DEFAULTS_TELEIP
+  bool "TeleIP"
+
+config DEFAULTS_TI
+  bool "TI"
+
+config DEFAULTS_TLL
+  bool "TLL"
+
+config DEFAULTS_TRISCEND
+  bool "Triscend"
+
+config DEFAULTS_VIA
+  bool "Via"
+
+config DEFAULTS_WEISS
+  bool "Weiss"
+
+config DEFAULTS_XILINX
+  bool "Xilinx"
+
+endchoice
+
+config VENDOR
+	string
+
+##############################################################
+
+comment "Select the Product you wish to target"
+
+##############################################################
+
+choice
+	prompt "3com Products"
+	depends on DEFAULTS_3COM
+	default DEFAULTS_3COM_PALMIIIX
+
+config DEFAULTS_3COM_PALMIIIX
+	bool "PalmIIIx"
+
+config DEFAULTS_3COM_XCOPILOT
+	bool "Xcopilot"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "Actiontec Products"
+	depends on DEFAULTS_ACTIONTEC
+	default DEFAULTS_ACTIONTEC_DPCM
+
+config DEFAULTS_ACTIONTEC_DPCM
+	bool "DPCM"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "ADI Products"
+	depends on DEFAULTS_ADI
+	default DEFAULTS_ADI_COYOTE
+
+config DEFAULTS_ADI_COYOTE
+	bool "Coyote"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "Aglaia Products"
+	depends on DEFAULTS_AGLAIA
+	default DEFAULTS_AGLAIA_TEPLA
+
+config DEFAULTS_AGLAIA_TEPLA
+	bool "Tepla"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "Akizuki Products"
+	depends on DEFAULTS_AKIZUKI
+	default DEFAULTS_AKIZUKI_AE3068
+
+config DEFAULTS_AKIZUKI_AE3068
+	bool "AE3068"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "Altera Products"
+	depends on DEFAULTS_ALTERA
+	default DEFAULTS_ALTERA_NIOS2
+
+config DEFAULTS_ALTERA_NIOS2
+	bool "nios2"
+
+config DEFAULTS_ALTERA_NIOS2NOMMU
+	bool "nios2nommu"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "AnalogDevices Products"
+	depends on DEFAULTS_ANALOGDEVICES
+	default DEFAULTS_ANALOGDEVICES_BF518F_EZBRD
+
+config DEFAULTS_ANALOGDEVICES_BF518F_EZBRD
+	bool "BF518F-EZBRD"
+
+config DEFAULTS_ANALOGDEVICES_BF526_EZBRD
+	bool "BF526-EZBRD"
+
+config DEFAULTS_ANALOGDEVICES_BF527_AD7160_EVAL
+	bool "BF527-AD7160-EVAL"
+
+config DEFAULTS_ANALOGDEVICES_BF527_EZKIT
+	bool "BF527-EZKIT"
+
+config DEFAULTS_ANALOGDEVICES_BF527_EZKIT_V2
+	bool "BF527-EZKIT-V2"
+
+config DEFAULTS_ANALOGDEVICES_BF533_EZKIT
+	bool "BF533-EZKIT"
+
+config DEFAULTS_ANALOGDEVICES_BF533_STAMP
+	bool "BF533-STAMP"
+
+config DEFAULTS_ANALOGDEVICES_BF537_STAMP
+	bool "BF537-STAMP"
+
+config DEFAULTS_ANALOGDEVICES_BF538_EZKIT
+	bool "BF538-EZKIT"
+
+config DEFAULTS_ANALOGDEVICES_BF548_EZKIT
+	bool "BF548-EZKIT"
+
+config DEFAULTS_ANALOGDEVICES_BF561_EZKIT
+	bool "BF561-EZKIT"
+
+config DEFAULTS_ANALOGDEVICES_BF561_EZKIT_SMP
+	bool "BF561-EZKIT-SMP"
+
+config DEFAULTS_ANALOGDEVICES_PNAV_10
+	bool "PNAV-10"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "Apple Products"
+	depends on DEFAULTS_APPLE
+	default DEFAULTS_APPLE_IPOD
+
+config DEFAULTS_APPLE_IPOD
+	bool "iPod"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "Arcturus Products"
+	depends on DEFAULTS_ARCTURUS
+	default DEFAULTS_ARCTURUS_UC5272
+
+config DEFAULTS_ARCTURUS_UC5272
+	bool "uC5272"
+
+config DEFAULTS_ARCTURUS_UC5272_XEE16U48
+	bool "uC5272-xEE16U48"
+
+config DEFAULTS_ARCTURUS_UC5272_XEE16U66
+	bool "uC5272-xEE16U66"
+
+config DEFAULTS_ARCTURUS_UC5272_XEE8U48
+	bool "uC5272-xEE8U48"
+
+config DEFAULTS_ARCTURUS_UC5272_XEE8U66
+	bool "uC5272-xEE8U66"
+
+config DEFAULTS_ARCTURUS_UC5282_XE16C64
+	bool "uC5282-xE16C64"
+
+config DEFAULTS_ARCTURUS_UC5329_XE32UVC240
+	bool "uC5329-xE32UVC240"
+
+config DEFAULTS_ARCTURUS_UC68VZ328_4E8L33
+	bool "uC68VZ328-4E8L33"
+
+config DEFAULTS_ARCTURUS_UC68VZ328_8E8L33
+	bool "uC68VZ328-8E8L33"
+
+config DEFAULTS_ARCTURUS_UCDIMM
+	bool "uCdimm"
+
+config DEFAULTS_ARCTURUS_UCDIMM_MTD
+	bool "uCdimm+mtd"
+
+config DEFAULTS_ARCTURUS_UCQUICC
+	bool "uCquicc"
+
+config DEFAULTS_ARCTURUS_UCSIMM
+	bool "uCsimm"
+
+config DEFAULTS_ARCTURUS_UCTI5471_XE8D50
+	bool "uCTI5471-xE8D50"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "Arnewsh Products"
+	depends on DEFAULTS_ARNEWSH
+	default DEFAULTS_ARNEWSH_M5206
+
+config DEFAULTS_ARNEWSH_M5206
+	bool "M5206"
+
+config DEFAULTS_ARNEWSH_M5307
+	bool "M5307"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "Atheros Products"
+	depends on DEFAULTS_ATHEROS
+	default DEFAULTS_ATHEROS_PB42
+
+config DEFAULTS_ATHEROS_PB42
+	bool "PB42"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "AtmarkTechno Products"
+	depends on DEFAULTS_ATMARKTECHNO
+	default DEFAULTS_ATMARKTECHNO_SUZAKU
+
+config DEFAULTS_ATMARKTECHNO_SUZAKU
+	bool "SUZAKU"
+
+config DEFAULTS_ATMARKTECHNO_SUZAKU_UQ_XUP
+	bool "SUZAKU-UQ-XUP"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "Atmel Products"
+	depends on DEFAULTS_ATMEL
+	default DEFAULTS_ATMEL_AT91
+
+config DEFAULTS_ATMEL_AT91
+	bool "AT91"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "Avnet Products"
+	depends on DEFAULTS_AVNET
+	default DEFAULTS_AVNET_AVNET5282
+
+config DEFAULTS_AVNET_AVNET5282
+	bool "AVNET5282"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "Bluetechnix Products"
+	depends on DEFAULTS_BLUETECHNIX
+	default DEFAULTS_BLUETECHNIX_CM_BF527
+
+config DEFAULTS_BLUETECHNIX_CM_BF527
+	bool "CM-BF527"
+
+config DEFAULTS_BLUETECHNIX_CM_BF533
+	bool "CM-BF533"
+
+config DEFAULTS_BLUETECHNIX_CM_BF537E
+	bool "CM-BF537E"
+
+config DEFAULTS_BLUETECHNIX_CM_BF537U
+	bool "CM-BF537U"
+
+config DEFAULTS_BLUETECHNIX_CM_BF548
+	bool "CM-BF548"
+
+config DEFAULTS_BLUETECHNIX_CM_BF561
+	bool "CM-BF561"
+
+config DEFAULTS_BLUETECHNIX_TCM_BF518
+	bool "TCM-BF518"
+
+config DEFAULTS_BLUETECHNIX_TCM_BF537
+	bool "TCM-BF537"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "Cirrus Products"
+	depends on DEFAULTS_CIRRUS
+	default DEFAULTS_CIRRUS_EDB9312
+
+config DEFAULTS_CIRRUS_EDB9312
+	bool "EDB9312"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "Cogent Products"
+	depends on DEFAULTS_COGENT
+	default DEFAULTS_COGENT_CSB337
+
+config DEFAULTS_COGENT_CSB337
+	bool "CSB337"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "Conexant Products"
+	depends on DEFAULTS_CONEXANT
+	default DEFAULTS_CONEXANT_HUMBER
+
+config DEFAULTS_CONEXANT_HUMBER
+	bool "Humber"
+
+config DEFAULTS_CONEXANT_P52
+	bool "P52"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "Cwlinux Products"
+	depends on DEFAULTS_CWLINUX
+	default DEFAULTS_CWLINUX_CWEZ328
+
+config DEFAULTS_CWLINUX_CWEZ328
+	bool "cwez328"
+
+config DEFAULTS_CWLINUX_CWVZ328
+	bool "cwvz328"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "CyberGuard Products"
+	depends on DEFAULTS_CYBERGUARD
+	default DEFAULTS_CYBERGUARD_SE4200
+
+config DEFAULTS_CYBERGUARD_SE4200
+	bool "SE4200"
+
+config DEFAULTS_CYBERGUARD_SE4500
+	bool "SE4500"
+
+config DEFAULTS_CYBERGUARD_SE4700
+	bool "SE4700"
+
+config DEFAULTS_CYBERGUARD_SE5000
+	bool "SE5000"
+
+config DEFAULTS_CYBERGUARD_SE5100
+	bool "SE5100"
+
+config DEFAULTS_CYBERGUARD_SE7100
+	bool "SE7100"
+
+config DEFAULTS_CYBERGUARD_SG300
+	bool "SG300"
+
+config DEFAULTS_CYBERGUARD_SG530
+	bool "SG530"
+
+config DEFAULTS_CYBERGUARD_SG550
+	bool "SG550"
+
+config DEFAULTS_CYBERGUARD_SG560
+	bool "SG560"
+
+config DEFAULTS_CYBERGUARD_SG565
+	bool "SG565"
+
+config DEFAULTS_CYBERGUARD_SG570
+	bool "SG570"
+
+config DEFAULTS_CYBERGUARD_SG575
+	bool "SG575"
+
+config DEFAULTS_CYBERGUARD_SG580
+	bool "SG580"
+
+config DEFAULTS_CYBERGUARD_SG630
+	bool "SG630"
+
+config DEFAULTS_CYBERGUARD_SG635
+	bool "SG635"
+
+config DEFAULTS_CYBERGUARD_SG710
+	bool "SG710"
+
+config DEFAULTS_CYBERGUARD_SG810
+	bool "SG810"
+
+config DEFAULTS_CYBERGUARD_SVPN
+	bool "sVPN"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "Cytek Products"
+	depends on DEFAULTS_CYTEK
+	default DEFAULTS_CYTEK_NETMP3
+
+config DEFAULTS_CYTEK_NETMP3
+	bool "NETmp3"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "EMAC Products"
+	depends on DEFAULTS_EMAC
+	default DEFAULTS_EMAC_SOM5282EM
+
+config DEFAULTS_EMAC_SOM5282EM
+	bool "SOM5282EM"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "ESPD Products"
+	depends on DEFAULTS_ESPD
+	default DEFAULTS_ESPD_4510B
+
+config DEFAULTS_ESPD_4510B
+	bool "4510B"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "Exys Products"
+	depends on DEFAULTS_EXYS
+	default DEFAULTS_EXYS_DE2
+
+config DEFAULTS_EXYS_DE2
+	bool "de2"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "Feith Products"
+	depends on DEFAULTS_FEITH
+	default DEFAULTS_FEITH_CANCAM
+
+config DEFAULTS_FEITH_CANCAM
+	bool "CANCam"
+
+config DEFAULTS_FEITH_CLEOPATRA
+	bool "Cleopatra"
+
+config DEFAULTS_FEITH_CLEOPATRA2
+	bool "Cleopatra2"
+
+config DEFAULTS_FEITH_SCALES
+	bool "SCALES"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "Freescale Products"
+	depends on DEFAULTS_FREESCALE
+	default DEFAULTS_FREESCALE_M5206EC3
+
+config DEFAULTS_FREESCALE_M5206EC3
+	bool "M5206eC3"
+
+config DEFAULTS_FREESCALE_M5206ELITE
+	bool "M5206eLITE"
+
+config DEFAULTS_FREESCALE_M5208EVB
+	bool "M5208EVB"
+
+config DEFAULTS_FREESCALE_M5235EVB
+	bool "M5235EVB"
+
+config DEFAULTS_FREESCALE_M5249C3
+	bool "M5249C3"
+
+config DEFAULTS_FREESCALE_M5271EVB
+	bool "M5271EVB"
+
+config DEFAULTS_FREESCALE_M5272C3
+	bool "M5272C3"
+
+config DEFAULTS_FREESCALE_M5275EVB
+	bool "M5275EVB"
+
+config DEFAULTS_FREESCALE_M5282EVB
+	bool "M5282EVB"
+
+config DEFAULTS_FREESCALE_M5282LITE
+	bool "M5282LITE"
+
+config DEFAULTS_FREESCALE_M5307C3
+	bool "M5307C3"
+
+config DEFAULTS_FREESCALE_M5329EVB
+	bool "M5329EVB"
+
+config DEFAULTS_FREESCALE_M5407C3
+	bool "M5407C3"
+
+config DEFAULTS_FREESCALE_M5475EVB
+	bool "M5475EVB"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "Future Products"
+	depends on DEFAULTS_FUTURE
+	default DEFAULTS_FUTURE_FUTURENETBURNER5282BADGE
+
+config DEFAULTS_FUTURE_FUTURENETBURNER5282BADGE
+	bool "FutureNetburner5282Badge"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "GDB Products"
+	depends on DEFAULTS_GDB
+	default DEFAULTS_GDB_ARMULATOR
+
+config DEFAULTS_GDB_ARMULATOR
+	bool "ARMulator"
+
+config DEFAULTS_GDB_ARMULATOR_EB
+	bool "ARMulator-EB"
+
+config DEFAULTS_GDB_SKYEYE
+	bool "SkyEye"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "Hitachi Products"
+	depends on DEFAULTS_HITACHI
+	default DEFAULTS_HITACHI_BIGSURIV
+
+config DEFAULTS_HITACHI_BIGSURIV
+	bool "BigSurIV"
+
+config DEFAULTS_HITACHI_EDOSK2674
+	bool "EDOSK2674"
+
+config DEFAULTS_HITACHI_KEYWEST
+	bool "KeyWest"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "HVSistemas Products"
+	depends on DEFAULTS_HVSISTEMAS
+	default DEFAULTS_HVSISTEMAS_H8606
+
+config DEFAULTS_HVSISTEMAS_H8606
+	bool "H8606"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "Imt Products"
+	depends on DEFAULTS_IMT
+	default DEFAULTS_IMT_MWI
+
+config DEFAULTS_IMT_MWI
+	bool "mwi"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "Insight Products"
+	depends on DEFAULTS_INSIGHT
+	default DEFAULTS_INSIGHT_MBVANILLA_NET
+
+config DEFAULTS_INSIGHT_MBVANILLA_NET
+	bool "mbvanilla_net"
+
+config DEFAULTS_INSIGHT_XC2V1K_MICROBLAZE
+	bool "XC2V1K_Microblaze"
+
+config DEFAULTS_INSIGHT_XC2VP7_MICROBLAZE
+	bool "XC2VP7_Microblaze"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "Intec Products"
+	depends on DEFAULTS_INTEC
+	default DEFAULTS_INTEC_WILDFIRE
+
+config DEFAULTS_INTEC_WILDFIRE
+	bool "WildFire"
+
+config DEFAULTS_INTEC_WILDFIREMOD
+	bool "WildFireMod"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "Intel Products"
+	depends on DEFAULTS_INTEL
+	default DEFAULTS_INTEL_IXDP2800
+
+config DEFAULTS_INTEL_IXDP2800
+	bool "IXDP2800"
+
+config DEFAULTS_INTEL_IXDP425
+	bool "IXDP425"
+
+config DEFAULTS_INTEL_IXDP465
+	bool "IXDP465"
+
+config DEFAULTS_INTEL_IXDPG425
+	bool "IXDPG425"
+
+config DEFAULTS_INTEL_MONTEJADE
+	bool "MonteJade"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "KendinMicrel Products"
+	depends on DEFAULTS_KENDINMICREL
+	default DEFAULTS_KENDINMICREL_KS8695
+
+config DEFAULTS_KENDINMICREL_KS8695
+	bool "KS8695"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "LEOX Products"
+	depends on DEFAULTS_LEOX
+	default DEFAULTS_LEOX_TSIM
+
+config DEFAULTS_LEOX_TSIM
+	bool "TSIM"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "Mecel Products"
+	depends on DEFAULTS_MECEL
+	default DEFAULTS_MECEL_FR1000
+
+config DEFAULTS_MECEL_FR1000
+	bool "FR1000"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "Midas Products"
+	depends on DEFAULTS_MIDAS
+	default DEFAULTS_MIDAS_RTE_NB85E_CB
+
+config DEFAULTS_MIDAS_RTE_NB85E_CB
+	bool "RTE-NB85E-CB"
+
+config DEFAULTS_MIDAS_RTE_V850E_MA1_CB
+	bool "RTE-V850E-MA1-CB"
+
+config DEFAULTS_MIDAS_RTE_V850E_ME2_CB
+	bool "RTE-V850E-ME2-CB"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "NEC Products"
+	depends on DEFAULTS_NEC
+	default DEFAULTS_NEC_ANNA
+
+config DEFAULTS_NEC_ANNA
+	bool "Anna"
+
+config DEFAULTS_NEC_COMMON
+	bool "common"
+
+config DEFAULTS_NEC_V850E_SIM_GDB
+	bool "v850e-sim-gdb"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "Netburner Products"
+	depends on DEFAULTS_NETBURNER
+	default DEFAULTS_NETBURNER_CFV240
+
+config DEFAULTS_NETBURNER_CFV240
+	bool "CFV240"
+
+config DEFAULTS_NETBURNER_MOD5272
+	bool "MOD5272"
+
+config DEFAULTS_NETBURNER_MOD5282
+	bool "MOD5282"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "NetSilicon Products"
+	depends on DEFAULTS_NETSILICON
+	default DEFAULTS_NETSILICON_NET_ARM
+
+config DEFAULTS_NETSILICON_NET_ARM
+	bool "NET+ARM"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "Nintendo Products"
+	depends on DEFAULTS_NINTENDO
+	default DEFAULTS_NINTENDO_GBA
+
+config DEFAULTS_NINTENDO_GBA
+	bool "GBA"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "NXP Products"
+	depends on DEFAULTS_NXP
+	default DEFAULTS_NXP_LPC28XX
+
+config DEFAULTS_NXP_LPC28XX
+	bool "LPC28xx"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "OPENcores Products"
+	depends on DEFAULTS_OPENCORES
+	default DEFAULTS_OPENCORES_OR32
+
+config DEFAULTS_OPENCORES_OR32
+	bool "or32"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "OpenGear Products"
+	depends on DEFAULTS_OPENGEAR
+	default DEFAULTS_OPENGEAR_CM4008
+
+config DEFAULTS_OPENGEAR_CM4008
+	bool "CM4008"
+
+config DEFAULTS_OPENGEAR_CM41XX
+	bool "CM41xx"
+
+config DEFAULTS_OPENGEAR_SD4002
+	bool "SD4002"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "Philips Products"
+	depends on DEFAULTS_PHILIPS
+	default DEFAULTS_PHILIPS_LPC2200
+
+config DEFAULTS_PHILIPS_LPC2200
+	bool "LPC2200"
+
+config DEFAULTS_PHILIPS_LPC2294
+	bool "LPC2294"
+
+config DEFAULTS_PHILIPS_LPC22XX
+	bool "LPC22xx"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "Promise Products"
+	depends on DEFAULTS_PROMISE
+	default DEFAULTS_PROMISE_SX6
+
+config DEFAULTS_PROMISE_SX6
+	bool "SX6"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "Samsung Products"
+	depends on DEFAULTS_SAMSUNG
+	default DEFAULTS_SAMSUNG_4510B
+
+config DEFAULTS_SAMSUNG_4510B
+	bool "4510B"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "Savant Products"
+	depends on DEFAULTS_SAVANT
+	default DEFAULTS_SAVANT_ROSIE1
+
+config DEFAULTS_SAVANT_ROSIE1
+	bool "Rosie1"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "SecureComputing Products"
+	depends on DEFAULTS_SECURECOMPUTING
+	default DEFAULTS_SECURECOMPUTING_AUDIOPHILE
+
+config DEFAULTS_SECURECOMPUTING_AUDIOPHILE
+	bool "audiophile"
+
+config DEFAULTS_SECURECOMPUTING_SE4200
+	bool "SE4200"
+
+config DEFAULTS_SECURECOMPUTING_SE4500
+	bool "SE4500"
+
+config DEFAULTS_SECURECOMPUTING_SE4700
+	bool "SE4700"
+
+config DEFAULTS_SECURECOMPUTING_SE5000
+	bool "SE5000"
+
+config DEFAULTS_SECURECOMPUTING_SE5100
+	bool "SE5100"
+
+config DEFAULTS_SECURECOMPUTING_SE5100_FLASH
+	bool "SE5100-Flash"
+
+config DEFAULTS_SECURECOMPUTING_SE7100
+	bool "SE7100"
+
+config DEFAULTS_SECURECOMPUTING_SG300
+	bool "SG300"
+
+config DEFAULTS_SECURECOMPUTING_SG310
+	bool "SG310"
+
+config DEFAULTS_SECURECOMPUTING_SG530
+	bool "SG530"
+
+config DEFAULTS_SECURECOMPUTING_SG550
+	bool "SG550"
+
+config DEFAULTS_SECURECOMPUTING_SG560
+	bool "SG560"
+
+config DEFAULTS_SECURECOMPUTING_SG560D
+	bool "SG560D"
+
+config DEFAULTS_SECURECOMPUTING_SG560U
+	bool "SG560U"
+
+config DEFAULTS_SECURECOMPUTING_SG565
+	bool "SG565"
+
+config DEFAULTS_SECURECOMPUTING_SG570
+	bool "SG570"
+
+config DEFAULTS_SECURECOMPUTING_SG575
+	bool "SG575"
+
+config DEFAULTS_SECURECOMPUTING_SG580
+	bool "SG580"
+
+config DEFAULTS_SECURECOMPUTING_SG590
+	bool "SG590"
+
+config DEFAULTS_SECURECOMPUTING_SG630
+	bool "SG630"
+
+config DEFAULTS_SECURECOMPUTING_SG635
+	bool "SG635"
+
+config DEFAULTS_SECURECOMPUTING_SG640
+	bool "SG640"
+
+config DEFAULTS_SECURECOMPUTING_SG710
+	bool "SG710"
+
+config DEFAULTS_SECURECOMPUTING_SG720
+	bool "SG720"
+
+config DEFAULTS_SECURECOMPUTING_SG810
+	bool "SG810"
+
+config DEFAULTS_SECURECOMPUTING_SG8100
+	bool "SG8100"
+
+config DEFAULTS_SECURECOMPUTING_SG8200
+	bool "SG8200"
+
+config DEFAULTS_SECURECOMPUTING_SVPN
+	bool "sVPN"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "SecureEdge Products"
+	depends on DEFAULTS_SECUREEDGE
+	default DEFAULTS_SECUREEDGE_DISKTEL
+
+config DEFAULTS_SECUREEDGE_DISKTEL
+	bool "DISKtel"
+
+config DEFAULTS_SECUREEDGE_ELIA
+	bool "eLIA"
+
+config DEFAULTS_SECUREEDGE_MP3
+	bool "MP3"
+
+config DEFAULTS_SECUREEDGE_NETTEL1500
+	bool "NETtel1500"
+
+config DEFAULTS_SECUREEDGE_NETTEL3540
+	bool "NETtel3540"
+
+config DEFAULTS_SECUREEDGE_SECUREEDGE1100
+	bool "SecureEdge1100"
+
+config DEFAULTS_SECUREEDGE_SECUREEDGE2540
+	bool "SecureEdge2540"
+
+config DEFAULTS_SECUREEDGE_SECUREEDGE2570
+	bool "SecureEdge2570"
+
+config DEFAULTS_SECUREEDGE_SECUREEDGE2580
+	bool "SecureEdge2580"
+
+config DEFAULTS_SECUREEDGE_SECUREEDGE2580_JFFS
+	bool "SecureEdge2580-JFFS"
+
+config DEFAULTS_SECUREEDGE_SECUREEDGEEDNA
+	bool "SecureEdgeEdna"
+
+config DEFAULTS_SECUREEDGE_SECUREEDGENAS
+	bool "SecureEdgeNAS"
+
+config DEFAULTS_SECUREEDGE_SECUREEDGEPCMCIA
+	bool "SecureEdgePCMCIA"
+
+config DEFAULTS_SECUREEDGE_SECUREEDGEVPN
+	bool "SecureEdgeVPN"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "senTec Products"
+	depends on DEFAULTS_SENTEC
+	default DEFAULTS_SENTEC_COBRA5272
+
+config DEFAULTS_SENTEC_COBRA5272
+	bool "COBRA5272"
+
+config DEFAULTS_SENTEC_COBRA5282
+	bool "COBRA5282"
+
+config DEFAULTS_SENTEC_COBRA5329
+	bool "COBRA5329"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "Serra Products"
+	depends on DEFAULTS_SERRA
+	default DEFAULTS_SERRA_MFC3000
+
+config DEFAULTS_SERRA_MFC3000
+	bool "MFC3000"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "Signal Products"
+	depends on DEFAULTS_SIGNAL
+	default DEFAULTS_SIGNAL_MCP751
+
+config DEFAULTS_SIGNAL_MCP751
+	bool "MCP751"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "Simtec Products"
+	depends on DEFAULTS_SIMTEC
+	default DEFAULTS_SIMTEC_EB675001DIP
+
+config DEFAULTS_SIMTEC_EB675001DIP
+	bool "EB675001DIP"
+
+config DEFAULTS_SIMTEC_EB675001DIP_SSH
+	bool "EB675001DIP-ssh"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "SnapGear Products"
+	depends on DEFAULTS_SNAPGEAR
+	default DEFAULTS_SNAPGEAR_LITE
+
+config DEFAULTS_SNAPGEAR_LITE
+	bool "LITE"
+
+config DEFAULTS_SNAPGEAR_LITE300
+	bool "LITE300"
+
+config DEFAULTS_SNAPGEAR_PRO
+	bool "PRO"
+
+config DEFAULTS_SNAPGEAR_SE2580
+	bool "SE2580"
+
+config DEFAULTS_SNAPGEAR_SE2580_JFFS
+	bool "SE2580-JFFS"
+
+config DEFAULTS_SNAPGEAR_SE2900
+	bool "SE2900"
+
+config DEFAULTS_SNAPGEAR_SE2910_CF
+	bool "SE2910-CF"
+
+config DEFAULTS_SNAPGEAR_SE2910_INTEL
+	bool "SE2910-Intel"
+
+config DEFAULTS_SNAPGEAR_SE3400
+	bool "SE3400"
+
+config DEFAULTS_SNAPGEAR_SE4000
+	bool "SE4000"
+
+config DEFAULTS_SNAPGEAR_SE5000
+	bool "SE5000"
+
+config DEFAULTS_SNAPGEAR_SME530
+	bool "SME530"
+
+config DEFAULTS_SNAPGEAR_SME550
+	bool "SME550"
+
+config DEFAULTS_SNAPGEAR_SME570
+	bool "SME570"
+
+config DEFAULTS_SNAPGEAR_SME575
+	bool "SME575"
+
+config DEFAULTS_SNAPGEAR_SOHO_
+	bool "SOHO+"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "SNEHA Products"
+	depends on DEFAULTS_SNEHA
+	default DEFAULTS_SNEHA_CPU16B
+
+config DEFAULTS_SNEHA_CPU16B
+	bool "CPU16B"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "Soekris Products"
+	depends on DEFAULTS_SOEKRIS
+	default DEFAULTS_SOEKRIS_NET4801
+
+config DEFAULTS_SOEKRIS_NET4801
+	bool "net4801"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "Sony Products"
+	depends on DEFAULTS_SONY
+	default DEFAULTS_SONY_CLIE
+
+config DEFAULTS_SONY_CLIE
+	bool "Clie"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "SSV Products"
+	depends on DEFAULTS_SSV
+	default DEFAULTS_SSV_DNP5280
+
+config DEFAULTS_SSV_DNP5280
+	bool "DNP5280"
+
+config DEFAULTS_SSV_DNP5370
+	bool "DNP5370"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "StrawberryLinux Products"
+	depends on DEFAULTS_STRAWBERRYLINUX
+	default DEFAULTS_STRAWBERRYLINUX_H8MAX
+
+config DEFAULTS_STRAWBERRYLINUX_H8MAX
+	bool "H8MAX"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "Surveyor Products"
+	depends on DEFAULTS_SURVEYOR
+	default DEFAULTS_SURVEYOR_SRV1
+
+config DEFAULTS_SURVEYOR_SRV1
+	bool "SRV1"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "SWARM Products"
+	depends on DEFAULTS_SWARM
+	default DEFAULTS_SWARM_SWARM
+
+config DEFAULTS_SWARM_SWARM
+	bool "SWARM"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "TeleIP Products"
+	depends on DEFAULTS_TELEIP
+	default DEFAULTS_TELEIP_RSC
+
+config DEFAULTS_TELEIP_RSC
+	bool "rsc"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "TI Products"
+	depends on DEFAULTS_TI
+	default DEFAULTS_TI_DM270
+
+config DEFAULTS_TI_DM270
+	bool "dm270"
+
+config DEFAULTS_TI_VC547X
+	bool "vc547x"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "TLL Products"
+	depends on DEFAULTS_TLL
+	default DEFAULTS_TLL_TLL6527M
+
+config DEFAULTS_TLL_TLL6527M
+	bool "TLL6527M"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "Triscend Products"
+	depends on DEFAULTS_TRISCEND
+	default DEFAULTS_TRISCEND_A7DB
+
+config DEFAULTS_TRISCEND_A7DB
+	bool "A7DB"
+
+config DEFAULTS_TRISCEND_DEVA7
+	bool "DevA7"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "Via Products"
+	depends on DEFAULTS_VIA
+	default DEFAULTS_VIA_EPIA
+
+config DEFAULTS_VIA_EPIA
+	bool "EPIA"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "Weiss Products"
+	depends on DEFAULTS_WEISS
+	default DEFAULTS_WEISS_SM2010
+
+config DEFAULTS_WEISS_SM2010
+	bool "SM2010"
+
+endchoice
+
+##############################################################
+
+choice
+	prompt "Xilinx Products"
+	depends on DEFAULTS_XILINX
+	default DEFAULTS_XILINX_COMMON
+
+config DEFAULTS_XILINX_COMMON
+	bool "common"
+
+config DEFAULTS_XILINX_ML401
+	bool "ml401"
+
+config DEFAULTS_XILINX_UCLINUX_AUTO
+	bool "uclinux-auto"
+
+endchoice
+
+endmenu
+
+config PRODUCT
+	string
+
+##############################################################
+
+menu "Kernel/Library/Defaults Selection"
+
+comment "Kernel is linux-2.6.x"
+
+config DEFAULTS_KERNEL_2_6
+	bool
+	default y
+
+config LINUXDIR
+	string
+
+comment "Libc is    None"
+
+config DEFAULTS_LIBC_NONE
+	bool
+	default y
+
+config LIBCDIR
+	string
+
+config DEFAULTS_OVERRIDE
+	bool "Default all settings (lose changes)"
+
+config DEFAULTS_KERNEL
+	bool "Customize Kernel Settings"
+
+config DEFAULTS_VENDOR
+	bool "Customize Application/Library Settings"
+
+config DEFAULTS_VENDOR_UPDATE
+	bool "Update Default Vendor Settings"
+
+endmenu
+

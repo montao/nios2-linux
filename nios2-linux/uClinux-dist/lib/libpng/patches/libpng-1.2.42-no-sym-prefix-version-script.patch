@@ -1,0 +1,13 @@
+Index: libpng-1.2.42/configure
+===================================================================
+--- libpng-1.2.42/configure	(revision 9856)
++++ libpng-1.2.42/configure	(working copy)
+@@ -11474,7 +11474,7 @@ fi
+ if test "$have_ld_version_script" = "yes"; then
+     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for symbol prefix" >&5
+ $as_echo_n "checking for symbol prefix... " >&6; }
+-    SYMBOL_PREFIX=`echo "PREFIX=__USER_LABEL_PREFIX__" \
++    SYMBOL_PREFIX=`echo "PREFIX=" \
+                    | ${CPP-${CC-gcc} -E} - 2>&1 \
+                    | ${EGREP-grep} "^PREFIX=" \
+                    | ${SED-sed} "s:^PREFIX=::"`

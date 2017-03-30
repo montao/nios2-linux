@@ -1,0 +1,5 @@
+/data/dwesterg/nios2-linux/nios2-linux/uClinux-dist/user/e2fsprogs/e2fsprogs-1.41.12/misc/e2freefrag.c: In function 'get_chunk_info':
+/data/dwesterg/nios2-linux/nios2-linux/uClinux-dist/user/e2fsprogs/e2fsprogs-1.41.12/misc/e2freefrag.c:147: warning: unused variable 'cum'
+/data/dwesterg/nios2-linux/nios2-linux/uClinux-dist/user/e2fsprogs/e2fsprogs-1.41.12/misc/e2freefrag.c: In function 'collect_info':
+/data/dwesterg/nios2-linux/nios2-linux/uClinux-dist/user/e2fsprogs/e2fsprogs-1.41.12/misc/e2freefrag.c:220: warning: unused variable 'free_blks'
+/data/dwesterg/nios2-linux/nios2-linux/uClinux-dist/user/e2fsprogs/e2fsprogs-1.41.12/misc/e2freefrag.c:220: warning: unused variable 'i'

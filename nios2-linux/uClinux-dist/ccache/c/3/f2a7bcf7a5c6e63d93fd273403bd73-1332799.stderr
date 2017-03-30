@@ -1,0 +1,2 @@
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/fs/nfs/callback_xdr.c: In function 'nfs4_callback_compound':
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/fs/nfs/callback_xdr.c:803: warning: 'op_nr' may be used uninitialized in this function

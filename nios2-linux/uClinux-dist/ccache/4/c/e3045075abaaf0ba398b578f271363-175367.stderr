@@ -1,0 +1,8 @@
+mii-tool.c: In function 'mdio_read':
+mii-tool.c:116: warning: dereferencing type-punned pointer will break strict-aliasing rules
+mii-tool.c: In function 'mdio_write':
+mii-tool.c:128: warning: dereferencing type-punned pointer will break strict-aliasing rules
+mii-tool.c: In function 'do_one_xcvr':
+mii-tool.c:315: warning: dereferencing type-punned pointer will break strict-aliasing rules
+mii-tool.c: In function 'watch_one_xcvr':
+mii-tool.c:363: warning: dereferencing type-punned pointer will break strict-aliasing rules

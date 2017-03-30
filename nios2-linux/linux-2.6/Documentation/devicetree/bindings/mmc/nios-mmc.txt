@@ -1,0 +1,21 @@
+FPS-Tech SD/SDIO/MMC Host Controller (IP Version 1.1)
+
+This controller provides an interface for SD, SDIO and MMC types of devices.
+
+Required properties:
+- compatible : Should be "fps,mmc-1.1"
+- reg : Should contain SD/MMC registers location and length
+- interrupts : Should contain SD/MMC interrupt
+- interrupt-parent : Should be the phandle for the interrupt controller
+- clock-frequency : Should contain the frequency of the clock input to the
+  controller
+
+Example:
+
+sd_card_host: sdio_host@0x8046e80 {
+	compatible = "fps,mmc-1.1";
+	reg = < 0x08046E80 0x00000040 >;
+	interrupt-parent = < &cpu_0 >;
+	interrupts = < 4 >;
+	clock-frequency = < 50000000 >;
+};

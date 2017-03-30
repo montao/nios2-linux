@@ -1,0 +1,27 @@
+sh2.c:471: warning: missing braces around initializer
+sh2.c:471: warning: (near initialization for 'restab[0]')
+sh2.c: In function 'collect':
+sh2.c:723: warning: type defaults to 'int' in declaration of 'c'
+sh2.c:723: warning: type defaults to 'int' in declaration of 'c1'
+sh2.c: In function 'dual':
+sh2.c:746: warning: type defaults to 'int' in declaration of 'c'
+sh2.c: At top level:
+sh.h:422: warning: 'findeq' declared 'static' but never defined
+sh.h:420: warning: 'blank' declared 'static' but never defined
+sh.h:421: warning: 'cclass' declared 'static' but never defined
+sh.h:423: warning: 'generate' declared 'static' but never defined
+sh.h:425: warning: 'anyspcl' declared 'static' but never defined
+sh.h:426: warning: 'brkcontin' declared 'static' but never defined
+sh.h:427: warning: 'dollar' declared 'static' but never defined
+sh.h:428: warning: 'expand' declared 'static' but never defined
+sh.h:429: warning: 'forkexec' declared 'static' but never defined
+sh.h:430: warning: 'grave' declared 'static' but never defined
+sh.h:432: warning: 'xstrcmp' declared 'static' but never defined
+sh.h:433: warning: 'xxchar' declared 'static' but never defined
+sh.h:437: warning: 'find1case' declared 'static' but never defined
+sh.h:446: warning: 'findcase' declared 'static' but never defined
+sh.h:454: warning: 'badid' declared 'static' but never defined
+sh.h:455: warning: 'brkset' declared 'static' but never defined
+sh.h:457: warning: 'echo' declared 'static' but never defined
+sh.h:459: warning: 'rdexp' declared 'static' but never defined
+sh.h:460: warning: 'readhere' declared 'static' but never defined

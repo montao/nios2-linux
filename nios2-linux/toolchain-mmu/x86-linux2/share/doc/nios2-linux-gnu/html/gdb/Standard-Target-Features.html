@@ -1,0 +1,126 @@
+<html lang="en">
+<head>
+<title>Standard Target Features - Debugging with GDB</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="Debugging with GDB">
+<meta name="generator" content="makeinfo 4.8">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="up" href="Target-Descriptions.html#Target-Descriptions" title="Target Descriptions">
+<link rel="prev" href="Predefined-Target-Types.html#Predefined-Target-Types" title="Predefined Target Types">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<p>
+<a name="Standard-Target-Features"></a>
+Previous:&nbsp;<a rel="previous" accesskey="p" href="Predefined-Target-Types.html#Predefined-Target-Types">Predefined Target Types</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="Target-Descriptions.html#Target-Descriptions">Target Descriptions</a>
+<hr>
+</div>
+
+<h3 class="section">F.4 Standard Target Features</h3>
+
+<p><a name="index-target-descriptions_002c-standard-features-1850"></a>
+A target description must contain either no registers or all the
+target's registers.  If the description contains no registers, then
+<span class="sc">gdb</span> will assume a default register layout, selected based on
+the architecture.  If the description contains any registers, the
+default layout will not be used; the standard registers must be
+described in the target description, in such a way that <span class="sc">gdb</span>
+can recognize them.
+
+   <p>This is accomplished by giving specific names to feature elements
+which contain standard registers.  <span class="sc">gdb</span> will look for features
+with those names and verify that they contain the expected registers;
+if any known feature is missing required registers, or if any required
+feature is missing, <span class="sc">gdb</span> will reject the target
+description.  You can add additional registers to any of the
+standard features &mdash; <span class="sc">gdb</span> will display them just as if
+they were added to an unrecognized feature.
+
+   <p>This section lists the known features and their expected contents. 
+Sample XML documents for these features are included in the
+<span class="sc">gdb</span> source tree, in the directory <samp><span class="file">gdb/features</span></samp>.
+
+   <p>Names recognized by <span class="sc">gdb</span> should include the name of the
+company or organization which selected the name, and the overall
+architecture to which the feature applies; so e.g. the feature
+containing ARM core registers is named `<samp><span class="samp">org.gnu.gdb.arm.core</span></samp>'.
+
+   <p>The names of registers are not case sensitive for the purpose
+of recognizing standard features, but <span class="sc">gdb</span> will only display
+registers using the capitalization used in the description.
+
+<h4 class="subsection">F.4.1 ARM Features</h4>
+
+<p><a name="index-target-descriptions_002c-ARM-features-1851"></a>
+The `<samp><span class="samp">org.gnu.gdb.arm.core</span></samp>' feature is required for ARM targets. 
+It should contain registers `<samp><span class="samp">r0</span></samp>' through `<samp><span class="samp">r13</span></samp>', `<samp><span class="samp">sp</span></samp>',
+`<samp><span class="samp">lr</span></samp>', `<samp><span class="samp">pc</span></samp>', and `<samp><span class="samp">cpsr</span></samp>'.
+
+   <p>The `<samp><span class="samp">org.gnu.gdb.arm.fpa</span></samp>' feature is optional.  If present, it
+should contain registers `<samp><span class="samp">f0</span></samp>' through `<samp><span class="samp">f7</span></samp>' and `<samp><span class="samp">fps</span></samp>'.
+
+   <p>The `<samp><span class="samp">org.gnu.gdb.xscale.iwmmxt</span></samp>' feature is optional.  If present,
+it should contain at least registers `<samp><span class="samp">wR0</span></samp>' through `<samp><span class="samp">wR15</span></samp>' and
+`<samp><span class="samp">wCGR0</span></samp>' through `<samp><span class="samp">wCGR3</span></samp>'.  The `<samp><span class="samp">wCID</span></samp>', `<samp><span class="samp">wCon</span></samp>',
+`<samp><span class="samp">wCSSF</span></samp>', and `<samp><span class="samp">wCASF</span></samp>' registers are optional.
+
+<h4 class="subsection">F.4.2 MIPS Features</h4>
+
+<p><a name="index-target-descriptions_002c-MIPS-features-1852"></a>
+The `<samp><span class="samp">org.gnu.gdb.mips.cpu</span></samp>' feature is required for MIPS targets. 
+It should contain registers `<samp><span class="samp">r0</span></samp>' through `<samp><span class="samp">r31</span></samp>', `<samp><span class="samp">lo</span></samp>',
+`<samp><span class="samp">hi</span></samp>', and `<samp><span class="samp">pc</span></samp>'.  They may be 32-bit or 64-bit depending
+on the target.
+
+   <p>The `<samp><span class="samp">org.gnu.gdb.mips.cp0</span></samp>' feature is also required.  It should
+contain at least the `<samp><span class="samp">status</span></samp>', `<samp><span class="samp">badvaddr</span></samp>', and `<samp><span class="samp">cause</span></samp>'
+registers.  They may be 32-bit or 64-bit depending on the target.
+
+   <p>The `<samp><span class="samp">org.gnu.gdb.mips.fpu</span></samp>' feature is currently required, though
+it may be optional in a future version of <span class="sc">gdb</span>.  It should
+contain registers `<samp><span class="samp">f0</span></samp>' through `<samp><span class="samp">f31</span></samp>', `<samp><span class="samp">fcsr</span></samp>', and
+`<samp><span class="samp">fir</span></samp>'.  They may be 32-bit or 64-bit depending on the target.
+
+   <p>The `<samp><span class="samp">org.gnu.gdb.mips.linux</span></samp>' feature is optional.  It should
+contain a single register, `<samp><span class="samp">restart</span></samp>', which is used by the
+Linux kernel to control restartable syscalls.
+
+<h4 class="subsection">F.4.3 PowerPC Features</h4>
+
+<p><a name="index-target-descriptions_002c-PowerPC-features-1853"></a>
+The `<samp><span class="samp">org.gnu.gdb.power.core</span></samp>' feature is required for PowerPC
+targets.  It should contain registers `<samp><span class="samp">r0</span></samp>' through `<samp><span class="samp">r31</span></samp>',
+`<samp><span class="samp">pc</span></samp>', `<samp><span class="samp">msr</span></samp>', `<samp><span class="samp">cr</span></samp>', `<samp><span class="samp">lr</span></samp>', `<samp><span class="samp">ctr</span></samp>', and
+`<samp><span class="samp">xer</span></samp>'.  They may be 32-bit or 64-bit depending on the target.
+
+   <p>The `<samp><span class="samp">org.gnu.gdb.power.fpu</span></samp>' feature is optional.  It should
+contain registers `<samp><span class="samp">f0</span></samp>' through `<samp><span class="samp">f31</span></samp>' and `<samp><span class="samp">fpscr</span></samp>'.
+
+   <p>The `<samp><span class="samp">org.gnu.gdb.power.altivec</span></samp>' feature is optional.  It should
+contain registers `<samp><span class="samp">vr0</span></samp>' through `<samp><span class="samp">vr31</span></samp>', `<samp><span class="samp">vscr</span></samp>',
+and `<samp><span class="samp">vrsave</span></samp>'.
+
+   <p>The `<samp><span class="samp">org.gnu.gdb.power.spe</span></samp>' feature is optional.  It should
+contain registers `<samp><span class="samp">ev0h</span></samp>' through `<samp><span class="samp">ev31h</span></samp>', `<samp><span class="samp">acc</span></samp>', and
+`<samp><span class="samp">spefscr</span></samp>'.  SPE targets should provide 32-bit registers in
+`<samp><span class="samp">org.gnu.gdb.power.core</span></samp>' and provide the upper halves in
+`<samp><span class="samp">ev0h</span></samp>' through `<samp><span class="samp">ev31h</span></samp>'.  <span class="sc">gdb</span> will combine
+these to present registers `<samp><span class="samp">ev0</span></samp>' through `<samp><span class="samp">ev31</span></samp>' to the
+user.
+
+   </body></html>
+

@@ -1,0 +1,16 @@
+hostname.c: In function 'sethname':
+hostname.c:103: warning: implicit declaration of function 'exit'
+hostname.c:103: warning: incompatible implicit declaration of built-in function 'exit'
+hostname.c: In function 'setdname':
+hostname.c:123: warning: incompatible implicit declaration of built-in function 'exit'
+hostname.c: In function 'showhname':
+hostname.c:137: warning: incompatible implicit declaration of built-in function 'exit'
+hostname.c: In function 'setfilename':
+hostname.c:215: warning: incompatible implicit declaration of built-in function 'exit'
+hostname.c: In function 'version':
+hostname.c:222: warning: incompatible implicit declaration of built-in function 'exit'
+hostname.c: In function 'usage':
+hostname.c:253: warning: incompatible implicit declaration of built-in function 'exit'
+hostname.c: In function 'main':
+hostname.c:346: warning: incompatible implicit declaration of built-in function 'exit'
+hostname.c:399: warning: incompatible implicit declaration of built-in function 'exit'

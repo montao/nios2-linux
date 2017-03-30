@@ -1,0 +1,147 @@
+#!/usr/bin/expect
+
+source ../kernel_config.exp
+source  ../board_info.exp
+log_file [log_file_name "$argv0"]
+send_user "Starting $argv0\n"
+
+cd $uclinux_path/testsuites
+
+step "Make config."
+
+source  make_default_config.exp
+
+# Following make specific configuration for this case.
+
+cd $uclinux_path
+set timeout 300
+set baud_rate_done_flag 0
+spawn make config
+
+#puts "Begin the interactive process of configuration"
+while 1 {
+    expect {
+
+        -re "Customize Kernel Settings.*DEFAULTS_KERNEL.*\\\[.*]" {
+            send "y\r"
+        }
+
+        -re "Customize Application/Library Settings.*DEFAULTS_VENDOR.*\\\[.*]" {
+            send "y\r"
+        }
+
+        -re "PINT2_ASSIGN.*PINT2_ASSIGN.*\\\[.*]" {
+            if { $board_type == "BF548-EZKIT" } {
+                send "0x04000101\r"
+            } else {
+                send "\r"
+            }
+        }
+
+        -re "I2C support.*I2C\[^_].*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "I2C device interface.*I2C_CHARDEV.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "GPIO-based bitbanging I2C.*I2C_GPIO.*\\\[.*]" {
+            if { $board_type == "BF533-STAMP" } {
+                send "Y\r"
+            } else {
+                send "N\r"
+            }
+        }
+
+        -re "Blackfin TWI I2C support.*I2C_BLACKFIN_TWI.*\\\[.*]" {
+            if { $board_type == "BF537-STAMP" || $board_type == "BF548-EZKIT" || [string match "BF527-EZKIT*" $board_type] } {
+                send "Y\r"
+            } else {
+                send "\r"
+            }
+        }
+
+        -re "Blackfin TWI I2C clock.*I2C_BLACKFIN_TWI_CLK_KHZ.*\\\[.*]" {
+            if { $board_type == "BF537-STAMP" || $board_type == "BF548-EZKIT" || [string match "BF527-EZKIT*" $board_type] } {
+                send "50\r"
+            } else {
+                send "\r"
+            }
+        }
+
+        -re "Generic input layer.*needed for keyboard, mouse.*INPUT.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Event interface.*INPUT_EVDEV.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Keyboards.*INPUT_KEYBOARD.*\\\[.*]" {
+            if { $board_type == "BF548-EZKIT" || [string match "BF527-EZKIT*" $board_type] } {
+                send "N\r"
+            } else {
+                send "\r"
+            }
+        }
+
+        -re "Miscellaneous devices.*INPUT_MISC.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "User level driver support.*INPUT_UINPUT.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "PCF8574 Keypad input device.*INPUT_PCF8574.*\\\[.*]" {
+            send "M\r"
+        }
+
+        -re "Sound card support.*SOUND.*\\\[.*]" {
+            send -s "N\r"
+        }
+
+        -re "TWI KEYPAD test program.*USER_BLACKFIN_TWIKEYPADTEST.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -nocase -re "\\\[\[^\r]*] (\[ymn])|choice\\\[.*]: \[0-9]+\r" {
+            continue
+        }
+
+        "\\\(*) \\\[*]" {
+            sleep .01
+            send "\r"
+        }
+
+        -re "\[cC]hoice\\\[.*]:" {
+            send "\r"
+        }
+
+        eof {
+            puts "End of configuration"
+            break
+        }
+
+        timeout {
+            puts "\n\nFATAL ERROR: config prompt timeout in make config"
+            break
+        }
+    }
+}
+
+cd $uclinux_path/testsuites
+
+step "Make"
+
+source  make_kernel.exp
+
+cd $uclinux_path/testsuites
+
+step "Copy linux"
+
+source   copy_image.exp
+
+send_user "Ending $argv0\n"
+log_file

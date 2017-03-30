@@ -1,0 +1,13 @@
+.EXPORT_ALL_VARIABLES:
+
+#
+# Board specific settings go here
+#
+
+LINUXSRC  = ../linux-2.6
+
+#
+# Pull in common Nios2 settings
+#
+
+include $(ROOTDIR)/vendors/config/nios2/config.arch

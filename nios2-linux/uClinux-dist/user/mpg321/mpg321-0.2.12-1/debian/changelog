@@ -1,0 +1,512 @@
+mpg321 (0.2.12-1) unstable; urgency=high
+
+  * New upstream release.
+  * Added AudioScrobbler support.
+  * Added FFT analysis support on PCM data for Remote mode play.
+  * mpg123 has been relicensed under the LGPL/GPL. Changed man page
+    accordingly. (Closes: Bug#533674).
+  * mpg321 now exits code 1 after failing to play music. (Closes: Bug#501334).
+  * Fixed ID3v2 tag problem which resulted in a splat-sound at the start of
+    the file. Patch from Martin Wellard. Thanks.
+  * Added support for recursive reading of directories. Patch from Giuseppe
+    Scrivano <gscrivano@gnu.org> and Michal Čihař <nijel@debian.org>.
+    (Closes: Bug#266887).
+  * Updated S-V to 3.9.0
+  	- debian/copyright file is now UTF-8 encoded.
+
+ -- Nanakos Chrysostomos <nanakos@wired-net.gr>  Tue, 29 Jun 2010 21:44:36 +0300
+
+mpg321 (0.2.11-3) unstable; urgency=high
+
+  * Now mpg321 displays the right MPEG version. (Closes: Bug#197726).
+  * New function added for restoring the correct xterm title.
+  * New troubleshooting information added for the resources that mpg321
+    uses for xterm control.
+  * Bug #182122 should close now because in this version of Debian we don't
+    face such problems. So I am closing this bug. (Closes: Bug#182122).
+  * Man page now includes the new "-l" option. (Closes: Bug#575836).
+    Thanks to Memnon Anon.
+  * Tried to reproduce the same experiment as Bug #388587 and 
+    I don't see any problem.
+    If someone else can simulate the same problem, please report the bug
+    and the way to simulate it again.So I am closing this bug also.
+    (Closes: Bug#388587)
+  * Anyone who wants to use the "-a" option can follow the information from 
+    the manpage. To give an example: "mpg321 -a /dev/dsp song.mp3".
+    So Bug #286176 should close.The "-a" option seems to work fine.
+    (Closes: Bug#286176).
+  * Properly added DM-Upload-Allowed: yes to source section of control file.
+  * Adjusted watch file properly to eliminate errors of uscan.
+  * Bumped debhelper versioned Build-Depends to 7, and updated
+    debian/compat.
+  * Bumped libao-dev versioned Build-Depends to 1.0.0.
+  * Fixed libao-dev problem with the new structure option
+    in ao_format_sample structure. In a near future version
+    mpg321 will utilise the power of this new libao option.
+    (Closes: Bug#580062, Bug#580193) 
+
+ -- Nanakos Chrysostomos <nanakos@wired-net.gr>  Mon, 24 May 2010 12:45:08 +0200
+
+mpg321 (0.2.11-2) unstable; urgency=high
+  
+  * Fixed PATH_MAX POSIX constant needed for GNU/Hurd compilation.
+  * Fixed compilation errors for MIPS and MIPSEL architectures
+    by reporting the libmad bug to the pkg-maintainers.Bug fixed and
+    closed. Thanks. 
+  * Changed to Quilt patch maintenance system.
+  * Added xterm title setting option so to enable/disable the feature.
+    Also gmusicbrowser doesn't crash anymore. 
+    (Closes: Bug#566544),(Closes: Bug#567104).
+  * mpg321 can stream a URL from 0.2.10.1 version. Bug#166512 should
+    have already been closed. (Closes: Bug#166512).
+  * mpg321 has already been adopted. (Closes: Bug#533671).
+  
+ -- Nanakos Chrysostomos <nanakos@wired-net.gr>  Sun, 21 Feb 2010 12:51:08 +0200
+
+mpg321 (0.2.11-1) unstable; urgency=low
+
+  * New upstream release.
+  * New maintainer (Closes: Bug#471770).
+  * Updated S-V to 3.8.3.
+  * Added HTTP Proxy support with Basic Authentication mechanism
+    from Chrysostomos Nanakos <nanakos@wired-net.gr>.
+  * ID3 tags now display on all files when playing a list of files and 
+    you haven't pressed CTRL-C to switch between them.
+  * Make volume scaling work entirely within fixed point. This is the
+    way it should have been to begin with.
+  * Add patch to support IPv6 from Carlos Jesus Bernandos Cano.
+    This is now the default in the Debian packages.
+    (Closes: Bug#182480).
+  * Fix up maintainer scripts to not quit on unknown arguments.
+  * Add GAIN option to remote control mode. 
+    Patch from Ralf Engels <ralf-engels@gmx.de>.
+  * Improve shuffling/randomizing code. Patch from Bas Zoetekouw - thanks!
+    (Closes: Bug#153594).
+  * Moritz Jodeit <moritz@jodeit.org>:
+     * Make http://some.server.name (no trailing slash) work.
+     * Fix other networking issues.
+     * Fix some format string issues.
+  * Change use of random() to rand() because random() on Solaris 
+    doesn't return up to RAND_MAX, but 2**31.
+  * Add patch from Mario <diverses@univecom.ch> to better
+    support HTTP and Shoutcast streams.
+
+  * Nanakos Chrysostomos <nanakos@wired-net.gr>:
+     * Run autoreconf to update the buildsystem to 
+       current versions of autotools.
+     * [debian/ruls] Use dh_installman instead of dh_installmanpages
+     * Add debian/mime and call dh_installmime.
+       (Closes: Bug#207871).
+     * Use ifneq and not ifeq to set options for INSTALL when
+       DEB_BUILD_OPTIONS has nostrip.
+       (Closes: Bug#163399).
+     * Acknowledge NMU (Thanks Mario Lang).
+       (Closes: Bug#186968).
+     * Print the current frame number of the current file when playing 
+       multiple files in verbose mode. Patch from Piotr Sulecki - thanks.
+       (Closes: Bug#269118).
+     * Patch from Gergely Szasz to fix crash when GAIN is 
+       set in remote mode without an argument.
+     * Add support for winamp playlists.
+       (Filter out line with # at the beginning).
+       Patch from Manolis Stamatogiannakis.
+     * Patch from David G. Andersen to check return value of read and only 
+       decode the right number of bytes.
+     * Fix off-by-one in networking code parsing ftp reply.
+     * Add loop option. Patch from Nicolas Bonifas.
+       (Closes: Bug#158950).
+     * Add output remote mode to distinguish between stopping playback and
+       the song finishing. Patch from Nicolas Bonifas.
+     * Reinitialise the current playback time when rewinding.
+       Another patch from Nicolas Bonifas.
+     * Only show the verbose option once in the usage text.
+       (Closes: Bug#285959).
+     * Add xterm title support.Patch from Chrysostomos Nanakos.
+
+ -- Nanakos Chrysostomos <nanakos@wired-net.gr>  Tue, 11 Jan 2010 19:17:42 +0200
+ 
+mpg321 (0.2.10.6) unstable; urgency=low
+
+  * QA upload.
+  * Don't use update-alternatives --auto in prerm. (Closes: #506892).
+
+ -- Barry deFreese <bdefreese@debian.org>  Wed, 26 Nov 2008 13:10:23 -0500
+
+mpg321 (0.2.10.5) unstable; urgency=low
+
+  * QA upload.
+    + Set maintainer to Debian QA Group <packages@qa.debian.org>.
+  * Add large file support. (Closes: #152392).
+    + Thanks to Clint Adams for the patch.
+  * Avoid crashing on non mp3 files. (Closes: #458035).
+    + Thanks to Justin Pryzby for the patch.
+  * Don't scan file before playback. (Closes: #500102).
+    + Thanks to Mikko Rapeli for the patch.
+  * Don't leave dangling symlink. (Closes: #227713).
+    + Thanks to Donggyoo Lee for the patch.
+  * README.remote should use @P not @S. (Closes: #153596).
+    + Add STOP comments.
+  * Make AM_PATH_AO XIPH_PATH_AO in configure.ac.
+  * Escape hyphens in manpage.
+  * Bump debhelper build-dep to 5.
+  * Move DH_COMPAT to debian/compat and set to 5.
+  * Make distclean not ignore errors.
+  * Bump Standards Version to 3.8.0.
+
+ -- Barry deFreese <bdefreese@debian.org>  Tue, 11 Nov 2008 14:25:12 -0500
+
+mpg321 (0.2.10.4) unstable; urgency=low
+
+  * NMU
+  * Update description: mpg123 is now free. Closes: #390358
+
+ -- Joey Hess <joeyh@debian.org>  Mon, 10 Sep 2007 16:22:35 -0400
+
+mpg321 (0.2.10.3) unstable; urgency=high
+
+  * Non-maintainer upload by the Security Team
+  * Fix format string vulnerabilities (CAN-2003-0969)
+
+ -- Matt Zimmerman <mdz@debian.org>  Sun,  4 Jan 2004 11:50:39 -0800
+
+mpg321 (0.2.10.1-1.1) unstable; urgency=low
+
+  * NMU
+  * Apply patch to close fd (Closes: Bug#178948)
+
+ -- Mario Lang <mlang@debian.org>  Mon, 31 Mar 2003 10:56:12 +0200
+
+mpg321 (0.2.10.1) unstable; urgency=low
+
+  * Check both for file existing and link existing in fix-mistake code in
+    postinst (Closes: Bug#140622)
+
+ -- Joe Drew <drew@debian.org>  Wed,  3 Apr 2002 23:12:22 -0500
+
+mpg321 (0.2.10) unstable; urgency=low
+
+  * The "Should've tested more" release
+  * Fix mismanagement of most id3 tags, which caused crashes.
+    Closes: Bug#139409
+  * Fix -k option. Closes: Bug#138598
+  * Add build-depends on zlib1g-dev. Closes: Bug#138675, Bug#138899
+  * Incorporate patches from Bill Nottingham <notting@redhat.com>:
+     * Fix format string in ftp code
+     * If opening one type of device hangs, try the other ones
+       before giving up.
+  * Don't print ID3 tag in remote mode when unpausing.
+  * Fix strange thinko in remote control parsing code that caused a hang. 
+
+ -- Joe Drew <drew@debian.org>  Sun, 24 Mar 2002 00:44:54 -0500
+
+mpg321 (0.2.9.1) unstable; urgency=low
+
+  * Add build depencency for libid3tag. Closes: Bug#138115 
+  * Fix date in boilerplate output. Closes: Bug#138370
+
+ -- Joe Drew <drew@debian.org>  Fri, 15 Mar 2002 11:51:42 -0500
+
+mpg321 (0.2.9) unstable; urgency=low
+
+  * The "Not quite 0.3.0 but damn it, Debian is releasing soon" release.
+  * Integrate patch from Luc Saillard starting the work on enabling Shoutcast
+    streams. We now recognise shoutcast streams!  Closes: Bug#116385
+  * Make reading MPEG data from a file descriptor work properly now.
+    We weren't preserving the incomplete frame that MAD passed back to us,
+    and this caused seams. This fixes the problems people were having with
+    gtoaster. Closes: Bug#123537, Bug#124358
+  * Fix EOF-detection on file descriptor streams. Closes: Bug#124360
+  * Remove the setvbuf test from configure.ac. This was causing cross-compile
+    failures.
+  * Add special-case for directory prepending code on playlists to properly
+    handle URLs in playlists.
+  * Add the long-awaited ID3 code, written graciously by Giuseppe Corbelli
+    <cowo@lugbs.linux.it>. Everybody thank him right now! :)
+  * Add support for alsa09 libao device, and also slightly generalize output
+    device code to allow users to specify unknown devices.
+  * Fix segfaults in http, ftp, and files - possible security risk.
+    Closes: Bug#134751
+  * http requests now follow redirects.
+
+ -- Joe Drew <drew@debian.org>  Sun, 10 Mar 2002 19:38:02 -0500
+
+mpg321 (0.2.3) unstable; urgency=low
+
+  * Removed ao.m4. It makes it more difficult to do aclocal on non-debian
+    systems, but that's why I ship aclocal.m4.
+  * Remove check for libintl.h in configure.ac; remove ifdef on libintl.h
+    in getopt.c. Was causing build failures on systems which didn't have
+    gettext integrated into the C library (i.e., anything but Linux)
+  * Added check for *env; in ao.c, use putenv by default, unless it doesn't
+    exist, in which case we use setenv, if it exists. If none of these exist
+    we just don't try to use them.
+  * Added support for forced stereo output, --stereo. Closes: Bug#119660.
+  * Fixed non-printing of @ status in remote control mode in certain
+    situations.
+  * Fixed segfault when using test mode. Note that libao prints an ugly
+    debugging message when test mode is being used, but that's already
+    been fixed upstream. Closes: Bug#119523.
+  * Made all mp3s play to their actual end, even if we don't print status
+    information for that tail end. Closes: Bug#119661.
+  * Recompile with new libmad, which has good shlibs. Closes: Bug#118009.
+  * Switch back to automake 1.4, the Sane Choice.
+  * Update build dependencies for libmad0-dev.
+  * Apply patch from Martijn Vernooij to implement line buffering in
+    Remote Control mode. This means that you no longer have to wait for
+    a reply to your command to enter another.
+  * Various correctness fixes wrt mpg123 emulation.
+  * Fix segfault when running a playlist with zero files in random mode 
+
+ -- Joe Drew <drew@debian.org>  Mon, 26 Nov 2001 22:45:33 -0500
+
+mpg321 (0.2.2.3) unstable; urgency=low
+
+  * Recompile against new libmad packages. (Yes, again.)
+  * Update Build-Depends for new libmad packages, and modify them for
+    new libao requirements (forgot this earlier).
+
+ -- Joe Drew <drew@debian.org>  Mon, 22 Oct 2001 13:49:27 -0400
+
+mpg321 (0.2.2.2) unstable; urgency=low
+
+  * Recompile against new libmad. Grr, broke binary compatibility.
+
+ -- Joe Drew <drew@debian.org>  Fri, 19 Oct 2001 17:13:45 -0400
+
+mpg321 (0.2.2.1) unstable; urgency=low
+
+  * Modify postinst to check for -e mpg123 (file exists) instead of
+    -L file (file exists and is a link). This didn't happen on stock Debian
+    systems, but if you manually installed mpg123 this is an issue. 
+    Closes: Bug#116109
+
+ -- Joe Drew <drew@debian.org>  Thu, 18 Oct 2001 19:03:12 -0400
+
+mpg321 (0.2.2) unstable; urgency=medium
+
+  * Fixed mono output. Brown paper bag bug, indeed.
+
+ -- Joe Drew <drew@debian.org>  Sat, 13 Oct 2001 21:22:17 -0400
+
+mpg321 (0.2.1) unstable; urgency=medium
+
+  * Made output when files with no path in the filename were printed
+    conform to mpg123 (print a newline after mpg123 blurb)
+    (Closes: Bug#114136)
+  * Made remote control (-R) print only the filename, minus the extension
+    (if one exists), as documented
+  * Made mpg321 continue if there was a playlist specified but no
+    files on the command-line (Closes: Bug#113294)
+  * Concatenated the directory specified for the playlist with the files
+    within the playlist itself, as long as the file wasn't specified with
+    an absolute path
+  * Added and changed header inclusion for BSDs - Patch by Christian Weisgerber
+  * Changed calc_length to use unbuffered I/O only; buffered/unbuffered mix
+    is undefined on some libcs - Patch by Christian Weisgerber
+  * Initialized remote control file in playlist structure on creation -
+    caused a segfault on FreeBSD/Alpha. Thanks for all of these, Christian!
+  * Changed the string "single-channel" to "mono" in regular output, to
+    conform with mpg123.
+  * Rewrote README file
+  * Added --skip-printing-frames= option, to limit output verbosity
+  * Made playing multiple files with different numbers of channels or
+    play rates work properly
+  * Now using a new, experimental, extremely high quality dithering routine
+    from the ever-brilliant Rob Leslie. Sound quality from mpg321 has
+    never been better.
+
+ -- Joe Drew <drew@debian.org>  Sat, 13 Oct 2001 02:29:25 -0400
+
+mpg321 (0.2.0) unstable; urgency=low
+
+  * modified to compile and use libao2 by Stan Seibert and Eduard Bloch.
+    Closes: Bug#109078
+  * implemented CDR, AU and ARTS output support, noted in the manpage.
+    Also by Stan Seibert and Eduward Bloch. I'm very impressed!
+  * Added compile-time default audio device setting (--with-default-audio=)
+  * Added aRts support
+  * Enhanced run-time audio device to allow mpg321 to switch easily between
+    esd, aRts, oss, alsa, and sun-style audio output
+  * made -o h, -o l, -o s no-ops again, rather than emitting error messages.
+  * Fixed volume not getting adjusted on mono streams
+  * Made usage come up if you use options but specify no files/streams
+  * Made mpg321 stop immediately if it can't open a file, like mpg123
+  * Made Directory: only show for files which have a path in the filename.
+  * Renamed short equiv for --aggressive to -I (Closes: Bug#112451)
+  * Eduard Bloch implemented --aggressive - Thanks, Eduard!
+  * Added support for playlists to use stdin (-@ -) (Closes: Bug#111499)
+  * Made mpg321 compile cleanly with -Wall
+  * Added -R (remote control) support. This took a lot of effort - it had
+    better work. Please test with frontends and report bugs!
+    Closes: Bug#92811
+
+ -- Joe Drew <drew@debian.org>  Sun, 23 Sep 2001 02:42:43 -0400
+
+mpg321 (0.1.5) unstable; urgency=low
+
+  * Updated Debian description (Thanks, Joshua)
+  * Added configure flag (--enable-mpg123-symlink) to stop creation of mpg123
+    symlink on install
+  * Added uninstall-hook to warn user about mpg123 symlink on make uninstall;
+    it doesn't appear to get run, however. Help!
+  * Disable creation of mpg123 -> mpg321 symlink in debian package
+  * Re-create /usr/bin/mpg123 -> /etc/alternatives/mpg123 symlink if it
+    doesn't exist on install on debian systems.
+
+ -- Joe Drew <drew@debian.org>  Sun, 12 Aug 2001 13:27:37 -0400
+
+mpg321 (0.1.4) unstable; urgency=low
+
+  * Updated the install hook which installs a symlink to mpg123 from mpg321
+    to work properly. This only affects non-Debian systems, compiling from
+    source.
+  * Updated libao detection m4 macro. This provides better support for
+    platforms like freebsd which require no dl library to dlopen().
+    Also updated makefiles, etc, to distribute new m4 directory.
+
+ -- Joe Drew <drew@debian.org>  Thu,  9 Aug 2001 23:36:45 -0400
+
+mpg321 (0.1.3) unstable; urgency=low
+
+  * Fixed wav file creation. The question isn't why didn't it work now, but
+    why did it ever work... Closes: #107014
+
+ -- Joe Drew <drew@debian.org>  Wed,  8 Aug 2001 20:44:05 -0400
+
+mpg321 (0.1.2) unstable; urgency=low
+
+  * Correct ^C multiple times always killing mpg321
+  * Corrected non-casting of random() which made all random playing
+    and shuffling not shuffled or random at all
+  * Made exiting by ^C-ing multiple times print file stats, etc, rather than
+    just exit(0)'ing
+  * Removed signal handler for TERM (mpg123-oss doesn't handle TERM, so we
+    shouldn't either)
+  * Updated short description (not smpeg any more) 
+
+ -- Joe Drew <drew@debian.org>  Sat, 21 Jul 2001 17:04:19 -0400
+
+mpg321 (0.1.1) unstable; urgency=low
+
+  * Add check for null string when setting up alsa driver (why did I
+    forget the alsa driver? I did it for every other one...)
+    Closes: Bug#105618 
+
+ -- Joe Drew <drew@debian.org>  Tue, 17 Jul 2001 22:22:05 -0400
+
+mpg321 (0.1.0) unstable; urgency=low
+
+  * Major refactoring of code
+  * Inclusion of -@, -Z and -z options
+    (playlists, random play, and shuffle play) (Closes: Bug#95861)
+    Thanks to Tobias Bengtsson for creating the first version of playlist
+    support for mpg321.
+  * Added creation of symlink to mpg123 on install (non-debian systems;
+    debian uses alternatives). This won't overwrite an existing file 'mpg123'
+    in your binary directory, though.
+  * Ported to libmad; mpg321 also now uses libao exclusively for output.
+    You can use -o alsa or -o esd to specify a different type of output
+    device in addition to the -a to specify the specific device.
+    Closes: Bug#94290, Bug#98772
+  * This release is no longer dependent on libsdl. People who installed sdl
+    because of the dependency, please see the package deborphan.
+  * Added proper alternative to mp3-decoder.
+
+ -- Joe Drew <drew@debian.org>  Sun, 15 Jul 2001 18:08:23 -0400
+
+mpg321 (0.0.6) unstable; urgency=low
+
+  * It's official: network access doesn't work correctly. Oh well.
+  * Fixed silliness with setting audio device (artifact from getopt
+    translation) Closes: Bug#96398
+  * Updated build-depends, configure, etc, for libsdl1.2
+  * The next version of mpg321 is likely to be a very large rework so that
+    I can slot in libmad, and insert playlist support and other important
+    things. (I'll do it soon, I swear!)
+
+ -- Joe Drew <drew@debian.org>  Sat,  5 May 2001 12:54:25 -0400
+
+mpg321 (0.0.5.1) unstable; urgency=low
+
+  * Updated man page, usage output because -h is not a valid "help" string,
+    even in mpg123 (Closes: Bug#90020)
+  * Added Provides: mp3-decoder 
+
+ -- Joe Drew <drew@debian.org>  Sat, 17 Mar 2001 21:13:12 -0500
+
+mpg321 (0.0.5) unstable; urgency=low
+
+  * Implemented SIGTERM handling (Closes: Bug#85316)
+    If anyone has trouble with any other frontends, let me know. I am going
+    to start filing 'move-from-contrib-to-main' bug reports.
+  * Changed maintainer address
+  * Implemented DEB_BUILD_OPTIONS, upgraded to policy 3.5.2
+  * Updated description
+  * Updated manual page
+  * Fixed printing total time instead of time played when interrupting a
+    song 
+
+ -- Joe Drew <drew@debian.org>  Sat, 17 Mar 2001 03:05:03 -0500
+
+mpg321 (0.0.4) unstable; urgency=low
+
+  * Created README.debian telling about alternatives
+  * Fixed stupid source and binary-incompatible libao problem (gah. soname
+    didn't change, yet api did?)
+  * Fixed dumb no-ops with arguments that I missed
+  * Made mpg321 depend on SDL 1.1.8 at least, in order to remove the hackish
+    way of supporting devfs
+  * Ensured documentation for all currently implemented commands
+  * Define _GNU_SOURCE. mpg321 will have to be ported to other libc's that
+    don't support the GNU extensions, I'm afraid (asprintf, getopt_long)
+  * Implemented getopt option handling (Closes: Bug#85321)
+  * Added smpeg patch to tarball, until Sam gets un-busy with Tribes 2 and
+    releases a new version of smpeg with it integrated
+  * Implemented SIGINT handling (Closes: Bug#85320)
+    May also fix 85316, but I want to make sure on that.
+  * Fixed mpg123 boilerplate to print only once a session
+  * Added mpg123 slave alternative for manpage (Closes: Bug#89153)
+    Arthur, if you haven't already, please file similar bugs on mpg123, etc.
+  * Removed extraneous dh_testversion and other debhelper commands we don't
+    need
+  * This release has been used with gtoaster to burn audio cds. It seems all
+    is well! 
+
+ -- Joe Drew <drew@debian.org>  Fri, 16 Mar 2001 14:09:49 -0500
+
+mpg321 (0.0.3) unstable; urgency=low
+
+  * Fixed version of smpeg to link against (Closes: Bug#85575) 
+
+ -- Joe Drew <drew@debian.org>  Sun, 11 Feb 2001 12:03:44 -0500
+
+mpg321 (0.0.2) unstable; urgency=low
+
+  * Add silence to stdout-output (remove garbage in buffer)
+  * Fix some free()ing of buffers/etc
+  * Update installation instructions WRT dependencies
+  * Fix no-op instructions which take parameters
+  * Implemented -q (Closes: Bug#85317) 
+
+ -- Joe Drew <drew@debian.org>  Fri,  9 Feb 2001 23:00:39 -0500
+
+mpg321 (0.0.1) unstable; urgency=low
+
+  * Add Provides: mpg123
+  * Minor front-end tuning
+  * Fixed wav decoding bug - mpg321 is now usable for general purposes!
+  * Removed man page generation from debian build process and put in general
+    package
+  * Uploaded to unstable (Closes: Bug#84772) 
+
+ -- Joe Drew <drew@debian.org>  Mon,  5 Feb 2001 23:32:27 -0500
+
+mpg321 (0.0) unstable; urgency=low
+
+  * Initial Release.
+  * This installs alternatives for mpg123 of *greater* *priority* than
+    mpg123 itself. This could result in bad audio: DON'T install this package
+    for regular use yet if you use mpg123 for mp3 conversion to wav!
+
+ -- Joe Drew <drew@debian.org>  Sat,  3 Feb 2001 23:04:40 -0500
+

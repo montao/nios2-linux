@@ -1,0 +1,5 @@
+dhcpcd.c: In function 'main':
+dhcpcd.c:176: warning: pointer targets in assignment differ in signedness
+dhcpcd.c:179: warning: pointer targets in passing argument 1 of 'strlen' differ in signedness
+dhcpcd.c:185: warning: pointer targets in assignment differ in signedness
+dhcpcd.c:188: warning: pointer targets in passing argument 1 of 'strlen' differ in signedness

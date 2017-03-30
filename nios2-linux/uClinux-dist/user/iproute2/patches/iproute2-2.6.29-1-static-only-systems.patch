@@ -1,0 +1,276 @@
+From dc7286c361b5e684969f5403cab0980fbf7f0a0e Mon Sep 17 00:00:00 2001
+From: Mike Frysinger <vapier@gentoo.org>
+Date: Wed, 4 Nov 2009 09:22:24 -0500
+Subject: [PATCH] support static-only systems
+
+The iptables code supports a "no shared libs" mode where it can be used
+without requiring dlfcn related functionality.  This adds similar support
+to iproute2 so that it can easily be used on systems like nommu Linux (but
+obviously with a few limitations -- no dynamic plugins).
+
+Rather than modify every location that uses dlfcn.h, I hooked the dlfcn.h
+header with stub functions when shared library support is disabled.  Then
+symbol lookup is done via a local static lookup table (which is generated
+automatically at build time) so that internal symbols can be found.
+
+Signed-off-by: Mike Frysinger <vapier@gentoo.org>
+---
+ .gitignore         |    1 +
+ Makefile           |    5 +++++
+ genl/Makefile      |   15 +++++++++++++++
+ genl/static-syms.c |    6 ++++++
+ include/dlfcn.h    |   39 +++++++++++++++++++++++++++++++++++++++
+ ip/Makefile        |   16 +++++++++++++++-
+ ip/static-syms.c   |    6 ++++++
+ tc/Makefile        |   23 +++++++++++++++++++----
+ tc/m_ipt.c         |    4 ++++
+ tc/static-syms.c   |    6 ++++++
+ 10 files changed, 116 insertions(+), 5 deletions(-)
+ create mode 100644 genl/static-syms.c
+ create mode 100644 include/dlfcn.h
+ create mode 100644 ip/static-syms.c
+ create mode 100644 tc/static-syms.c
+
+diff --git a/.gitignore b/.gitignore
+index 5a3d20f..390ffb1 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -1,4 +1,5 @@
+ Config
++static-syms.h
+ .gdbinit
+ .gdb_history
+ *.o
+diff --git a/Makefile b/Makefile
+index 74e9d62..77a85c6 100644
+--- a/Makefile
++++ b/Makefile
+@@ -10,7 +10,12 @@ ARPDDIR=/var/lib/arpd
+ # Path to db_185.h include
+ DBM_INCLUDE:=$(ROOTDIR)/usr/include
+ 
++SHARED_LIBS = y
++
+ DEFINES= -DRESOLVE_HOSTNAMES -DLIBDIR=\"$(LIBDIR)\"
++ifneq ($(SHARED_LIBS),y)
++DEFINES+= -DNO_SHARED_LIBS
++endif
+ 
+ #options if you have a bind>=4.9.4 libresolv (or, maybe, glibc)
+ LDLIBS=-lresolv
+diff --git a/genl/Makefile b/genl/Makefile
+index 6435875..44bb83c 100644
+--- a/genl/Makefile
++++ b/genl/Makefile
+@@ -1,6 +1,7 @@
+ GENLOBJ=genl.o
+ 
+ include ../Config
++SHARED_LIBS ?= y
+ 
+ GENLMODULES :=
+ GENLMODULES += ctrl.o
+@@ -9,8 +10,10 @@ GENLOBJ += $(GENLMODULES)
+ 
+ GENLLIB :=
+ 
++ifeq ($(SHARED_LIBS),y)
+ LDFLAGS += -Wl,-export-dynamic
+ LDLIBS  += -lm -ldl
++endif
+ 
+ all: genl
+ 
+@@ -21,3 +24,15 @@ install: all
+ 
+ clean:
+ 	rm -f $(GENLOBJ) $(GENLLIB) genl
++
++ifneq ($(SHARED_LIBS),y)
++
++genl: static-syms.o
++static-syms.o: static-syms.h
++static-syms.h: $(wildcard *.c)
++	files="$^" ; \
++	for s in `grep -B 3 '\<dlsym' $$files | sed -n '/snprintf/{s:.*"\([^"]*\)".*:\1:;s:%s::;p}'` ; do \
++		sed -n '/'$$s'[^ ]* =/{s:.* \([^ ]*'$$s'[^ ]*\) .*:extern char \1[] __attribute__((weak)); if (!strcmp(sym, "\1")) return \1;:;p}' $$files ; \
++	done > $@
++
++endif
+diff --git a/genl/static-syms.c b/genl/static-syms.c
+new file mode 100644
+index 0000000..1ed3a8a
+--- /dev/null
++++ b/genl/static-syms.c
+@@ -0,0 +1,6 @@
++#include <string.h>
++void *_dlsym(const char *sym)
++{
++#include "static-syms.h"
++	return NULL;
++}
+diff --git a/include/dlfcn.h b/include/dlfcn.h
+new file mode 100644
+index 0000000..b0be5a0
+--- /dev/null
++++ b/include/dlfcn.h
+@@ -0,0 +1,39 @@
++/*
++ * Stub dlfcn implementation for systems that lack shared library support
++ * but obviously can still reference compiled-in symbols.
++ */
++
++#ifndef NO_SHARED_LIBS
++#include_next <dlfcn.h>
++#else
++
++#define RTLD_LAZY 0
++#define _FAKE_DLFCN_HDL (void *)0xbeefcafe
++
++static inline void *dlopen(const char *file, int flag)
++{
++	if (file == NULL)
++		return _FAKE_DLFCN_HDL;
++	else
++		return NULL;
++}
++
++extern void *_dlsym(const char *sym);
++static inline void *dlsym(void *handle, const char *sym)
++{
++	if (handle != _FAKE_DLFCN_HDL)
++		return NULL;
++	return _dlsym(sym);
++}
++
++static inline char *dlerror(void)
++{
++	return NULL;
++}
++
++static inline int dlclose(void *handle)
++{
++	return (handle == _FAKE_DLFCN_HDL) ? 0 : 1;
++}
++
++#endif
+diff --git a/ip/Makefile b/ip/Makefile
+index 3c185cf..51914e8 100644
+--- a/ip/Makefile
++++ b/ip/Makefile
+@@ -23,6 +23,20 @@ install: all
+ clean:
+ 	rm -f $(ALLOBJ) $(TARGETS)
+ 
+-LDLIBS += -ldl
++SHARED_LIBS ?= y
++ifeq ($(SHARED_LIBS),y)
+ 
++LDLIBS += -ldl
+ LDFLAGS += -Wl,-export-dynamic
++
++else
++
++ip: static-syms.o
++static-syms.o: static-syms.h
++static-syms.h: $(wildcard *.c)
++	files="$^" ; \
++	for s in `grep -B 3 '\<dlsym' $$files | sed -n '/snprintf/{s:.*"\([^"]*\)".*:\1:;s:%s::;p}'` ; do \
++		sed -n '/'$$s'[^ ]* =/{s:.* \([^ ]*'$$s'[^ ]*\) .*:extern char \1[] __attribute__((weak)); if (!strcmp(sym, "\1")) return \1;:;p}' $$files ; \
++	done > $@
++
++endif
+diff --git a/ip/static-syms.c b/ip/static-syms.c
+new file mode 100644
+index 0000000..1ed3a8a
+--- /dev/null
++++ b/ip/static-syms.c
+@@ -0,0 +1,6 @@
++#include <string.h>
++void *_dlsym(const char *sym)
++{
++#include "static-syms.h"
++	return NULL;
++}
+diff --git a/tc/Makefile b/tc/Makefile
+index 3ff2535..027055c 100644
+--- a/tc/Makefile
++++ b/tc/Makefile
+@@ -3,6 +3,7 @@ TCOBJ= tc.o tc_qdisc.o tc_class.o tc_filter.o tc_util.o \
+        m_ematch.o emp_ematch.yacc.o emp_ematch.lex.o
+ 
+ include ../Config
++SHARED_LIBS ?= y
+ 
+ TCMODULES :=
+ TCMODULES += q_fifo.o
+@@ -57,7 +58,12 @@ else
+ endif
+ 
+ TCOBJ += $(TCMODULES)
+-LDLIBS += -L. -ltc -lm -ldl
++LDLIBS += -L. -ltc -lm
++
++ifeq ($(SHARED_LIBS),y)
++LDLIBS += -ldl
++LDFLAGS += -Wl,-export-dynamic
++endif
+ 
+ TCLIB := tc_core.o
+ TCLIB += tc_red.o
+@@ -72,9 +78,6 @@ ifeq ($(TC_CONFIG_ATM),y)
+   TCSO += q_atm.so
+ endif
+ 
+-
+-LDFLAGS += -Wl,-export-dynamic
+-
+ YACC := bison
+ LEX := flex
+ 
+@@ -108,3 +111,15 @@ q_atm.so: q_atm.c
+ 
+ %.lex.c: %.l
+ 	$(LEX) $(LEXFLAGS) -o$@ $<
++
++ifneq ($(SHARED_LIBS),y)
++
++tc: static-syms.o
++static-syms.o: static-syms.h
++static-syms.h: $(wildcard *.c)
++	files="$^" ; \
++	for s in `grep -B 3 '\<dlsym' $$files | sed -n '/snprintf/{s:.*"\([^"]*\)".*:\1:;s:%s::;p}'` ; do \
++		sed -n '/'$$s'[^ ]* =/{s:.* \([^ ]*'$$s'[^ ]*\) .*:extern char \1[] __attribute__((weak)); if (!strcmp(sym, "\1")) return \1;:;p}' $$files ; \
++	done > $@
++
++endif
+diff --git a/tc/m_ipt.c b/tc/m_ipt.c
+index d17d324..99d9965 100644
+--- a/tc/m_ipt.c
++++ b/tc/m_ipt.c
+@@ -226,6 +226,10 @@ get_target_name(const char *name)
+ 	struct iptables_target *m;
+ 	char path[strlen(lib_dir) + sizeof ("/libipt_.so") + strlen(name)];
+ 
++#ifdef NO_SHARED_LIBS
++	return NULL;
++#endif
++
+ 	new_name = malloc(strlen(name) + 1);
+ 	lname = malloc(strlen(name) + 1);
+ 	if (new_name)
+diff --git a/tc/static-syms.c b/tc/static-syms.c
+new file mode 100644
+index 0000000..1ed3a8a
+--- /dev/null
++++ b/tc/static-syms.c
+@@ -0,0 +1,6 @@
++#include <string.h>
++void *_dlsym(const char *sym)
++{
++#include "static-syms.h"
++	return NULL;
++}
+-- 
+1.6.5.1
+

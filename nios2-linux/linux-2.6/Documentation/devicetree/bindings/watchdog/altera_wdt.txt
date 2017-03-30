@@ -1,0 +1,6 @@
+Altera Watchdog Timer
+
+Required properties:
+- compatible : should be "ALTR,wdt-1.0"
+- clock-frequency : frequency of the clock input
+- timeout : load value of the watchdog (number of clock ticks until watchdog)

@@ -1,0 +1,23 @@
+libbb/perror_nomsg.o:  \
+ /data/dwesterg/nios2-linux/nios2-linux/uClinux-dist/user/busybox/busybox-1.18.4/libbb/perror_nomsg.c \
+  include/autoconf.h \
+  /data/dwesterg/nios2-linux/nios2-linux/uClinux-dist/user/busybox/busybox-1.18.4/include/platform.h \
+  /data/dwesterg/nios2-linux/nios2-linux/toolchain-mmu/x86-linux2/bin/../lib/gcc/nios2-linux-gnu/4.1.2/include-fixed/limits.h \
+  /data/dwesterg/nios2-linux/nios2-linux/toolchain-mmu/x86-linux2/bin/../lib/gcc/nios2-linux-gnu/4.1.2/include-fixed/syslimits.h \
+  /data/dwesterg/nios2-linux/nios2-linux/toolchain-mmu/x86-linux2/bin/../nios2-linux-gnu/libc/usr/include/limits.h \
+  /data/dwesterg/nios2-linux/nios2-linux/toolchain-mmu/x86-linux2/bin/../nios2-linux-gnu/libc/usr/include/features.h \
+  /data/dwesterg/nios2-linux/nios2-linux/toolchain-mmu/x86-linux2/bin/../nios2-linux-gnu/libc/usr/include/bits/predefs.h \
+  /data/dwesterg/nios2-linux/nios2-linux/toolchain-mmu/x86-linux2/bin/../nios2-linux-gnu/libc/usr/include/sys/cdefs.h \
+  /data/dwesterg/nios2-linux/nios2-linux/toolchain-mmu/x86-linux2/bin/../nios2-linux-gnu/libc/usr/include/bits/wordsize.h \
+  /data/dwesterg/nios2-linux/nios2-linux/toolchain-mmu/x86-linux2/bin/../nios2-linux-gnu/libc/usr/include/gnu/stubs.h \
+  /data/dwesterg/nios2-linux/nios2-linux/toolchain-mmu/x86-linux2/bin/../nios2-linux-gnu/libc/usr/include/bits/posix1_lim.h \
+  /data/dwesterg/nios2-linux/nios2-linux/toolchain-mmu/x86-linux2/bin/../nios2-linux-gnu/libc/usr/include/bits/local_lim.h \
+  /data/dwesterg/nios2-linux/nios2-linux/toolchain-mmu/x86-linux2/bin/../nios2-linux-gnu/libc/usr/include/linux/limits.h \
+  /data/dwesterg/nios2-linux/nios2-linux/toolchain-mmu/x86-linux2/bin/../nios2-linux-gnu/libc/usr/include/bits/posix2_lim.h \
+  /data/dwesterg/nios2-linux/nios2-linux/toolchain-mmu/x86-linux2/bin/../nios2-linux-gnu/libc/usr/include/bits/xopen_lim.h \
+  /data/dwesterg/nios2-linux/nios2-linux/toolchain-mmu/x86-linux2/bin/../nios2-linux-gnu/libc/usr/include/bits/stdio_lim.h \
+  /data/dwesterg/nios2-linux/nios2-linux/toolchain-mmu/x86-linux2/bin/../nios2-linux-gnu/libc/usr/include/byteswap.h \
+  /data/dwesterg/nios2-linux/nios2-linux/toolchain-mmu/x86-linux2/bin/../nios2-linux-gnu/libc/usr/include/bits/byteswap.h \
+  /data/dwesterg/nios2-linux/nios2-linux/toolchain-mmu/x86-linux2/bin/../nios2-linux-gnu/libc/usr/include/endian.h \
+  /data/dwesterg/nios2-linux/nios2-linux/toolchain-mmu/x86-linux2/bin/../nios2-linux-gnu/libc/usr/include/bits/endian.h \
+  /data/dwesterg/nios2-linux/nios2-linux/toolchain-mmu/x86-linux2/bin/../lib/gcc/nios2-linux-gnu/4.1.2/include/stdbool.h

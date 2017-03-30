@@ -1,0 +1,8 @@
+ADS7846 based touchscreen and sensor driver
+
+Required properties:
+- compatible : should be "ti,ads7843", "ti,ads7845" or "ti,ads7846".
+- gpios : should specify GPIO used for pen down.
+
+If interrupt node is not present in this node, gpio_to_irq of the pen
+down GPIO will be used.

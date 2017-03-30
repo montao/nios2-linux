@@ -1,0 +1,3 @@
+VER = @VER@
+VPATH = ../$(VER)/src
+include ../$(VER)/bld/Makefile

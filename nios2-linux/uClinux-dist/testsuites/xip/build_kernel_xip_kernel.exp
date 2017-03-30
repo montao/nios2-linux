@@ -1,0 +1,177 @@
+#!/usr/bin/expect --
+
+#
+# Build Kernel for XIP test in both kernel and user space.
+# Root file system is romfs.
+# Both kernel and root file system images are flashed into parallel flash.
+#
+
+source ../kernel_config.exp
+log_file [log_file_name "$argv0"]
+send_user "Starting $argv0\n"
+
+set format [lindex $argv 1]
+send_log "\n#### binary_format is $format\n"
+
+if { $argc < 2} {
+    puts "Please input: board_type, binary_format(fdpic or shared-flat)"
+    exit
+}
+
+set HAVE_KERNEL_ONLY_IMAGE 1
+
+cd $uclinux_path/testsuites
+step "Make clean."
+if { [source make_clean.exp] != 0 } {
+    send_user "\n\nFail to make clean. Exit!\n\n"
+    exit
+}
+
+cd $uclinux_path/testsuites
+step "Make config."
+source make_default_config.exp
+
+cd $uclinux_path/testsuites
+source make_cut_busybox_config.exp
+
+cd $uclinux_path/testsuites
+source make_cut_fs_config.exp
+
+cd $uclinux_path
+set timeout 300
+spawn make config
+while 1 {
+    expect {
+        -re "Customize Kernel Settings.*DEFAULTS_KERNEL.*\\\[.*]" {
+            send "y\r"
+        }
+
+        -re "Customize Application/Library Settings.*DEFAULTS_VENDOR.*\\\[.*]" {
+            send "y\r"
+        }
+
+        -nocase -re "\\\[\[^\r]*] (\[ymn])|choice\\\[.*]: \[0-9]+\r" {
+            continue
+        }
+
+        -re "Kernel ROM Base \\\(ROM_BASE\\\) \\\[.*]" {
+            if { $board_type == "BF548-EZKIT" } {
+                send "0x20080040\r"
+            } else {
+                send "\r"
+            }
+        }
+
+        -re "Kernel executes from.*(\[0-9]). ROM.*choice.*\\\[.*]" {
+            send "$expect_out(1,string)\r"
+        }
+
+        -re "Initial RAM filesystem and RAM disk.*BLK_DEV_INITRD.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "Detect flash chips by Common Flash Interface.*MTD_CFI.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "Support for AMD.*flash chips.*MTD_CFI_AMDSTD.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "Flash device in physical memory map.*MTD_PHYSMAP.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "Support for ROM chips in bus mapping.*MTD_ROM.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Network File Systems \\\(NETWORK_FILESYSTEMS\\\).*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "NFS client support \\\(NFS_FS\\\).*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "NFS client support for NFS version 3 \\\(NFS_V3\\\).*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Root file system on NFS \\\(ROOT_NFS\\\).*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Kernel support for FDPIC ELF binaries.*BINFMT_ELF_FDPIC.*\\\[.*]" {
+            if { $format == "fdpic" } {
+                send "Y\r"
+            } else {
+                send "N\r"
+            }
+        }
+
+        -re "Kernel support for flat binaries.*BINFMT_FLAT.*\\\[.*]" {
+            if { $format == "shared-flat" } {
+                send "Y\r"
+            } else {
+                send "N\r"
+            }
+        }
+
+        -re "Enable shared FLAT support.*BINFMT_SHARED_FLAT.*\\\[.*]" {
+            if { $format == "shared-flat" } {
+                send "Y\r"
+            } else {
+                send "N\r"
+            }
+        }
+
+        -re "Binary format.*FLAT.*Shared-FLAT.*FDPIC.*\\\[.*]" {
+            if { $format == "fdpic" } {
+                send "4\r"
+            } elseif { $format == "shared-flat" } {
+                send "3\r"
+            } else {
+                send "4\r"
+            }
+        }
+
+        -re "Install ELF shared libraries.*INSTALL_ELF_SHARED_LIBS.*\\\[.*]" {
+            if { $format == "shared-flat" } {
+                send "N\r"
+            } else {
+                send "Y\r"
+            }
+        }
+
+        "\\\(*) \\\[*]" {
+            sleep .05
+            send "\r"
+        }
+
+        -re "\[cC]hoice\\\[.*]:" {
+            send "\r"
+        }
+
+        eof {
+            puts "End of configuration"
+            break
+        }
+
+        timeout {
+            puts "\n\nFATAL ERROR: config prompt timeout in make config"
+            break
+        }
+    }
+}
+
+cd $uclinux_path/testsuites
+step "Make kernel"
+source make_kernel.exp
+
+cd $uclinux_path/testsuites
+step "Copy linux image"
+source copy_image.exp
+
+send_user "Ending $argv0\n"
+log_file

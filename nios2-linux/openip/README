@@ -1,0 +1,8 @@
+
+These are collections of open ip cores for Quartus v7.1 or later, ie, 
+using xxx_hw.tcl to declare components.
+
+Usage: checkout the cores under the "ip" dir of your quartus project.
+
+eth_ocm: Avalon Opencores 10/100 ethernet MAC
+irqn: simple irq inverter

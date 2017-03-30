@@ -1,0 +1,2 @@
+/data/dwesterg/nios2-linux/nios2-linux/uClinux-dist/user/e2fsprogs/e2fsprogs-1.41.12/e2fsck/pass2.c: In function 'check_dotdot':
+/data/dwesterg/nios2-linux/nios2-linux/uClinux-dist/user/e2fsprogs/e2fsprogs-1.41.12/e2fsck/pass2.c:418: warning: pointer targets in passing argument 3 of 'ext2fs_get_rec_len' differ in signedness

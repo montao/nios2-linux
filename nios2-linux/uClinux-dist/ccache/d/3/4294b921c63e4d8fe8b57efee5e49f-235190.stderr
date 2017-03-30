@@ -1,0 +1,2 @@
+ftp.c: In function 'sendrequest':
+ftp.c:475: warning: unused variable 'st'

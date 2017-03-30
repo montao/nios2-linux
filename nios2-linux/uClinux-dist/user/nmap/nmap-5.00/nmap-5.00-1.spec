@@ -1,0 +1,109 @@
+# To build a static RPM, add
+#     --define "static 1"
+# to the rpmbuild command line. To build without Ncat, add
+#     --define "buildncat 0"
+#
+# To specify openssl dir, add something like:
+#     --define "openssl /usr/local/ssl"
+
+%define name nmap
+%define version 5.00
+%define release 1
+%define _prefix /usr
+
+Summary: Network exploration tool and security scanner
+Name: %{name}
+Version: %{version}
+Release: %{release}
+Epoch: 2
+License: http://nmap.org/man/man-legal.html
+Group: Applications/System
+Source0: http://nmap.org/dist/%{name}-%{version}.tgz
+URL: http://nmap.org
+
+# For Ndiff.
+Requires: python >= 2.4
+
+# RPM can't be relocatable until I stop storing path info in the binary.
+# Prefix: %{_prefix}
+BuildRoot: %{_tmppath}/%{name}-root
+
+%description
+
+Nmap ("Network Mapper") is a free and open source utility
+for network exploration or security auditing. Many systems and network
+administrators also find it useful for tasks such as network
+inventory, managing service upgrade schedules, and monitoring host or
+service uptime. Nmap uses raw IP packets in novel ways to determine
+what hosts are available on the network, what services (application
+name and version) those hosts are offering, what operating systems
+(and OS versions) they are running, what type of packet
+filters/firewalls are in use, and dozens of other characteristics. It
+was designed to rapidly scan large networks, but works fine against
+single hosts. Nmap runs on all major computer operating systems, and
+both console and graphical versions are available.
+
+%prep
+%setup -q
+
+%build
+%configure --with-openssl=%{openssl} --without-zenmap --with-ndiff --with-libdnet=included --with-libpcap=included --with-libpcre=included --with-liblua=included
+%if "%{buildncat}" == "0"
+%configure --without-ncat
+%endif
+%if "%{static}" == "1"
+make static
+%else
+make
+%endif
+
+%install
+[ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
+make install DESTDIR=$RPM_BUILD_ROOT
+strip $RPM_BUILD_ROOT%{_bindir}/* || :
+gzip $RPM_BUILD_ROOT%{_mandir}/man1/* || :
+
+%clean
+[ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
+
+%files 
+%defattr(-,root,root)
+%doc COPYING
+%doc docs/README
+%doc docs/nmap.usage.txt
+%doc %{_prefix}/share/man/man1/nmap.1.gz
+%{_bindir}/nmap
+%{_datadir}/nmap
+
+%{_bindir}/ndiff
+%doc %{_prefix}/share/man/man1/ndiff.1.gz
+
+# Ncat subpackage
+%if "%{buildncat}" != "0"
+%package -n ncat
+Summary: Nmap's Netcat replacement
+Group: Applications/System
+
+%description -n ncat
+Ncat is a feature packed networking utility which will read and
+write data across a network from the command line.  It uses both
+TCP and UDP for communication and is designed to be a reliable
+back-end tool to instantly provide network connectivity to other
+applications and users. Ncat will not only work with IPv4 and IPv6
+but provides the user with a virtually limitless number of potential
+uses.
+
+%files -n ncat
+%defattr(-,root,root)
+%doc %{_prefix}/share/man/man1/ncat.1.gz
+%{_bindir}/ncat
+%{_datadir}/ncat
+
+%endif
+
+%changelog
+
+* Sat Jun 06 2009 Fyodor (fyodor(a)insecure.org)
+- Removed changelog entries as SVN is a more authoritative source. Execute:
+- svn log --username guest --password "" svn://svn.insecure.org/nmap/nmap.spec.in
+

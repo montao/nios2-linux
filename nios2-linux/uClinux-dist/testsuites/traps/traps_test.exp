@@ -1,0 +1,181 @@
+#!/usr/bin/expect
+
+source  ../kernel_config.exp
+log_file [log_file_name "$argv0"]
+send_user "Starting $argv0\n"
+set TITLE [title "$argv0"]
+
+step "Spawn kermit"
+source ../spawn_kermit.exp
+
+step "Reboot the kernel."
+# To add following line here to indicate that if the bootargs is different,
+# it could be set here. If the bootargs value is 0, it needn't be stated,
+# for it is the default value.
+# set bootargs 	$bootargs_param0
+source ../reboot_kernel.exp
+
+step "Start testing."
+sleep 10
+set case_num 0
+set timeout 10
+
+send "uname -a\n"
+while 1 {
+    expect {
+        -re "SMP.*$kernel_prompt" {
+            set smp_flag 1
+            send_user "\nIt's a SMP kernel!\n"
+            break
+        }
+        -re $kernel_prompt {
+            set smp_flag 0
+            send_user "\nIt's not a SMP kernel.\n"
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+send -s "cd /bin\r"
+while 1 {
+    expect {
+        "bin" {
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+incr case_num
+set timeout 10
+send -s "./traps_test #\r"
+while 1 {
+    expect {
+        -re "(\[0-9]+)\r\n" {
+            set case_number $expect_out(1,string)
+            incr case_number
+            set passed_case_number $case_number
+            set total_case_number $case_number
+            send_user "Total case num is $total_case_number.\n"
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+set timeout [ expr $total_case_number * 10 ]
+
+if { $smp_flag == 1 } {
+    incr case_num
+    send -s  "taskset 1 ./traps_test -1\r"
+    while 1 {
+        expect {
+            -re "Running test 20 for exception 0x00: prefetch l1_instruction\r\n\.\.\. FAIL" {
+                incr passed_case_number -1
+                continue
+            }
+            -re "Running test 21 for exception 0x00: prefetch _l1_non\r\n\.\.\. FAIL" {
+                incr passed_case_number -1
+                continue
+            }
+            -re "Running test 54 for exception 0x26: Data Read CPLB miss\r\n\.\.\. FAIL" {
+                if { [string match "BF533-*" $board_type] } {
+                    incr passed_case_number -1
+                }
+                continue
+            }
+            -re "Running test 56 for exception 0x26: Stack CPLB miss\r\n\.\.\. FAIL" {
+                if { [string match "BF533-*" $board_type] } {
+                    incr passed_case_number -1
+                }
+                continue
+            }
+            -re "$passed_case_number/$total_case_number tests passed.*$kernel_prompt" {
+                case_pass $case_num
+                break
+            }
+            timeout {
+                case_fail $case_num
+            }
+        }
+    }
+
+    set passed_case_number $total_case_number
+    incr case_num
+    send -s "taskset 2 ./traps_test -1\r"
+    while 1 {
+        expect {
+            -re "Running test 20 for exception 0x00: prefetch l1_instruction\r\n\.\.\. FAIL" {
+                incr passed_case_number -1
+                continue
+            }
+            -re "Running test 21 for exception 0x00: prefetch _l1_non\r\n\.\.\. FAIL" {
+                incr passed_case_number -1
+                continue
+            }
+            -re "Running test 54 for exception 0x26: Data Read CPLB miss\r\n\.\.\. FAIL" {
+                if { [string match "BF533-*" $board_type] } {
+                    incr passed_case_number -1
+                }
+                continue
+            }
+            -re "Running test 56 for exception 0x26: Stack CPLB miss\r\n\.\.\. FAIL" {
+                if { [string match "BF533-*" $board_type] } {
+                    incr passed_case_number -1
+                }
+                continue
+            }
+            -re "$passed_case_number/$total_case_number tests passed.*$kernel_prompt" {
+                case_pass $case_num
+                break
+            }
+            timeout {
+                case_fail $case_num
+            }
+        }
+    }
+} else {
+    incr case_num
+    send -s "./traps_test -1\r"
+    while 1 {
+        expect {
+            -re "Running test 20 for exception 0x00: prefetch l1_instruction\r\n\.\.\. FAIL" {
+                incr passed_case_number -1
+                continue
+            }
+            -re "Running test 21 for exception 0x00: prefetch _l1_non\r\n\.\.\. FAIL" {
+                incr passed_case_number -1
+                continue
+            }
+            -re "Running test 54 for exception 0x26: Data Read CPLB miss\r\n\.\.\. FAIL" {
+                if { [string match "BF533-*" $board_type] } {
+                    incr passed_case_number -1
+                }
+                continue
+            }
+            -re "Running test 56 for exception 0x26: Stack CPLB miss\r\n\.\.\. FAIL" {
+                if { [string match "BF533-*" $board_type] } {
+                    incr passed_case_number -1
+                }
+                continue
+            }
+            -re "$passed_case_number/$total_case_number tests passed.*$kernel_prompt" {
+                case_pass $case_num
+                break
+            }
+            timeout {
+                case_fail $case_num
+            }
+        }
+    }
+}
+
+all_pass
+send_user "Ending $argv0\n"
+log_file

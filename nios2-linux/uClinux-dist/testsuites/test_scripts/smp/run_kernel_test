@@ -1,0 +1,118 @@
+#!/bin/sh
+
+source ./test_board_config
+
+USER=/home/test/work/cruise
+CHECKOUT=$USER/checkouts
+UCLINUX_DIST_PATH=$USER/checkouts/uclinux-dist
+UCLINUX_DIST_SCRIPTS=$USER/test_scripts/uclinux-dist
+LASTRUN=lastrun
+THISRUN=thisrun
+FROM=grace.pan@analog.com
+NOTIFY=uclinux-dist-test-notify@blackfin.uclinux.org
+test_results=0
+MAIL_LIST=""
+LOG_DIR="$USER/test_scripts/uclinux-dist/logs"
+HOST_IP=`/sbin/ifconfig|grep "10.99"|awk '{print $2}'|awk -F: '{print $2}'`
+
+if [ ! -d $USER/test_scripts/uclinux-dist ] ; then
+    mkdir $USER/test_scripts/uclinux-dist
+fi
+## Send out mails to notify.
+
+send_mail()
+{
+       echo -e "\n$*"
+       if [ -n "$*" ] ; then
+            title=$1
+            shift
+            cat "$@" | mail -s "$title" -r $FROM  $NOTIFY
+       fi
+}
+
+## build and run the tests
+TIMESTAMP=`date +%Y_%b_%d_%H_%M`
+THIS_LOG=$LOG_DIR/$TIMESTAMP
+mkdir -p $THIS_LOG
+
+cd $LOG_DIR
+rm -rf $THISRUN
+ln -s $THIS_LOG $THISRUN
+
+##########Applay SMP Patch##########
+cd $UCLINUX_DIST_SCRIPTS/
+./smp_test > smp_test_log 2>&1
+if [ $? -ne 0 ]
+then
+    echo "$0:       Error, apply smp patch failed"
+    exit 1
+else
+    cp smp_test_log $THIS_LOG
+fi
+##########Applay SMP Patch##########
+
+cp  $UCLINUX_DIST_PATH/testsuites/kernel_test $UCLINUX_DIST_SCRIPTS
+
+cd $UCLINUX_DIST_SCRIPTS
+./test_runtime_control & 
+
+echo -e "Testing on $HOST_IP :\n./kernel_test  $BOARD_CONFIG $CPU default $UCLINUX_DIST_PATH $BINARY_FORMAT $ALLOCATOR ICACHE($ICACHE) DCACHE($DCACHE) $POLICY $UART_MODE SMP($SMP) MPU($MPU) XENOMAI($XENOMAI) $THIS_LOG "     > kernel_test_log
+./kernel_test  $BOARD_CONFIG $CPU $REVISION $UCLINUX_DIST_PATH  $BINARY_FORMAT $ALLOCATOR $ICACHE $DCACHE $POLICY $UART_MODE $SMP $MPU $XENOMAI $THIS_LOG \
+>> kernel_test_log 2>&1
+test_status=$?
+mkdir -p $LOG_DIR/$THISRUN/test_summary
+if [ $test_status -eq 1 ] ; then 
+    echo -e "Give the wrong arguments in $TIMESTAMP.\nexit=$test_status." > $LOG_DIR/$THISRUN/test_summary/test_results
+elif [ $test_status -eq 2 ] ; then
+    echo -e "No source files in $TIMESTAMP.\nexit=$test_status." > $LOG_DIR/$THISRUN/test_summary/test_results
+elif [ $test_status -eq 3 ] ; then 
+    echo -e "Building failed in $TIMESTAMP.\nexit=$test_status." > $LOG_DIR/$THISRUN/test_summary/test_results
+else
+    echo -e "Testing are done in $TIMESTAMP.\nexit=$test_status." > $LOG_DIR/$THISRUN/test_summary/test_results
+fi
+
+cp $UCLINUX_DIST_SCRIPTS/kernel_test_log $THIS_LOG
+
+$UCLINUX_DIST_SCRIPTS/get_test_summary $THIS_LOG
+
+echo -e "Here is the difference between lastrun and thisrun test results: \n"
+
+$UCLINUX_DIST_SCRIPTS/compare_kernel_results $LOG_DIR/$LASTRUN/test_summary  $LOG_DIR/$THISRUN/test_summary  > $LOG_DIR/$THISRUN/test_summary/compare_results 
+compare_result_status=$?
+if [ $compare_result_status -eq 0 ] ; then
+  if [ $test_status -eq 0 ] ; then    
+    echo -e "Testing success in $TIMESTAMP.\ncompare_result_exit=$compare_result_status." >> $LOG_DIR/$THISRUN/test_summary/test_results
+  # send_mail "Test $BOARD_CONFIG on $HOST_IP Pass! " $LOG_DIR/$THISRUN/test_summary/test_results
+  else
+    echo -e "Testing in $TIMESTAMP failed as last time.\ncompare_result_exit=$compare_result_status." >> $LOG_DIR/$THISRUN/test_summary/test_results
+  fi
+elif [ $compare_result_status -eq 1 ] ; then
+  if [ $test_status -eq 0 ] ; then    
+    echo -e "Testing failed in $TIMESTAMP\ncompare_result_exit=$compare_result_status." >> $LOG_DIR/$THISRUN/test_summary/test_results
+    send_mail "Test $BOARD_CONFIG on $HOST_IP  fails! " $LOG_DIR/$THISRUN/test_summary/test_results $LOG_DIR/$THISRUN/summary 
+
+  elif [ $test_status -eq 1 ] || [ $test_status -eq 2 ] ; then    
+    echo -e "Test $BOARD_CONFIG on $HOST_IP  fails!\ncompare_result_exit=$compare_result_status." >> $LOG_DIR/$THISRUN/test_summary/test_results
+    send_mail "Test $BOARD_CONFIG on $HOST_IP  fails!" $LOG_DIR/$THISRUN/test_summary/test_results
+
+  elif [ $test_status -eq 3 ] ; then    
+    echo -e "Test $BOARD_CONFIG on $HOST_IP  fails!\ncompare_result_exit=$compare_result_status." >> $LOG_DIR/$THISRUN/test_summary/test_results
+    grep -nr  "Error"  $THIS_LOG/build_policy_kernel_log -A 20 -B 30 | dos2unix  > /tmp/build_policy_kernel_log
+    send_mail "Build policy kernel on $HOST_IP  fails! " $LOG_DIR/$THISRUN/test_summary/test_results  /tmp/build_policy_kernel_log 
+  else
+    echo -e "Test $BOARD_CONFIG on $HOST_IP  fails oddly!\ncompare_result_exit=$compare_result_status." >> $LOG_DIR/$THISRUN/test_summary/test_results
+    send_mail "Test $BOARD_CONFIG on $HOST_IP  fails for unknown reason!." $LOG_DIR/$THISRUN/test_summary/test_results
+  fi  
+else
+    echo -e "Compare test results fails in $TIMESTAMP\ncompare_result_exit=$compare_result_status." >> $LOG_DIR/$THISRUN/test_summary/test_results
+    send_mail "Compare test results of $BOARD_CONFIG  fails in $TIMESTAMP on $HOST_IP !" $LOG_DIR/$THISRUN/test_summary/test_results
+fi
+
+cd $UCLINUX_DIST_PATH 
+find testsuites -name "*log" -type f | xargs rm
+rm -rf  romfs/ images/
+
+cd $LOG_DIR
+rm -rf $LASTRUN
+ln -s $THIS_LOG $LASTRUN
+exit

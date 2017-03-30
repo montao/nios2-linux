@@ -1,0 +1,175 @@
+<html lang="en">
+<head>
+<title>Remote Configuration - Debugging with GDB</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="Debugging with GDB">
+<meta name="generator" content="makeinfo 4.8">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="up" href="Remote-Debugging.html#Remote-Debugging" title="Remote Debugging">
+<link rel="prev" href="Server.html#Server" title="Server">
+<link rel="next" href="Remote-Stub.html#Remote-Stub" title="Remote Stub">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<p>
+<a name="Remote-Configuration"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="Remote-Stub.html#Remote-Stub">Remote Stub</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="Server.html#Server">Server</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="Remote-Debugging.html#Remote-Debugging">Remote Debugging</a>
+<hr>
+</div>
+
+<h3 class="section">18.3 Remote Configuration</h3>
+
+<p><a name="index-set-remote-882"></a><a name="index-show-remote-883"></a>This section documents the configuration options available when
+debugging remote programs.  For the options related to the File I/O
+extensions of the remote protocol, see <a href="system.html#system">system-call-allowed</a>.
+
+     <dl>
+<dt><code>set remoteaddresssize </code><var>bits</var><dd><a name="index-address-size-for-remote-targets-884"></a><a name="index-bits-in-remote-address-885"></a>Set the maximum size of address in a memory packet to the specified
+number of bits.  <span class="sc">gdb</span> will mask off the address bits above
+that number, when it passes addresses to the remote target.  The
+default value is the number of bits in the target's address.
+
+     <br><dt><code>show remoteaddresssize</code><dd>Show the current value of remote address size in bits.
+
+     <br><dt><code>set remotebaud </code><var>n</var><dd><a name="index-baud-rate-for-remote-targets-886"></a>Set the baud rate for the remote serial I/O to <var>n</var> baud.  The
+value is used to set the speed of the serial port used for debugging
+remote targets.
+
+     <br><dt><code>show remotebaud</code><dd>Show the current speed of the remote connection.
+
+     <br><dt><code>set remotebreak</code><dd><a name="index-interrupt-remote-programs-887"></a><a name="index-BREAK-signal-instead-of-Ctrl_002dC-888"></a><a name="set-remotebreak"></a>
+If set to on, <span class="sc">gdb</span> sends a <code>BREAK</code> signal to the remote
+when you type <kbd>Ctrl-c</kbd> to interrupt the program running
+on the remote.  If set to off, <span class="sc">gdb</span> sends the `<samp><span class="samp">Ctrl-C</span></samp>'
+character instead.  The default is off, since most remote systems
+expect to see `<samp><span class="samp">Ctrl-C</span></samp>' as the interrupt signal.
+
+     <br><dt><code>show remotebreak</code><dd>Show whether <span class="sc">gdb</span> sends <code>BREAK</code> or `<samp><span class="samp">Ctrl-C</span></samp>' to
+interrupt the remote program.
+
+     <br><dt><code>set remoteflow on</code><dt><code>set remoteflow off</code><dd><a name="index-set-remoteflow-889"></a>Enable or disable hardware flow control (<code>RTS</code>/<code>CTS</code>)
+on the serial port used to communicate to the remote target.
+
+     <br><dt><code>show remoteflow</code><dd><a name="index-show-remoteflow-890"></a>Show the current setting of hardware flow control.
+
+     <br><dt><code>set remotelogbase </code><var>base</var><dd>Set the base (a.k.a. radix) of logging serial protocol
+communications to <var>base</var>.  Supported values of <var>base</var> are:
+<code>ascii</code>, <code>octal</code>, and <code>hex</code>.  The default is
+<code>ascii</code>.
+
+     <br><dt><code>show remotelogbase</code><dd>Show the current setting of the radix for logging remote serial
+protocol.
+
+     <br><dt><code>set remotelogfile </code><var>file</var><dd><a name="index-record-serial-communications-on-file-891"></a>Record remote serial communications on the named <var>file</var>.  The
+default is not to record at all.
+
+     <br><dt><code>show remotelogfile.</code><dd>Show the current setting  of the file name on which to record the
+serial communications.
+
+     <br><dt><code>set remotetimeout </code><var>num</var><dd><a name="index-timeout-for-serial-communications-892"></a><a name="index-remote-timeout-893"></a>Set the timeout limit to wait for the remote target to respond to
+<var>num</var> seconds.  The default is 2 seconds.
+
+     <br><dt><code>show remotetimeout</code><dd>Show the current number of seconds to wait for the remote target
+responses.
+
+     <p><a name="index-limit-hardware-breakpoints-and-watchpoints-894"></a><a name="index-remote-target_002c-limit-break_002d-and-watchpoints-895"></a><a name="set-remote-hardware_002dwatchpoint_002dlimit"></a>
+<a name="set-remote-hardware_002dbreakpoint_002dlimit"></a>
+<br><dt><code>set remote hardware-watchpoint-limit </code><var>limit</var><dt><code>set remote hardware-breakpoint-limit </code><var>limit</var><dd>Restrict <span class="sc">gdb</span> to using <var>limit</var> remote hardware breakpoint or
+watchpoints.  A limit of -1, the default, is treated as unlimited. 
+</dl>
+
+   <p><a name="index-remote-packets_002c-enabling-and-disabling-896"></a>The <span class="sc">gdb</span> remote protocol autodetects the packets supported by
+your debugging stub.  If you need to override the autodetection, you
+can use these commands to enable or disable individual packets.  Each
+packet can be set to `<samp><span class="samp">on</span></samp>' (the remote target supports this
+packet), `<samp><span class="samp">off</span></samp>' (the remote target does not support this packet),
+or `<samp><span class="samp">auto</span></samp>' (detect remote target support for this packet).  They
+all default to `<samp><span class="samp">auto</span></samp>'.  For more information about each packet,
+see <a href="Remote-Protocol.html#Remote-Protocol">Remote Protocol</a>.
+
+   <p>During normal use, you should not have to use any of these commands. 
+If you do, that may be a bug in your remote debugging stub, or a bug
+in <span class="sc">gdb</span>.  You may want to report the problem to the
+<span class="sc">gdb</span> developers.
+
+   <p>The available settings are:
+
+   <p><table summary=""><tr align="left"><td valign="top" width="30%">Command Name
+</td><td valign="top" width="20%">Remote Packet
+</td><td valign="top" width="35%">Related Features
+
+<p><br></td></tr><tr align="left"><td valign="top" width="30%"><code>fetch-register-packet</code>
+</td><td valign="top" width="20%"><code>p</code>
+</td><td valign="top" width="35%"><code>info registers</code>
+
+<p><br></td></tr><tr align="left"><td valign="top" width="30%"><code>set-register-packet</code>
+</td><td valign="top" width="20%"><code>P</code>
+</td><td valign="top" width="35%"><code>set</code>
+
+<p><br></td></tr><tr align="left"><td valign="top" width="30%"><code>binary-download-packet</code>
+</td><td valign="top" width="20%"><code>X</code>
+</td><td valign="top" width="35%"><code>load</code>, <code>set</code>
+
+<p><br></td></tr><tr align="left"><td valign="top" width="30%"><code>read-aux-vector-packet</code>
+</td><td valign="top" width="20%"><code>qXfer:auxv:read</code>
+</td><td valign="top" width="35%"><code>info auxv</code>
+
+<p><br></td></tr><tr align="left"><td valign="top" width="30%"><code>symbol-lookup-packet</code>
+</td><td valign="top" width="20%"><code>qSymbol</code>
+</td><td valign="top" width="35%">Detecting multiple threads
+
+<p><br></td></tr><tr align="left"><td valign="top" width="30%"><code>verbose-resume-packet</code>
+</td><td valign="top" width="20%"><code>vCont</code>
+</td><td valign="top" width="35%">Stepping or resuming multiple threads
+
+<p><br></td></tr><tr align="left"><td valign="top" width="30%"><code>software-breakpoint-packet</code>
+</td><td valign="top" width="20%"><code>Z0</code>
+</td><td valign="top" width="35%"><code>break</code>
+
+<p><br></td></tr><tr align="left"><td valign="top" width="30%"><code>hardware-breakpoint-packet</code>
+</td><td valign="top" width="20%"><code>Z1</code>
+</td><td valign="top" width="35%"><code>hbreak</code>
+
+<p><br></td></tr><tr align="left"><td valign="top" width="30%"><code>write-watchpoint-packet</code>
+</td><td valign="top" width="20%"><code>Z2</code>
+</td><td valign="top" width="35%"><code>watch</code>
+
+<p><br></td></tr><tr align="left"><td valign="top" width="30%"><code>read-watchpoint-packet</code>
+</td><td valign="top" width="20%"><code>Z3</code>
+</td><td valign="top" width="35%"><code>rwatch</code>
+
+<p><br></td></tr><tr align="left"><td valign="top" width="30%"><code>access-watchpoint-packet</code>
+</td><td valign="top" width="20%"><code>Z4</code>
+</td><td valign="top" width="35%"><code>awatch</code>
+
+<p><br></td></tr><tr align="left"><td valign="top" width="30%"><code>get-thread-local-storage-address-packet</code>
+</td><td valign="top" width="20%"><code>qGetTLSAddr</code>
+</td><td valign="top" width="35%">Displaying <code>__thread</code> variables
+
+<p><br></td></tr><tr align="left"><td valign="top" width="30%"><code>supported-packets</code>
+</td><td valign="top" width="20%"><code>qSupported</code>
+</td><td valign="top" width="35%">Remote communications parameters
+
+<p><br></td></tr><tr align="left"><td valign="top" width="30%"><code>pass-signals-packet</code>
+</td><td valign="top" width="20%"><code>QPassSignals</code>
+</td><td valign="top" width="35%"><code>handle </code><var>signal</var>
+
+   <br></td></tr></table>
+
+   </body></html>
+

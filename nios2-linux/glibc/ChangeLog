@@ -1,0 +1,140 @@
+2010-06-19  Ulrich Drepper  <drepper@redhat.com>
+
+	[BZ #11701]
+	* posix/group_member.c (__group_member): Correct checking loop.
+
+	* sysdeps/unix/sysv/linux/getlogin_r.c (__getlogin_r_loginuid): Handle
+	OOM in getpwuid_r correctly.  Return error number when the caller
+	should return, otherwise -1.
+	(getlogin_r): Adjust to return also for result of __getlogin_r_loginuid
+	call returning > 0 value.
+	* sysdeps/unix/sysv/linux/getlogin.c (getlogin): Likewise.
+
+2010-06-07  Andreas Schwab  <schwab@redhat.com>
+
+	* dlfcn/Makefile: Remove explicit dependencies on libc.so and
+	libc_nonshared.a from targets in modules-names.
+
+2010-06-02  Kirill A. Shutemov  <kirill@shutemov.name>
+
+	* elf/dl-reloc.c: Flush cache after solving TEXTRELs if arch
+	requires it.
+
+2010-06-10  Luis Machado  <luisgpm@br.ibm.com>
+
+	* sysdeps/powerpc/powerpc32/power7/memcmp.S: New file
+	* sysdeps/powerpc/powerpc64/power7/memcmp.S: New file.
+	* sysdeps/powerpc/powerpc32/power7/strncmp.S: New file.
+	* sysdeps/powerpc/powerpc64/power7/strncmp.S: New file.
+
+2010-06-02  Andreas Schwab  <schwab@redhat.com>
+
+	* nis/nss_nis/nis-initgroups.c (get_uid): Properly resize buffer.
+
+2010-06-14  Ulrich Drepper  <drepper@redhat.com>
+
+	* sysdeps/unix/sysv/linux/powerpc/bits/fcntl.h: Define F_SETPIPE_SZ
+	and F_GETPIPE_SZ.
+	* sysdeps/unix/sysv/linux/i386/bits/fcntl.h: Likewise.
+	* sysdeps/unix/sysv/linux/x86_64/bits/fcntl.h: Likewise.
+	* sysdeps/unix/sysv/linux/s390/bits/fcntl.h: Likewise.
+	* sysdeps/unix/sysv/linux/sparc/bits/fcntl.h: Likewise.
+	* sysdeps/unix/sysv/linux/sh/bits/fcntl.h: Likewise.
+	* sysdeps/unix/sysv/linux/ia64/bits/fcntl.h: Likewise
+
+2010-06-14  Roland McGrath  <roland@redhat.com>
+
+	* manual/libc.texinfo (@copying): Change to GFDL v1.3.
+
+2010-06-07  Jakub Jelinek  <jakub@redhat.com>
+
+	* libio/stdio.h (sscanf, vsscanf): Use __REDIRECT_NTH instead of
+	__REDIRECT followed by __THROW.
+	* wcsmbs/wchar.h (swscanf, vswscanf): Likewise.
+	* posix/getopt.h (getopt): Likewise.
+
+2010-06-02  Emilio Pozuelo Monfort  <pochu27@gmail.com>
+
+	* hurd/lookup-at.c (__file_name_lookup_at): Accept
+	AT_SYMLINK_FOLLOW in AT_FLAGS.  Fail with EINVAL if both
+	AT_SYMLINK_FOLLOW and AT_SYMLINK_NOFOLLOW are present
+	in AT_FLAGS.
+	* hurd/hurd/fd.h (__file_name_lookup_at): Update comment.
+	* sysdeps/mach/hurd/linkat.c (linkat): Pass O_NOLINK in FLAGS.
+
+2010-05-28  Luis Machado  <luisgpm@br.ibm.com>
+
+	* sysdeps/powerpc/powerpc32/power7/memcpy.S: Exchange srdi for srwi.
+
+2010-05-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	[BZ #11640]
+	* sysdeps/x86_64/multiarch/init-arch.c (__init_cpu_features):
+	Properly check family and model.
+
+2010-05-26  Takashi Yoshii  <takashi.yoshii.zj@renesas.com>
+
+	* sysdeps/unix/sysv/linux/sh/sh4/register-dump.h: Fix iov[] size.
+
+2010-05-24  Luis Machado  <luisgpm@br.ibm.com>
+
+	* sysdeps/powerpc/powerpc32/power7/memset.S: POWER7 32-bit memset fix.
+
+2010-05-21  Ulrich Drepper  <drepper@redhat.com>
+
+	* elf/dl-runtime.c (_dl_profile_fixup): Don't crash on unresolved weak
+	symbol reference.
+
+2010-05-19  Andreas Schwab  <schwab@redhat.com>
+
+	* elf/dl-runtime.c (_dl_fixup): Don't crash on unresolved weak
+	symbol reference.
+
+2010-05-21  Andreas Schwab  <schwab@redhat.com>
+
+	* sysdeps/unix/sysv/linux/Makefile (sysdep_routines): Add recvmmsg
+	and internal_recvmmsg.
+	* sysdeps/unix/sysv/linux/recvmmsg.c: New file.
+	* sysdeps/unix/sysv/linux/internal_recvmmsg.S: New file.
+	* sysdeps/unix/sysv/linux/socketcall.h (SOCKOP_recvmmsg): Define.
+	* sysdeps/unix/sysv/linux/syscalls.list (recvmmsg): Remove.
+
+	* sunrpc/clnt_tcp.c (clnttcp_control): Add missing break.
+	* sunrpc/clnt_udp.c (clntudp_control): Likewise.
+	* sunrpc/clnt_unix.c (clntunix_control): Likewise.
+
+2010-05-20  Andreas Schwab  <schwab@redhat.com>
+
+	* sysdeps/unix/sysv/linux/sys/timex.h: Use __REDIRECT_NTH.
+
+2010-05-17  Luis Machado  <luisgpm@br.ibm.com>
+
+	POWER7 optimizations.
+	* sysdeps/powerpc/powerpc64/power7/memset.S: New file.
+	* sysdeps/powerpc/powerpc32/power7/memset.S: New file.
+
+2010-05-19  Ulrich Drepper  <drepper@redhat.com>
+
+	* version.h: Update for 2.13 development version.
+
+2010-05-12  Andrew Stubbs  <ams@codesourcery.com>
+
+	* sysdeps/sh/sh4/fpu/feholdexcpt.c (feholdexcept): Really disable all
+	exceptions.  Return 0.
+
+2010-05-07  Roland McGrath  <roland@redhat.com>
+
+	* elf/ldconfig.c (main): Add a const.
+
+2010-05-06  Ulrich Drepper  <drepper@redhat.com>
+
+	* nss/getent.c (idn_flags): Default to AI_IDN|AI_CANONIDN.
+	(args_options): Add no-idn option.
+	(ahosts_keys_int): Add idn_flags to ai_flags.
+	(parse_option): Handle 'i' option to clear idn_flags.
+
+	* malloc/malloc.c (_int_free): Possible race in the most recently
+	added check.  Only act on the data if no current modification
+	happened.
+
+See ChangeLog.17 for earlier changes.

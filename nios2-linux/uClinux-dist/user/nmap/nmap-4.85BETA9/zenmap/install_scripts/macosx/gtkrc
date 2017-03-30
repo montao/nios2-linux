@@ -1,0 +1,5 @@
+# Use a larger font size than GTK+ would by default, otherwise the screen fonts
+# are too small. Also use Lucida Grande, the face used by other OS X
+# applications.
+
+gtk-font-name="Lucida Grande 12"

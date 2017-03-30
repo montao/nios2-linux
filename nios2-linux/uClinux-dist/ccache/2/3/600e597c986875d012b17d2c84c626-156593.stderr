@@ -1,0 +1,11 @@
+sash.c:49: warning: missing braces around initializer
+sash.c:49: warning: (near initialization for 'cmdtab[0]')
+sash.c:243: warning: return type defaults to 'int'
+sash.c: In function 'main':
+sash.c:247: warning: unused variable 'cp'
+sash.c: In function 'command':
+sash.c:467: warning: suggest parentheses around assignment used as truth value
+sash.c: In function 'command_in_path':
+sash.c:549: warning: suggest parentheses around assignment used as truth value
+sash.c: In function 'runcmd':
+sash.c:668: warning: unused variable 'cp'

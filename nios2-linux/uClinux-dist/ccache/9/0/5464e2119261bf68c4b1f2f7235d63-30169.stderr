@@ -1,0 +1,2 @@
+conftest.c: In function 'main':
+conftest.c:86: warning: unused variable 'p'

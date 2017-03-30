@@ -1,0 +1,20 @@
+sys_bsd.c: In function 'TerminalSpecialChars':
+sys_bsd.c:201: warning: implicit declaration of function 'sendabort'
+sys_bsd.c:205: warning: implicit declaration of function 'sendeof'
+sys_bsd.c:210: warning: implicit declaration of function 'sendsusp'
+sys_bsd.c: In function 'TerminalNewMode':
+sys_bsd.c:426: warning: implicit declaration of function 'ttyflush'
+sys_bsd.c:677: warning: 'sigsetmask' is deprecated (declared at /data/dwesterg/nios2-linux/nios2-linux/toolchain-mmu/x86-linux2/bin/../nios2-linux-gnu/libc/usr/include/signal.h:184)
+sys_bsd.c:677: warning: 'sigblock' is deprecated (declared at /data/dwesterg/nios2-linux/nios2-linux/toolchain-mmu/x86-linux2/bin/../nios2-linux-gnu/libc/usr/include/signal.h:181)
+sys_bsd.c: In function 'susp':
+sys_bsd.c:877: warning: implicit declaration of function 'rlogin_susp'
+sys_bsd.c: In function 'sys_telnet_init':
+sys_bsd.c:938: warning: implicit declaration of function 'SetSockOpt'
+sys_bsd.c: In function 'process_rings':
+sys_bsd.c:1187: warning: implicit declaration of function 'netflush'
+sys_bsd.c: At top level:
+sys_bsd.c:1200: warning: return type defaults to 'int'
+sys_bsd.c: In function 'dumpbuf':
+sys_bsd.c:1219: warning: control reaches end of non-void function
+sys_bsd.c: At top level:
+sys_bsd.c:35: warning: 'sccsid' defined but not used

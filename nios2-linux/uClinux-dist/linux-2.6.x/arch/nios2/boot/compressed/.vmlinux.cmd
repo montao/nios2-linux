@@ -1,0 +1,1 @@
+cmd_arch/nios2/boot/compressed/vmlinux := nios2-linux-gnu-ld  -mnios2elf   -T arch/nios2/boot/compressed/vmlinux.lds arch/nios2/boot/compressed/head.o arch/nios2/boot/compressed/misc.o arch/nios2/boot/compressed/piggy.o -o arch/nios2/boot/compressed/vmlinux 

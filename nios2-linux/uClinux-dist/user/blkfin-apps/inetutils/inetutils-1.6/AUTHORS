@@ -1,0 +1,9 @@
+Here are the names of the programs in this package, each followed by
+the name(s) of its author(s).  Most of the utilities are from
+4.4BSD-Lite2, and might not have an author associated with them.
+
+ifconfig: Marcus Brinkmann
+ping, talkd: Sergey Poznyakoff
+ping6: Jeroen Dekkers
+talk: Kipp Hickman
+whois: Joel N. Weber II

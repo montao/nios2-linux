@@ -1,0 +1,2 @@
+/home/developer/altera/nios2-linux/uClinux-dist/user/netperf/netperf-2.4.1/src/netsh.c: In function 'scan_cmd_line':
+/home/developer/altera/nios2-linux/uClinux-dist/user/netperf/netperf-2.4.1/src/netsh.c:457: warning: format '%d' expects type 'int', but argument 2 has type 'long unsigned int'

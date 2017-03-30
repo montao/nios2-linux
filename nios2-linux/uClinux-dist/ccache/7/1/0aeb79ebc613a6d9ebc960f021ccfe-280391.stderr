@@ -1,0 +1,2 @@
+/data/dwesterg/nios2-linux/nios2-linux/uClinux-dist/user/e2fsprogs/e2fsprogs-1.41.12/misc/mke2fs.c: In function 'mke2fs_discard_blocks':
+/data/dwesterg/nios2-linux/nios2-linux/uClinux-dist/user/e2fsprogs/e2fsprogs-1.41.12/misc/mke2fs.c:1959: warning: implicit declaration of function 'open64'

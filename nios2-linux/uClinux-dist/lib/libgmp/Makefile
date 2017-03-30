@@ -1,0 +1,6 @@
+VER = gmp-4.3.1
+
+include $(ROOTDIR)/tools/autotools.mk
+
+romfs:
+	$(ROMFSINST) -d -e CONFIG_FMT_USE_FDPIC_ELF $(STAGEDIR)/usr/lib/libgmp.so.3 /usr/lib/libgmp.so.3

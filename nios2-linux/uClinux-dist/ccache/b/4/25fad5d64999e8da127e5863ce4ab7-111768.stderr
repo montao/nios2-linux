@@ -1,0 +1,2 @@
+libbridge_devif.c: In function 'br_device_ioctl32':
+libbridge_devif.c:40: warning: dereferencing type-punned pointer will break strict-aliasing rules

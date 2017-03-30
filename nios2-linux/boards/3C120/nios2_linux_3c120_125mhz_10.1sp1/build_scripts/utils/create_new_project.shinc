@@ -1,0 +1,105 @@
+#
+#   This script is an error checking wrapper for the subsequent TCL script that
+#   it executes in quartus_sh.
+#
+#   Script:
+#       
+#       create_new_project.shinc
+#   
+#   Input Arguments:
+#   
+#       PROJECT_NAME    : the name to give the project
+#
+#   Output Results:
+#   
+#       script returns a status of success if the Quartus project is
+#       successfully created, otherwise it returns a status of error
+#
+#   Return Status:
+#       
+#       success         : 0
+#       error           : 1
+#       bad argument    : no return, exits with status 1
+#
+#   Required Environment Variables
+#   
+#       ABS_PATH_TO_PROJECT_DIR     : this is a path to the quartus project
+#                                     directory
+#       ABS_PATH_TO_BUILD_UTILS_DIR : this is a path to the build script utils
+#                                     directory
+#
+
+create_new_project () {
+    
+    #
+    # validate the input arguments
+    #
+    if [ $# -ne 1 ] ; then
+        
+        echo ""
+        echo "ERROR: wrong number of arguments passed into this function"
+        echo "Expected 1 argument, but got $#"
+        echo ""
+        echo "USAGE: create_new_project <PROJECT_NAME>"
+        echo ""
+        
+        exit 1
+        
+    fi
+    
+    #
+    # validate the required environment variables
+    #
+    PATH_2_PROJECT_DIR=${ABS_PATH_TO_PROJECT_DIR:?environment variable is required...}
+    PATH_2_BUILD_UTILS_DIR=${ABS_PATH_TO_BUILD_UTILS_DIR:?environment variable is required...}
+    
+    #
+    # validate that the quartus_sh TCL script exists
+    #
+    THE_TCL_SCRIPT=create_new_project.tcl
+    if [ ! -e "${PATH_2_BUILD_UTILS_DIR}/${THE_TCL_SCRIPT}" ] ; then
+    
+        echo ""
+        echo "ERROR: Cannot locate TCL script \"${PATH_2_BUILD_UTILS_DIR}/${THE_TCL_SCRIPT}\""
+        echo ""
+        exit 1
+    
+    fi
+
+    #
+    # extract the input arguments that we need
+    #
+    PROJECT_NAME=${1}
+    
+    echo ""
+    echo "Attempting to create project \"${PROJECT_NAME}\""
+    echo ""
+    
+    #
+    # execute the quartus_sh TCL script
+    #
+    pushd ${PATH_2_PROJECT_DIR} >> /dev/null
+        quartus_sh -t "${PATH_2_BUILD_UTILS_DIR}/${THE_TCL_SCRIPT}" "${PROJECT_NAME}"
+        RESULT=$?
+    popd >> /dev/null
+    
+    if [ ${RESULT} -ne 0 ] ; then
+        
+        echo ""
+        echo "Quartus project was NOT created..."
+        echo ""
+        echo "If this project already exists, please delete all files associated with the"
+        echo "project and rerun this script."
+        echo ""
+        return 1
+        
+    else
+        
+        echo ""
+        echo "Quartus project was created successfully..."
+        echo ""
+        return 0
+        
+    fi
+
+}

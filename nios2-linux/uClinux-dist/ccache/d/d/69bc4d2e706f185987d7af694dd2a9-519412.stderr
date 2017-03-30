@@ -1,0 +1,2 @@
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/arch/nios2/kernel/setup.c: In function 'nios2_boot_init':
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/arch/nios2/kernel/setup.c:112: warning: unused variable 'cmdline_passed'

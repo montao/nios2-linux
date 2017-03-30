@@ -1,0 +1,2267 @@
+
+Allocating common symbols
+Common symbol       size              file
+
+console_buffer      0x101             common/libcommon.o
+NetDHCPServerIP     0x4               net/libnet.o
+NetArpWaitTry       0x4               net/libnet.o
+NetArpWaitPacketMAC
+                    0x4               net/libnet.o
+hist_list           0x50              common/libcommon.o
+env_htab            0xc               common/libcommon.o
+flash_info          0x2878            drivers/mtd/libmtd.o
+hist_lines          0x1414            common/libcommon.o
+NetOurEther         0x6               net/libnet.o
+NetOurIP            0x4               net/libnet.o
+NetPingIP           0x4               net/libnet.o
+NetServerIP         0x4               net/libnet.o
+save_addr           0x4               common/libcommon.o
+___strtok           0x4               lib/libgeneric.o
+NetArpWaitTxPacketSize
+                    0x4               net/libnet.o
+NetArpWaitReplyIP   0x4               net/libnet.o
+NetArpWaitTxPacket  0x4               net/libnet.o
+NetRxPackets        0x10              net/libnet.o
+NetArpWaitPacketIP  0x4               net/libnet.o
+NetState            0x4               net/libnet.o
+BootpTry            0x4               net/libnet.o
+BootFile            0x80              net/libnet.o
+his_pad_char        0x1               common/libcommon.o
+env_ptr             0x4               common/libcommon.o
+NetServerEther      0x6               net/libnet.o
+os_data_init        0x4               common/libcommon.o
+NetOurSubnetMask    0x4               net/libnet.o
+NetBootFileSize     0x2               net/libnet.o
+NetIPID             0x4               net/libnet.o
+NetRxPacket         0x4               net/libnet.o
+nesting_level       0x4               common/libcommon.o
+images              0x8c              common/libcommon.o
+send_ptr            0x4               common/libcommon.o
+BootpID             0x4               net/libnet.o
+last_return_code    0x4               common/libcommon.o
+dhcp_leasetime      0x4               net/libnet.o
+NetOurGatewayIP     0x4               net/libnet.o
+NetEtherNullAddr    0x6               net/libnet.o
+os_data_char        0x4               common/libcommon.o
+NetRestartWrap      0x4               net/libnet.o
+save_size           0x4               common/libcommon.o
+NetArpWaitPacketBuf
+                    0x620             net/libnet.o
+his_eol             0x1               common/libcommon.o
+NetTxPacket         0x4               net/libnet.o
+his_quote           0x1               common/libcommon.o
+NetBootFileXferSize
+                    0x4               net/libnet.o
+NetOurDNSIP         0x4               net/libnet.o
+NetRxPacketLen      0x4               net/libnet.o
+PktBuf              0x1e20            net/libnet.o
+send_parms          0x14              common/libcommon.o
+his_pad_count       0x4               common/libcommon.o
+NetArpWaitTimerStart
+                    0x4               net/libnet.o
+
+Discarded input sections
+
+ .bss           0x00000000        0x0 arch/nios2/cpu/start.o
+ .text.dcache_status
+                0x00000000        0x0 arch/nios2/cpu/libnios2.o
+ .text.dcache_disable
+                0x00000000        0x0 arch/nios2/cpu/libnios2.o
+ .text.dcache_enable
+                0x00000000        0x0 arch/nios2/cpu/libnios2.o
+ .data          0x00000000        0x0 arch/nios2/cpu/libnios2.o
+ .bss           0x00000000        0x0 arch/nios2/cpu/libnios2.o
+ .text.__ashrdi3
+                0x00000000        0x0 arch/nios2/lib/libnios2.o
+ .text.__cmpdi2
+                0x00000000        0x0 arch/nios2/lib/libnios2.o
+ .text.__udivmoddi4
+                0x00000000        0x0 arch/nios2/lib/libnios2.o
+ .text.__divdi3
+                0x00000000        0x0 arch/nios2/lib/libnios2.o
+ .text.__negdi2
+                0x00000000        0x0 arch/nios2/lib/libnios2.o
+ .text.__moddi3
+                0x00000000        0x0 arch/nios2/lib/libnios2.o
+ .text.__ucmpdi2
+                0x00000000        0x0 arch/nios2/lib/libnios2.o
+ .text.__udivdi3
+                0x00000000        0x0 arch/nios2/lib/libnios2.o
+ .text.__umoddi3
+                0x00000000        0x0 arch/nios2/lib/libnios2.o
+ .text.__gcc_bcmp
+                0x00000000        0x0 arch/nios2/lib/libnios2.o
+ .rodata.__clz_tab
+                0x00000000        0x0 arch/nios2/lib/libnios2.o
+ .data          0x00000000        0x0 arch/nios2/lib/libnios2.o
+ .bss           0x00000000        0x0 arch/nios2/lib/libnios2.o
+ .text          0x00000000        0x0 common/libcommon.o
+ .text.k_data_save
+                0x00000000        0x0 common/libcommon.o
+ .text.k_data_restore
+                0x00000000        0x0 common/libcommon.o
+ .text.getenv_ulong
+                0x00000000        0x0 common/libcommon.o
+ .text.setenv_addr
+                0x00000000        0x0 common/libcommon.o
+ .text.setenv_ulong
+                0x00000000        0x0 common/libcommon.o
+ .text.disable_ctrlc
+                0x00000000        0x0 common/libcommon.o
+ .text.dbg      0x00000000        0x0 common/libcommon.o
+ .text.fprintf  0x00000000        0x0 common/libcommon.o
+ .text.serial_printf
+                0x00000000        0x0 common/libcommon.o
+ .text.malloc_usable_size
+                0x00000000        0x0 common/libcommon.o
+ .text.mallopt  0x00000000        0x0 common/libcommon.o
+ .text.cfree    0x00000000        0x0 common/libcommon.o
+ .text.memalign
+                0x00000000        0x0 common/libcommon.o
+ .text.pvalloc  0x00000000        0x0 common/libcommon.o
+ .text.valloc   0x00000000        0x0 common/libcommon.o
+ .text.env_import
+                0x00000000        0x0 common/libcommon.o
+ .text.unset_local_var
+                0x00000000        0x0 common/libcommon.o
+ .text.genimg_has_config
+                0x00000000        0x0 common/libcommon.o
+ .text.get_table_entry_id
+                0x00000000        0x0 common/libcommon.o
+ .text.genimg_get_comp_id
+                0x00000000        0x0 common/libcommon.o
+ .text.genimg_get_type_id
+                0x00000000        0x0 common/libcommon.o
+ .text.genimg_get_arch_id
+                0x00000000        0x0 common/libcommon.o
+ .text.genimg_get_os_id
+                0x00000000        0x0 common/libcommon.o
+ .text.getenv_bootm_low
+                0x00000000        0x0 common/libcommon.o
+ .text.getenv_bootm_size
+                0x00000000        0x0 common/libcommon.o
+ .text.getenv_bootm_mapsize
+                0x00000000        0x0 common/libcommon.o
+ .text.parse_line
+                0x00000000        0x0 common/libcommon.o
+ .text.get_ram_size
+                0x00000000        0x0 common/libcommon.o
+ .text.mdio_get_current_dev
+                0x00000000        0x0 common/libcommon.o
+ .text.mdio_phydev_for_ethname
+                0x00000000        0x0 common/libcommon.o
+ .text.miiphy_reset
+                0x00000000        0x0 common/libcommon.o
+ .text.mdio_list_devices
+                0x00000000        0x0 common/libcommon.o
+ .text.mdio_register
+                0x00000000        0x0 common/libcommon.o
+ .rodata.version_string
+                0x00000000        0x0 common/libcommon.o
+ .rodata.__func__.3498
+                0x00000000        0x0 common/libcommon.o
+ .data          0x00000000        0x0 common/libcommon.o
+ .data.mmap_threshold
+                0x00000000        0x0 common/libcommon.o
+ .bss           0x00000000        0x0 common/libcommon.o
+ .bss.n_mmaps_max
+                0x00000000        0x0 common/libcommon.o
+ .text          0x00000000        0x0 disk/libdisk.o
+ .text.get_dev  0x00000000        0x0 disk/libdisk.o
+ .data          0x00000000        0x0 disk/libdisk.o
+ .bss           0x00000000        0x0 disk/libdisk.o
+ .text          0x00000000        0x0 drivers/gpio/libgpio.o
+ .text.gpio_free
+                0x00000000        0x0 drivers/gpio/libgpio.o
+ .text.gpio_direction_input
+                0x00000000        0x0 drivers/gpio/libgpio.o
+ .text.gpio_is_valid
+                0x00000000        0x0 drivers/gpio/libgpio.o
+ .text.altera_pio_info
+                0x00000000        0x0 drivers/gpio/libgpio.o
+ .rodata.str1.4
+                0x00000000        0x0 drivers/gpio/libgpio.o
+ .data          0x00000000        0x0 drivers/gpio/libgpio.o
+ .bss           0x00000000        0x0 drivers/gpio/libgpio.o
+ .text          0x00000000        0x0 drivers/input/libinput.o
+ .text.input_queue_ascii
+                0x00000000        0x0 drivers/input/libinput.o
+ .text.input_tstc
+                0x00000000        0x0 drivers/input/libinput.o
+ .text.input_getc
+                0x00000000        0x0 drivers/input/libinput.o
+ .text.array_search
+                0x00000000        0x0 drivers/input/libinput.o
+ .text.input_add_table
+                0x00000000        0x0 drivers/input/libinput.o
+ .text.input_stdio_register
+                0x00000000        0x0 drivers/input/libinput.o
+ .text.input_init
+                0x00000000        0x0 drivers/input/libinput.o
+ .text.sort_array_by_ordering
+                0x00000000        0x0 drivers/input/libinput.o
+ .text.input_send_keycodes
+                0x00000000        0x0 drivers/input/libinput.o
+ .rodata.str1.4
+                0x00000000        0x0 drivers/input/libinput.o
+ .rodata.kbd_plain_xlate
+                0x00000000        0x0 drivers/input/libinput.o
+ .data          0x00000000        0x0 drivers/input/libinput.o
+ .data.kbd_shift_xlate
+                0x00000000        0x0 drivers/input/libinput.o
+ .data.kbd_ctrl_xlate
+                0x00000000        0x0 drivers/input/libinput.o
+ .bss           0x00000000        0x0 drivers/input/libinput.o
+ .text          0x00000000        0x0 drivers/misc/libmisc.o
+ .text.__led_set
+                0x00000000        0x0 drivers/misc/libmisc.o
+ .text.status_led_set
+                0x00000000        0x0 drivers/misc/libmisc.o
+ .data          0x00000000        0x0 drivers/misc/libmisc.o
+ .bss           0x00000000        0x0 drivers/misc/libmisc.o
+ .text          0x00000000        0x0 drivers/mtd/libmtd.o
+ .text.flash_sector_size
+                0x00000000        0x0 drivers/mtd/libmtd.o
+ .text.flash_protect_default
+                0x00000000        0x0 drivers/mtd/libmtd.o
+ .text.flash_read_factory_serial
+                0x00000000        0x0 drivers/mtd/libmtd.o
+ .text.flash_read_user_serial
+                0x00000000        0x0 drivers/mtd/libmtd.o
+ .data          0x00000000        0x0 drivers/mtd/libmtd.o
+ .bss           0x00000000        0x0 drivers/mtd/libmtd.o
+ .text          0x00000000        0x0 drivers/net/libnet.o
+ .data          0x00000000        0x0 drivers/net/libnet.o
+ .bss           0x00000000        0x0 drivers/net/libnet.o
+ .text          0x00000000        0x0 drivers/pcmcia/libpcmcia.o
+ .data          0x00000000        0x0 drivers/pcmcia/libpcmcia.o
+ .bss           0x00000000        0x0 drivers/pcmcia/libpcmcia.o
+ .text          0x00000000        0x0 drivers/rtc/librtc.o
+ .data          0x00000000        0x0 drivers/rtc/librtc.o
+ .bss           0x00000000        0x0 drivers/rtc/librtc.o
+ .text          0x00000000        0x0 drivers/serial/libserial.o
+ .data          0x00000000        0x0 drivers/serial/libserial.o
+ .bss           0x00000000        0x0 drivers/serial/libserial.o
+ .text          0x00000000        0x0 lib/libgeneric.o
+ .text.crc7     0x00000000        0x0 lib/libgeneric.o
+ .text.hmatch_r
+                0x00000000        0x0 lib/libgeneric.o
+ .text.hstrstr_r
+                0x00000000        0x0 lib/libgeneric.o
+ .text.ldiv     0x00000000        0x0 lib/libgeneric.o
+ .text.strcmp_compar
+                0x00000000        0x0 lib/libgeneric.o
+ .text.strmhz   0x00000000        0x0 lib/libgeneric.o
+ .text.skip_spaces
+                0x00000000        0x0 lib/libgeneric.o
+ .text.strrchr  0x00000000        0x0 lib/libgeneric.o
+ .text.strspn   0x00000000        0x0 lib/libgeneric.o
+ .text.strpbrk  0x00000000        0x0 lib/libgeneric.o
+ .text.strtok   0x00000000        0x0 lib/libgeneric.o
+ .text.strsep   0x00000000        0x0 lib/libgeneric.o
+ .text.strswab  0x00000000        0x0 lib/libgeneric.o
+ .text.bcopy    0x00000000        0x0 lib/libgeneric.o
+ .text.memscan  0x00000000        0x0 lib/libgeneric.o
+ .text.strstr   0x00000000        0x0 lib/libgeneric.o
+ .text.memchr   0x00000000        0x0 lib/libgeneric.o
+ .text.strim    0x00000000        0x0 lib/libgeneric.o
+ .text.mdelay   0x00000000        0x0 lib/libgeneric.o
+ .text.ustrtoul
+                0x00000000        0x0 lib/libgeneric.o
+ .text.simple_strtoull
+                0x00000000        0x0 lib/libgeneric.o
+ .text.simple_itoa
+                0x00000000        0x0 lib/libgeneric.o
+ .text.__assert_fail
+                0x00000000        0x0 lib/libgeneric.o
+ .rodata.crc7_syndrome_table
+                0x00000000        0x0 lib/libgeneric.o
+ .data          0x00000000        0x0 lib/libgeneric.o
+ .bss           0x00000000        0x0 lib/libgeneric.o
+ .bss.local.3939
+                0x00000000        0x0 lib/libgeneric.o
+ .sbss          0x00000000        0x0 lib/libgeneric.o
+ .text          0x00000000        0x0 lib/zlib/libz.o
+ .text.inflateInit_
+                0x00000000        0x0 lib/zlib/libz.o
+ .rodata.z_errmsg
+                0x00000000        0x0 lib/zlib/libz.o
+ .data          0x00000000        0x0 lib/zlib/libz.o
+ .bss           0x00000000        0x0 lib/zlib/libz.o
+ .text          0x00000000        0x0 net/libnet.o
+ .text.eth_get_dev_by_index
+                0x00000000        0x0 net/libnet.o
+ .text.eth_unregister
+                0x00000000        0x0 net/libnet.o
+ .text.eth_setenv_enetaddr
+                0x00000000        0x0 net/libnet.o
+ .text.VLAN_to_string
+                0x00000000        0x0 net/libnet.o
+ .data          0x00000000        0x0 net/libnet.o
+ .data.TftpRRQTimeoutMSecs
+                0x00000000        0x0 net/libnet.o
+ .bss           0x00000000        0x0 net/libnet.o
+ .text.initdram
+                0x00000000        0x0 board/altera/nios2-generic/libnios2-generic.o
+ .data          0x00000000        0x0 board/altera/nios2-generic/libnios2-generic.o
+ .bss           0x00000000        0x0 board/altera/nios2-generic/libnios2-generic.o
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+*default*        0x00000000         0xffffffff
+
+Linker script and memory map
+
+                0xd7fc0000                . = text_base
+
+.text           0xd7fc0000    0x1fd85
+ arch/nios2/cpu/start.o(.text)
+ .text          0xd7fc0000      0x11c arch/nios2/cpu/start.o
+                0xd7fc0110                dly_clks
+                0xd7fc0000                _start
+ *(.text)
+ *fill*         0xd7fc011c        0x4 00
+ .text          0xd7fc0120      0x180 arch/nios2/cpu/libnios2.o
+                0xd7fc0120                _exception
+ .text          0xd7fc02a0       0x98 arch/nios2/lib/libnios2.o
+                0xd7fc02bc                flush_icache
+                0xd7fc02f0                flush_cache
+                0xd7fc02d8                flush_dcache_range
+                0xd7fc02a0                flush_dcache
+ .text          0xd7fc0338        0x4 board/altera/nios2-generic/libnios2-generic.o
+                0xd7fc0338                text_base_hook
+ *(.text.*)
+ .text.do_reset
+                0xd7fc033c       0x28 arch/nios2/cpu/libnios2.o
+                0xd7fc033c                do_reset
+ .text.checkcpu
+                0xd7fc0364       0x28 arch/nios2/cpu/libnios2.o
+                0xd7fc0364                checkcpu
+ .text.reset_timer
+                0xd7fc038c       0x30 arch/nios2/cpu/libnios2.o
+                0xd7fc038c                reset_timer
+ .text.get_timer
+                0xd7fc03bc       0x14 arch/nios2/cpu/libnios2.o
+                0xd7fc03bc                get_timer
+ .text.get_tbclk
+                0xd7fc03d0        0x8 arch/nios2/cpu/libnios2.o
+                0xd7fc03d0                get_tbclk
+ .text.disable_interrupts
+                0xd7fc03d8       0x18 arch/nios2/cpu/libnios2.o
+                0xd7fc03d8                disable_interrupts
+ .text.enable_interrupts
+                0xd7fc03f0       0x10 arch/nios2/cpu/libnios2.o
+                0xd7fc03f0                enable_interrupts
+ .text.external_interrupt
+                0xd7fc0400       0x7c arch/nios2/cpu/libnios2.o
+                0xd7fc0400                external_interrupt
+ .text.irq_install_handler
+                0xd7fc047c       0xc4 arch/nios2/cpu/libnios2.o
+                0xd7fc047c                irq_install_handler
+ .text.def_hdlr
+                0xd7fc0540       0x24 arch/nios2/cpu/libnios2.o
+ .text.tmr_isr  0xd7fc0564       0x24 arch/nios2/cpu/libnios2.o
+                0xd7fc0564                tmr_isr
+ .text.get_ticks
+                0xd7fc0588       0x1c arch/nios2/cpu/libnios2.o
+                0xd7fc0588                get_ticks
+ .text.interrupt_init
+                0xd7fc05a4       0xb0 arch/nios2/cpu/libnios2.o
+                0xd7fc05a4                interrupt_init
+ .text.display_sysid
+                0xd7fc0654      0x25c arch/nios2/cpu/libnios2.o
+                0xd7fc0654                display_sysid
+ .text.do_sysid
+                0xd7fc08b0       0x1c arch/nios2/cpu/libnios2.o
+                0xd7fc08b0                do_sysid
+ .text.trap_handler
+                0xd7fc08cc       0x14 arch/nios2/cpu/libnios2.o
+                0xd7fc08cc                trap_handler
+ .text.soft_emulation
+                0xd7fc08e0       0x20 arch/nios2/cpu/libnios2.o
+                0xd7fc08e0                soft_emulation
+ .text.hang     0xd7fc0900       0x1c arch/nios2/lib/libnios2.o
+                0xd7fc0900                hang
+ .text.board_init
+                0xd7fc091c       0xe4 arch/nios2/lib/libnios2.o
+                0xd7fc091c                board_init
+ .text.do_bootm_linux
+                0xd7fc0a00       0xdc arch/nios2/lib/libnios2.o
+                0xd7fc0a00                do_bootm_linux
+ .text.__ashldi3
+                0xd7fc0adc       0x50 arch/nios2/lib/libnios2.o
+                0xd7fc0adc                __ashldi3
+ .text.__lshrdi3
+                0xd7fc0b2c       0x4c arch/nios2/lib/libnios2.o
+                0xd7fc0b2c                __lshrdi3
+ .text.__muldi3
+                0xd7fc0b78      0x120 arch/nios2/lib/libnios2.o
+                0xd7fc0b78                __muldi3
+ .text.udivmodsi4
+                0xd7fc0c98       0x5c arch/nios2/lib/libnios2.o
+ .text.__divsi3
+                0xd7fc0cf4       0x54 arch/nios2/lib/libnios2.o
+                0xd7fc0cf4                __divsi3
+ .text.__udivsi3
+                0xd7fc0d48        0x8 arch/nios2/lib/libnios2.o
+                0xd7fc0d48                __udivsi3
+ .text.__modsi3
+                0xd7fc0d50       0x64 arch/nios2/lib/libnios2.o
+                0xd7fc0d50                __modsi3
+ .text.__mulsi3
+                0xd7fc0db4       0x2c arch/nios2/lib/libnios2.o
+                0xd7fc0db4                __mulsi3
+ .text.__umodsi3
+                0xd7fc0de0        0x8 arch/nios2/lib/libnios2.o
+                0xd7fc0de0                __umodsi3
+ .text.__udelay
+                0xd7fc0de8       0x20 arch/nios2/lib/libnios2.o
+                0xd7fc0de8                __udelay
+ .text.print_num
+                0xd7fc0e08       0x14 common/libcommon.o
+ .text.do_bdinfo
+                0xd7fc0e1c       0xec common/libcommon.o
+                0xd7fc0e1c                do_bdinfo
+ .text.do_go_exec
+                0xd7fc0f08       0x10 common/libcommon.o
+                0xd7fc0f08                do_go_exec
+ .text.do_go    0xd7fc0f18       0x8c common/libcommon.o
+                0xd7fc0f18                do_go
+ .text.__fswab32
+                0xd7fc0fa4       0x78 common/libcommon.o
+ .text.__arch_preboot_os
+                0xd7fc101c        0x4 common/libcommon.o
+                0xd7fc101c                arch_preboot_os
+                0xd7fc101c                __arch_preboot_os
+ .text.image_get_size
+                0xd7fc1020        0x8 common/libcommon.o
+ .text.image_get_data_size
+                0xd7fc1028        0xc common/libcommon.o
+ .text.image_check_magic
+                0xd7fc1034       0x50 common/libcommon.o
+ .text.image_info
+                0xd7fc1084       0xe4 common/libcommon.o
+ .text.do_iminfo
+                0xd7fc1168       0xa8 common/libcommon.o
+                0xd7fc1168                do_iminfo
+ .text.bootstage_error
+                0xd7fc1210       0x60 common/libcommon.o
+ .text.bootstage_mark
+                0xd7fc1270       0x54 common/libcommon.o
+ .text.do_bootm_rtems
+                0xd7fc12c4       0x54 common/libcommon.o
+ .text.do_bootm_netbsd
+                0xd7fc1318      0x178 common/libcommon.o
+ .text.bootm_start
+                0xd7fc1490      0x3f0 common/libcommon.o
+ .text.bootm_load_os
+                0xd7fc1880      0x1fc common/libcommon.o
+ .text.do_bootm_subcommand
+                0xd7fc1a7c      0x1ec common/libcommon.o
+                0xd7fc1a7c                do_bootm_subcommand
+ .text.do_bootm
+                0xd7fc1c68      0x2b0 common/libcommon.o
+                0xd7fc1c68                do_bootm
+ .text.bootm_maybe_autostart
+                0xd7fc1f18       0x8c common/libcommon.o
+                0xd7fc1f18                bootm_maybe_autostart
+ .text.do_coninfo
+                0xd7fc1fa4      0x104 common/libcommon.o
+                0xd7fc1fa4                do_coninfo
+ .text.do_echo  0xd7fc20a8       0xc4 common/libcommon.o
+                0xd7fc20a8                do_echo
+ .text.do_exit  0xd7fc216c       0x3c common/libcommon.o
+                0xd7fc216c                do_exit
+ .text.flash_fill_sect_ranges
+                0xd7fc21a8      0x1c0 common/libcommon.o
+ .text.flash_sect_protect
+                0xd7fc2368      0x164 common/libcommon.o
+                0xd7fc2368                flash_sect_protect
+ .text.flash_sect_roundb
+                0xd7fc24cc       0xd4 common/libcommon.o
+                0xd7fc24cc                flash_sect_roundb
+ .text.addr_spec
+                0xd7fc25a0       0xe8 common/libcommon.o
+ .text.abbrev_spec
+                0xd7fc2688      0x168 common/libcommon.o
+ .text.do_protect
+                0xd7fc27f0      0x368 common/libcommon.o
+                0xd7fc27f0                do_protect
+ .text.flash_sect_erase
+                0xd7fc2b58       0xf0 common/libcommon.o
+                0xd7fc2b58                flash_sect_erase
+ .text.do_flerase
+                0xd7fc2c48      0x20c common/libcommon.o
+                0xd7fc2c48                do_flerase
+ .text.do_flinfo
+                0xd7fc2e54       0xc8 common/libcommon.o
+                0xd7fc2e54                do_flinfo
+ .text.do_help  0xd7fc2f1c       0x8c common/libcommon.o
+                0xd7fc2f1c                do_help
+ .text.ktrans   0xd7fc2fa8       0x58 common/libcommon.o
+                0xd7fc2fa8                ktrans
+ .text.chk1     0xd7fc3000       0x2c common/libcommon.o
+                0xd7fc3000                chk1
+ .text.bin_data_init
+                0xd7fc302c       0x28 common/libcommon.o
+ .text.bin_data_char
+                0xd7fc3054       0x2c common/libcommon.o
+ .text.k_data_init
+                0xd7fc3080       0x1c common/libcommon.o
+                0xd7fc3080                k_data_init
+ .text.k_data_char
+                0xd7fc309c       0xa0 common/libcommon.o
+                0xd7fc309c                k_data_char
+ .text.send_pad
+                0xd7fc313c       0x44 common/libcommon.o
+                0xd7fc313c                send_pad
+ .text.s1_sendpacket
+                0xd7fc3180       0x3c common/libcommon.o
+                0xd7fc3180                s1_sendpacket
+ .text.handle_send_packet
+                0xd7fc31bc      0x25c common/libcommon.o
+                0xd7fc31bc                handle_send_packet
+ .text.send_nack
+                0xd7fc3418       0x7c common/libcommon.o
+                0xd7fc3418                send_nack
+ .text.send_ack
+                0xd7fc3494       0x7c common/libcommon.o
+                0xd7fc3494                send_ack
+ .text.getcxmodem
+                0xd7fc3510       0x2c common/libcommon.o
+ .text.do_load_serial_bin
+                0xd7fc353c      0x760 common/libcommon.o
+                0xd7fc353c                do_load_serial_bin
+ .text.do_load_serial
+                0xd7fc3c9c      0x2fc common/libcommon.o
+                0xd7fc3c9c                do_load_serial
+ .text.do_mem_crc
+                0xd7fc3f98       0xe4 common/libcommon.o
+                0xd7fc3f98                do_mem_crc
+ .text.do_mem_base
+                0xd7fc407c       0x54 common/libcommon.o
+                0xd7fc407c                do_mem_base
+ .text.do_mem_mtest
+                0xd7fc40d0      0x1e0 common/libcommon.o
+                0xd7fc40d0                do_mem_mtest
+ .text.do_mem_loop
+                0xd7fc42b0      0x134 common/libcommon.o
+                0xd7fc42b0                do_mem_loop
+ .text.do_mem_cmp
+                0xd7fc43e4      0x1c0 common/libcommon.o
+                0xd7fc43e4                do_mem_cmp
+ .text.do_mem_mw
+                0xd7fc45a4      0x11c common/libcommon.o
+                0xd7fc45a4                do_mem_mw
+ .text.do_mem_cp
+                0xd7fc46c0      0x17c common/libcommon.o
+                0xd7fc46c0                do_mem_cp
+ .text.mod_mem  0xd7fc483c      0x1c4 common/libcommon.o
+ .text.do_mem_nm
+                0xd7fc4a00       0x2c common/libcommon.o
+                0xd7fc4a00                do_mem_nm
+ .text.do_mem_mm
+                0xd7fc4a2c       0x2c common/libcommon.o
+                0xd7fc4a2c                do_mem_mm
+ .text.do_mem_md
+                0xd7fc4a58      0x140 common/libcommon.o
+                0xd7fc4a58                do_mem_md
+ .text.extract_range
+                0xd7fc4b98       0x74 common/libcommon.o
+ .text.do_mii   0xd7fc4c0c      0x824 common/libcommon.o
+ .text.do_sleep
+                0xd7fc5430       0x94 common/libcommon.o
+                0xd7fc5430                do_sleep
+ .text.do_ping  0xd7fc54c4       0x88 common/libcommon.o
+                0xd7fc54c4                do_ping
+ .text.netboot_common
+                0xd7fc554c      0x2f8 common/libcommon.o
+ .text.do_dhcp  0xd7fc5844        0xc common/libcommon.o
+                0xd7fc5844                do_dhcp
+ .text.do_bootp
+                0xd7fc5850        0xc common/libcommon.o
+                0xd7fc5850                do_bootp
+ .text.do_tftpb
+                0xd7fc585c        0xc common/libcommon.o
+                0xd7fc585c                do_tftpb
+ .text.get_env_id
+                0xd7fc5868       0x10 common/libcommon.o
+                0xd7fc5868                get_env_id
+ .text.do_env   0xd7fc5878       0x98 common/libcommon.o
+ .text.do_env_delete
+                0xd7fc5910       0x24 common/libcommon.o
+ .text.do_env_import
+                0xd7fc5934      0x278 common/libcommon.o
+ .text.do_env_default
+                0xd7fc5bac       0x48 common/libcommon.o
+ .text.envmatch
+                0xd7fc5bf4       0x88 common/libcommon.o
+                0xd7fc5bf4                envmatch
+ .text.getenv_f
+                0xd7fc5c7c       0xf0 common/libcommon.o
+                0xd7fc5c7c                getenv_f
+ .text.getenv   0xd7fc5d6c       0x68 common/libcommon.o
+                0xd7fc5d6c                getenv
+ .text.env_print
+                0xd7fc5dd4       0xa4 common/libcommon.o
+ .text.do_env_print
+                0xd7fc5e78       0xb0 common/libcommon.o
+                0xd7fc5e78                do_env_print
+ .text._do_env_set
+                0xd7fc5f28      0x374 common/libcommon.o
+                0xd7fc5f28                _do_env_set
+ .text.do_env_set
+                0xd7fc629c       0x24 common/libcommon.o
+                0xd7fc629c                do_env_set
+ .text.setenv   0xd7fc62c0       0x58 common/libcommon.o
+                0xd7fc62c0                setenv
+ .text.do_env_export
+                0xd7fc6318      0x29c common/libcommon.o
+ .text.do_env_edit
+                0xd7fc65b4       0x7c common/libcommon.o
+                0xd7fc65b4                do_env_edit
+ .text.source   0xd7fc6630      0x164 common/libcommon.o
+                0xd7fc6630                source
+ .text.do_source
+                0xd7fc6794       0x58 common/libcommon.o
+                0xd7fc6794                do_source
+ .text.do_false
+                0xd7fc67ec        0x8 common/libcommon.o
+                0xd7fc67ec                do_false
+ .text.do_true  0xd7fc67f4        0x8 common/libcommon.o
+                0xd7fc67f4                do_true
+ .text.do_test  0xd7fc67fc      0x450 common/libcommon.o
+                0xd7fc67fc                do_test
+ .text.do_version
+                0xd7fc6c4c       0x44 common/libcommon.o
+                0xd7fc6c4c                do_version
+ .text.cmd_get_data_size
+                0xd7fc6c90       0xa0 common/libcommon.o
+                0xd7fc6c90                cmd_get_data_size
+ .text.cmd_usage
+                0xd7fc6d30       0x70 common/libcommon.o
+                0xd7fc6d30                cmd_usage
+ .text.find_cmd_tbl
+                0xd7fc6da0       0xdc common/libcommon.o
+                0xd7fc6da0                find_cmd_tbl
+ .text.find_cmd
+                0xd7fc6e7c       0x58 common/libcommon.o
+                0xd7fc6e7c                find_cmd
+ .text.cmd_process
+                0xd7fc6ed4       0xd8 common/libcommon.o
+                0xd7fc6ed4                cmd_process
+ .text._do_help
+                0xd7fc6fac      0x1d8 common/libcommon.o
+                0xd7fc6fac                _do_help
+ .text.console_setfile
+                0xd7fc7184       0xbc common/libcommon.o
+ .text.fgetc    0xd7fc7240       0x30 common/libcommon.o
+                0xd7fc7240                fgetc
+ .text.ftstc    0xd7fc7270       0x30 common/libcommon.o
+                0xd7fc7270                ftstc
+ .text.fputc    0xd7fc72a0       0x3c common/libcommon.o
+                0xd7fc72a0                fputc
+ .text.fputs    0xd7fc72dc       0x34 common/libcommon.o
+                0xd7fc72dc                fputs
+ .text.had_ctrlc
+                0xd7fc7310       0x10 common/libcommon.o
+                0xd7fc7310                had_ctrlc
+ .text.clear_ctrlc
+                0xd7fc7320       0x10 common/libcommon.o
+                0xd7fc7320                clear_ctrlc
+ .text.console_init_f
+                0xd7fc7330       0x10 common/libcommon.o
+                0xd7fc7330                console_init_f
+ .text.search_device
+                0xd7fc7340       0x44 common/libcommon.o
+                0xd7fc7340                search_device
+ .text.console_assign
+                0xd7fc7384       0x5c common/libcommon.o
+                0xd7fc7384                console_assign
+ .text.puts     0xd7fc73e0       0x28 common/libcommon.o
+                0xd7fc73e0                puts
+ .text.vprintf  0xd7fc7408       0x50 common/libcommon.o
+                0xd7fc7408                vprintf
+ .text.printf   0xd7fc7458       0x6c common/libcommon.o
+                0xd7fc7458                printf
+ .text.stdio_print_current_devices
+                0xd7fc74c4       0xc8 common/libcommon.o
+                0xd7fc74c4                stdio_print_current_devices
+ .text.console_init_r
+                0xd7fc758c       0xf0 common/libcommon.o
+                0xd7fc758c                console_init_r
+ .text.putc     0xd7fc767c       0x34 common/libcommon.o
+                0xd7fc767c                putc
+ .text.tstc     0xd7fc76b0       0x28 common/libcommon.o
+                0xd7fc76b0                tstc
+ .text.getc     0xd7fc76d8       0x28 common/libcommon.o
+                0xd7fc76d8                getc
+ .text.ctrlc    0xd7fc7700       0x60 common/libcommon.o
+                0xd7fc7700                ctrlc
+ .text.mem_malloc_init
+                0xd7fc7760       0x34 common/libcommon.o
+                0xd7fc7760                mem_malloc_init
+ .text.sbrk     0xd7fc7794       0x84 common/libcommon.o
+                0xd7fc7794                sbrk
+ .text.malloc_trim
+                0xd7fc7818      0x100 common/libcommon.o
+                0xd7fc7818                malloc_trim
+ .text.free     0xd7fc7918      0x270 common/libcommon.o
+                0xd7fc7918                free
+ .text.malloc   0xd7fc7b88      0x708 common/libcommon.o
+                0xd7fc7b88                malloc
+ .text.calloc   0xd7fc8290       0xf4 common/libcommon.o
+                0xd7fc8290                calloc
+ .text.realloc  0xd7fc8384      0x4d8 common/libcommon.o
+                0xd7fc8384                realloc
+ .text.__env_get_char_spec
+                0xd7fc885c       0x10 common/libcommon.o
+                0xd7fc885c                env_get_char_spec
+ .text.env_get_addr
+                0xd7fc886c       0x24 common/libcommon.o
+                0xd7fc886c                env_get_addr
+ .text.env_get_char_memory
+                0xd7fc8890       0x1c common/libcommon.o
+                0xd7fc8890                env_get_char_memory
+ .text.env_get_char
+                0xd7fc88ac       0x54 common/libcommon.o
+                0xd7fc88ac                env_get_char
+ .text.set_default_env
+                0xd7fc8900       0xa4 common/libcommon.o
+                0xd7fc8900                set_default_env
+ .text.env_relocate
+                0xd7fc89a4       0x14 common/libcommon.o
+                0xd7fc89a4                env_relocate
+ .text.env_relocate_spec
+                0xd7fc89b8        0x4 common/libcommon.o
+                0xd7fc89b8                env_relocate_spec
+ .text.env_init
+                0xd7fc89bc       0x18 common/libcommon.o
+                0xd7fc89bc                env_init
+ .text.dummy    0xd7fc89d4        0x4 common/libcommon.o
+ .text.get_version
+                0xd7fc89d8        0x8 common/libcommon.o
+                0xd7fc89d8                get_version
+ .text.jumptable_init
+                0xd7fc89e0      0x138 common/libcommon.o
+                0xd7fc89e0                jumptable_init
+ .text.addr2info
+                0xd7fc8b18       0x64 common/libcommon.o
+                0xd7fc8b18                addr2info
+ .text.flash_perror
+                0xd7fc8b7c       0xe0 common/libcommon.o
+                0xd7fc8b7c                flash_perror
+ .text.flash_write
+                0xd7fc8c5c      0x158 common/libcommon.o
+                0xd7fc8c5c                flash_write
+ .text.flash_protect
+                0xd7fc8db4      0x104 common/libcommon.o
+                0xd7fc8db4                flash_protect
+ .text.b_reset  0xd7fc8eb8       0x18 common/libcommon.o
+ .text.static_get
+                0xd7fc8ed0       0x24 common/libcommon.o
+ .text.static_peek
+                0xd7fc8ef4        0xc common/libcommon.o
+ .text.file_peek
+                0xd7fc8f00        0xc common/libcommon.o
+ .text.setup_string_in_str
+                0xd7fc8f0c       0x2c common/libcommon.o
+ .text.is_assignment
+                0xd7fc8f38       0x68 common/libcommon.o
+ .text.mapset   0xd7fc8fa0       0x24 common/libcommon.o
+                0xd7fc8fa0                mapset
+ .text.syntax_err
+                0xd7fc8fc4        0xc common/libcommon.o
+ .text.do_showvar
+                0xd7fc8fd0      0x12c common/libcommon.o
+                0xd7fc8fd0                do_showvar
+ .text.xmalloc  0xd7fc90fc       0x2c common/libcommon.o
+ .text.new_pipe
+                0xd7fc9128       0x30 common/libcommon.o
+                0xd7fc9128                new_pipe
+ .text.u_boot_hush_start
+                0xd7fc9158       0x64 common/libcommon.o
+                0xd7fc9158                u_boot_hush_start
+ .text.file_get
+                0xd7fc91bc      0x214 common/libcommon.o
+ .text.free_pipe_list
+                0xd7fc93d0      0x114 common/libcommon.o
+ .text.b_free   0xd7fc94e4       0x34 common/libcommon.o
+ .text.xrealloc
+                0xd7fc9518       0x2c common/libcommon.o
+ .text.done_command
+                0xd7fc9544       0xa8 common/libcommon.o
+ .text.done_pipe
+                0xd7fc95ec       0x60 common/libcommon.o
+ .text.initialize_context
+                0xd7fc964c       0x3c common/libcommon.o
+ .text.reserved_word
+                0xd7fc9688      0x154 common/libcommon.o
+                0xd7fc9688                reserved_word
+ .text.done_word
+                0xd7fc97dc      0x178 common/libcommon.o
+ .text.b_addchr
+                0xd7fc9954       0xa8 common/libcommon.o
+ .text.b_addqchr
+                0xd7fc99fc       0x6c common/libcommon.o
+ .text.set_local_var
+                0xd7fc9a68      0x1d8 common/libcommon.o
+                0xd7fc9a68                set_local_var
+ .text.update_ifs_map
+                0xd7fc9c40       0x80 common/libcommon.o
+                0xd7fc9c40                update_ifs_map
+ .text.get_local_var
+                0xd7fc9cc0       0xa8 common/libcommon.o
+                0xd7fc9cc0                get_local_var
+ .text.insert_var_value
+                0xd7fc9d68      0x174 common/libcommon.o
+ .text.run_list_real
+                0xd7fc9edc      0x768 common/libcommon.o
+ .text.parse_stream_outer
+                0xd7fca644      0x5fc common/libcommon.o
+ .text.parse_file_outer
+                0xd7fcac40       0x48 common/libcommon.o
+                0xd7fcac40                parse_file_outer
+ .text.parse_string_outer
+                0xd7fcac88       0xd4 common/libcommon.o
+                0xd7fcac88                parse_string_outer
+ .text.image_multi_count
+                0xd7fcad5c       0x24 common/libcommon.o
+                0xd7fcad5c                image_multi_count
+ .text.get_table_entry_name
+                0xd7fcad80       0x24 common/libcommon.o
+                0xd7fcad80                get_table_entry_name
+ .text.genimg_get_os_name
+                0xd7fcada4       0x18 common/libcommon.o
+                0xd7fcada4                genimg_get_os_name
+ .text.genimg_get_arch_name
+                0xd7fcadbc       0x18 common/libcommon.o
+                0xd7fcadbc                genimg_get_arch_name
+ .text.genimg_get_type_name
+                0xd7fcadd4       0x18 common/libcommon.o
+                0xd7fcadd4                genimg_get_type_name
+ .text.genimg_get_comp_name
+                0xd7fcadec       0x18 common/libcommon.o
+                0xd7fcadec                genimg_get_comp_name
+ .text.genimg_get_image
+                0xd7fcae04        0x8 common/libcommon.o
+                0xd7fcae04                genimg_get_image
+ .text.image_multi_getimg
+                0xd7fcae0c       0xe4 common/libcommon.o
+                0xd7fcae0c                image_multi_getimg
+ .text.image_get_load
+                0xd7fcaef0        0x8 common/libcommon.o
+ .text.genimg_get_format
+                0xd7fcaef8       0x1c common/libcommon.o
+                0xd7fcaef8                genimg_get_format
+ .text.genimg_print_size
+                0xd7fcaf14       0x44 common/libcommon.o
+                0xd7fcaf14                genimg_print_size
+ .text.image_print_contents
+                0xd7fcaf58      0x1b4 common/libcommon.o
+                0xd7fcaf58                image_print_contents
+ .text.memmove_wd
+                0xd7fcb10c        0xc common/libcommon.o
+                0xd7fcb10c                memmove_wd
+ .text.getenv_yesno
+                0xd7fcb118       0x2c common/libcommon.o
+                0xd7fcb118                getenv_yesno
+ .text.image_check_dcrc
+                0xd7fcb144       0x54 common/libcommon.o
+                0xd7fcb144                image_check_dcrc
+ .text.image_check_hcrc
+                0xd7fcb198       0x60 common/libcommon.o
+                0xd7fcb198                image_check_hcrc
+ .text.boot_get_ramdisk
+                0xd7fcb1f8      0x270 common/libcommon.o
+                0xd7fcb1f8                boot_get_ramdisk
+ .text.__show_boot_progress
+                0xd7fcb468        0x4 common/libcommon.o
+                0xd7fcb468                __show_boot_progress
+                0xd7fcb468                show_boot_progress
+ .text.run_command
+                0xd7fcb46c        0x8 common/libcommon.o
+                0xd7fcb46c                run_command
+ .text.do_run   0xd7fcb474       0x94 common/libcommon.o
+                0xd7fcb474                do_run
+ .text.delete_char
+                0xd7fcb508      0x110 common/libcommon.o
+ .text.cread_add_char
+                0xd7fcb618      0x130 common/libcommon.o
+ .text.cread_add_str
+                0xd7fcb748       0x98 common/libcommon.o
+ .text.readline_into_buffer
+                0xd7fcb7e0      0x968 common/libcommon.o
+                0xd7fcb7e0                readline_into_buffer
+ .text.readline
+                0xd7fcc148       0x18 common/libcommon.o
+                0xd7fcc148                readline
+ .text.main_loop
+                0xd7fcc160       0x14 common/libcommon.o
+                0xd7fcc160                main_loop
+ .text.miiphy_init
+                0xd7fcc174       0x20 common/libcommon.o
+                0xd7fcc174                miiphy_init
+ .text.legacy_miiphy_read
+                0xd7fcc194       0x40 common/libcommon.o
+ .text.legacy_miiphy_write
+                0xd7fcc1d4       0x1c common/libcommon.o
+ .text.miiphy_get_current_dev
+                0xd7fcc1f0       0x20 common/libcommon.o
+                0xd7fcc1f0                miiphy_get_current_dev
+ .text.miiphy_is_1000base_x
+                0xd7fcc210        0x8 common/libcommon.o
+                0xd7fcc210                miiphy_is_1000base_x
+ .text.miiphy_get_dev_by_name
+                0xd7fcc218       0x78 common/libcommon.o
+                0xd7fcc218                miiphy_get_dev_by_name
+ .text.miiphy_set_current_dev
+                0xd7fcc290       0x58 common/libcommon.o
+                0xd7fcc290                miiphy_set_current_dev
+ .text.miiphy_get_active_dev
+                0xd7fcc2e8       0x70 common/libcommon.o
+ .text.miiphy_write
+                0xd7fcc358       0x6c common/libcommon.o
+                0xd7fcc358                miiphy_write
+ .text.miiphy_read
+                0xd7fcc3c4       0x70 common/libcommon.o
+                0xd7fcc3c4                miiphy_read
+ .text.miiphy_duplex
+                0xd7fcc434       0xac common/libcommon.o
+                0xd7fcc434                miiphy_duplex
+ .text.miiphy_speed
+                0xd7fcc4e0       0xac common/libcommon.o
+                0xd7fcc4e0                miiphy_speed
+ .text.miiphy_info
+                0xd7fcc58c       0xc0 common/libcommon.o
+                0xd7fcc58c                miiphy_info
+ .text.mdio_alloc
+                0xd7fcc64c       0x48 common/libcommon.o
+                0xd7fcc64c                mdio_alloc
+ .text.miiphy_register
+                0xd7fcc694      0x14c common/libcommon.o
+                0xd7fcc694                miiphy_register
+ .text.miiphy_listdev
+                0xd7fcc7e0       0x90 common/libcommon.o
+                0xd7fcc7e0                miiphy_listdev
+ .text.hex1_bin
+                0xd7fcc870       0x6c common/libcommon.o
+ .text.hex2_bin
+                0xd7fcc8dc       0x54 common/libcommon.o
+ .text.srec_decode
+                0xd7fcc930      0x278 common/libcommon.o
+                0xd7fcc930                srec_decode
+ .text.stdio_get_list
+                0xd7fccba8        0xc common/libcommon.o
+                0xd7fccba8                stdio_get_list
+ .text.stdio_clone
+                0xd7fccbb4       0x6c common/libcommon.o
+                0xd7fccbb4                stdio_clone
+ .text.stdio_register
+                0xd7fccc20       0x4c common/libcommon.o
+                0xd7fccc20                stdio_register
+ .text.stdio_init
+                0xd7fccc6c       0x90 common/libcommon.o
+                0xd7fccc6c                stdio_init
+ .text.stdio_get_by_name
+                0xd7fcccfc       0x70 common/libcommon.o
+                0xd7fcccfc                stdio_get_by_name
+ .text.parse_num
+                0xd7fccd6c      0x1c8 common/libcommon.o
+                0xd7fccd6c                parse_num
+ .text.xyzModem_error
+                0xd7fccf34       0xb4 common/libcommon.o
+                0xd7fccf34                xyzModem_error
+ .text.xyzModem_stream_close
+                0xd7fccfe8       0x60 common/libcommon.o
+                0xd7fccfe8                xyzModem_stream_close
+ .text.CYGACC_COMM_IF_PUTC
+                0xd7fcd048       0x10 common/libcommon.o
+                0xd7fcd048                CYGACC_COMM_IF_PUTC
+ .text.CYGACC_COMM_IF_GETC_TIMEOUT
+                0xd7fcd058       0x64 common/libcommon.o
+                0xd7fcd058                CYGACC_COMM_IF_GETC_TIMEOUT
+ .text.xyzModem_flush
+                0xd7fcd0bc       0x30 common/libcommon.o
+ .text.xyzModem_stream_terminate
+                0xd7fcd0ec       0xf4 common/libcommon.o
+                0xd7fcd0ec                xyzModem_stream_terminate
+ .text.xyzModem_get_hdr
+                0xd7fcd1e0      0x294 common/libcommon.o
+ .text.xyzModem_stream_read
+                0xd7fcd474      0x2f4 common/libcommon.o
+                0xd7fcd474                xyzModem_stream_read
+ .text.xyzModem_stream_open
+                0xd7fcd768      0x1a8 common/libcommon.o
+                0xd7fcd768                xyzModem_stream_open
+ .text.altera_pio_gidx
+                0xd7fcd910       0x3c drivers/gpio/libgpio.o
+ .text.altera_pio_get_and_mask
+                0xd7fcd94c       0x88 drivers/gpio/libgpio.o
+ .text.gpio_direction_output
+                0xd7fcd9d4       0xa4 drivers/gpio/libgpio.o
+                0xd7fcd9d4                gpio_direction_output
+ .text.gpio_get_value
+                0xd7fcda78       0x70 drivers/gpio/libgpio.o
+                0xd7fcda78                gpio_get_value
+ .text.gpio_set_value
+                0xd7fcdae8       0x7c drivers/gpio/libgpio.o
+                0xd7fcdae8                gpio_set_value
+ .text.gpio_request
+                0xd7fcdb64       0x6c drivers/gpio/libgpio.o
+                0xd7fcdb64                gpio_request
+ .text.altera_pio_init
+                0xd7fcdbd0      0x20c drivers/gpio/libgpio.o
+                0xd7fcdbd0                altera_pio_init
+ .text.__led_toggle
+                0xd7fcdddc       0x2c drivers/misc/libmisc.o
+                0xd7fcdddc                __led_toggle
+ .text.__led_init
+                0xd7fcde08       0x40 drivers/misc/libmisc.o
+                0xd7fcde08                __led_init
+ .text.status_led_init
+                0xd7fcde48       0x38 drivers/misc/libmisc.o
+ .text.status_led_tick
+                0xd7fcde80       0x70 drivers/misc/libmisc.o
+                0xd7fcde80                status_led_tick
+ .text.__cfi_flash_bank_addr
+                0xd7fcdef0       0x28 drivers/mtd/libmtd.o
+                0xd7fcdef0                cfi_flash_bank_addr
+ .text.__cfi_flash_bank_size
+                0xd7fcdf18        0x8 drivers/mtd/libmtd.o
+                0xd7fcdf18                cfi_flash_bank_size
+ .text.flash_make_cmd
+                0xd7fcdf20       0x94 drivers/mtd/libmtd.o
+ .text.flash_write_cmd
+                0xd7fcdfb4       0xd0 drivers/mtd/libmtd.o
+                0xd7fcdfb4                flash_write_cmd
+ .text.flash_unlock_seq
+                0xd7fce084       0x48 drivers/mtd/libmtd.o
+ .text.flash_isequal
+                0xd7fce0cc       0xec drivers/mtd/libmtd.o
+ .text.flash_isset
+                0xd7fce1b8      0x10c drivers/mtd/libmtd.o
+ .text.flash_add_byte
+                0xd7fce2c4       0xac drivers/mtd/libmtd.o
+ .text.find_sector
+                0xd7fce370       0x98 drivers/mtd/libmtd.o
+ .text.cfi_reverse_geometry
+                0xd7fce408       0xc4 drivers/mtd/libmtd.o
+ .text.__flash_cmd_reset
+                0xd7fce4cc       0x48 drivers/mtd/libmtd.o
+                0xd7fce4cc                flash_cmd_reset
+                0xd7fce4cc                __flash_cmd_reset
+ .text.flash_get_size
+                0xd7fce514      0x8a8 drivers/mtd/libmtd.o
+                0xd7fce514                flash_get_size
+ .text.flash_status_poll
+                0xd7fcedbc      0x118 drivers/mtd/libmtd.o
+ .text.flash_status_check
+                0xd7fceed4      0x200 drivers/mtd/libmtd.o
+ .text.flash_full_status_check
+                0xd7fcf0d4      0x184 drivers/mtd/libmtd.o
+ .text.flash_real_protect
+                0xd7fcf258      0x248 drivers/mtd/libmtd.o
+                0xd7fcf258                flash_real_protect
+ .text.flash_write_cfiword
+                0xd7fcf4a0      0x268 drivers/mtd/libmtd.o
+ .text.flash_print_info
+                0xd7fcf708      0x26c drivers/mtd/libmtd.o
+                0xd7fcf708                flash_print_info
+ .text.flash_erase
+                0xd7fcf974      0x240 drivers/mtd/libmtd.o
+                0xd7fcf974                flash_erase
+ .text.write_buff
+                0xd7fcfbb4      0x6d0 drivers/mtd/libmtd.o
+                0xd7fcfbb4                write_buff
+ .text.flash_init
+                0xd7fd0284      0x174 drivers/mtd/libmtd.o
+                0xd7fd0284                flash_init
+ .text.alt_sgdma_construct_descriptor_burst
+                0xd7fd03f8      0x1b8 drivers/net/libnet.o
+ .text.alt_sgdma_do_async_transfer
+                0xd7fd05b0       0x54 drivers/net/libnet.o
+ .text.tse_eth_halt
+                0xd7fd0604        0x4 drivers/net/libnet.o
+ .text.tse_mdio_read
+                0xd7fd0608       0x24 drivers/net/libnet.o
+ .text.tse_mdio_write
+                0xd7fd062c       0x28 drivers/net/libnet.o
+ .text.mii_m88e1111s_setmode_sr
+                0xd7fd0654       0x58 drivers/net/libnet.o
+ .text.mii_m88e1111s_setmode_cr
+                0xd7fd06ac       0x4c drivers/net/libnet.o
+ .text.mii_cr_init
+                0xd7fd06f8        0x8 drivers/net/libnet.o
+ .text.phy_run_commands
+                0xd7fd0700       0xa4 drivers/net/libnet.o
+ .text.tse_set_mac_address
+                0xd7fd07a4       0x90 drivers/net/libnet.o
+ .text.altera_tse_initialize
+                0xd7fd0834      0x244 drivers/net/libnet.o
+                0xd7fd0834                altera_tse_initialize
+ .text.mii_parse_88E1011_psr
+                0xd7fd0a78       0xfc drivers/net/libnet.o
+ .text.mii_parse_sr
+                0xd7fd0b74       0xf0 drivers/net/libnet.o
+ .text.altera_tse_miiphy_read
+                0xd7fd0c64       0x68 drivers/net/libnet.o
+ .text.altera_tse_miiphy_write
+                0xd7fd0ccc       0x44 drivers/net/libnet.o
+ .text.tse_eth_init
+                0xd7fd0d10      0x2a4 drivers/net/libnet.o
+ .text.tse_eth_rx
+                0xd7fd0fb4       0xcc drivers/net/libnet.o
+ .text.tse_eth_send
+                0xd7fd1080      0x118 drivers/net/libnet.o
+ .text.serial_setbrg
+                0xd7fd1198        0x4 drivers/serial/libserial.o
+                0xd7fd1198                serial_setbrg
+ .text.serial_init
+                0xd7fd119c        0x8 drivers/serial/libserial.o
+                0xd7fd119c                serial_init
+ .text.serial_putc
+                0xd7fd11a4       0x5c drivers/serial/libserial.o
+                0xd7fd11a4                serial_putc
+ .text.serial_puts
+                0xd7fd1200       0x38 drivers/serial/libserial.o
+                0xd7fd1200                serial_puts
+ .text.serial_tstc
+                0xd7fd1238       0x14 drivers/serial/libserial.o
+                0xd7fd1238                serial_tstc
+ .text.serial_getc
+                0xd7fd124c       0x28 drivers/serial/libserial.o
+                0xd7fd124c                serial_getc
+ .text.cyg_crc16
+                0xd7fd1274       0x48 lib/libgeneric.o
+                0xd7fd1274                cyg_crc16
+ .text.crc32_no_comp
+                0xd7fd12bc      0x144 lib/libgeneric.o
+                0xd7fd12bc                crc32_no_comp
+ .text.crc32    0xd7fd1400       0x20 lib/libgeneric.o
+                0xd7fd1400                crc32
+ .text.crc32_wd
+                0xd7fd1420        0x4 lib/libgeneric.o
+                0xd7fd1420                crc32_wd
+ .text.print_size
+                0xd7fd1424      0x1e0 lib/libgeneric.o
+                0xd7fd1424                print_size
+ .text.display_options
+                0xd7fd1604       0x2c lib/libgeneric.o
+                0xd7fd1604                display_options
+ .text.print_buffer
+                0xd7fd1630      0x1dc lib/libgeneric.o
+                0xd7fd1630                print_buffer
+ .text.zunzip   0xd7fd180c      0x148 lib/libgeneric.o
+                0xd7fd180c                zunzip
+ .text.gunzip   0xd7fd1954       0xd0 lib/libgeneric.o
+                0xd7fd1954                gunzip
+ .text.gzfree   0xd7fd1a24        0x8 lib/libgeneric.o
+                0xd7fd1a24                gzfree
+ .text.gzalloc  0xd7fd1a2c       0x28 lib/libgeneric.o
+                0xd7fd1a2c                gzalloc
+ .text.hdestroy_r
+                0xd7fd1a54       0x9c lib/libgeneric.o
+                0xd7fd1a54                hdestroy_r
+ .text.cmpkey   0xd7fd1af0       0x14 lib/libgeneric.o
+ .text.hcreate_r
+                0xd7fd1b04       0xc8 lib/libgeneric.o
+                0xd7fd1b04                hcreate_r
+ .text.hexport_r
+                0xd7fd1bcc      0x308 lib/libgeneric.o
+                0xd7fd1bcc                hexport_r
+ .text.hsearch_r
+                0xd7fd1ed4      0x324 lib/libgeneric.o
+                0xd7fd1ed4                hsearch_r
+ .text.hdelete_r
+                0xd7fd21f8       0xb0 lib/libgeneric.o
+                0xd7fd21f8                hdelete_r
+ .text.himport_r
+                0xd7fd22a8      0x2a8 lib/libgeneric.o
+                0xd7fd22a8                himport_r
+ .text.string_to_ip
+                0xd7fd2550       0xac lib/libgeneric.o
+                0xd7fd2550                string_to_ip
+ .text.qsort    0xd7fd25fc      0x178 lib/libgeneric.o
+                0xd7fd25fc                qsort
+ .text.__div64_32
+                0xd7fd2774      0x17c lib/libgeneric.o
+                0xd7fd2774                __div64_32
+ .text.strcpy   0xd7fd28f0       0x20 lib/libgeneric.o
+                0xd7fd28f0                strcpy
+ .text.strncpy  0xd7fd2910       0x2c lib/libgeneric.o
+                0xd7fd2910                strncpy
+ .text.strcat   0xd7fd293c       0x30 lib/libgeneric.o
+                0xd7fd293c                strcat
+ .text.strncat  0xd7fd296c       0x48 lib/libgeneric.o
+                0xd7fd296c                strncat
+ .text.strcmp   0xd7fd29b4       0x30 lib/libgeneric.o
+                0xd7fd29b4                strcmp
+ .text.strncmp  0xd7fd29e4       0x40 lib/libgeneric.o
+                0xd7fd29e4                strncmp
+ .text.strchr   0xd7fd2a24       0x30 lib/libgeneric.o
+                0xd7fd2a24                strchr
+ .text.strlen   0xd7fd2a54       0x1c lib/libgeneric.o
+                0xd7fd2a54                strlen
+ .text.strnlen  0xd7fd2a70       0x28 lib/libgeneric.o
+                0xd7fd2a70                strnlen
+ .text.memset   0xd7fd2a98       0x64 lib/libgeneric.o
+                0xd7fd2a98                memset
+ .text.memcpy   0xd7fd2afc       0x5c lib/libgeneric.o
+                0xd7fd2afc                memcpy
+ .text.memmove  0xd7fd2b58       0x60 lib/libgeneric.o
+                0xd7fd2b58                memmove
+ .text.memcmp   0xd7fd2bb8       0x2c lib/libgeneric.o
+                0xd7fd2bb8                memcmp
+ .text.strdup   0xd7fd2be4       0x58 lib/libgeneric.o
+                0xd7fd2be4                strdup
+ .text.udelay   0xd7fd2c3c       0x40 lib/libgeneric.o
+                0xd7fd2c3c                udelay
+ .text.pack_hex_byte
+                0xd7fd2c7c       0x3c lib/libgeneric.o
+ .text.simple_strtoul
+                0xd7fd2cb8      0x138 lib/libgeneric.o
+                0xd7fd2cb8                simple_strtoul
+ .text.simple_strtol
+                0xd7fd2df0       0x38 lib/libgeneric.o
+                0xd7fd2df0                simple_strtol
+ .text.skip_atoi
+                0xd7fd2e28       0x7c lib/libgeneric.o
+ .text.put_dec_trunc
+                0xd7fd2ea4      0x190 lib/libgeneric.o
+ .text.panic    0xd7fd3034       0x50 lib/libgeneric.o
+                0xd7fd3034                panic
+ .text.string   0xd7fd3084       0xc0 lib/libgeneric.o
+ .text.put_dec  0xd7fd3144      0x1e4 lib/libgeneric.o
+ .text.number   0xd7fd3328      0x2b0 lib/libgeneric.o
+ .text.vsprintf
+                0xd7fd35d8      0x73c lib/libgeneric.o
+                0xd7fd35d8                vsprintf
+ .text.sprintf  0xd7fd3d14       0x2c lib/libgeneric.o
+                0xd7fd3d14                sprintf
+ .text.strict_strtoul
+                0xd7fd3d40       0x9c lib/libgeneric.o
+                0xd7fd3d40                strict_strtoul
+ .text.inflate_fast
+                0xd7fd3ddc      0x5a4 lib/zlib/libz.o
+                0xd7fd3ddc                inflate_fast
+ .text.inflate_table
+                0xd7fd4380      0x544 lib/zlib/libz.o
+                0xd7fd4380                inflate_table
+ .text.inflateReset
+                0xd7fd48c4       0x74 lib/zlib/libz.o
+                0xd7fd48c4                inflateReset
+ .text.inflateInit2_
+                0xd7fd4938      0x11c lib/zlib/libz.o
+                0xd7fd4938                inflateInit2_
+ .text.inflateEnd
+                0xd7fd4a54       0x70 lib/zlib/libz.o
+                0xd7fd4a54                inflateEnd
+ .text.adler32  0xd7fd4ac4      0x300 lib/zlib/libz.o
+                0xd7fd4ac4                adler32
+ .text.zcfree   0xd7fd4dc4        0x8 lib/zlib/libz.o
+                0xd7fd4dc4                zcfree
+ .text.zcalloc  0xd7fd4dcc       0x24 lib/zlib/libz.o
+                0xd7fd4dcc                zcalloc
+ .text.inflate  0xd7fd4df0     0x1618 lib/zlib/libz.o
+                0xd7fd4df0                inflate
+ .text.__fswab16
+                0xd7fd6408       0x48 net/libnet.o
+ .text.__fswab32
+                0xd7fd6450       0x28 net/libnet.o
+ .text.truncate_sz
+                0xd7fd6478       0x40 net/libnet.o
+ .text.NetCopyLong
+                0xd7fd64b8        0x8 net/libnet.o
+ .text.NetCopyIP
+                0xd7fd64c0       0x10 net/libnet.o
+ .text.DhcpOptionsProcess
+                0xd7fd64d0      0x1fc net/libnet.o
+ .text.NetWriteIP
+                0xd7fd66cc       0x48 net/libnet.o
+ .text.NetReadLong
+                0xd7fd6714       0x28 net/libnet.o
+ .text.DhcpExtended
+                0xd7fd673c      0x198 net/libnet.o
+ .text.BootpRequest
+                0xd7fd68d4      0x218 net/libnet.o
+                0xd7fd68d4                BootpRequest
+ .text.DhcpRequest
+                0xd7fd6aec        0x4 net/libnet.o
+                0xd7fd6aec                DhcpRequest
+ .text.DhcpHandler
+                0xd7fd6af0      0x36c net/libnet.o
+ .text.BootpTimeout
+                0xd7fd6e5c       0x50 net/libnet.o
+ .text.is_valid_ether_addr
+                0xd7fd6eac       0x4c net/libnet.o
+ .text.__def_eth_init
+                0xd7fd6ef8        0x8 net/libnet.o
+                0xd7fd6ef8                cpu_eth_init
+ .text.eth_get_dev
+                0xd7fd6f00       0x10 net/libnet.o
+                0xd7fd6f00                eth_get_dev
+ .text.eth_get_dev_index
+                0xd7fd6f10       0x20 net/libnet.o
+                0xd7fd6f10                eth_get_dev_index
+ .text.eth_halt
+                0xd7fd6f30       0x44 net/libnet.o
+                0xd7fd6f30                eth_halt
+ .text.eth_send
+                0xd7fd6f74       0x30 net/libnet.o
+                0xd7fd6f74                eth_send
+ .text.eth_rx   0xd7fd6fa4       0x24 net/libnet.o
+                0xd7fd6fa4                eth_rx
+ .text.eth_get_name
+                0xd7fd6fc8       0x24 net/libnet.o
+                0xd7fd6fc8                eth_get_name
+ .text.eth_current_changed
+                0xd7fd6fec       0x7c net/libnet.o
+ .text.eth_set_current
+                0xd7fd7068       0xcc net/libnet.o
+                0xd7fd7068                eth_set_current
+ .text.eth_try_another
+                0xd7fd7134       0x9c net/libnet.o
+                0xd7fd7134                eth_try_another
+ .text.bootstage_mark
+                0xd7fd71d0       0x1c net/libnet.o
+ .text.eth_register
+                0xd7fd71ec       0x94 net/libnet.o
+                0xd7fd71ec                eth_register
+ .text.eth_get_dev_by_name
+                0xd7fd7280       0x98 net/libnet.o
+                0xd7fd7280                eth_get_dev_by_name
+ .text.eth_parse_enetaddr
+                0xd7fd7318       0x78 net/libnet.o
+                0xd7fd7318                eth_parse_enetaddr
+ .text.eth_getenv_enetaddr
+                0xd7fd7390       0x34 net/libnet.o
+                0xd7fd7390                eth_getenv_enetaddr
+ .text.eth_getenv_enetaddr_by_index
+                0xd7fd73c4       0x54 net/libnet.o
+                0xd7fd73c4                eth_getenv_enetaddr_by_index
+ .text.eth_init
+                0xd7fd7418       0xec net/libnet.o
+                0xd7fd7418                eth_init
+ .text.eth_write_hwaddr
+                0xd7fd7504      0x128 net/libnet.o
+                0xd7fd7504                eth_write_hwaddr
+ .text.eth_initialize
+                0xd7fd762c      0x1d4 net/libnet.o
+                0xd7fd762c                eth_initialize
+ .text.startAgainTimeout
+                0xd7fd7800       0x14 net/libnet.o
+ .text.startAgainHandler
+                0xd7fd7814        0x4 net/libnet.o
+ .text.NetSetHandler
+                0xd7fd7818       0x10 net/libnet.o
+                0xd7fd7818                NetSetHandler
+ .text.PingHandler
+                0xd7fd7828       0x24 net/libnet.o
+ .text.NetCksum
+                0xd7fd784c       0x38 net/libnet.o
+                0xd7fd784c                NetCksum
+ .text.NetCksumOk
+                0xd7fd7884       0x24 net/libnet.o
+                0xd7fd7884                NetCksumOk
+ .text.copy_filename
+                0xd7fd78a8       0x50 net/libnet.o
+                0xd7fd78a8                copy_filename
+ .text.string_to_VLAN
+                0xd7fd78f8       0x50 net/libnet.o
+                0xd7fd78f8                string_to_VLAN
+ .text.getenv_VLAN
+                0xd7fd7948       0x24 net/libnet.o
+                0xd7fd7948                getenv_VLAN
+ .text.NetEthHdrSize
+                0xd7fd796c       0x48 net/libnet.o
+                0xd7fd796c                NetEthHdrSize
+ .text.ip_to_string
+                0xd7fd79b4       0x6c net/libnet.o
+                0xd7fd79b4                ip_to_string
+ .text.NetSetEther
+                0xd7fd7a20      0x110 net/libnet.o
+                0xd7fd7a20                NetSetEther
+ .text.NetSetIP
+                0xd7fd7b30      0x110 net/libnet.o
+                0xd7fd7b30                NetSetIP
+ .text.NetReadIP
+                0xd7fd7c40       0x28 net/libnet.o
+ .text.NetSendPacket
+                0xd7fd7c68        0x4 net/libnet.o
+                0xd7fd7c68                NetSendPacket
+ .text.NetReceive
+                0xd7fd7c6c      0x59c net/libnet.o
+                0xd7fd7c6c                NetReceive
+ .text.NetSetTimeout
+                0xd7fd8208       0x58 net/libnet.o
+                0xd7fd8208                NetSetTimeout
+ .text.PingTimeout
+                0xd7fd8260       0x28 net/libnet.o
+ .text.NetStartAgain
+                0xd7fd8288      0x134 net/libnet.o
+                0xd7fd8288                NetStartAgain
+ .text.net_auto_load
+                0xd7fd83bc       0x4c net/libnet.o
+                0xd7fd83bc                net_auto_load
+ .text.getenv_IPaddr
+                0xd7fd8408       0x1c net/libnet.o
+ .text.ArpRequest
+                0xd7fd8424      0x144 net/libnet.o
+                0xd7fd8424                ArpRequest
+ .text.PingSend
+                0xd7fd8568      0x1a8 net/libnet.o
+                0xd7fd8568                PingSend
+ .text.NetSendUDPPacket
+                0xd7fd8710      0x1b0 net/libnet.o
+                0xd7fd8710                NetSendUDPPacket
+ .text.ArpTimeoutCheck
+                0xd7fd88c0       0xa0 net/libnet.o
+                0xd7fd88c0                ArpTimeoutCheck
+ .text.NetLoop  0xd7fd8960      0x4cc net/libnet.o
+                0xd7fd8960                NetLoop
+ .text.TftpSend
+                0xd7fd8e2c      0x1f0 net/libnet.o
+ .text.TftpStart
+                0xd7fd901c      0x35c net/libnet.o
+                0xd7fd901c                TftpStart
+ .text.TftpTimeout
+                0xd7fd9378       0x9c net/libnet.o
+ .text.TftpHandler
+                0xd7fd9414      0x3cc net/libnet.o
+ .text.board_eth_init
+                0xd7fd97e0       0x3c board/altera/nios2-generic/libnios2-generic.o
+                0xd7fd97e0                board_eth_init
+ .text.checkboard
+                0xd7fd981c       0x2c board/altera/nios2-generic/libnios2-generic.o
+                0xd7fd981c                checkboard
+ .text.board_early_init_f
+                0xd7fd9848       0x48 board/altera/nios2-generic/libnios2-generic.o
+                0xd7fd9848                board_early_init_f
+ *(.gnu.linkonce.t*)
+ *(SORT(.rodata*))
+ .rodata        0xd7fd9890       0x10 net/libnet.o
+ .rodata.__FUNCTION__.4001
+                0xd7fd98a0       0x14 net/libnet.o
+ .rodata.__FUNCTION__.4063
+                0xd7fd98b4       0x10 common/libcommon.o
+ .rodata.__func__.3483
+                0xd7fd98c4       0x10 common/libcommon.o
+ .rodata.__func__.3839
+                0xd7fd98d4       0x10 common/libcommon.o
+ .rodata.__func__.3893
+                0xd7fd98e4       0x10 common/libcommon.o
+ .rodata.boot_os
+                0xd7fd98f4       0x4c common/libcommon.o
+ .rodata.crc_table
+                0xd7fd9940      0x400 lib/libgeneric.o
+ .rodata.default_environment
+                0xd7fd9d40       0x14 common/libcommon.o
+                0xd7fd9d40                default_environment
+ .rodata.desc_and_len_tbl
+                0xd7fd9d54       0x30 common/libcommon.o
+ .rodata.digits.3594
+                0xd7fd9d84       0x10 lib/libgeneric.o
+ .rodata.erase_seq
+                0xd7fd9d94        0x4 common/libcommon.o
+ .rodata.flash_offset_cfi
+                0xd7fd9d98        0x8 drivers/mtd/libmtd.o
+ .rodata.hex_asc
+                0xd7fd9da0       0x14 lib/libgeneric.o
+                0xd7fd9da0                hex_asc
+ .rodata.mon_lengths.3464
+                0xd7fd9db4       0x60 arch/nios2/cpu/libnios2.o
+ .rodata.phy_info
+                0xd7fd9e14        0x8 drivers/net/libnet.o
+ .rodata.reg_0_5_desc_tbl
+                0xd7fd9e1c       0x30 common/libcommon.o
+ .rodata.reg_0_desc_tbl
+                0xd7fd9e4c       0x78 common/libcommon.o
+ .rodata.reg_1_desc_tbl
+                0xd7fd9ec4       0xc0 common/libcommon.o
+ .rodata.reg_2_desc_tbl
+                0xd7fd9f84        0xc common/libcommon.o
+ .rodata.reg_3_desc_tbl
+                0xd7fd9f90       0x24 common/libcommon.o
+ .rodata.reg_4_desc_tbl
+                0xd7fd9fb4       0x90 common/libcommon.o
+ .rodata.reg_5_desc_tbl
+                0xd7fda044       0x90 common/libcommon.o
+ .rodata.str1.4
+                0xd7fda0d4       0xf7 arch/nios2/cpu/libnios2.o
+                                 0xfc (size before relaxing)
+ *fill*         0xd7fda1cb        0x1 00
+ .rodata.str1.4
+                0xd7fda1cc       0x39 arch/nios2/lib/libnios2.o
+                                 0x3c (size before relaxing)
+ *fill*         0xd7fda205        0x3 00
+ .rodata.str1.4
+                0xd7fda208     0x3cbd common/libcommon.o
+                               0x3eb8 (size before relaxing)
+ *fill*         0xd7fddec5        0x3 00
+ .rodata.str1.4
+                0xd7fddec8        0x9 drivers/misc/libmisc.o
+                                  0xc (size before relaxing)
+ *fill*         0xd7fdded1        0x3 00
+ .rodata.str1.4
+                0xd7fdded4      0x3af drivers/mtd/libmtd.o
+                                0x3f0 (size before relaxing)
+ *fill*         0xd7fde283        0x1 00
+ .rodata.str1.4
+                0xd7fde284       0xc5 drivers/net/libnet.o
+                                 0xd4 (size before relaxing)
+ *fill*         0xd7fde349        0x3 00
+ .rodata.str1.4
+                0xd7fde34c      0x16f lib/libgeneric.o
+                                0x178 (size before relaxing)
+ *fill*         0xd7fde4bb        0x1 00
+ .rodata.str1.4
+                0xd7fde4bc      0x23f lib/zlib/libz.o
+                                0x244 (size before relaxing)
+ *fill*         0xd7fde6fb        0x1 00
+ .rodata.str1.4
+                0xd7fde6fc      0x715 net/libnet.o
+                                0x7cc (size before relaxing)
+ *fill*         0xd7fdee11        0x3 00
+ .rodata.str1.4
+                0xd7fdee14       0x24 board/altera/nios2-generic/libnios2-generic.o
+ .rodata.tab_seq
+                0xd7fdee38        0xc common/libcommon.o
+ .rodata.uimage_arch
+                0xd7fdee44       0xfc common/libcommon.o
+ .rodata.uimage_comp
+                0xd7fdef40       0x48 common/libcommon.o
+ .rodata.uimage_os
+                0xd7fdef88       0x54 common/libcommon.o
+ .rodata.uimage_type
+                0xd7fdefdc       0xc0 common/libcommon.o
+ .rodata.year_lengths.3465
+                0xd7fdf09c        0x8 arch/nios2/cpu/libnios2.o
+ .rodata.crc16_tab
+                0xd7fdf0a4      0x200 lib/libgeneric.o
+ .rodata.dbase.3869
+                0xd7fdf2a4       0x40 lib/zlib/libz.o
+ .rodata.dext.3870
+                0xd7fdf2e4       0x40 lib/zlib/libz.o
+ .rodata.distfix
+                0xd7fdf324       0x80 lib/zlib/libz.o
+ .rodata.lbase.3867
+                0xd7fdf3a4       0x3e lib/zlib/libz.o
+ .rodata.lenfix
+                0xd7fdf3e2      0x800 lib/zlib/libz.o
+ .rodata.lext.3868
+                0xd7fdfbe2       0x3e lib/zlib/libz.o
+ .rodata.order.4096
+                0xd7fdfc20       0x26 lib/zlib/libz.o
+ .rodata._ctype
+                0xd7fdfc46      0x100 lib/libgeneric.o
+                0xd7fdfc46                _ctype
+ .rodata.day_name.3439
+                0xd7fdfd46       0x15 arch/nios2/cpu/libnios2.o
+ .rodata.mon_name.3440
+                0xd7fdfd5b       0x24 arch/nios2/cpu/libnios2.o
+ .rodata.names.3415
+                0xd7fdfd7f        0x6 lib/libgeneric.o
+ *(.gnu.linkonce.r*)
+                0xd7fdfd88                . = ALIGN (0x4)
+                0xd7fdfd88                _etext = .
+                0xd7fdfd88                PROVIDE (etext, .)
+                0xd7fdfd88                __u_boot_cmd_start = .
+
+.u_boot_cmd     0xd7fdfd88      0x420
+ *(.u_boot_cmd)
+ .u_boot_cmd    0xd7fdfd88       0x18 arch/nios2/cpu/libnios2.o
+                0xd7fdfd88                __u_boot_cmd_sysid
+ .u_boot_cmd    0xd7fdfda0      0x408 common/libcommon.o
+                0xd7fdfda0                __u_boot_cmd_bdinfo
+                0xd7fdfde8                __u_boot_cmd_bootm
+                0xd7fdff20                __u_boot_cmd_md
+                0xd7fdff08                __u_boot_cmd_loady
+                0xd7fdff98                __u_boot_cmd_cmp
+                0xd7fdfe00                __u_boot_cmd_iminfo
+                0xd7fdfe48                __u_boot_cmd_exit
+                0xd7fdff68                __u_boot_cmd_mw
+                0xd7fdffe0                __u_boot_cmd_loop
+                0xd7fdfe30                __u_boot_cmd_echo
+                0xd7fdfe60                __u_boot_cmd_flinfo
+                0xd7fdffc8                __u_boot_cmd_base
+                0xd7fdfec0                __u_boot_cmd_question_mark
+                0xd7fe0088                __u_boot_cmd_ping
+                0xd7fe0118                __u_boot_cmd_source
+                0xd7fe00b8                __u_boot_cmd_editenv
+                0xd7fdfef0                __u_boot_cmd_loadb
+                0xd7fe0058                __u_boot_cmd_tftpboot
+                0xd7fe0100                __u_boot_cmd_run
+                0xd7fe00a0                __u_boot_cmd_env
+                0xd7fe0028                __u_boot_cmd_sleep
+                0xd7fdff38                __u_boot_cmd_mm
+                0xd7fe0178                __u_boot_cmd_version
+                0xd7fdfe18                __u_boot_cmd_coninfo
+                0xd7fdfed8                __u_boot_cmd_loads
+                0xd7fdffb0                __u_boot_cmd_crc32
+                0xd7fe0040                __u_boot_cmd_bootp
+                0xd7fe0148                __u_boot_cmd_false
+                0xd7fe0190                __u_boot_cmd_showvar
+                0xd7fdfe78                __u_boot_cmd_erase
+                0xd7fe0010                __u_boot_cmd_mii
+                0xd7fdff50                __u_boot_cmd_nm
+                0xd7fe00d0                __u_boot_cmd_printenv
+                0xd7fdfdd0                __u_boot_cmd_reset
+                0xd7fdfe90                __u_boot_cmd_protect
+                0xd7fe0070                __u_boot_cmd_dhcp
+                0xd7fdfff8                __u_boot_cmd_mtest
+                0xd7fe0160                __u_boot_cmd_true
+                0xd7fdfdb8                __u_boot_cmd_go
+                0xd7fdff80                __u_boot_cmd_cp
+                0xd7fdfea8                __u_boot_cmd_help
+                0xd7fe0130                __u_boot_cmd_test
+                0xd7fe00e8                __u_boot_cmd_setenv
+                0xd7fe01a8                . = ALIGN (0x4)
+                0xd7fe01a8                __u_boot_cmd_end = .
+                0xd7fe01a8                _data = .
+
+.data           0xd7fe01a8      0x7b2
+ *(.data)
+ .data          0xd7fe01a8       0x40 arch/nios2/cpu/start.o
+                0xd7fe01a8                version_string
+ *(.data.*)
+ .data.init_sequence
+                0xd7fe01e8       0x20 arch/nios2/lib/libnios2.o
+                0xd7fe01e8                init_sequence
+ .data.cmd_bootm_sub
+                0xd7fe0208       0x90 common/libcommon.o
+ .data.do_echo  0xd7fe0298        0x4 common/libcommon.o
+ .data.dp_last_length
+                0xd7fe029c        0x4 common/libcommon.o
+ .data.load_addr
+                0xd7fe02a0        0x4 common/libcommon.o
+                0xd7fe02a0                load_addr
+ .data.cmd_env_sub
+                0xd7fe02a4       0xc0 common/libcommon.o
+ .data.env_id   0xd7fe0364        0x4 common/libcommon.o
+ .data.trim_threshold
+                0xd7fe0368        0x4 common/libcommon.o
+ .data.av_      0xd7fe036c      0x408 common/libcommon.o
+ .data.sbrk_base
+                0xd7fe0774        0x4 common/libcommon.o
+ .data.reserved_list
+                0xd7fe0778       0x84 common/libcommon.o
+ .data.hist_cur
+                0xd7fe07fc        0x4 common/libcommon.o
+ .data.stdio_names
+                0xd7fe0800        0xc common/libcommon.o
+                0xd7fe0800                stdio_names
+ .data.led_dev  0xd7fe080c       0x10 drivers/misc/libmisc.o
+                0xd7fe080c                led_dev
+ .data.phy_info_generic
+                0xd7fe081c       0x18 drivers/net/libnet.o
+ .data.__compound_literal.3
+                0xd7fe0834       0x24 drivers/net/libnet.o
+ .data.__compound_literal.4
+                0xd7fe0858       0x24 drivers/net/libnet.o
+ .data.__compound_literal.5
+                0xd7fe087c        0xc drivers/net/libnet.o
+ .data.__compound_literal.0
+                0xd7fe0888       0x60 drivers/net/libnet.o
+ .data.__compound_literal.1
+                0xd7fe08e8       0x30 drivers/net/libnet.o
+ .data.__compound_literal.2
+                0xd7fe0918        0xc drivers/net/libnet.o
+ .data.phy_info_M88E1111S
+                0xd7fe0924       0x18 drivers/net/libnet.o
+ .data.NetBcastAddr
+                0xd7fe093c        0x6 net/libnet.o
+                0xd7fe093c                NetBcastAddr
+ .data.NetOurVLAN
+                0xd7fe0942        0x2 net/libnet.o
+                0xd7fe0942                NetOurVLAN
+ .data.NetOurNativeVLAN
+                0xd7fe0944        0x2 net/libnet.o
+                0xd7fe0944                NetOurNativeVLAN
+ *fill*         0xd7fe0946        0x2 00
+ .data.TftpRRQTimeoutCountMax
+                0xd7fe0948        0x4 net/libnet.o
+                0xd7fe0948                TftpRRQTimeoutCountMax
+ .data.TftpBlkSizeOption
+                0xd7fe094c        0x2 net/libnet.o
+ *fill*         0xd7fe094e        0x2 00
+ .data.TftpTimeoutMSecs
+                0xd7fe0950        0x4 net/libnet.o
+ .data.TftpTimeoutCountMax
+                0xd7fe0954        0x4 net/libnet.o
+ .data.TftpBlkSize
+                0xd7fe0958        0x2 net/libnet.o
+ *(.gnu.linkonce.d*)
+                0xd7fe0960                . = ALIGN (0x10)
+                0xd7fe0960                _gp = .
+                0xd7fe0960                PROVIDE (gp, .)
+
+.sdata
+ *(.sdata)
+ *(.sdata.*)
+ *(.gnu.linkonce.s.*)
+                0xd7fe0960                . = ALIGN (0x4)
+                0xd7fe0960                _edata = .
+                0xd7fe0960                PROVIDE (edata, .)
+                0xd7fe0960                __bss_start = .
+
+.sbss           0xd7fe0960       0xa8
+ *(.sbss)
+ .sbss          0xd7fe0960       0x2c common/libcommon.o
+                0xd7fe0960                save_addr
+                0xd7fe0964                his_pad_char
+                0xd7fe0968                env_ptr
+                0xd7fe096c                os_data_init
+                0xd7fe0970                nesting_level
+                0xd7fe0974                send_ptr
+                0xd7fe0978                last_return_code
+                0xd7fe097c                os_data_char
+                0xd7fe0980                save_size
+                0xd7fe0984                his_eol
+                0xd7fe0985                his_quote
+                0xd7fe0988                his_pad_count
+ .sbss          0xd7fe098c       0x7c net/libnet.o
+                0xd7fe098c                NetDHCPServerIP
+                0xd7fe0990                NetArpWaitTry
+                0xd7fe0994                NetArpWaitPacketMAC
+                0xd7fe0998                NetOurEther
+                0xd7fe09a0                NetOurIP
+                0xd7fe09a4                NetPingIP
+                0xd7fe09a8                NetServerIP
+                0xd7fe09ac                NetArpWaitTxPacketSize
+                0xd7fe09b0                NetArpWaitReplyIP
+                0xd7fe09b4                NetArpWaitTxPacket
+                0xd7fe09b8                NetArpWaitPacketIP
+                0xd7fe09bc                NetState
+                0xd7fe09c0                BootpTry
+                0xd7fe09c4                NetServerEther
+                0xd7fe09cc                NetOurSubnetMask
+                0xd7fe09d0                NetBootFileSize
+                0xd7fe09d4                NetIPID
+                0xd7fe09d8                NetRxPacket
+                0xd7fe09dc                BootpID
+                0xd7fe09e0                dhcp_leasetime
+                0xd7fe09e4                NetOurGatewayIP
+                0xd7fe09e8                NetEtherNullAddr
+                0xd7fe09f0                NetRestartWrap
+                0xd7fe09f4                NetTxPacket
+                0xd7fe09f8                NetBootFileXferSize
+                0xd7fe09fc                NetOurDNSIP
+                0xd7fe0a00                NetRxPacketLen
+                0xd7fe0a04                NetArpWaitTimerStart
+ *(.sbss.*)
+ *(.gnu.linkonce.sb.*)
+ *(.scommon)
+                0xd7fe0a08                . = ALIGN (0x4)
+
+.bss            0xd7fe0a08     0x6f58
+ *(.bss)
+ *(.bss.*)
+ .bss.timestamp
+                0xd7fe0a08        0x4 arch/nios2/cpu/libnios2.o
+                0xd7fe0a08                timestamp
+ .bss.vecs      0xd7fe0a0c      0x180 arch/nios2/cpu/libnios2.o
+ .bss.a_b       0xd7fe0b8c       0x18 common/libcommon.o
+ .bss.os_data_state
+                0xd7fe0ba4        0x4 common/libcommon.o
+ .bss.os_data_state_saved
+                0xd7fe0ba8        0x4 common/libcommon.o
+ .bss.os_data_addr
+                0xd7fe0bac        0x4 common/libcommon.o
+ .bss.os_data_addr_saved
+                0xd7fe0bb0        0x4 common/libcommon.o
+ .bss.bin_start_address
+                0xd7fe0bb4        0x4 common/libcommon.o
+ .bss.k_data_escape
+                0xd7fe0bb8        0x4 common/libcommon.o
+ .bss.k_data_escape_saved
+                0xd7fe0bbc        0x4 common/libcommon.o
+ .bss.base_address
+                0xd7fe0bc0        0x4 common/libcommon.o
+ .bss.dp_last_addr
+                0xd7fe0bc4        0x4 common/libcommon.o
+ .bss.dp_last_size
+                0xd7fe0bc8        0x4 common/libcommon.o
+ .bss.mm_last_addr
+                0xd7fe0bcc        0x4 common/libcommon.o
+ .bss.mm_last_size
+                0xd7fe0bd0        0x4 common/libcommon.o
+ .bss.last_op   0xd7fe0bd4        0x2 common/libcommon.o
+ *fill*         0xd7fe0bd6        0x2 00
+ .bss.last_data
+                0xd7fe0bd8        0x4 common/libcommon.o
+ .bss.last_addr_lo
+                0xd7fe0bdc        0x4 common/libcommon.o
+ .bss.last_addr_hi
+                0xd7fe0be0        0x4 common/libcommon.o
+ .bss.last_reg_lo
+                0xd7fe0be4        0x4 common/libcommon.o
+ .bss.last_reg_hi
+                0xd7fe0be8        0x4 common/libcommon.o
+ .bss.ctrlc_was_pressed
+                0xd7fe0bec        0x4 common/libcommon.o
+ .bss.ctrlc_disabled
+                0xd7fe0bf0        0x4 common/libcommon.o
+ .bss.mem_malloc_start
+                0xd7fe0bf4        0x4 common/libcommon.o
+                0xd7fe0bf4                mem_malloc_start
+ .bss.mem_malloc_end
+                0xd7fe0bf8        0x4 common/libcommon.o
+                0xd7fe0bf8                mem_malloc_end
+ .bss.mem_malloc_brk
+                0xd7fe0bfc        0x4 common/libcommon.o
+                0xd7fe0bfc                mem_malloc_brk
+ .bss.top_pad   0xd7fe0c00        0x4 common/libcommon.o
+ .bss.current_mallinfo
+                0xd7fe0c04       0x28 common/libcommon.o
+ .bss.max_sbrked_mem
+                0xd7fe0c2c        0x4 common/libcommon.o
+ .bss.max_total_mem
+                0xd7fe0c30        0x4 common/libcommon.o
+ .bss.top_vars  0xd7fe0c34        0x4 common/libcommon.o
+ .bss.flag_repeat
+                0xd7fe0c38        0x4 common/libcommon.o
+ .bss.do_repeat
+                0xd7fe0c3c        0x4 common/libcommon.o
+ .bss.the_command.3606
+                0xd7fe0c40      0x100 common/libcommon.o
+ .bss.buf.4051  0xd7fe0d40       0x28 common/libcommon.o
+ .bss.ifs       0xd7fe0d68        0x4 common/libcommon.o
+ .bss.map       0xd7fe0d6c      0x100 common/libcommon.o
+ .bss.hist_num  0xd7fe0e6c        0x4 common/libcommon.o
+                0xd7fe0e6c                hist_num
+ .bss.initted.3663
+                0xd7fe0e70        0x4 common/libcommon.o
+ .bss.hist_max  0xd7fe0e74        0x4 common/libcommon.o
+ .bss.hist_add_idx
+                0xd7fe0e78        0x4 common/libcommon.o
+ .bss.mii_devs  0xd7fe0e7c        0x8 common/libcommon.o
+ .bss.current_mii
+                0xd7fe0e84        0x4 common/libcommon.o
+ .bss.stdio_devices
+                0xd7fe0e88        0xc common/libcommon.o
+                0xd7fe0e88                stdio_devices
+ .bss.devs      0xd7fe0e94       0x3c common/libcommon.o
+ .bss.xyz       0xd7fe0ed0      0x43c common/libcommon.o
+ .bss.pios      0xd7fe130c       0x24 drivers/gpio/libgpio.o
+ .bss.pio_num   0xd7fe1330        0x4 drivers/gpio/libgpio.o
+ .bss.gpios     0xd7fe1334      0x140 drivers/gpio/libgpio.o
+ .bss.pio_gpio_num
+                0xd7fe1474        0x4 drivers/gpio/libgpio.o
+ .bss.status_led_init_done
+                0xd7fe1478        0x4 drivers/misc/libmisc.o
+ .bss.saved_info.3942
+                0xd7fe147c        0x4 drivers/mtd/libmtd.o
+ .bss.saved_sector.3941
+                0xd7fe1480        0x4 drivers/mtd/libmtd.o
+ .bss.errno     0xd7fe1484        0x4 lib/libgeneric.o
+                0xd7fe1484                errno
+ .bss.dhcp_state
+                0xd7fe1488        0x4 net/libnet.o
+                0xd7fe1488                dhcp_state
+ .bss.env_changed_id.4156
+                0xd7fe148c        0x4 net/libnet.o
+ .bss.act.4155  0xd7fe1490        0x4 net/libnet.o
+ .bss.first_failed.4145
+                0xd7fe1494        0x4 net/libnet.o
+ .bss.index.4056
+                0xd7fe1498        0x4 net/libnet.o
+ .bss.eth_devices
+                0xd7fe149c        0x4 net/libnet.o
+ .bss.eth_current
+                0xd7fe14a0        0x4 net/libnet.o
+ .bss.NetOurNISDomain
+                0xd7fe14a4       0x20 net/libnet.o
+                0xd7fe14a4                NetOurNISDomain
+ .bss.NetOurHostName
+                0xd7fe14c4       0x20 net/libnet.o
+                0xd7fe14c4                NetOurHostName
+ .bss.NetOurRootPath
+                0xd7fe14e4       0x40 net/libnet.o
+                0xd7fe14e4                NetOurRootPath
+ .bss.mac.4249  0xd7fe1524        0x6 net/libnet.o
+ *fill*         0xd7fe152a        0x2 00
+ .bss.env_changed_id.4098
+                0xd7fe152c        0x4 net/libnet.o
+ .bss.NetRestarted
+                0xd7fe1530        0x4 net/libnet.o
+ .bss.NetDevExists
+                0xd7fe1534        0x4 net/libnet.o
+ .bss.packetHandler
+                0xd7fe1538        0x4 net/libnet.o
+ .bss.timeHandler
+                0xd7fe153c        0x4 net/libnet.o
+ .bss.timeStart
+                0xd7fe1540        0x4 net/libnet.o
+ .bss.timeDelta
+                0xd7fe1544        0x4 net/libnet.o
+ .bss.NetTryCount
+                0xd7fe1548        0x4 net/libnet.o
+ .bss.PingSeqNo
+                0xd7fe154c        0x2 net/libnet.o
+ *fill*         0xd7fe154e        0x2 00
+ .bss.TftpRemoteIP
+                0xd7fe1550        0x4 net/libnet.o
+ .bss.TftpRemotePort
+                0xd7fe1554        0x4 net/libnet.o
+ .bss.TftpOurPort
+                0xd7fe1558        0x4 net/libnet.o
+ .bss.TftpTimeoutCount
+                0xd7fe155c        0x4 net/libnet.o
+ .bss.TftpBlock
+                0xd7fe1560        0x4 net/libnet.o
+ .bss.TftpLastBlock
+                0xd7fe1564        0x4 net/libnet.o
+ .bss.TftpBlockWrap
+                0xd7fe1568        0x4 net/libnet.o
+ .bss.TftpBlockWrapOffset
+                0xd7fe156c        0x4 net/libnet.o
+ .bss.TftpState
+                0xd7fe1570        0x4 net/libnet.o
+ .bss.default_filename
+                0xd7fe1574        0xd net/libnet.o
+ .bss.tftp_filename
+                0xd7fe1581       0x80 net/libnet.o
+ *(.dynbss)
+ *(COMMON)
+ *fill*         0xd7fe1601        0x3 00
+ COMMON         0xd7fe1604     0x1614 common/libcommon.o
+                0xd7fe1604                console_buffer
+                0xd7fe1708                hist_list
+                0xd7fe1758                env_htab
+                0xd7fe1764                hist_lines
+                0xd7fe2b78                images
+                0xd7fe2c04                send_parms
+ COMMON         0xd7fe2c18     0x2878 drivers/mtd/libmtd.o
+                0xd7fe2c18                flash_info
+ COMMON         0xd7fe5490     0x24d0 net/libnet.o
+                0xd7fe5490                NetRxPackets
+                0xd7fe54a0                BootFile
+                0xd7fe5520                NetArpWaitPacketBuf
+                0xd7fe5b40                PktBuf
+ *(.scommon)
+                0xd7fe7960                . = ALIGN (0x4)
+                0xd7fe7960                __bss_end__ = .
+                0xd7fe7960                PROVIDE (end, .)
+
+.stab
+ *(.stab)
+
+.stabstr
+ *(.stabstr)
+
+.stab.excl
+ *(.stab.excl)
+
+.stab.exclstr
+ *(.stab.exclstr)
+
+.stab.index
+ *(.stab.index)
+
+.stab.indexstr
+ *(.stab.indexstr)
+
+.comment        0x00000000      0x558
+ *(.comment)
+ .comment       0x00000000       0x6c arch/nios2/cpu/libnios2.o
+ .comment       0x0000006c       0x48 arch/nios2/lib/libnios2.o
+ .comment       0x000000b4      0x252 common/libcommon.o
+ .comment       0x00000306       0x12 disk/libdisk.o
+ .comment       0x00000318       0x12 drivers/gpio/libgpio.o
+ .comment       0x0000032a       0x12 drivers/input/libinput.o
+ .comment       0x0000033c       0x24 drivers/misc/libmisc.o
+ .comment       0x00000360       0x12 drivers/mtd/libmtd.o
+ .comment       0x00000372       0x12 drivers/net/libnet.o
+ .comment       0x00000384       0x24 drivers/pcmcia/libpcmcia.o
+ .comment       0x000003a8       0x12 drivers/rtc/librtc.o
+ .comment       0x000003ba       0x12 drivers/serial/libserial.o
+ .comment       0x000003cc      0x120 lib/libgeneric.o
+ .comment       0x000004ec       0x12 lib/zlib/libz.o
+ .comment       0x000004fe       0x48 net/libnet.o
+ .comment       0x00000546       0x12 board/altera/nios2-generic/libnios2-generic.o
+
+.debug
+ *(.debug)
+
+.line
+ *(.line)
+
+.debug_srcinfo
+ *(.debug_srcinfo)
+
+.debug_sfnames
+ *(.debug_sfnames)
+
+.debug_aranges  0x00000000     0x1968
+ *(.debug_aranges)
+ .debug_aranges
+                0x00000000      0x120 arch/nios2/cpu/libnios2.o
+ .debug_aranges
+                0x00000120      0x138 arch/nios2/lib/libnios2.o
+ .debug_aranges
+                0x00000258      0xc50 common/libcommon.o
+ .debug_aranges
+                0x00000ea8       0x28 disk/libdisk.o
+ .debug_aranges
+                0x00000ed0       0x78 drivers/gpio/libgpio.o
+ .debug_aranges
+                0x00000f48       0x68 drivers/input/libinput.o
+ .debug_aranges
+                0x00000fb0       0x70 drivers/misc/libmisc.o
+ .debug_aranges
+                0x00001020       0xe8 drivers/mtd/libmtd.o
+ .debug_aranges
+                0x00001108       0xb0 drivers/net/libnet.o
+ .debug_aranges
+                0x000011b8       0x50 drivers/serial/libserial.o
+ .debug_aranges
+                0x00001208      0x3f8 lib/libgeneric.o
+ .debug_aranges
+                0x00001600       0x70 lib/zlib/libz.o
+ .debug_aranges
+                0x00001670      0x2b8 net/libnet.o
+ .debug_aranges
+                0x00001928       0x40 board/altera/nios2-generic/libnios2-generic.o
+
+.debug_pubnames
+                0x00000000     0x2858
+ *(.debug_pubnames)
+ .debug_pubnames
+                0x00000000      0x1b6 arch/nios2/cpu/libnios2.o
+ .debug_pubnames
+                0x000001b6      0x19f arch/nios2/lib/libnios2.o
+ .debug_pubnames
+                0x00000355     0x153b common/libcommon.o
+ .debug_pubnames
+                0x00001890       0x1e disk/libdisk.o
+ .debug_pubnames
+                0x000018ae       0xc4 drivers/gpio/libgpio.o
+ .debug_pubnames
+                0x00001972       0x9a drivers/input/libinput.o
+ .debug_pubnames
+                0x00001a0c       0x85 drivers/misc/libmisc.o
+ .debug_pubnames
+                0x00001a91      0x121 drivers/mtd/libmtd.o
+ .debug_pubnames
+                0x00001bb2       0x2c drivers/net/libnet.o
+ .debug_pubnames
+                0x00001bde       0x7b drivers/serial/libserial.o
+ .debug_pubnames
+                0x00001c59      0x4a6 lib/libgeneric.o
+ .debug_pubnames
+                0x000020ff       0xb4 lib/zlib/libz.o
+ .debug_pubnames
+                0x000021b3      0x64d net/libnet.o
+ .debug_pubnames
+                0x00002800       0x58 board/altera/nios2-generic/libnios2-generic.o
+
+.debug_info     0x00000000    0x1df26
+ *(.debug_info)
+ .debug_info    0x00000000      0xe53 arch/nios2/cpu/libnios2.o
+ .debug_info    0x00000e53     0x141c arch/nios2/lib/libnios2.o
+ .debug_info    0x0000226f     0xe8fe common/libcommon.o
+ .debug_info    0x00010b6d      0x265 disk/libdisk.o
+ .debug_info    0x00010dd2      0x601 drivers/gpio/libgpio.o
+ .debug_info    0x000113d3      0x924 drivers/input/libinput.o
+ .debug_info    0x00011cf7      0x2c7 drivers/misc/libmisc.o
+ .debug_info    0x00011fbe     0x27ae drivers/mtd/libmtd.o
+ .debug_info    0x0001476c     0x1a82 drivers/net/libnet.o
+ .debug_info    0x000161ee       0xf4 drivers/pcmcia/libpcmcia.o
+ .debug_info    0x000162e2       0x7a drivers/rtc/librtc.o
+ .debug_info    0x0001635c      0x393 drivers/serial/libserial.o
+ .debug_info    0x000166ef     0x308c lib/libgeneric.o
+ .debug_info    0x0001977b      0xfe8 lib/zlib/libz.o
+ .debug_info    0x0001a763     0x3626 net/libnet.o
+ .debug_info    0x0001dd89      0x19d board/altera/nios2-generic/libnios2-generic.o
+
+.debug_abbrev   0x00000000     0x7a32
+ *(.debug_abbrev)
+ .debug_abbrev  0x00000000      0x5e6 arch/nios2/cpu/libnios2.o
+ .debug_abbrev  0x000005e6      0x476 arch/nios2/lib/libnios2.o
+ .debug_abbrev  0x00000a5c     0x3c50 common/libcommon.o
+ .debug_abbrev  0x000046ac       0xd0 disk/libdisk.o
+ .debug_abbrev  0x0000477c      0x253 drivers/gpio/libgpio.o
+ .debug_abbrev  0x000049cf      0x2ed drivers/input/libinput.o
+ .debug_abbrev  0x00004cbc      0x175 drivers/misc/libmisc.o
+ .debug_abbrev  0x00004e31      0x423 drivers/mtd/libmtd.o
+ .debug_abbrev  0x00005254      0x3bb drivers/net/libnet.o
+ .debug_abbrev  0x0000560f       0x54 drivers/pcmcia/libpcmcia.o
+ .debug_abbrev  0x00005663       0x2a drivers/rtc/librtc.o
+ .debug_abbrev  0x0000568d      0x181 drivers/serial/libserial.o
+ .debug_abbrev  0x0000580e     0x10c8 lib/libgeneric.o
+ .debug_abbrev  0x000068d6      0x31a lib/zlib/libz.o
+ .debug_abbrev  0x00006bf0      0xd74 net/libnet.o
+ .debug_abbrev  0x00007964       0xce board/altera/nios2-generic/libnios2-generic.o
+
+.debug_line     0x00000000    0x205e4
+ *(.debug_line)
+ .debug_line    0x00000000     0x1228 arch/nios2/cpu/libnios2.o
+ .debug_line    0x00001228     0x12d6 arch/nios2/lib/libnios2.o
+ .debug_line    0x000024fe     0xf6bc common/libcommon.o
+ .debug_line    0x00011bba      0x228 disk/libdisk.o
+ .debug_line    0x00011de2      0x730 drivers/gpio/libgpio.o
+ .debug_line    0x00012512      0x7d8 drivers/input/libinput.o
+ .debug_line    0x00012cea      0x5da drivers/misc/libmisc.o
+ .debug_line    0x000132c4     0x1f1b drivers/mtd/libmtd.o
+ .debug_line    0x000151df      0xf3b drivers/net/libnet.o
+ .debug_line    0x0001611a      0x404 drivers/pcmcia/libpcmcia.o
+ .debug_line    0x0001651e      0x20b drivers/rtc/librtc.o
+ .debug_line    0x00016729      0x339 drivers/serial/libserial.o
+ .debug_line    0x00016a62     0x4208 lib/libgeneric.o
+ .debug_line    0x0001ac6a     0x2071 lib/zlib/libz.o
+ .debug_line    0x0001ccdb     0x3631 net/libnet.o
+ .debug_line    0x0002030c      0x2d8 board/altera/nios2-generic/libnios2-generic.o
+
+.debug_frame    0x00000000     0x392c
+ *(.debug_frame)
+ .debug_frame   0x00000000      0x1d8 arch/nios2/cpu/libnios2.o
+ .debug_frame   0x000001d8      0x240 arch/nios2/lib/libnios2.o
+ .debug_frame   0x00000418     0x1c88 common/libcommon.o
+ .debug_frame   0x000020a0       0x20 disk/libdisk.o
+ .debug_frame   0x000020c0      0x140 drivers/gpio/libgpio.o
+ .debug_frame   0x00002200      0x100 drivers/input/libinput.o
+ .debug_frame   0x00002300       0xac drivers/misc/libmisc.o
+ .debug_frame   0x000023ac      0x2c8 drivers/mtd/libmtd.o
+ .debug_frame   0x00002674      0x1d8 drivers/net/libnet.o
+ .debug_frame   0x0000284c       0x88 drivers/serial/libserial.o
+ .debug_frame   0x000028d4      0x7e0 lib/libgeneric.o
+ .debug_frame   0x000030b4      0x118 lib/zlib/libz.o
+ .debug_frame   0x000031cc      0x6f8 net/libnet.o
+ .debug_frame   0x000038c4       0x68 board/altera/nios2-generic/libnios2-generic.o
+
+.debug_str      0x00000000     0x6a36
+ *(.debug_str)
+ .debug_str     0x00000000      0x358 arch/nios2/cpu/libnios2.o
+                                0x87a (size before relaxing)
+ .debug_str     0x00000358      0x43b arch/nios2/lib/libnios2.o
+                                0x820 (size before relaxing)
+ .debug_str     0x00000793     0x332e common/libcommon.o
+                               0x8432 (size before relaxing)
+ .debug_str     0x00003ac1       0xbe disk/libdisk.o
+                                0x17b (size before relaxing)
+ .debug_str     0x00003b7f      0x168 drivers/gpio/libgpio.o
+                                0x237 (size before relaxing)
+ .debug_str     0x00003ce7      0x253 drivers/input/libinput.o
+                                0x38e (size before relaxing)
+ .debug_str     0x00003f3a       0xdb drivers/misc/libmisc.o
+                                0x26f (size before relaxing)
+ .debug_str     0x00004015      0x65e drivers/mtd/libmtd.o
+                                0x8e4 (size before relaxing)
+ .debug_str     0x00004673      0xda0 drivers/net/libnet.o
+                               0x1004 (size before relaxing)
+ .debug_str     0x00005413       0x5a drivers/pcmcia/libpcmcia.o
+                                0x1c1 (size before relaxing)
+ .debug_str     0x0000546d       0x41 drivers/rtc/librtc.o
+                                 0xd6 (size before relaxing)
+ .debug_str     0x000054ae       0xc8 drivers/serial/libserial.o
+                                0x244 (size before relaxing)
+ .debug_str     0x00005576      0x5b6 lib/libgeneric.o
+                               0x140e (size before relaxing)
+ .debug_str     0x00005b2c      0x2f7 lib/zlib/libz.o
+                                0x57a (size before relaxing)
+ .debug_str     0x00005e23      0xb79 net/libnet.o
+                               0x35a3 (size before relaxing)
+ .debug_str     0x0000699c       0x9a board/altera/nios2-generic/libnios2-generic.o
+                                0x1ae (size before relaxing)
+
+.debug_loc      0x00000000    0x181ca
+ *(.debug_loc)
+ .debug_loc     0x00000000      0x4aa arch/nios2/cpu/libnios2.o
+ .debug_loc     0x000004aa     0x11b7 arch/nios2/lib/libnios2.o
+ .debug_loc     0x00001661     0xca8a common/libcommon.o
+ .debug_loc     0x0000e0eb      0x59b drivers/gpio/libgpio.o
+ .debug_loc     0x0000e686      0x662 drivers/input/libinput.o
+ .debug_loc     0x0000ece8      0x1a1 drivers/misc/libmisc.o
+ .debug_loc     0x0000ee89     0x1601 drivers/mtd/libmtd.o
+ .debug_loc     0x0001048a      0x93d drivers/net/libnet.o
+ .debug_loc     0x00010dc7       0xdc drivers/serial/libserial.o
+ .debug_loc     0x00010ea3     0x313b lib/libgeneric.o
+ .debug_loc     0x00013fde     0x2449 lib/zlib/libz.o
+ .debug_loc     0x00016427     0x1d33 net/libnet.o
+ .debug_loc     0x0001815a       0x70 board/altera/nios2-generic/libnios2-generic.o
+
+.debug_macinfo
+ *(.debug_macinfo)
+
+.debug_weaknames
+ *(.debug_weaknames)
+
+.debug_funcnames
+ *(.debug_funcnames)
+
+.debug_typenames
+ *(.debug_typenames)
+
+.debug_varnames
+ *(.debug_varnames)
+LOAD arch/nios2/cpu/start.o
+START GROUP
+LOAD api/libapi.o
+LOAD arch/nios2/cpu/libnios2.o
+LOAD arch/nios2/lib/libnios2.o
+LOAD common/libcommon.o
+LOAD disk/libdisk.o
+LOAD drivers/bios_emulator/libatibiosemu.o
+LOAD drivers/block/libblock.o
+LOAD drivers/dma/libdma.o
+LOAD drivers/fpga/libfpga.o
+LOAD drivers/gpio/libgpio.o
+LOAD drivers/hwmon/libhwmon.o
+LOAD drivers/i2c/libi2c.o
+LOAD drivers/input/libinput.o
+LOAD drivers/misc/libmisc.o
+LOAD drivers/mmc/libmmc.o
+LOAD drivers/mtd/libmtd.o
+LOAD drivers/mtd/nand/libnand.o
+LOAD drivers/mtd/onenand/libonenand.o
+LOAD drivers/mtd/spi/libspi_flash.o
+LOAD drivers/mtd/ubi/libubi.o
+LOAD drivers/net/libnet.o
+LOAD drivers/net/phy/libphy.o
+LOAD drivers/pci/libpci.o
+LOAD drivers/pcmcia/libpcmcia.o
+LOAD drivers/power/libpower.o
+LOAD drivers/rtc/librtc.o
+LOAD drivers/serial/libserial.o
+LOAD drivers/spi/libspi.o
+LOAD drivers/twserial/libtws.o
+LOAD drivers/usb/eth/libusb_eth.o
+LOAD drivers/usb/gadget/libusb_gadget.o
+LOAD drivers/usb/host/libusb_host.o
+LOAD drivers/usb/musb/libusb_musb.o
+LOAD drivers/usb/phy/libusb_phy.o
+LOAD drivers/usb/ulpi/libusb_ulpi.o
+LOAD drivers/video/libvideo.o
+LOAD drivers/watchdog/libwatchdog.o
+LOAD fs/cramfs/libcramfs.o
+LOAD fs/ext2/libext2fs.o
+LOAD fs/fat/libfat.o
+LOAD fs/fdos/libfdos.o
+LOAD fs/jffs2/libjffs2.o
+LOAD fs/reiserfs/libreiserfs.o
+LOAD fs/ubifs/libubifs.o
+LOAD fs/yaffs2/libyaffs2.o
+LOAD lib/libfdt/libfdt.o
+LOAD lib/libgeneric.o
+LOAD lib/lzma/liblzma.o
+LOAD lib/lzo/liblzo.o
+LOAD lib/zlib/libz.o
+LOAD net/libnet.o
+LOAD post/libpost.o
+LOAD board/altera/nios2-generic/libnios2-generic.o
+END GROUP
+LOAD /data/dwesterg/nios2-linux/nios2-linux/toolchain-mmu/x86-linux2/bin/../lib/gcc/nios2-linux-gnu/4.1.2/libgcc.a
+OUTPUT(u-boot elf32-littlenios2)
+
+.debug_ranges   0x00000000     0x1a60
+ .debug_ranges  0x00000000      0x1e0 arch/nios2/lib/libnios2.o
+ .debug_ranges  0x000001e0      0xd30 common/libcommon.o
+ .debug_ranges  0x00000f10       0x40 drivers/gpio/libgpio.o
+ .debug_ranges  0x00000f50       0xe8 drivers/input/libinput.o
+ .debug_ranges  0x00001038      0x548 drivers/mtd/libmtd.o
+ .debug_ranges  0x00001580       0x70 drivers/net/libnet.o
+ .debug_ranges  0x000015f0      0x198 lib/libgeneric.o
+ .debug_ranges  0x00001788       0x38 lib/zlib/libz.o
+ .debug_ranges  0x000017c0      0x2a0 net/libnet.o

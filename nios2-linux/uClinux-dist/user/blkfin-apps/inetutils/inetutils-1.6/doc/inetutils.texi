@@ -1,0 +1,219 @@
+\input texinfo @c -*-texinfo-*-
+@c %**start of header
+@setfilename inetutils.info
+@settitle GNU networking utilities
+@c %**end of header
+
+@include version.texi
+
+@c Define new indices for file names and options.
+@defcodeindex fl
+@defcodeindex op
+
+@c Put everything in one index (arbitrarily chosen to be the concept index).
+@syncodeindex fl cp
+@syncodeindex fn cp
+@syncodeindex ky cp
+@syncodeindex op cp
+@syncodeindex pg cp
+@syncodeindex vr cp
+
+@set Francois Fran@,{c}ois
+
+@dircategory Network applications
+@direntry
+* Inetutils: (inetutils).       GNU networking utilities.
+@end direntry
+
+@dircategory Individual utilities
+@direntry
+* traceroute: (inetutils)traceroute invocation.    Trace the route to a host.
+* ftp: (inetutils)ftp invocation.               File Transfer Protocol.
+* ftpd: (inetutils)ftpd invocation.             FTP Daemon.
+* inetd: (inetutils)inetd invocation.           Internet super-server.
+* ping: (inetutils)ping invocation.             Packets to network hosts.
+* rcp: (inetutils)rcp invocation.               Strip non-directory suffix.
+* rexecd: (inetutils)rexecd invocation.         Remote execution server.
+* rlogin: (inetutils)rlogin invocation.         Remote login.
+* rlogind: (inetutils)rlogind invocation.       Remote login server.
+* rsh: (inetutils)rsh invocation.               Remote shell.
+* rshd: (inetutils)rshd invocation.             Remote shell server.
+* logger: (inetutils)logger invocation.            Make entries in the system log.
+* syslogd: (inetutils)syslogd invocation.       Syslog server.
+* talk: (inetutils)talk invocation.             Talk client.
+* talkd: (inetutils)talkd invocation.           Talk server.
+* telnet: (inetutils)telnet invocation.         User interface to TELNET.
+* telnetd: (inetutils)telnetd invocation.       Telnet server.
+* tftp: (inetutils)tftp invocation.             Trivial FTP.
+* tftpd: (inetutils)tftpd invocation.           TFTP server.
+* uucpd: (inetutils)uucpd invocation.           Unix to Unix Copy.
+* whois: (inetutils)whois invocation.           Whois user interface.
+@end direntry
+
+@copying
+This manual documents version @value{VERSION} of the GNU networking
+utilities.
+
+Copyright @copyright{} 1994, 1995, 1996, 2000, 2001, 2007, 2008 Free
+Software Foundation, Inc.
+
+@quotation
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.2 or
+any later version published by the Free Software Foundation; with no
+Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+Texts.  A copy of the license is included in the section entitled
+``GNU Free Documentation License''.
+@end quotation
+@end copying
+
+@titlepage
+@title GNU @code{inetutils}
+@subtitle GNU networking utilities
+@subtitle for version @value{VERSION}, @value{UPDATED}
+@author Alain Magloire et al.
+
+@page
+@vskip 0pt plus 1filll
+@insertcopying
+@end titlepage
+
+
+@ifnottex
+@node Top
+@top GNU networking utilities
+
+@insertcopying
+@end ifnottex
+
+@cindex networking utilities
+
+@menu
+* Introduction::                       Caveats, overview, and authors.
+* Common options::                     Common options.
+* traceroute invocation::  Trace the route to a host.
+* ftp invocation::                         FTP client.
+* ftpd invocation::                        FTP Daemon.
+* inetd::                       Interner super-server.
+* ping::                        Packets to network hosts.
+* rcp invocation::                 Remote copy
+* rexecd invocation::              Remote execution server.
+* rlogin::                      Remote login.
+* rlogind::                     Remote login server.
+* rsh::                         Remote shell.
+* rshd::                        Remote shell server.
+* logger invocation::              Make entries in the system log.
+* syslogd invocation::             Syslog server.
+* talk invocation::                Talk client.
+* talkd invocation::               Talk server.
+@c * telnet::                      User interface to TELNET.
+@c * telnetd::                     Telnet server.
+* tftp invocation::                TFTP client.
+@c * tftpd::                       TFTP server.
+@c * uucpd::                       Unix to Unix Copy.
+@c * whois::                       Whois user interface.
+* GNU Free Documentation License::     The license for this manual.
+* Concept Index::                      Index of concepts.
+* Index::                              Index of commands, options and variables.
+@end menu
+
+
+@node Introduction
+@chapter Introduction
+@cindex introduction
+
+This manual is a work in progress: many sections make no attempt to
+explain basic concepts in a way suitable for novices.  Thus, if you
+are interested, please get involved in improving this manual.  The
+entire @sc{gnu} community will benefit.
+
+@cindex bug, reporting
+Please report bugs to @email{bug-inetutils@@gnu.org}.  Remember
+to include the version number, machine architecture, input files, and
+any other information needed to reproduce the bug: your input, what you
+expected, what you got, and why it is wrong.  Diffs are welcome, but
+please include a description of the problem as well, since this is
+sometimes difficult to infer.
+
+The individual utilities were originally derived from the 4.4BSDLite2
+distribution.  
+
+Many features were integrated from NetBSD, OpenBSD, FreeBSD and
+GNU/Linux, the merges were done by a group of dedicated hackers (in no
+particular order): Jeff Bailey, Marcus Brinkmann, Michael Vogt,
+Bernhard Rosenkraenzer, Kaveh R. Ghazi, NIIBE Yutaka, Nathan
+Neulinger, Jeff Smith, Dan Stromberg, David O'Shea, Frederic Goudal,
+Gerald Combs, Joachim Gabler, Marco D'Itri, Sergey Poznyakoff.
+
+@node Common options
+@chapter Common options
+
+Certain options are available in all these programs.  Rather than
+writing identical descriptions for each of the programs, they are
+described here.  (In fact, every GNU program accepts (or should
+accept) these options.)
+
+Many of these programs take arbitrary strings as arguments.  In those
+cases, @option{--help} and @option{--version} are taken as these options
+only if there is one and exactly one command line argument.
+
+@table @option
+
+@item --help
+@opindex --help
+@cindex help, online
+Print a usage message listing all available options, then exit successfully.
+
+@item --version
+@opindex --version
+@cindex version number, finding
+Print the version number, then exit successfully.
+@end table
+
+@include traceroute.texi
+@include ftp.texi
+@include ftpd.texi
+@include inetd.texi
+@include ping.texi
+@include rcp.texi
+@include rexecd.texi
+@include rlogin.texi
+@include rlogind.texi
+@include rsh.texi
+@include rshd.texi
+@include logger.texi
+@include syslogd.texi
+@include talk.texi
+@include talkd.texi
+@c @include telnet.texi -- no such file
+@c @include telnetd.texi -- no such file
+@include tftp.texi
+@c @include tftpd.texi -- no such file
+@c @include uucpd.texi -- no such file
+@c @include whois.texi -- no such file
+
+
+@node GNU Free Documentation License
+@appendix GNU Free Documentation License
+@include fdl.texi
+
+@page
+@node Concept Index
+@unnumbered Concept Index
+
+This is a general index of all issues discussed in this manual, with the
+exception of the commands and command-line options.
+
+@printindex cp
+
+@page
+@node Index
+@unnumbered Index
+
+This is an alphabetical list of all commands, command-line
+options, and environment variables.
+
+@printindex fn
+
+@contents
+@bye

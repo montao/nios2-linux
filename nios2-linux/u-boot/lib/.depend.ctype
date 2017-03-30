@@ -1,0 +1,2 @@
+ctype.o: ctype.c \
+  /data/dwesterg/nios2-linux/nios2-linux/u-boot/include/linux/ctype.h

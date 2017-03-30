@@ -1,0 +1,45 @@
+Index: irattach/util.c
+===================================================================
+--- irattach/util.c	(revision 7184)
++++ irattach/util.c	(working copy)
+@@ -156,8 +156,9 @@
+ 
+ void fork_now(int ttyfd)
+ {
++	int i;
++#ifndef __uClinux__
+ 	int ret;
+-	int i;
+ 
+ 	if ((ret = fork()) > 0)
+ 		exit(0);
+@@ -171,6 +172,9 @@
+ 		/* cleanup_files = 0; */
+ 		exit(0);
+ 	}
++#else
++	daemon (1, 1);
++#endif
+ 
+ 	/* Close all open inherited files! Except for ttyfd! */
+ 	for (i = 0; i < 64; i++)
+Index: irattach/irattach.c
+===================================================================
+--- irattach/irattach.c	(revision 9116)
++++ irattach/irattach.c	(working copy)
+@@ -397,7 +397,15 @@
+ 					after_names[i]);
+ 				/* Create a new instance for this other
+ 				 * interface */
++#ifdef __uClinux__
++				/*
++				 * uClinux not implemented fork(),
++				 * ignore the additional interfaces for uCinux
++				 */
++				pid = -1;
++#else
+ 				pid = fork();
++#endif
+ 				/* If in the child */
+ 				if(!pid) {
+ 					/* Get the interface name */

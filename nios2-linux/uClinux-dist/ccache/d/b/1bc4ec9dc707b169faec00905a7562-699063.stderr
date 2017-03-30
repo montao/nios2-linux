@@ -1,0 +1,4 @@
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/arch/nios2/kernel/setup.c: In function 'nios2_boot_init':
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/arch/nios2/kernel/setup.c:113: warning: unused variable 'cmdline_passed'
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/arch/nios2/kernel/setup.c: In function 'setup_arch':
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/arch/nios2/kernel/setup.c:209: warning: ISO C90 forbids mixed declarations and code

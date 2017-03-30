@@ -1,0 +1,1 @@
+cmd_util-linux/lib.a := rm -f util-linux/lib.a; nios2-linux-gnu-ar  rcs util-linux/lib.a util-linux/blockdev.o util-linux/dmesg.o util-linux/flock.o util-linux/getopt.o util-linux/hexdump.o util-linux/hwclock.o util-linux/losetup.o util-linux/more.o util-linux/mount.o util-linux/rev.o util-linux/umount.o

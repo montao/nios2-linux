@@ -1,0 +1,35 @@
+Index: src/lat_sem.c
+===================================================================
+--- src/lat_sem.c	(revision 9093)
++++ src/lat_sem.c	(working copy)
+@@ -81,9 +81,17 @@
+ 	semctl(state->semid, 1, SETVAL, 0);
+ 
+ 	handle_scheduler(benchmp_childid(), 0, 1);
++#ifdef CONFIG_NOMMU
++	switch (state->pid = vfork()) {
++#else
+ 	switch (state->pid = fork()) {
++#endif
+ 	    case 0:
++#ifdef CONFIG_NOMMU
++		signal(SIGTERM, _exit);
++#else
+ 		signal(SIGTERM, exit);
++#endif
+ 		handle_scheduler(benchmp_childid(), 1, 1);
+ 		writer(state->semid);
+ 		return;
+Index: src/lat_unix_connect.c
+===================================================================
+--- src/lat_unix_connect.c	(revision 9093)
++++ src/lat_unix_connect.c	(working copy)
+@@ -41,7 +41,7 @@
+ 	if (ac == 2) {
+ 		if (!strcmp(av[1], "-s")) {
+ #ifdef CONFIG_NOMMU
+-			if (fork() == 0) {
++			if (vfork() == 0) {
+ 				server_main();
+ 				_exit(0);
+ 			}

@@ -1,0 +1,2 @@
+libbridge_init.c: In function 'br_make_bridge_list':
+libbridge_init.c:213: warning: 'err' is used uninitialized in this function

@@ -1,0 +1,170 @@
+#!/usr/bin/expect
+
+source ../kernel_config.exp
+log_file [log_file_name "$argv0"]
+
+if { $argc >= 1} {
+   set targetip           [lindex $argv 0]
+}
+
+set timeout 300
+
+spawn /bin/sh
+
+while (1) {
+	send -s "ftp $targetip\r"
+	expect {
+		"):" { }
+	        timeout { send_user "Failed first return\n"
+			break }
+	}
+	send -s "root\r"
+	expect {
+	        "Password:" { }
+	        timeout { send_user "Failed first return\n"
+			break }
+	}
+	send -s "uClinux\r"
+        expect {
+                "ftp>" { }
+                timeout { send_user "Failed first return\n"
+                        break }
+        }
+
+	send -s "put ftp_load\r"
+        expect {
+                "ftp>" { }
+                timeout { send_user "Failed first return\n"
+                        break }
+        }
+	send -s "get ftp_load ftp_load1\r"
+        expect {
+                "ftp>" { }
+                timeout { send_user "Failed first return\n"
+                        break }
+        }
+	send -s "put ftp_load\r"
+        expect {
+                "ftp>" { }
+                timeout { send_user "Failed first return\n"
+                        break }
+        }
+	send -s "get ftp_load ftp_load1\r"
+        expect {
+                "ftp>" { }
+                timeout { send_user "Failed first return\n"
+                        break }
+        }
+	send -s "put ftp_load\r"
+        expect {
+                "ftp>" { }
+                timeout { send_user "Failed first return\n"
+                        break }
+        }
+	send -s "get ftp_load ftp_load1\r"
+        expect {
+                "ftp>" { }
+                timeout { send_user "Failed first return\n"
+                        break }
+        }
+	send -s "put ftp_load\r"
+        expect {
+                "ftp>" { }
+                timeout { send_user "Failed first return\n"
+                        break }
+        }
+	send -s "get ftp_load ftp_load1\r"
+        expect {
+                "ftp>" { }
+                timeout { send_user "Failed first return\n"
+                        break }
+        }
+	send -s "put ftp_load\r"
+        expect {
+                "ftp>" { }
+                timeout { send_user "Failed first return\n"
+                        break }
+        }
+	send -s "get ftp_load ftp_load1\r"
+        expect {
+                "ftp>" { }
+                timeout { send_user "Failed first return\n"
+                        break }
+        }
+	send -s "put ftp_load\r"
+        expect {
+                "ftp>" { }
+                timeout { send_user "Failed first return\n"
+                        break }
+        }
+	send -s "get ftp_load ftp_load1\r"
+        expect {
+                "ftp>" { }
+                timeout { send_user "Failed first return\n"
+                        break }
+        }
+	send -s "put ftp_load\r"
+        expect {
+                "ftp>" { }
+                timeout { send_user "Failed first return\n"
+                        break }
+        }
+	send -s "get ftp_load ftp_load1\r"
+        expect {
+                "ftp>" { }
+                timeout { send_user "Failed first return\n"
+                        break }
+        }
+	send -s "put ftp_load\r"
+        expect {
+                "ftp>" { }
+                timeout { send_user "Failed first return\n"
+                        break }
+        }
+	send -s "get ftp_load ftp_load1\r"
+        expect {
+                "ftp>" { }
+                timeout { send_user "Failed first return\n"
+                        break }
+        }
+	send -s "put ftp_load\r"
+        expect {
+                "ftp>" { }
+                timeout { send_user "Failed first return\n"
+                        break }
+        }
+	send -s "get ftp_load ftp_load1\r"
+        expect {
+                "ftp>" { }
+                timeout { send_user "Failed first return\n"
+                        break }
+        }
+	send -s "put ftp_load\r"
+        expect {
+                "ftp>" { }
+                timeout { send_user "Failed first return\n"
+                        break }
+        }
+	send -s "get ftp_load ftp_load1\r"
+        expect {
+                "ftp>" { }
+                timeout { send_user "Failed first return\n"
+                        break }
+        }
+	send -s "put ftp_load\r"
+        expect {
+                "ftp>" { }
+                timeout { send_user "Failed first return\n"
+                        break }
+        }
+	send -s "get ftp_load ftp_load1\r"
+        expect {
+                "ftp>" { }
+                timeout { send_user "Failed first return\n"
+                        break }
+        }
+
+	send -s "bye\r"
+	sleep 2
+}
+log_file

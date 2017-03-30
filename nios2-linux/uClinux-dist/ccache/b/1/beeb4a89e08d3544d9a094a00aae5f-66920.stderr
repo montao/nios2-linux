@@ -1,0 +1,22 @@
+tftpsubs.c:94:41: warning: "/*" within comment
+tftpsubs.c:82: warning: return type defaults to 'int'
+tftpsubs.c: In function 'readit':
+tftpsubs.c:93: warning: implicit declaration of function 'read_ahead'
+tftpsubs.c: At top level:
+tftpsubs.c:104: warning: return type defaults to 'int'
+tftpsubs.c: In function 'read_ahead':
+tftpsubs.c:115: warning: 'return' with no value, in function returning non-void
+tftpsubs.c:121: warning: implicit declaration of function 'read'
+tftpsubs.c:122: warning: 'return' with no value, in function returning non-void
+tftpsubs.c: At top level:
+tftpsubs.c:152: warning: return type defaults to 'int'
+tftpsubs.c: In function 'writeit':
+tftpsubs.c:159: warning: implicit declaration of function 'write_behind'
+tftpsubs.c: At top level:
+tftpsubs.c:172: warning: return type defaults to 'int'
+tftpsubs.c: In function 'write_behind':
+tftpsubs.c:196: warning: implicit declaration of function 'write'
+tftpsubs.c: In function 'synchnet':
+tftpsubs.c:244: warning: pointer targets in passing argument 6 of 'recvfrom' differ in signedness
+tftpsubs.c: At top level:
+tftpsubs.c:19: warning: 'sccsid' defined but not used

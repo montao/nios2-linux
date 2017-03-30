@@ -1,0 +1,1 @@
+cmd_arch/nios2/mm/built-in.o :=  nios2-linux-gnu-ld  -mnios2elf   -r -o arch/nios2/mm/built-in.o arch/nios2/mm/init.o arch/nios2/mm/cacheflush.o arch/nios2/mm/pgtable.o arch/nios2/mm/tlb.o arch/nios2/mm/uaccess.o arch/nios2/mm/fault.o arch/nios2/mm/ioremap.o arch/nios2/mm/extable.o arch/nios2/mm/mmu_context.o arch/nios2/mm/dma-mapping.o 

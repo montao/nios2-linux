@@ -1,0 +1,82 @@
+Index: samba-3.0.25a/source/lib/sock_exec.c
+===================================================================
+--- samba-3.0.25a/source/lib/sock_exec.c	(revision 9116)
++++ samba-3.0.25a/source/lib/sock_exec.c	(working copy)
+@@ -102,13 +102,21 @@
+ 		DEBUG(0,("socketpair_tcp failed (%s)\n", strerror(errno)));
+ 		return -1;
+ 	}
++#ifdef __uClinux__
++	if (vfork() == 0) {
++#else
+ 	if (fork() == 0) {
++#endif
+ 		close(fd[0]);
+ 		close(0);
+ 		close(1);
+ 		dup(fd[1]);
+ 		dup(fd[1]);
++#ifdef __uClinux__
++		_exit(system(prog));
++#else
+ 		exit(system(prog));
++#endif
+ 	}
+ 	close(fd[1]);
+ 	return fd[0];
+Index: samba-3.0.25a/source/lib/system.c
+===================================================================
+--- samba-3.0.25a/source/lib/system.c	(revision 9116)
++++ samba-3.0.25a/source/lib/system.c	(working copy)
+@@ -1322,7 +1322,11 @@
+ 
+ pid_t sys_fork(void)
+ {
++#ifdef __uClinux__
++	pid_t forkret = vfork();
++#else
+ 	pid_t forkret = fork();
++#endif
+ 
+ 	if (forkret == (pid_t)0) /* Child - reset mypid so sys_getpid does a system call. */
+ 		mypid = (pid_t) -1;
+Index: samba-3.0.25a/source/web/startstop.c
+===================================================================
+--- samba-3.0.25a/source/web/startstop.c	(revision 9116)
++++ samba-3.0.25a/source/web/startstop.c	(working copy)
+@@ -30,7 +30,11 @@
+ 
+ 	if (geteuid() != 0) return;
+ 
++#ifdef __uClinux__
++	if (vfork()) {
++#else
+ 	if (fork()) {
++#endif
+ 		return;
+ 	}
+ 
+@@ -50,7 +54,11 @@
+ 
+ 	if (geteuid() != 0) return;
+ 
++#ifdef __uClinux__
++	if (vfork()) {
++#else
+ 	if (fork()) {
++#endif
+ 		return;
+ 	}
+ 
+@@ -70,7 +78,11 @@
+ 
+ 	if (geteuid() != 0) return;
+ 
++#ifdef __uClinux__
++	if (vfork()) {
++#else
+ 	if (fork()) {
++#endif
+ 		return;
+ 	}
+ 

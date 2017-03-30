@@ -1,0 +1,7 @@
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/drivers/mmc/card/block.c: In function 'mmc_blk_issue_rq':
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/drivers/mmc/card/block.c:794: warning: 'arg' may be used uninitialized in this function
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/drivers/mmc/card/block.c:794: warning: 'nr' may be used uninitialized in this function
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/drivers/mmc/card/block.c:794: warning: 'from' may be used uninitialized in this function
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/drivers/mmc/card/block.c:748: warning: 'arg' may be used uninitialized in this function
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/drivers/mmc/card/block.c:748: warning: 'nr' may be used uninitialized in this function
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/drivers/mmc/card/block.c:748: warning: 'from' may be used uninitialized in this function

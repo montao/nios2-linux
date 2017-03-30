@@ -1,0 +1,57 @@
+diff --unidirectional-new-file -ru -x 'PortIndex*' ports.orig/python/py25-py2app-devel/Portfile ports/python/py25-py2app-devel/Portfile
+--- ports.orig/python/py25-py2app-devel/Portfile	2009-01-16 14:09:14.000000000 -0700
++++ ports/python/py25-py2app-devel/Portfile	2009-06-18 12:51:51.000000000 -0600
+@@ -21,13 +21,14 @@
+ 
+ fetch.type          svn
+ svn.url             http://svn.pythonmac.org/py2app/py2app/trunk/
++svn.revision        72
+ worksrcdir          trunk
+ 
+ set apymacholibfile "/lib/python2.5/site-packages/macholib/__init__.py"
+ 
+ depends_lib-append  port:py25-setuptools \
+                     port:py25-altgraph \
+-                    path:${prefix}${apymacholibfile}:py25-macholib \
++                    port:py25-macholib-devel \
+                     port:py25-modulegraph-devel \
+                     port:py25-bdist_mpkg
+ 
+diff --unidirectional-new-file -ru -x 'PortIndex*' ports.orig/x11/gtk2/Portfile ports/x11/gtk2/Portfile
+--- ports.orig/x11/gtk2/Portfile	2009-06-11 12:13:07.000000000 -0600
++++ ports/x11/gtk2/Portfile	2009-06-18 19:55:48.000000000 -0600
+@@ -86,9 +86,18 @@
+                 port:gettext \
+                 port:zlib
+ 
+-depends_run     port:shared-mime-info
+-
+-configure.args  --enable-static \
++# If shared-mime-info is installed it causes GTK+ to use Glib's GIO to
++# do automatic file type guessing and to disable its own internal
++# guessing. The guessing then fails at runtime if the MIME database
++# (/usr/share/mime) isn't present. Avoid using GIO and always use GTK+'s
++# internal guesser.
++# depends_run     port:shared-mime-info
++
++# Don't have the GDK picbuf loaders as loadable modules. This would
++# require running install_name_tool on the .so files to make the
++# libraries they depend on relative to @executable_path, not the
++# MacPorts installation directory.
++configure.args  --with-included-loaders \
+                 --disable-glibtest
+ 
+ if { [variant_isset universal] } {
+diff --unidirectional-new-file -ru -x 'PortIndex*' ports.orig/x11/pango/Portfile ports/x11/pango/Portfile
+--- ports.orig/x11/pango/Portfile	2009-05-07 03:15:30.000000000 -0600
++++ ports/x11/pango/Portfile	2009-06-18 12:51:51.000000000 -0600
+@@ -111,7 +111,8 @@
+ 
+ configure.ldflags-append \
+     -no-undefined \
+-    -bind_at_load
++    -bind_at_load \
++    "-Wl,-dylib_file,/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib:/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib"
+ 
+ configure.args \
+     --enable-static \

@@ -1,0 +1,144 @@
+From b11678bd151344a36c87397cae10f8171dcfe1b1 Mon Sep 17 00:00:00 2001
+From: Mike Frysinger <vapier@gentoo.org>
+Date: Thu, 16 Jul 2009 18:45:01 -0400
+Subject: [PATCH 1/2] add support for systems w/out fork()
+
+Signed-off-by: Mike Frysinger <vapier@gentoo.org>
+---
+ main.cc           |    3 +++
+ ncat/Makefile.in  |    2 +-
+ ncat/ncat_posix.c |    6 +++++-
+ ncat/ncat_proxy.c |   22 +++++++++++++++++++++-
+ ncat/util.c       |    8 ++++++++
+ ncat/util.h       |    5 +++++
+ 6 files changed, 43 insertions(+), 3 deletions(-)
+
+diff --git a/main.cc b/main.cc
+index 2db1a72..c2ce38f 100644
+--- a/main.cc
++++ b/main.cc
+@@ -254,6 +254,9 @@ int main(int argc, char *argv[]) {
+     } else if (*myargv[0] == 'd') {
+       o.debugging++;
+     } else if (strcasecmp(myargv[0], "f") == 0) {
++#ifndef HAVE_FORK
++# define fork() vfork()
++#endif
+       switch((ret = fork())) {
+       case 0: /* Child */
+ 	/* My job is as follows:
+diff --git a/ncat/Makefile.in b/ncat/Makefile.in
+index b4f7d7a..c5ae8c1 100644
+--- a/ncat/Makefile.in
++++ b/ncat/Makefile.in
+@@ -54,7 +54,7 @@ CC = @CC@
+ CPPFLAGS = @CPPFLAGS@
+ CFLAGS = @CFLAGS@
+ LDFLAGS = @LDFLAGS@
+-LIBS = @LIBS@
++LIBS = @LIBS@ -lpthread
+ DEFS = @DEFS@ -DNCAT_DATADIR="\"$(pkgdatadir)\""
+ # With GCC, add extra security checks to source code.
+ DEFS += -D_FORTIFY_SOURCE=2
+diff --git a/ncat/ncat_posix.c b/ncat/ncat_posix.c
+index d0c7d7c..57e20cb 100644
+--- a/ncat/ncat_posix.c
++++ b/ncat/ncat_posix.c
+@@ -6,6 +6,10 @@
+ 
+ static char **cmdline_split(const char *cmdexec);
+ 
++#ifndef HAVE_FORK
++# define fork() vfork()
++#endif
++
+ /* fork and exec a child process with netexec. Close the given file descriptor
+    in the parent process. Return the child's PID or -1 on error. */
+ int netrun(int fd, char *cmdexec)
+@@ -58,7 +62,7 @@ void netexec(int fd, char *cmdexec)
+         execv(cmdargs[0], cmdargs);
+     }
+     /* exec failed.*/
+-    die("exec");
++    _die("exec");
+ }
+ 
+ /* Split a command line into an array suitable for handing to execv. */
+diff --git a/ncat/ncat_proxy.c b/ncat/ncat_proxy.c
+index cfd943c..b8d483a 100644
+--- a/ncat/ncat_proxy.c
++++ b/ncat/ncat_proxy.c
+@@ -117,7 +117,7 @@ static void fork_handler(int s, int c)
+     }
+     CloseHandle(thread);
+ }
+-#else
++#elif defined(HAVE_FORK)
+ static void fork_handler(int s, int c)
+ {
+     int rc;
+@@ -140,6 +140,26 @@ static void fork_handler(int s, int c)
+         Close(c);
+     }
+ }
++#else
++#include <pthread.h>
++static void *handler_thread_func(void *data)
++{
++    http_server_handler((int)data);
++    return 0;
++}
++
++static void fork_handler(int s, int c)
++{
++    int ret;
++    pthread_t tid;
++
++    ret = pthread_create(&tid, NULL, handler_thread_func, (void *)c);
++    if (ret) {
++        if (o.verbose)
++            logdebug("Error in pthread_create: %s\n", strerror(errno));
++        return;
++    }
++}
+ #endif
+ 
+ /* Is this one of the methods we can handle? */
+diff --git a/ncat/util.c b/ncat/util.c
+index 8303b37..8713253 100644
+--- a/ncat/util.c
++++ b/ncat/util.c
+@@ -78,6 +78,14 @@ void logdebug(const char *fmt, ...)
+     va_end(ap);
+ }
+ 
++#ifndef HAVE_FORK
++void _die(char *err)
++{
++    perror(err);
++    _exit(EXIT_FAILURE);
++}
++#endif
++
+ void die(char *err)
+ {
+     perror(err);
+diff --git a/ncat/util.h b/ncat/util.h
+index e69701f..a9adf35 100644
+--- a/ncat/util.h
++++ b/ncat/util.h
+@@ -35,6 +35,11 @@ void loguser(const char *fmt, ...);
+ void logdebug(const char *fmt, ...);
+ 
+ /* handle errors */
++#ifndef HAVE_FORK
++void _die(char *);
++#else
++#define _die(msg) die(msg)
++#endif
+ void die(char *);
+ 
+ void bye(const char *, ...);
+-- 
+1.6.3.3
+

@@ -1,0 +1,11 @@
+--- lirc-0.8.6/tools/lircrcd.c
++++ lirc-0.8.6/tools/lircrcd.c
+@@ -313,7 +311,7 @@
+ void add_client(int sock)
+ {
+ 	int fd;
+-	int clilen;
++	socklen_t clilen;
+ 	struct sockaddr client_addr;
+ 	int flags;
+ 

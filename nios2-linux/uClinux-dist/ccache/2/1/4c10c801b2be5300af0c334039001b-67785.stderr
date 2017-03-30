@@ -1,0 +1,14 @@
+dhry_2.c:35: warning: return type defaults to 'int'
+dhry_2.c: In function 'Proc_6':
+dhry_2.c:39: warning: implicit declaration of function 'Func_3'
+dhry_2.c: At top level:
+dhry_2.c:73: warning: return type defaults to 'int'
+dhry_2.c:89: warning: return type defaults to 'int'
+dhry_2.c: In function 'Func_2':
+dhry_2.c:164: warning: implicit declaration of function 'strcmp'
+dhry_2.c: In function 'Proc_8':
+dhry_2.c:106: warning: control reaches end of non-void function
+dhry_2.c: In function 'Proc_7':
+dhry_2.c:81: warning: control reaches end of non-void function
+dhry_2.c: In function 'Proc_6':
+dhry_2.c:61: warning: control reaches end of non-void function

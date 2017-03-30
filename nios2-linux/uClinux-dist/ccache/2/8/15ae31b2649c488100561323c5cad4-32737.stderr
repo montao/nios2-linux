@@ -1,0 +1,36 @@
+Using built-in specs.
+Target: nios2-linux-gnu
+Configured with: /opt/nios2gcc4/src/gcc-4.1/configure --build=i686-pc-linux-gnu --host=i686-pc-linux-gnu --target=nios2-linux-gnu --enable-threads --disable-libmudflap --disable-libssp --disable-libstdcxx-pch --with-gnu-as --with-gnu-ld --enable-languages=c,c++ --enable-shared --enable-symvers=gnu --enable-__cxa_atexit --disable-nls --prefix=/opt/nios2 --with-sysroot=/opt/nios2/nios2-linux-gnu/libc --with-build-sysroot=/opt/nios2gcc4/install/nios2-linux-gnu/libc --disable-libgomp --enable-poison-system-directories
+Thread model: posix
+gcc version 4.1.2
+ /data/dwesterg/nios2-linux/nios2-linux/toolchain-mmu/x86-linux2/bin/../libexec/gcc/nios2-linux-gnu/4.1.2/cc1plus -E -quiet -v -I/data/dwesterg/nios2-linux/nios2-linux/uClinux-dist/include/STLport -iprefix /data/dwesterg/nios2-linux/nios2-linux/toolchain-mmu/x86-linux2/bin/../lib/gcc/nios2-linux-gnu/4.1.2/ -isysroot /data/dwesterg/nios2-linux/nios2-linux/toolchain-mmu/x86-linux2/bin/../nios2-linux-gnu/libc -D_GNU_SOURCE -isystem /data/dwesterg/nios2-linux/nios2-linux/uClinux-dist/staging/usr/include except.cpp -mhw-mul -mhw-mulx -mhw-div -Wall -O2
+ignoring duplicate directory "/data/dwesterg/nios2-linux/nios2-linux/toolchain-mmu/x86-linux2/bin/../lib/gcc/../../lib/gcc/nios2-linux-gnu/4.1.2/../../../../nios2-linux-gnu/include/c++/4.1.2"
+ignoring duplicate directory "/data/dwesterg/nios2-linux/nios2-linux/toolchain-mmu/x86-linux2/bin/../lib/gcc/../../lib/gcc/nios2-linux-gnu/4.1.2/../../../../nios2-linux-gnu/include/c++/4.1.2/nios2-linux-gnu"
+ignoring duplicate directory "/data/dwesterg/nios2-linux/nios2-linux/toolchain-mmu/x86-linux2/bin/../lib/gcc/../../lib/gcc/nios2-linux-gnu/4.1.2/../../../../nios2-linux-gnu/include/c++/4.1.2/backward"
+ignoring nonexistent directory "/data/dwesterg/nios2-linux/nios2-linux/toolchain-mmu/x86-linux2/bin/../nios2-linux-gnu/libc/usr/local/include"
+ignoring duplicate directory "/data/dwesterg/nios2-linux/nios2-linux/toolchain-mmu/x86-linux2/bin/../lib/gcc/../../lib/gcc/nios2-linux-gnu/4.1.2/include"
+ignoring duplicate directory "/data/dwesterg/nios2-linux/nios2-linux/toolchain-mmu/x86-linux2/bin/../lib/gcc/../../lib/gcc/nios2-linux-gnu/4.1.2/include-fixed"
+ignoring duplicate directory "/data/dwesterg/nios2-linux/nios2-linux/toolchain-mmu/x86-linux2/bin/../lib/gcc/../../lib/gcc/nios2-linux-gnu/4.1.2/../../../../nios2-linux-gnu/include"
+ignoring nonexistent directory "/data/dwesterg/nios2-linux/nios2-linux/uClinux-dist/include/STLport"
+#include "..." search starts here:
+#include <...> search starts here:
+ /data/dwesterg/nios2-linux/nios2-linux/uClinux-dist/staging/usr/include
+ /data/dwesterg/nios2-linux/nios2-linux/toolchain-mmu/x86-linux2/bin/../lib/gcc/nios2-linux-gnu/4.1.2/../../../../nios2-linux-gnu/include/c++/4.1.2
+ /data/dwesterg/nios2-linux/nios2-linux/toolchain-mmu/x86-linux2/bin/../lib/gcc/nios2-linux-gnu/4.1.2/../../../../nios2-linux-gnu/include/c++/4.1.2/nios2-linux-gnu
+ /data/dwesterg/nios2-linux/nios2-linux/toolchain-mmu/x86-linux2/bin/../lib/gcc/nios2-linux-gnu/4.1.2/../../../../nios2-linux-gnu/include/c++/4.1.2/backward
+ /data/dwesterg/nios2-linux/nios2-linux/toolchain-mmu/x86-linux2/bin/../lib/gcc/nios2-linux-gnu/4.1.2/include
+ /data/dwesterg/nios2-linux/nios2-linux/toolchain-mmu/x86-linux2/bin/../lib/gcc/nios2-linux-gnu/4.1.2/include-fixed
+ /data/dwesterg/nios2-linux/nios2-linux/toolchain-mmu/x86-linux2/bin/../lib/gcc/nios2-linux-gnu/4.1.2/../../../../nios2-linux-gnu/include
+ /data/dwesterg/nios2-linux/nios2-linux/toolchain-mmu/x86-linux2/bin/../nios2-linux-gnu/libc/usr/include
+End of search list.
+Using built-in specs.
+Target: nios2-linux-gnu
+Configured with: /opt/nios2gcc4/src/gcc-4.1/configure --build=i686-pc-linux-gnu --host=i686-pc-linux-gnu --target=nios2-linux-gnu --enable-threads --disable-libmudflap --disable-libssp --disable-libstdcxx-pch --with-gnu-as --with-gnu-ld --enable-languages=c,c++ --enable-shared --enable-symvers=gnu --enable-__cxa_atexit --disable-nls --prefix=/opt/nios2 --with-sysroot=/opt/nios2/nios2-linux-gnu/libc --with-build-sysroot=/opt/nios2gcc4/install/nios2-linux-gnu/libc --disable-libgomp --enable-poison-system-directories
+Thread model: posix
+gcc version 4.1.2
+ /data/dwesterg/nios2-linux/nios2-linux/toolchain-mmu/x86-linux2/bin/../libexec/gcc/nios2-linux-gnu/4.1.2/cc1plus -fpreprocessed /data/dwesterg/nios2-linux/nios2-linux/uClinux-dist/ccache/tmp/except.tmp.sj-dwesterg-ll.altera.com.21779.ii -quiet -dumpbase except.tmp.sj-dwesterg-ll.altera.com.21779.ii -mhw-mul -mhw-mulx -mhw-div -auxbase-strip /data/dwesterg/nios2-linux/nios2-linux/uClinux-dist/ccache/2/8/15ae31b2649c488100561323c5cad4-32737.o.tmp.sj-dwesterg-ll.altera.com.21779 -O2 -Wall -version -o - |
+ /data/dwesterg/nios2-linux/nios2-linux/toolchain-mmu/x86-linux2/bin/../lib/gcc/nios2-linux-gnu/4.1.2/../../../../nios2-linux-gnu/bin/as -EL -o /data/dwesterg/nios2-linux/nios2-linux/uClinux-dist/ccache/2/8/15ae31b2649c488100561323c5cad4-32737.o.tmp.sj-dwesterg-ll.altera.com.21779
+GNU C++ version 4.1.2 (nios2-linux-gnu)
+	compiled by GNU C version 3.4.6 20060404 (Red Hat 3.4.6-4).
+GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
+Compiler executable checksum: 896934dee87d5cf8e9074b7079b32456

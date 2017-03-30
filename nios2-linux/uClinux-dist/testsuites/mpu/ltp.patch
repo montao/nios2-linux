@@ -1,0 +1,74 @@
+Index: testcases/kernel/syscalls/mmap/mmap03.c
+===================================================================
+--- testcases/kernel/syscalls/mmap/mmap03.c	(revision 192)
++++ testcases/kernel/syscalls/mmap/mmap03.c	(working copy)
+@@ -173,7 +173,7 @@
+ 						 "Functionality of mmap() successful");
+ 				}
+ 			}
+-#if defined(__ia64__) || defined(__hppa__)
++#if defined(__ia64__) || defined(__hppa__) || defined(UCLINUX)
+ 			if (pass) {
+ 				tst_resm(TPASS, "Got SIGSEGV as expected");
+ 			} else {
+Index: testcases/kernel/Makefile
+===================================================================
+--- testcases/kernel/Makefile	(revision 192)
++++ testcases/kernel/Makefile	(working copy)
+@@ -32,7 +32,7 @@
+ 		   numa performance_counters power_management pty sched \
+ 		   security syscalls timers tracing
+ else
+-SUBDIRS		:= syscalls
++SUBDIRS		:= mem syscalls
+ endif
+ 
+ MAKE_DEPS	:= include/linux_syscall_numbers.h
+Index: testcases/kernel/mem/mtest06/mmap1.c
+===================================================================
+--- testcases/kernel/mem/mtest06/mmap1.c	(revision 192)
++++ testcases/kernel/mem/mtest06/mmap1.c	(working copy)
+@@ -168,7 +168,8 @@
+              _exit(0);
+ 
+         case SIGSEGV:
+-             if (info->si_code == SEGV_MAPERR &&
++#define ILL_CPLB_VI 9
++             if (info->si_code == ILL_CPLB_VI &&
+                       info->si_addr == map_address)
+              {
+                   tst_resm(TINFO,
+@@ -357,6 +358,10 @@
+     static int	 rd_index = 0;	/* index to the number of reads performed.    */
+     long 	*rmargs = args;	/* local pointer to the arguments	      */
+     long exit_val = 0;  /* pthread exit value			      */
++    
++    /* waiting write thread to finish mapping */
++    while (!map_address)
++    	usleep(1);
+ 
+     tst_resm(TINFO, "pid[%d] - read contents of memory %p %ld times",
+            getpid(), map_address, rmargs[2]);
+@@ -614,6 +619,7 @@
+             }
+         }
+         close(fd);
++	map_address = 0;
+     }while (TRUE);
+     exit (0);
+ }
+Index: testcases/kernel/mem/Makefile
+===================================================================
+--- testcases/kernel/mem/Makefile	(revision 192)
++++ testcases/kernel/mem/Makefile	(working copy)
+@@ -24,6 +24,10 @@
+ 
+ include $(top_srcdir)/include/mk/env_pre.mk
+ 
++ifeq ($(UCLINUX),1)
++    SUBDIRS         := mtest06
++endif
++
+ LIBDIR			:= libmm
+ FILTER_OUT_DIRS		:= $(LIBDIR)
+ LIB			:= $(LIBDIR)/libmm.a

@@ -1,0 +1,2 @@
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/fs/nfs/nfs4filelayout.c: In function 'filelayout_get_dense_offset':
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/fs/nfs/nfs4filelayout.c:57: warning: comparison of distinct pointer types lacks a cast

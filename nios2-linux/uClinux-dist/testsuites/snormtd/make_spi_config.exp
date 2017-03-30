@@ -1,0 +1,97 @@
+#!/usr/bin/expect
+
+cd $uclinux_path
+set timeout 300
+spawn make config
+
+while 1 {
+    expect {
+
+
+       -re "Customize Kernel Settings.*DEFAULTS_KERNEL.*\\\[.*]" {
+            send "y\r"
+        }
+
+        -re "Customize Application/Library Settings.*DEFAULTS_VENDOR.*\\\[.*]" {
+            send "y\r"
+        }
+
+        -re "SPI support.*SPI.*\\\[\[^\r]*]" {
+            send "Y\r"
+        }
+
+        -re "SPI controller driver for ADI Blackfin5xx.*SPI_BFIN.*\\\[.*]" {
+            send "Y\r"
+        }
+#########################################################################################
+
+        -re "Detect non-CFI AMD/JEDEC-compatible flash chips.*MTD_JEDECPROBE.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Flash chip driver advanced configuration options.*MTD_CFI_ADV_OPTIONS.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Specific CFI Flash geometry selection.*MTD_CFI_GEOMETRY.*\\\[.*]" {
+            send "Y\r"
+        }
+        -re "Support 16-bit buswidth.*MTD_MAP_BANK_WIDTH_2.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Support 4-chip flash interleave.*MTD_CFI_I4.*\\\[.*]" {
+            send "Y\r"
+        }
+#########################################################################################
+
+        -re "Support non-linear mappings of flash chips.*MTD_COMPLEX_MAPPINGS.*\\\[.*]" {
+            send "Y\r"
+        }
+        -re "Support for AT45xxx DataFlash.*MTD_DATAFLASH.*\\\[.*]" {
+            if { $spi_board_type == "df" } {
+                send "Y\r"
+            } else {
+                send "N\r"
+            }
+        }
+        -re "Support most SPI Flash chips.*MTD_M25P80.*\\\[.*]" {
+            if { $spi_board_type == "normal" } {
+                send "Y\r"
+            } else {
+                send "N\r"
+            }
+        }
+
+        -re "Use FAST_READ OPCode allowing SPI CLK <= 50MHz.*M25PXX_USE_FAST_READ.*\\\[.*]" {
+            if { $spi_board_type == "normal" } {
+                send "Y\r"
+            } else {
+                send "N\r"
+            }
+        }
+
+        -nocase -re "\\\[\[^\r]*] (\[ymn])|choice\\\[.*]: \[0-9]+\r" {
+            continue
+        }
+
+        "\\\(*) \\\[*]" {
+            sleep .01
+            send "\r"
+        }
+
+        -re "\[cC]hoice\\\[.*]:" {
+            send "\r"
+        }
+
+        eof {
+            puts "End of configuration"
+            break
+        }
+
+        timeout {
+            puts "\n\nFATAL ERROR: config prompt timeout in make config"
+            break
+        }
+    }
+}

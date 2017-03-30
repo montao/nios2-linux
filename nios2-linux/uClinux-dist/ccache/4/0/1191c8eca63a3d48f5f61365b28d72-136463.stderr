@@ -1,0 +1,25 @@
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/mwin/winsbar.c:522: warning: 'PtInRect2' defined but not used
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/mwin/winsbar.c: In function 'MwPaintNCScrollbars':
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/mwin/winsbar.c:129: warning: 'rcVBar.left' may be used uninitialized in this function
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/mwin/winsbar.c:129: warning: 'rcVBar.right' may be used uninitialized in this function
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/mwin/winsbar.c:129: warning: 'rcVBar.top' may be used uninitialized in this function
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/mwin/winsbar.c:129: warning: 'rcVBar.bottom' may be used uninitialized in this function
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/mwin/winsbar.c:129: warning: 'rcHBar.top' may be used uninitialized in this function
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/mwin/winsbar.c:129: warning: 'rcHBar.bottom' may be used uninitialized in this function
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/mwin/winsbar.c:129: warning: 'rcHBar.left' may be used uninitialized in this function
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/mwin/winsbar.c:129: warning: 'rcHBar.right' may be used uninitialized in this function
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/mwin/winsbar.c: In function 'SetScrollInfo':
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/mwin/winsbar.c:775: warning: 'rcBar.left' may be used uninitialized in this function
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/mwin/winsbar.c:775: warning: 'rcBar.right' may be used uninitialized in this function
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/mwin/winsbar.c:775: warning: 'rcBar.top' may be used uninitialized in this function
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/mwin/winsbar.c:775: warning: 'rcBar.bottom' may be used uninitialized in this function
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/mwin/winsbar.c: In function 'SetScrollRange':
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/mwin/winsbar.c:720: warning: 'rcBar.left' may be used uninitialized in this function
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/mwin/winsbar.c:720: warning: 'rcBar.right' may be used uninitialized in this function
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/mwin/winsbar.c:720: warning: 'rcBar.top' may be used uninitialized in this function
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/mwin/winsbar.c:720: warning: 'rcBar.bottom' may be used uninitialized in this function
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/mwin/winsbar.c: In function 'SetScrollPos':
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/mwin/winsbar.c:673: warning: 'rcBar.left' may be used uninitialized in this function
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/mwin/winsbar.c:673: warning: 'rcBar.right' may be used uninitialized in this function
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/mwin/winsbar.c:673: warning: 'rcBar.top' may be used uninitialized in this function
+/home/developer/altera/nios2-linux/uClinux-dist/user/microwin/src/mwin/winsbar.c:673: warning: 'rcBar.bottom' may be used uninitialized in this function

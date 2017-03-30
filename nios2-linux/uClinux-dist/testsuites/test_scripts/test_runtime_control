@@ -1,0 +1,56 @@
+#!/bin/sh
+
+QUIT=2
+cnt=0
+
+echo -e "###########Starting test_runtime_control ###########\n" > test_runtime_control_log
+
+while [ $QUIT -gt 1 ]
+do
+
+((cnt = cnt + 1 ))
+echo -e "################### The $cnt round start! #############################\n" >> test_runtime_control_log
+
+whole_command_line=`ps aux | grep .exp | grep -v grep | head -1`
+test_pid=`echo $whole_command_line | awk '{print $2}'`
+test_command=`echo $whole_command_line | awk '{print $11}'`
+
+if [ "$test_pid" == "" ] && [ "$test_command" == "" ] ; then
+
+ echo -e "QUIT=$QUIT `date`\n1111 No test script is running."  >> test_runtime_control_log
+ sleep 1200 
+
+else
+
+ echo -e "QUIT=$QUIT `date`\n2222 $whole_command_line"  >> test_runtime_control_log
+ script_name=`echo $whole_command_line | awk '{print $12}'`
+ if [ "$script_name" == "./build_qt_kernel.exp" ] || [ "$script_name" == "./ltp_auto_test.exp" ] || [ "$script_name" == "./spimmc_test.exp" ] || [ "$script_name" == "./sdiommc_test.exp" ]; then
+     sleep 7200
+ elif [ "$script_name" == "./gadget_fs_bulk_test.exp" ] || [ "$script_name" == "./gadget_fs_control_test.exp" ] || [ "$script_name" == "./gadget_zero_bulk_test.exp" ] || [ "$script_name" == "./gadget_zero_control_test.exp" ] ; then
+     sleep 3800
+ else
+     sleep 6000
+ fi
+
+ test_name=`{ ps -p $test_pid | tail -1 | awk '{print $4}' ;}  2> /dev/null`
+ if [ "$test_pid" != "" ] && [ "$test_name" != 'CMD' ] ; then
+   echo -e "QUIT=$QUIT `date`\n3333 Process: $test_name, ID: $test_pid to be killed." >> test_runtime_control_log
+   kill -9 $test_pid
+ fi
+
+fi
+
+kernel_test_whole_command_line=`ps aux | grep -w kernel_test | grep -v grep | head -1`
+kernel_test_pid=`echo $kernel_test_whole_command_line | awk '{print $2}'`
+kernel_test_command=`echo $kernel_test_whole_command_line | awk '{print $11}'`
+
+if [ "$kernel_test_pid" == "" ] && [ "$kernel_test_command" == "" ] ; then
+   echo -e "QUIT=$QUIT `date`\n 4444 Process: $kernel_test_command, ID: $kernel_test_pid to be killed! kill $$.!!" >> test_runtime_control_log
+
+kill -9 $$
+
+fi
+echo -e "################### The $cnt round finished! #############################\n" >> test_runtime_control_log
+
+done
+

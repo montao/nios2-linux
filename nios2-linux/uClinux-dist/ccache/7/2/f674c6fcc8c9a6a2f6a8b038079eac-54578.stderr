@@ -1,0 +1,37 @@
+dhry_1.c:31: warning: conflicting types for built-in function 'malloc'
+dhry_1.c:78: warning: return type defaults to 'int'
+dhry_1.c: In function 'main':
+dhry_1.c:98: warning: implicit declaration of function 'strcpy'
+dhry_1.c:98: warning: incompatible implicit declaration of built-in function 'strcpy'
+dhry_1.c:110: warning: implicit declaration of function 'atoi'
+dhry_1.c:157: warning: implicit declaration of function 'Proc_5'
+dhry_1.c:158: warning: implicit declaration of function 'Proc_4'
+dhry_1.c:164: warning: implicit declaration of function 'Func_2'
+dhry_1.c:170: warning: implicit declaration of function 'Proc_7'
+dhry_1.c:175: warning: implicit declaration of function 'Proc_8'
+dhry_1.c:177: warning: implicit declaration of function 'Proc_1'
+dhry_1.c:184: warning: implicit declaration of function 'Proc_6'
+dhry_1.c:195: warning: implicit declaration of function 'Proc_2'
+dhry_1.c:292: warning: implicit declaration of function 'exit'
+dhry_1.c:292: warning: incompatible implicit declaration of built-in function 'exit'
+dhry_1.c: At top level:
+dhry_1.c:299: warning: return type defaults to 'int'
+dhry_1.c: In function 'Proc_1':
+dhry_1.c:312: warning: implicit declaration of function 'Proc_3'
+dhry_1.c: At top level:
+dhry_1.c:335: warning: return type defaults to 'int'
+dhry_1.c:358: warning: return type defaults to 'int'
+dhry_1.c:371: warning: return type defaults to 'int'
+dhry_1.c:383: warning: return type defaults to 'int'
+dhry_1.c: In function 'Proc_5':
+dhry_1.c:386: warning: control reaches end of non-void function
+dhry_1.c: In function 'Proc_4':
+dhry_1.c:377: warning: control reaches end of non-void function
+dhry_1.c: In function 'Proc_3':
+dhry_1.c:365: warning: control reaches end of non-void function
+dhry_1.c: In function 'Proc_2':
+dhry_1.c:350: warning: control reaches end of non-void function
+dhry_1.c: In function 'Proc_1':
+dhry_1.c:327: warning: control reaches end of non-void function
+dhry_1.c: In function 'main':
+dhry_1.c:80: warning: 'Int_2_Loc' may be used uninitialized in this function

@@ -1,0 +1,114 @@
+#!/usr/bin/expect
+
+cd $uclinux_path
+set timeout 300
+spawn make config
+
+while 1 {
+    expect {
+
+
+       -re "Customize Kernel Settings.*DEFAULTS_KERNEL.*\\\[.*]" {
+            send "y\r"
+        }
+
+        -re "Customize Application/Library Settings.*DEFAULTS_VENDOR.*\\\[.*]" {
+            send "y\r"
+        }
+        
+        -nocase -re "\\\[\[^\r]*] (\[ymn])|choice\\\[.*]: \[0-9]+\r" {
+            continue
+        }
+
+        # The following two conflicting items could have already been unselected by make_cut_fs_config.exp.
+        -re "SPI support.*SPI.*\\\[.*]" {
+            if { $board_type == "BF518F-EZBRD" } {
+                send -s "N\r"
+            } else {
+                send -s "\r"
+            }
+        }
+
+        -re "Distributed Switch Architecture support.*NET_DSA.*\\\[.*]" {
+            if { $board_type == "BF518F-EZBRD" } {
+                send -s "N\r"
+            } else {
+                send -s "\r"
+            }
+        }
+
+        -re "Detect flash chips by Common Flash Interface \\\(CFI\\\) probe \\\(MTD_CFI\\\).*\\\[.*]" {
+            send -s "Y\r"
+        }
+
+        -re "Detect non-CFI AMD/JEDEC-compatible flash chips \\\(MTD_JEDECPROBE\\\).*\\\[.*]" {
+            if { $board_type == "BF518F-EZBRD" } {
+                send -s "Y\r"
+            } else {
+                send -s "\r"
+            }
+        }
+
+        -re "Support for AMD/Fujitsu/Spansion.* flash chips \\\(MTD_CFI_AMDSTD\\\).*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Support for Intel/Sharp flash chips.*MTD_CFI_INTELEXT.*\\\[.*]" {
+            send -s "Y\r"
+        }
+
+        -re "Support for RAM chips in bus mapping.*MTD_RAM.*\\\[.*]" {
+            send -s "Y\r"
+        }
+
+        -re "Support for ROM chips in bus mapping.*MTD_ROM.*\\\[.*]" {
+            send -s "Y\r"
+        }
+##############################################################################
+
+        -re "Flash device in physical memory map.*MTD_PHYSMAP.*\\\[.*]" {
+            send -s "Y\r"
+        }
+
+        -re "Physmap compat support.*MTD_PHYSMAP_COMPAT.*\\\[.*]" {
+            send -s "\r"
+        }
+
+##############################################################################
+
+        -re "Blackfin BF561 EZKIT Flash Chip Support \\\(MTD_EZKIT561\\\).*\\\[.*]" {
+            if { $board_type == "BF561-EZKIT" } {
+                send -s "Y\r"
+            } else {
+                send -s "N\r"
+            }
+        }
+
+        -re "Blackfin BF533-STAMP Flash Chip Support.*MTD_BFIN_ASYNC.*\\\[.*]" {
+            if { $board_type == "BF533-STAMP" } {
+                send -s "Y\r"
+            } else {
+                send -s "N\r"
+            }
+        }
+
+        "\\\(*) \\\[*]" {
+            sleep .05
+            send "\r"
+        }
+
+        -re "\[cC]hoice\\\[.*]:" {
+            send "\r"
+        }
+
+        eof {
+            puts "End of configuration"
+            break
+        }
+
+        timeout {
+            puts "\n\nFATAL ERROR: config prompt timeout in make config"
+            break
+        }
+    }
+}

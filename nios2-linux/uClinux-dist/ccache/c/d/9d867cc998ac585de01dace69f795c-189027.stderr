@@ -1,0 +1,7 @@
+In file included from fdisk.c:50:
+fdisk.h:87: warning: type qualifiers ignored on function return type
+fdisk.c: In function 'get_boot':
+fdisk.c:789: warning: pointer targets in passing argument 1 of 'valid_part_table_flag' differ in signedness
+fdisk.c:841: warning: pointer targets in passing argument 1 of 'valid_part_table_flag' differ in signedness
+fdisk.c: At top level:
+fdisk.c:1025: warning: type qualifiers ignored on function return type

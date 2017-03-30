@@ -1,0 +1,166 @@
+#!/usr/bin/expect
+
+source  ../kernel_config.exp
+log_file [log_file_name "$argv0"]
+send_user "Starting $argv0\n"
+set TITLE [title "$argv0"]
+
+step "Spawn kermit"
+source ../spawn_kermit.exp
+
+step "Reboot the kernel."
+# To add following line here to indicate that if the bootargs is different,
+# it could be set here. If the bootargs value is 0, it needn't be stated,
+# for it is the default value.
+# set bootargs  $bootargs_param0
+source ../reboot_kernel.exp
+
+set case_num 0
+set timeout 5
+
+step "Cover photosensor to see the brightness control of D6-D14..."
+sleep 10
+send "\r"
+expect -re $kernel_prompt
+
+send_user "\nTest ADP8860 backlight controls\n"
+set timeout 5
+incr case_num
+send "cd /sys/class/backlight/adp8860_bl/\r"
+while 1 {
+    expect {
+        -re "No such.*$kernel_prompt" {
+            case_fail $case_num
+        }
+        -re "adp8860_bl>" {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+send_user "\nChange brightness to zero and check D6-D14 have no light\n"
+set timeout 10
+incr case_num
+send -s "echo 0 > brightness; sleep 5; cat brightness\r"
+while 1 {
+    expect {
+        -re "(\[eE]rror|\[fF]ail).*$kernel_prompt" {
+            case_pass $case_num
+            break
+        }
+        -re "0\r\n$kernel_prompt" {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+send_user "\nChange brightness to a low level and check D6-D14 get dimmer\n"
+set timeout 10
+incr case_num
+send -s "echo 12 > brightness; sleep 5; cat brightness\r"
+while 1 {
+    expect {
+        -re "(\[eE]rror|\[fF]ail).*$kernel_prompt" {
+            case_pass $case_num
+            break
+        }
+        -re "12\r\n$kernel_prompt" {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+send_user "\nChange Ambient Light Zone, D6-D14 light will change\n"
+set timeout 10
+incr case_num
+send -s "echo 3 > ambient_light_zone; sleep 5; cat ambient_light_zone\r"
+while 1 {
+    expect {
+        -re "(\[eE]rror|\[fF]ail).*$kernel_prompt" {
+            case_pass $case_num
+            break
+        }
+        -re "3\r\n$kernel_prompt" {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+send_user "\nTest with linux LEDs class\n"
+set timeout 5
+incr case_num
+send -s "cd /sys/class/leds/adp8860-led7/\r"
+while 1 {
+    expect {
+        -re "No such.*$kernel_prompt" {
+            case_fail $case_num
+        }
+        -re "adp8860-led7>" {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+send_user "\nA matrix of LEDs will blink\n"
+set timeout 10
+incr case_num
+send -s "echo 100 > brightness; sleep 5; cat brightness\r"
+while 1 {
+    expect {
+        -re "(\[eE]rror|\[fF]ail).*$kernel_prompt" {
+            case_pass $case_num
+            break
+        }
+        -re "100\r\n$kernel_prompt" {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+send_user "\nA matrix of LEDs will stop to blink\n"
+set timeout 10
+incr case_num
+send -s "echo 0 > brightness; sleep 5; cat brightness\r"
+while 1 {
+    expect {
+        -re "(\[eE]rror|\[fF]ail).*$kernel_prompt" {
+            case_pass $case_num
+            break
+        }
+        -re "0\r\n$kernel_prompt" {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+all_pass
+send_user "Ending $argv0\n"
+log_file

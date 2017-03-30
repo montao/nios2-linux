@@ -1,0 +1,115 @@
+#!/usr/bin/expect
+
+source  ../kernel_config.exp
+source  ../board_info.exp
+log_file [log_file_name "$argv0"]
+send_user "Starting $argv0\n"
+set TITLE [title "$argv0"]
+
+set standby_pattern "Syncing filesystems \.\.\. done.*Freezing user space processes \.\.\. \\\(elapsed.*seconds\\\) done\.\r\nFreezing remaining freezable tasks \.\.\. \\\(elapsed.*seconds\\\) done\.\r\nSuspending console\\\(s\\\) \\\(use no_console_suspend to debug\\\)"
+
+step "Spawn kermit"
+source ../spawn_kermit.exp
+
+step "Reboot the kernel."
+# To add following line here to indicate that if the bootargs is different,
+# it could be set here. If the bootargs value is 0, it needn't be stated,
+# for it is the default value.
+# set bootargs  $bootargs_param0
+source ../reboot_kernel.exp
+
+set standby_fail 0
+
+proc standby_test_case {} {
+    global case_num
+    global kernel_prompt
+    global standby_pattern
+
+    set timeout 10
+    incr case_num
+    send "echo standby > /sys/power/state"
+    sleep 1
+    send "\r"
+    while 1 {
+        expect {
+            -re $standby_pattern {
+                case_pass $case_num
+                break
+            }
+            timeout {
+                send_user "Standby fail\n"
+                case_fail $case_num
+            }
+        }
+    }
+
+    sleep 5
+    set timeout 10
+    incr case_num
+    send " "
+    while 1 {
+        expect {
+            -re "Restarting tasks.*done\.\r\n$kernel_prompt" {
+                case_pass $case_num
+                break
+            }
+            timeout {
+                send_user "Wake up fail\n"
+                case_fail $case_num
+            }
+        }
+    }
+
+    set timeout 5
+    expect -re "Full\r\n|lpa 0x41E1\r\n"
+}
+
+
+step "Start testing"
+set case_num 0
+set Total_Count 5
+sleep 5
+send "\r"
+expect -re $kernel_prompt
+
+set timeout 5
+incr case_num
+send "echo enabled > /sys/class/tty/ttyBF$def_uart_port/power/wakeup\r"
+while 1 {
+    expect {
+        -re $kernel_prompt {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+set timeout 5
+incr case_num
+send "cat /sys/class/tty/ttyBF$def_uart_port/power/wakeup\r"
+while 1 {
+    expect {
+        -re "enabled.*$kernel_prompt" {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+for {set count 1} {$count <= $Total_Count} {incr count} {
+    standby_test_case
+    sleep 5
+    send_user "\nStandby test round $count pass\n\n"
+}
+
+all_pass
+
+send_user "Ending $argv0\n"
+
+log_file

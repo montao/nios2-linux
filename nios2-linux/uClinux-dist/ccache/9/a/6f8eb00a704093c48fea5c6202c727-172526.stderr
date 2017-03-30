@@ -1,0 +1,2 @@
+interface.c: In function 'ife_print_long':
+interface.c:678: warning: pointer targets in passing argument 1 of 'hw->print' differ in signedness

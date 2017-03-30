@@ -1,0 +1,149 @@
+#!/usr/bin/expect
+
+source ../kernel_config.exp
+source  ../board_info.exp
+log_file [log_file_name "$argv0"]
+send_user "Starting $argv0\n"
+
+set env(EXT2_BLOCKS) "20480"
+
+cd $uclinux_path/testsuites
+step "Make clean."
+if { [source make_clean.exp] != 0 } {
+    send_user "\n\nFail to make clean. Exit!\n\n"
+    exit
+}
+
+cd $uclinux_path/testsuites
+step "Make config."
+source  make_default_config.exp
+
+# Following make specific configuration for this case.
+cd $uclinux_path
+set timeout 300
+set baud_rate_done_flag 0
+spawn make config
+
+while 1 {
+    expect {
+        -re "Customize Kernel Settings.*DEFAULTS_KERNEL.*\\\[.*]" {
+            send "y\r"
+        }
+
+        -re "Customize Application/Library Settings.*DEFAULTS_VENDOR.*\\\[.*]" {
+            send "y\r"
+        }
+
+#Video Output on TFT-LCD or other video devices
+        -re "Support for generic platform NAND driver.*MTD_NAND_PLATFORM.*\\\[.*]" {
+            #conflict with TFT LCD
+            send "N\r"
+        }
+
+        -re "SPI controller driver for ADI Blackfin5xx.*SPI_BFIN.*\\\[.*]" {
+            if { $board_type == "BF537-STAMP" } {
+                send "M\r"
+            } else {
+                send "\r"
+            }
+        }
+
+        -re "Backlight & LCD device support.*BACKLIGHT_LCD_SUPPORT.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Support for frame buffer devices.*FB.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "SHARP LQ035 TFT LCD.*FB_BF537_LQ035.*\\\[.*]" {
+            if { $board_type == "BF537-STAMP" } {
+                send "M\r"
+            } else {
+                send "N\r"
+            }
+        }
+
+        -re "SHARP LQ043 TFT LCD.*BF548 EZKIT.*\\\[.*]" {
+            if { $board_type == "BF548-EZKIT" } {
+                send "M\r"
+            } else {
+                send "N\r"
+            }
+        }
+
+        -re "Varitronix COG-T350MCQB TFT LCD display.*FB_BFIN_T350MCQB.*\\\[.*]" {
+            if { $board_type == "BF527-EZKIT" } {
+                send "M\r"
+            } else {
+                send "N\r"
+            }
+        }
+
+        -re "SHARP LQ035Q1DH02 TFT LCD.*FB_BFIN_LQ035Q1.*\\\[.*]" {
+            if { $board_type == "BF527-EZKIT-V2" } {
+                send "M\r"
+            } else {
+                send "N\r"
+            }
+        }
+
+        -re "Sound card support.*SOUND.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "Uncached DMA region.*(\[0-9]). Enable 2M DMA region.*DMA_UNCACHED_2M.*\[cC]hoice.*\\\[.*]" {
+            send "$expect_out(1,string)\r"
+        }
+
+        -re "VIDEO test program.*USER_BLACKFIN_VIDEOTEST.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Binary format.*FLAT.*Shared-FLAT.*FDPIC.*\\\[.*]" {
+            send "4\r"
+        }
+
+        -re "MPlayer and mencode.*USER_MPLAYER.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Use L1 memory for rx\\\/tx packets.*BFIN_MAC_USE_L1.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -nocase -re "\\\[\[^\r]*] (\[ymn])|choice\\\[.*]: \[0-9]+\r" {
+            continue
+        }
+
+        "\\\(*) \\\[*]" {
+            sleep .05
+            send "\r"
+        }
+
+        -re "\[cC]hoice\\\[.*]:" {
+            send "\r"
+        }
+
+        eof {
+            puts "End of configuration"
+            break
+        }
+
+        timeout {
+            puts "\n\nFATAL ERROR: config prompt timeout in make config"
+            break
+        }
+    }
+}
+
+cd $uclinux_path/testsuites
+step "Make"
+source  make_kernel.exp
+
+cd $uclinux_path/testsuites
+step "Copy linux"
+source   copy_image.exp
+
+send_user "Ending $argv0\n"
+log_file

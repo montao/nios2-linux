@@ -1,0 +1,22 @@
+this is wrong ...
+
+--- lirc-0.8.6/tools/irpty.c
++++ lirc-0.8.6/tools/irpty.c
+@@ -81,7 +81,7 @@
+ 	char buf[BUFFSIZE];
+ 	struct sigaction act;
+ 
+-	if ((child = fork()) < 0) {
++	if ((child = vfork()) < 0) {
+ 		die("fork error");
+ 	} else if (!child) {
+ 		fd_set fds;
+@@ -255,7 +255,7 @@
+ 	if (slave_name)
+ 		strcpy(slave_name, pts_name);
+ 
+-	if ((pid = fork()) < 0)
++	if ((pid = vfork()) < 0)
+ 		die("fork error\n");
+ 	if (!pid) {
+ 		if (setsid() < 0)

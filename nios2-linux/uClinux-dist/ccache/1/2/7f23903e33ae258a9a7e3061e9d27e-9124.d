@@ -1,0 +1,23 @@
+libbb/perror_nomsg_and_die.o:  \
+ /home/developer/altera/nios2-linux/uClinux-dist/user/busybox/busybox-1.18.4/libbb/perror_nomsg_and_die.c \
+  include/autoconf.h \
+  /home/developer/altera/nios2-linux/uClinux-dist/user/busybox/busybox-1.18.4/include/platform.h \
+  /home/developer/altera/nios2-linux/toolchain-mmu/x86-linux2/bin/../lib/gcc/nios2-linux-gnu/4.1.2/include-fixed/limits.h \
+  /home/developer/altera/nios2-linux/toolchain-mmu/x86-linux2/bin/../lib/gcc/nios2-linux-gnu/4.1.2/include-fixed/syslimits.h \
+  /home/developer/altera/nios2-linux/toolchain-mmu/x86-linux2/bin/../nios2-linux-gnu/libc/usr/include/limits.h \
+  /home/developer/altera/nios2-linux/toolchain-mmu/x86-linux2/bin/../nios2-linux-gnu/libc/usr/include/features.h \
+  /home/developer/altera/nios2-linux/toolchain-mmu/x86-linux2/bin/../nios2-linux-gnu/libc/usr/include/bits/predefs.h \
+  /home/developer/altera/nios2-linux/toolchain-mmu/x86-linux2/bin/../nios2-linux-gnu/libc/usr/include/sys/cdefs.h \
+  /home/developer/altera/nios2-linux/toolchain-mmu/x86-linux2/bin/../nios2-linux-gnu/libc/usr/include/bits/wordsize.h \
+  /home/developer/altera/nios2-linux/toolchain-mmu/x86-linux2/bin/../nios2-linux-gnu/libc/usr/include/gnu/stubs.h \
+  /home/developer/altera/nios2-linux/toolchain-mmu/x86-linux2/bin/../nios2-linux-gnu/libc/usr/include/bits/posix1_lim.h \
+  /home/developer/altera/nios2-linux/toolchain-mmu/x86-linux2/bin/../nios2-linux-gnu/libc/usr/include/bits/local_lim.h \
+  /home/developer/altera/nios2-linux/toolchain-mmu/x86-linux2/bin/../nios2-linux-gnu/libc/usr/include/linux/limits.h \
+  /home/developer/altera/nios2-linux/toolchain-mmu/x86-linux2/bin/../nios2-linux-gnu/libc/usr/include/bits/posix2_lim.h \
+  /home/developer/altera/nios2-linux/toolchain-mmu/x86-linux2/bin/../nios2-linux-gnu/libc/usr/include/bits/xopen_lim.h \
+  /home/developer/altera/nios2-linux/toolchain-mmu/x86-linux2/bin/../nios2-linux-gnu/libc/usr/include/bits/stdio_lim.h \
+  /home/developer/altera/nios2-linux/toolchain-mmu/x86-linux2/bin/../nios2-linux-gnu/libc/usr/include/byteswap.h \
+  /home/developer/altera/nios2-linux/toolchain-mmu/x86-linux2/bin/../nios2-linux-gnu/libc/usr/include/bits/byteswap.h \
+  /home/developer/altera/nios2-linux/toolchain-mmu/x86-linux2/bin/../nios2-linux-gnu/libc/usr/include/endian.h \
+  /home/developer/altera/nios2-linux/toolchain-mmu/x86-linux2/bin/../nios2-linux-gnu/libc/usr/include/bits/endian.h \
+  /home/developer/altera/nios2-linux/toolchain-mmu/x86-linux2/bin/../lib/gcc/nios2-linux-gnu/4.1.2/include/stdbool.h

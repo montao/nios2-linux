@@ -1,0 +1,117 @@
+#!/usr/bin/expect
+
+source ../kernel_config.exp
+
+set port_config "i2c"
+if { $argc >= 2} {
+    set port_config [lindex $argv 1]
+}
+
+log_file [log_file_name $argv0.$port_config ]
+
+source ../board_info.exp
+send_user "Starting $argv0\n"
+
+if { $port_config == "i2c" || $port_config == "spi" } {
+    send_log "\n#### Port config is $port_config.\n"
+} else {
+    send_log "\n#### This config $port_config is not supported. Sorry.\n"
+    exit
+}
+
+if { $port_config == "i2c" } {
+    set input_num 1
+    set interrupt_num 140
+} elseif { $port_config == "spi" } {
+    set input_num 0
+    set interrupt_num 56
+} else {
+    exit
+}
+
+set TITLE [title "$argv0"]
+append TITLE " ($port_config)"
+
+step "Start kermit."
+source ../spawn_kermit.exp
+
+step "Reboot the kernel."
+source ../reboot_kernel.exp
+
+step "Starting test."
+set timeout 8
+set case_num 0
+sleep 5
+
+incr case_num
+expect -re $kernel_prompt
+send -s "dmesg|grep input\r"
+while 1 {
+    expect {
+        -re "input: ADXL34x accelerometer.*$kernel_prompt" {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+incr case_num
+send -s "cat /sys/class/input/input$input_num/name\r"
+while 1 {
+    expect {
+        -re "ADXL34x accelerometer.*$kernel_prompt" {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+incr case_num
+send -s "cat /proc/interrupts\r"
+while 1 {
+    expect {
+        -re "$interrupt_num.*$kernel_prompt" {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+incr case_num
+send -s "event_test /dev/input/event$input_num\r"
+while 1 {
+    expect {
+        -re "Input device name.*Testing" {
+            puts "\nPlease move the board...\n"
+            expect {
+                -re "Event: time .* type .* code .* value " {
+                    case_pass $case_num
+                }
+                timeout {
+                    case_fail $case_num
+                }
+            }
+            sleep 5
+            send -s "\003"
+            expect -re $kernel_prompt
+            break
+        }
+
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+all_pass
+send_user "Ending $argv0\n"
+log_file

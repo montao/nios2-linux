@@ -1,0 +1,4 @@
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/arch/nios2/kernel/setup.c: In function 'nios2_boot_init':
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/arch/nios2/kernel/setup.c:114: warning: unused variable 'cmdline_passed'
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/arch/nios2/kernel/setup.c: In function 'altera_tse_add_fixed_phys':
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/arch/nios2/kernel/setup.c:192: warning: 'return' with a value, in function returning void

@@ -1,0 +1,439 @@
+#############################################################################
+
+
+menu "Blackfin test programs"
+
+config USER_BLACKFIN_RTC
+	bool "RTC test program"
+config USER_BLACKFIN_PREEMPTTEST
+	bool "PREEMPT kernel latency test program"
+config USER_BLACKFIN_DPMC
+	bool "DPMC test program"
+config USER_BLACKFIN_PPIFCDTEST
+	bool "PPIFCD test program"
+config USER_BLACKFIN_AUDIOTEST
+	bool "AUDIO test program"
+config USER_BLACKFIN_VIDEOTEST
+	bool "VIDEO test program"
+config USER_BLACKFIN_V4L2_VIDEOTEST
+	bool "V4L2 VIDEO test program"
+config USER_BLACKFIN_PFBUTTONS
+	bool "PFBUTTONS test program"
+config USER_BLACKFIN_TWI
+	bool "TWI test program"
+	help
+	  This test is based on LQ035 LCD add-on board. Please configure
+	  bf537-lq035 driver as a module in kernel configuration before
+	  run build and run this test.
+config USER_BLACKFIN_SPITEST
+	bool "SPI test program"
+config USER_BLACKFIN_PPI
+	bool "PPI test program"
+config USER_BLACKFIN_TWILCDTEST
+	bool "TWI LCD test program"
+config USER_BLACKFIN_TWIKEYPADTEST
+	bool "TWI KEYPAD test program"
+config USER_BLACKFIN_RTSCTSTEST
+	bool "RTS/CTS test program"
+config USER_SQLITE_TEST
+	bool "Sqlite test program"
+	select LIB_SQLITE
+config USER_BLACKFIN_PTHREADTEST
+	bool "Pthread lib test"
+config USER_BLACKFIN_PANICTEST
+	bool "Kernel Panic (test Watchdog)"
+config USER_BLACKFIN_TRAPSTEST
+	bool "Trap tests"
+config USER_SYSVIPC_TEST
+	bool "SYSVIPC testcase"
+config YET
+	bool "Still to write"
+config EVENT_TEST
+	bool "Input event device test"
+config FILE_OPERATION_TEST
+	bool "file operation test"
+config USER_BLACKFIN_SPORT
+	bool "common sport test"
+config USER_UPNP_SAMPLES
+	bool "UPNP samples"
+	select LIB_LIBUPNP
+config USER_BLACKFIN_DCPLB
+	bool "DCPLB Replacement Test"
+config USER_BLACKFIN_LATENCYTEST
+	bool "IRQ Schedule latency test"
+config USER_BLACKFIN_MALLOCPERF
+	bool "Malloc performance test"
+config USER_BLACKFIN_SRAMALLOC_TEST
+	bool "sram_alloc/sram_free test"
+config USER_BLACKFIN_ERESTART_TEST
+	bool "erestart test"
+config USER_IIO_RING_TEST
+	bool "Analog Devices IIO device ring test"
+config CAMERA_TEST
+	bool "camera test"
+config STRING_TEST
+	bool "string test"
+config MMAP_TEST
+	bool "mmap test"
+config USER_CRYPTOPP_LIB_EXAMPLES
+	bool "Crypto++ Lib Test program"
+	select LIB_CRYPTOPP
+config USER_NCURSES_TESTS
+	bool "NCurses Test apps"
+	select LIB_NCURSES
+config USER_LIBIPOD_EXAMPLES
+	bool "libipod examples"
+	select LIB_LIBIPOD
+config USER_GETTIMEOFDAY_TEST
+	bool "gettimeofday system time test"
+config FIXED_CODE_TEST
+	bool "Fixed code test"
+config DYNTICK_TEST
+	bool "Dynamic Tick Test"
+config BFIN_DMA
+	bool "bfin-dma test"
+config XIP_TEST
+	bool "xip test"
+config BOUNDARY_ANOMALY_TEST
+	bool "boundary fetches anomaly test"
+config NMI_WDT_TEST
+	bool "nmi_wdt test"
+config AD7160_RAW_TEST
+	bool "AD7160-RAW interface test"
+config GPTIMER_TEST
+	bool "gptimer simple test"
+endmenu
+
+
+#############################################################################
+
+
+menu "Blackfin app programs"
+
+config SIGMA_FIRMWARE_UTIL
+	bool "Gen soundcard with SigmalDSP 's(eg.adau1761) firmware file"
+config USER_EDN_BENCH
+	bool "EDN's DSP benchmark"
+config USER_LMBENCH
+	bool "lmbench"
+config USER_BLKFIN_APPS_DEVFBAPP_DEVTEST
+	bool "devfbapp"
+config USER_INETUTILS
+	bool "inetutils"
+config USER_INETUTILS_RCP
+	bool "rcp"
+	depends on USER_INETUTILS
+config USER_INETUTILS_RSH
+	bool "rsh"
+	depends on USER_INETUTILS
+config USER_INETUTILS_RSHD
+	bool "rshd"
+	depends on USER_INETUTILS
+config USER_INETUTILS_TELNET
+	bool "telnet"
+	depends on USER_INETUTILS
+config USER_INETUTILS_FTP
+	bool "ftp"
+	depends on USER_INETUTILS
+config USER_INETUTILS_FTPD
+	bool "ftpd"
+	depends on USER_INETUTILS
+config USER_BF561_COREBLD
+	bool "BF561 Core B support tools"
+config USER_BF561_ICC
+	bool "BF561 ICC utils"
+	default N
+config USER_DSP_BRIDGE
+	bool "dsp_bridge for bf561"
+	help
+	  A framework which was designed to enhance the CoreBLD
+config USER_POUND
+	bool "pound SSL Wrapper"
+	select LIB_LIBSSL
+config USER_PNGVIEW
+	bool "pngview"
+	select LIB_LIBPNG
+	select LIB_ZLIB
+config USER_IRDA_TOOLS
+	bool "IrDA Tools"
+	#irattach,irdaping
+config USER_IRCP
+	bool "ircp"
+	select LIB_OPENOBEX
+config USER_ALSA_UTILS
+	bool "ALSA utils"
+	select LIB_ALSA_LIB
+	select LIB_NCURSES
+config USER_FFMPEG_APPS
+	bool "FFmpeg and FFserver"
+	select LIB_ZLIB
+	select LIB_FFMPEG
+config USER_FPING
+	bool "fping"
+	help
+	  fping is a ping(1) like program which uses the Internet Control Message
+	  Protocol (ICMP) echo request to determine if a host is up. fping is
+	  different from ping in that you can specify any number of hosts on
+	  the command line, or specify a file containing the lists of hosts to ping. 
+	  http://fping.sourceforge.net/
+config USER_HTPDATE
+	bool htpdate
+	help
+	  Why would anybody need another time protocol, when ntp is already great?
+	  A simple answer is you do not, unless you do not have access to a ntp
+	  server, because you are behind a firewall and/or proxy server.
+
+	  In order for ntp to work, you need to have access to outgoing and
+	  incoming packets from UDP port 123. As long as HTTP or HTTPS
+	  connectivity is available, you can use HTPDATE to set up your system
+	  clocks.
+	  http://www.clevervest.com/twiki/bin/view/HTP
+config USER_HTTPING
+	bool httping
+	help
+	  Httping is like 'ping' but for http-requests. Give it an url, and it'll
+	  show you how long it takes to connect, send a request and retrieve the
+	  reply (only the headers). Be aware that the transmission across the
+	  network also takes time! 
+	  http://www.vanheusden.com/httping/
+config USER_IFTOP
+	bool iftop
+	select LIB_NCURSES
+	select LIB_LIBPCAP
+	help
+	  iftop does for network usage what top(1) does for CPU usage.
+	  It listens to network traffic on a named interface and displays a
+	  table of current bandwidth usage by pairs of hosts. Handy for
+	  answering the question "why is our ADSL link so slow?".
+	  http://www.ex-parrot.com/pdw/iftop/
+config USER_MPC
+	bool "MPC"
+config USER_MPD
+	bool "MPD"
+	select LIB_FAAD2
+	select LIB_FLAC
+	select LIB_LIBAUDIO
+	select LIB_LIBID3TAG
+	select LIB_LIBMAD
+	select LIB_TREMOR
+config USER_MPLAYER
+	bool "MPlayer and mencode"
+	# force libmad as it does fixed point decoding and only other
+	# choice is floating point which is unusable on Blackfin
+	select LIB_LIBMAD
+config USER_VLC
+	bool "VLC"
+	select LIB_FFMPEG
+	select LIB_LIBICONV
+	select LIB_LIBMPEG2
+	select LIB_ZLIB
+config USER_USBUTILS
+	bool "usbutils (lsusb)"
+	select LIB_LIBUSB
+config USER_BLUEZ
+	bool "Bluez-utils"
+	select LIB_BLUEZ
+config USER_BLUEZ_BCCMD
+	bool "Bluez bccmd util"
+	depends on USER_BLUEZ
+	select LIB_LIBUSB
+	help
+	  Utility for the CSR BCCMD interface
+config USER_BFBLUET_EZEXT_UTIL
+	bool "BFBLUET-EZEXT Boot Mode Utility"
+config USER_BTSCO
+	bool "Bluetooth ALSA utility"
+	depends on USER_BLUEZ
+	select USER_ALSA_UTILS
+config USER_PCMCIAUTILS
+	bool "pcmciautils"
+	select LIB_LIBSYSFS
+config USER_DAGRAB_DAGRAB
+	bool "dagrab"
+config USER_MPG321
+	bool "mpg321"
+	select LIB_LIBAO
+	select LIB_LIBID3TAG
+	select LIB_LIBMAD
+	select LIB_ZLIB
+	help
+	  simple and lightweight command line mp3 player
+
+	  http://mpg321.sourceforge.net/
+config USER_SDLEXAMPLES
+	bool "SDL Examples"
+	select LIB_LIBSDL
+	select LIB_SDL_MIXER
+	select LIB_SDL_NET
+	select LIB_SDL_IMAGE
+	select LIB_SDL_TTF
+	select LIB_ZLIB
+	select LIB_LIBMAD
+	select LIB_FAAD2
+	select LIB_FLAC
+	select LIB_TREMOR
+	select LIB_LIBAUDIO
+	select LIB_LIBPNG
+	select LIB_FREETYPE
+	select LIB_TSLIB
+config USER_DIRECTVNC
+	bool "DirectVNC"
+	select LIB_DIRECTFB
+	select LIB_LIBJPEG
+config USER_DIRECTFBEXAMPLES
+	bool "DirectFB Examples"
+	select LIB_DIRECTFB
+	select LIB_FREETYPE
+	select LIB_LIBJPEG
+config USER_CURL_CURL
+	bool "curl"
+	select LIB_LIBCURL
+	select LIB_LIBIDN
+	select LIB_ZLIB
+	select LIB_LIBBZ2
+	select LIB_LIBSSL
+config USER_LIBSSL_TESTS
+	bool "SSL Test Applications"
+	select LIB_LIBSSL
+config USER_UBOOT_TOOLS
+	bool "U-Boot Tools"
+config USER_I2C_TOOLS
+	bool "I2C Tools"
+config USER_LSUIO
+	bool "lsuio"
+	select LIB_LIBUIO
+	help
+	  lsuio is based on libuio and lists UIO devices and their attributes.
+	  http://docs.blackfin.uclinux.org/doku.php?id=auto_generated_kernel_docs:uio-howto
+config USER_NANO
+	bool "nano"
+	select LIB_NCURSES
+	help
+	  The ncurses based text editor:
+	  http://www.nano-editor.org/
+config USER_FPGA_HSCONV
+	bool "HS Conv driver and FPGA Tools"
+config USER_UVC_VIDEO
+	bool "USB Video Class Driver and Test Application"
+	select LIB_LIBSDL
+	select LIB_TSLIB	
+config USER_CPUFREQUTILS
+	bool "cpufrequtils"
+config USER_PICTUREFLOW
+	bool "pictureflow"
+	select LIB_QT
+	help
+	  The pictureflow demo app
+	  http://code.google.com/p/pictureflow/
+config USER_SERCD
+	bool "sercd"
+	help
+	  sercd is an RFC 2217-compliant serial port redirector.
+	  see http://sourceforge.net/projects/sercd
+
+config USER_LOWPANTOOLS
+	bool "loWPAN-tools"
+	select LIB_LIBNL
+	help
+	  This is a set of utils to manage the Linux LoWPAN stack.
+	  Such as iz, izcoordinator, izconfig, izchat, etc.
+	  The LoWPAN stack aims for IEEE 802.15.4-2003 (and for lesser extent
+	  IEEE 802.15.4-2006) compatibility.
+	  If you want to learn more, please go to http://linux-zigbee.sf.net/
+
+config USER_USB_MODESWITCH
+	bool "usb_modeswitch"
+	select LIB_LIBUSB
+	help
+	  Helper utility to switch the modes of random USB devices.
+	  http://www.draisberghof.de/usb_modeswitch/
+endmenu
+
+
+#############################################################################
+
+
+menu "Blackfin canned demos"
+
+config USER_NDSO
+	bool "Networked Software Defined Storage Oscilloscope /dev/sport"
+	select LIB_LIBPNG
+	select USER_GNUPLOT
+
+config USER_NDSO_IIO
+	bool "Networked Software Defined Storage Oscilloscope IIO"
+	select LIB_LIBPNG
+	select USER_GNUPLOT
+
+config USER_AWG 
+	bool "Networked Arbitrary Waveform Genertor"
+	select LIB_LIBPNG
+	select USER_GNUPLOT
+
+config USER_PPIFPGACGI 
+	bool "Networked PPI/FPGA Demo Project"
+
+config USER_BLACKFIN_PPIFCDCGI
+	bool "CGI based Test Application for the PPI Frame Capture Driver"
+
+config USER_LINPHONE
+	bool "Linphone, a SIP compatible VoIP phone"
+	select LIB_SPEEX
+	select LIB_OSIP2
+	select LIB_LIBEXOSIP
+	select LIB_READLINE
+	select LIB_NCURSES
+	select LIB_ALSA_LIB
+config USER_LINPHONE_VIDEO
+	bool "Enable video"
+	depends on USER_LINPHONE
+	select LIB_LIBSDL
+	select LIB_FFMPEG
+
+config USER_NET_AUDIO
+	bool "NetAudio"
+	select USER_MPD
+	select USER_MPC
+
+config USER_MACCHANGER
+	bool "MacChanger"
+	help
+	  A GNU/Linux utility for viewing/manipulating the MAC address of network interface
+	  http://www.alobbs.com/macchanger
+
+config USER_MPC2X
+	bool "mpc2x"
+	select LIB_LIBMAD
+	select LIB_FAAD2
+	select LIB_FLAC
+	select LIB_LIBID3TAG
+	select LIB_TREMOR
+	select LIB_LIBAUDIO
+	select LIB_LIBSDL
+	select LIB_ZLIB
+	select LIB_LIBPNG
+	select LIB_FREETYPE
+	select LIB_SDL_IMAGE
+	select LIB_SDL_TTF
+	select LIB_TSLIB
+
+endmenu
+
+
+#############################################################################
+
+
+menu "Blackfin device drivers (Experimental)"
+
+config USER_BLACKFIN_DRV_TEA5764
+	bool "tea5764"
+
+config USER_BLACKFIN_DRV_TIMER_LATENCY
+	bool "bfin timer latency test"
+
+config USER_BLACKFIN_DRV_PREEMPT_LATENCY
+	bool "bfin preempt latency test drvier"
+
+config USER_BLACKFIN_DRV_SPI_ADC
+	bool "bfin spi adc test drvier"
+endmenu

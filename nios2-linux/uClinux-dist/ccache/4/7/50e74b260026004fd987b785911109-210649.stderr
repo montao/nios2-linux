@@ -1,0 +1,13 @@
+cmds.c: In function 'do_time':
+cmds.c:66: warning: format '%d' expects type 'int', but argument 2 has type '__time_t'
+cmds.c:66: warning: format '%6.6d' expects type 'int', but argument 3 has type '__suseconds_t'
+cmds.c: In function 'do_touch':
+cmds.c:317: warning: implicit declaration of function 'time'
+cmds.c: In function 'do_mount':
+cmds.c:508: warning: implicit declaration of function 'mount'
+cmds.c: In function 'do_umount':
+cmds.c:517: warning: implicit declaration of function 'umount'
+cmds.c: In function 'do_cmp':
+cmds.c:533: warning: unused variable 'lastarg'
+cmds.c:532: warning: unused variable 'destname'
+cmds.c:531: warning: unused variable 'srcname'

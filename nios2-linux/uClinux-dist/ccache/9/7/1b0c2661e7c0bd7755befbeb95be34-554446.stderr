@@ -1,0 +1,2 @@
+/home/developer/altera/nios2-linux/linux-2.6/drivers/spi/spi-bitbang.c: In function 'bitbang_work':
+/home/developer/altera/nios2-linux/linux-2.6/drivers/spi/spi-bitbang.c:347: warning: comparison is always false due to limited range of data type

@@ -1,0 +1,33 @@
+--- dbus-1.3.0/configure
++++ dbus-1.3.0/configure
+@@ -10270,7 +10270,7 @@ $as_echo_n "checking whether the $compil
+   compiler_needs_object=no
+   enable_shared_with_static_runtimes=no
+   export_dynamic_flag_spec=
+-  export_symbols_cmds='$NM $libobjs $convenience | $global_symbol_pipe | $SED '\''s/.* //'\'' | sort | uniq > $export_symbols'
++  export_symbols_cmds='$NM $libobjs $convenience | $global_symbol_pipe | $SED '\''s/[^ ]* \(_[^ ]*\) .*/\1/'\'' | sort | uniq > $export_symbols'
+   hardcode_automatic=no
+   hardcode_direct=no
+   hardcode_direct_absolute=no
+--- dbus-1.3.0/dbus/Makefile.in
++++ dbus-1.3.0/dbus/Makefile.in
+@@ -493,7 +493,7 @@ BUILT_SOURCES = $(dbusarchinclude_HEADER
+ EXTRA_DIST = dbus-arch-deps.h.in
+ noinst_LTLIBRARIES = libdbus-convenience.la
+ libdbus_1_la_LIBADD = $(DBUS_CLIENT_LIBS)
+-libdbus_1_la_LDFLAGS = -export-symbols-regex "^[^_].*" -version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE) -no-undefined @R_DYNAMIC_LDFLAG@ @PIC_LDFLAGS@
++libdbus_1_la_LDFLAGS = -export-symbols-regex "^_[^_].*" -version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE) -no-undefined @R_DYNAMIC_LDFLAG@ @PIC_LDFLAGS@
+ libdbus_convenience_la_LDFLAGS = @R_DYNAMIC_LDFLAG@
+ @DBUS_BUILD_TESTS_TRUE@TESTS_ENVIRONMENT = DBUS_TEST_DATA=$(top_builddir)/test/data DBUS_TEST_HOMEDIR=$(top_builddir)/dbus
+ dbus_test_SOURCES = \
+--- dbus-1.3.0/dbus/Makefile.am
++++ dbus-1.3.0/dbus/Makefile.am
+@@ -173,7 +173,7 @@ noinst_LTLIBRARIES=libdbus-convenience.l
+ libdbus_1_la_LIBADD= $(DBUS_CLIENT_LIBS)
+ ## don't export symbols that start with "_" (we use this 
+ ## convention for internal symbols)
+-libdbus_1_la_LDFLAGS= -export-symbols-regex "^[^_].*" -version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE) -no-undefined @R_DYNAMIC_LDFLAG@ @PIC_LDFLAGS@
++libdbus_1_la_LDFLAGS= -export-symbols-regex "^_[^_].*" -version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE) -no-undefined @R_DYNAMIC_LDFLAG@ @PIC_LDFLAGS@
+ 
+ libdbus_convenience_la_LDFLAGS=@R_DYNAMIC_LDFLAG@
+ 

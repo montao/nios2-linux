@@ -1,0 +1,192 @@
+#!/usr/bin/expect
+
+source ../kernel_config.exp
+
+set port_config "i2c"
+if { $argc >= 2} {
+    set port_config [lindex $argv 1]
+}
+
+log_file [log_file_name $argv0.$port_config ]
+
+source ../board_info.exp
+send_user "Starting $argv0\n"
+
+if { $port_config == "i2c" || $port_config == "spi" } {
+    send_log "\n#### Port config is $port_config.\n"
+} else {
+    send_log "\n#### This config $port_config is not supported. Sorry.\n"
+    exit
+}
+
+cd $uclinux_path/testsuites
+
+step "Make config."
+
+source make_default_config.exp
+
+# Following make specific configuration for this case.
+
+cd $uclinux_path
+set timeout 300
+set baud_rate_done_flag 0
+spawn make config
+
+#Since the i2c spi support is located after input device driver but some config in input need i2c to be selected, so run two rounds of selection.
+#puts "Begin the interactive process of configuration"
+while 1 {
+    expect {
+        -re "Customize Kernel Settings.*DEFAULTS_KERNEL.*\\\[.*]" {
+            send "y\r"
+        }
+
+        -re "Customize Application/Library Settings.*DEFAULTS_VENDOR.*\\\[.*]" {
+            send "y\r"
+        }
+
+        -re "I2C support.*I2C\[^_].*\\\[.*]" {
+            if { $port_config == "i2c" } {
+                send "Y\r"
+            } else {
+                send "\r"
+            }
+        }
+
+        -re "I2C device interface.*I2C_CHARDEV.*\\\[.*]" {
+            if { $port_config == "i2c" } {
+                send "Y\r"
+            } else {
+                send "\r"
+            }
+        }
+
+        -re "Blackfin TWI I2C support.*I2C_BLACKFIN_TWI.*\\\[.*]" {
+            if { $port_config == "i2c" } {
+                send "Y\r"
+            } else {
+                send "\r"
+            }
+        }
+
+        -re "Blackfin TWI I2C clock.*I2C_BLACKFIN_TWI_CLK_KHZ.*\\\[.*]" {
+            if { $port_config == "i2c" } {
+                 send "100\r"
+            } else {
+                 send "\r"
+            }
+        }
+
+        -re "SPI support.*SPI.*\\\[\[^\r]*]" {
+            if { $port_config == "spi" } {
+                send "Y\r"
+            } else {
+                send "\r"
+            }
+        }
+
+        -nocase -re "\\\[\[^\r]*] (\[ymn])|choice\\\[.*]: \[0-9]+\r" {
+            continue
+        }
+
+        "\\\(*) \\\[*]" {
+            sleep .01
+            send "\r"
+        }
+
+        -re "\[cC]hoice\\\[.*]:" {
+            send "\r"
+        }
+
+        eof {
+            puts "End of configuration"
+            break
+        }
+
+        timeout {
+            puts "\n\nFATAL ERROR: config prompt timeout in make config"
+            break
+        }
+    }
+}
+
+spawn make config
+#puts "Begin the interactive process of configuration"
+while 1 {
+    expect {
+
+        -re "Customize Kernel Settings.*DEFAULTS_KERNEL.*\\\[.*]" {
+            send "y\r"
+        }
+
+        -re "Customize Application/Library Settings.*DEFAULTS_VENDOR.*\\\[.*]" {
+            send "y\r"
+        }
+
+        -re "Generic input layer.*needed for keyboard, mouse.*INPUT.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Event interface.*INPUT_EVDEV.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Miscellaneous devices.*INPUT_MISC.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Analog Devices ADXL34x Three-Axis Digital Accelerometer.*INPUT_ADXL34X.*\\\[.*]" {
+            send -s "Y\r"
+        }
+
+         -re "support I2C bus connection.*INPUT_ADXL34X_I2C.*\\\[.*]" {
+            if { $port_config == "i2c" } {
+                send -s "Y\r"
+            } else {
+                send -s "N\r"
+            }
+        }
+
+         -re "support SPI bus connection.*INPUT_ADXL34X_SPI.*\\\[.*]" {
+            if { $port_config == "spi" } {
+                send -s "Y\r"
+            } else {
+                send -s "N\r"
+            }
+        }
+
+        -nocase -re "\\\[\[^\r]*] (\[ymn])|choice\\\[.*]: \[0-9]+\r" {
+            continue
+        }
+
+        "\\\(*) \\\[*]" {
+            sleep .01
+            send "\r"
+        }
+
+        -re "\[cC]hoice\\\[.*]:" {
+            send "\r"
+        }
+
+        eof {
+            puts "End of configuration"
+            break
+        }
+
+        timeout {
+            puts "\n\nFATAL ERROR: config prompt timeout in make config"
+            break
+        }
+    }
+}
+
+
+cd $uclinux_path/testsuites
+step "Make"
+source make_kernel.exp
+
+cd $uclinux_path/testsuites
+step "Copy linux"
+source copy_image.exp
+
+send_user "Ending $argv0\n"
+log_file

@@ -1,0 +1,32 @@
+Index: pictureflow-0.1.0/pictureflow-qt/pictureflow.pro
+===================================================================
+--- pictureflow-0.1.0/pictureflow-qt/pictureflow.pro	(revision 9290)
++++ pictureflow-0.1.0/pictureflow-qt/pictureflow.pro	(working copy)
+@@ -1,7 +1,9 @@
+ TARGET = pictureflow
+ TEMPLATE = app
+ linux-bfin-flat-* {
+-	QMAKE_LIBS_THREAD += -lz -lpng
++	QMAKE_LIBS_THREAD += -lz -lpng -lqjpeg -ljpeg
++	QTPLUGIN += qjpeg
++	CONFIG += static 
+ }
+ HEADERS = pictureflow.h
+ SOURCES = pictureflow.cpp main.cpp
+Index: pictureflow-0.1.0/pictureflow-qt/main.cpp
+===================================================================
+--- pictureflow-0.1.0/pictureflow-qt/main.cpp	(revision 9290)
++++ pictureflow-0.1.0/pictureflow-qt/main.cpp	(working copy)
+@@ -30,6 +30,12 @@
+ #include <qfileinfo.h>
+ #include <qimage.h>
+ 
++#ifdef QT_STATIC_PLUGIN
++#include <qplugin.h>
++
++Q_IMPORT_PLUGIN(qjpeg)
++#endif
++
+ #if QT_VERSION >= 0x040000
+ #include <QTime>
+ #endif

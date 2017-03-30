@@ -1,0 +1,321 @@
+#!/usr/bin/expect
+
+source  ../kernel_config.exp
+log_file [log_file_name "$argv0"]
+send_user "Starting $argv0\n"
+set TITLE [title "$argv0"]
+
+set format [lindex $argv 1]
+send_user "\n#### binary format is $format\n"
+
+if { $argc < 2} {
+    puts "Please input:board_type, binary format (FDPIC or SHARED-FLAT)"
+    exit
+}
+append TITLE " ($format)"
+
+step "Spawn kermit"
+source ../spawn_kermit.exp
+
+step "Prepare romfs in /tftpboot\n"
+spawn /bin/bash
+set host_spawn_id $spawn_id
+
+set case_num 0
+incr case_num
+set timeout 15
+send "su -\r"
+while 1 {
+    expect {
+        -re "\[pP]assword" {
+            sleep 2
+            send "$password\r"
+            continue
+        }
+        -re "\[eE]rror|\[fF]ail" {
+            case_fail $case_num
+        }
+        -re "#" {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+incr case_num
+set timeout 30
+send "rm -fr /tftpboot/romfs\r"
+while 1 {
+    expect {
+        -re "(\[eE]rror|\[fF]ail|rm:).*#" {
+            send_user "remove /tftpboot/romfs fail\n"
+            case_fail $case_num
+        }
+        -re "#" {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            send_user "remove /tftpboot/romfs timeout\n"
+            case_fail $case_num
+        }
+    }
+}
+
+incr case_num
+set timeout 30
+send "cp -a $uclinux_path/romfs /tftpboot/\r"
+while 1 {
+    expect {
+        -re "(\[eE]rror|\[fF]ail|cp:).*#" {
+            send_user "Copy romfs to /tftpboot fail\n"
+            case_fail $case_num
+        }
+        -re "#" {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            send_user "Copy romfs to /tftpboot timeout\n"
+            case_fail $case_num
+        }
+    }
+}
+
+incr case_num
+set timeout 30
+send "mkdir /tftpboot/romfs/dev; cd /tftpboot/romfs/dev\r"
+while 1 {
+    expect {
+        -re "(\[eE]rror|\[fF]ail|mkdir:|cd:).*#" {
+            send_user "Create device folder fail\n"
+            case_fail $case_num
+        }
+        -re "dev #" {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            send_user "Create device folder timeout\n"
+            case_fail $case_num
+        }
+    }
+}
+
+incr case_num
+set timeout 30
+send "mknod -m 666 null c 1 3; mknod -m 666 zero c 1 5; mknod -m 600 console c 5 1; mkdir pts\r"
+while 1 {
+    expect {
+        -re "(\[eE]rror|\[fF]ail|mknod:|mkdir:).*#" {
+            send_user "Create device nodes fail\n"
+            case_fail $case_num
+        }
+        -re "#" {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            send_user "Create device nodes timeout\n"
+            case_fail $case_num
+        }
+    }
+}
+
+incr case_num
+set timeout 30
+send "chmod -R 777 /tftpboot/romfs/\r"
+while 1 {
+    expect {
+        -re "(\[eE]rror|\[fF]ail|chmod:).*#" {
+            case_fail $case_num
+        }
+        -re "#" {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+step "Start testing."
+set timeout 10
+
+set spawn_id $kermit_spawn_id
+sleep 5
+
+incr case_num
+send_user "Try to figure out if we are in u-boot or the kernel"
+set where_are_we 0
+send "version\r"
+set timeout 20
+expect {
+    "U-Boot" {
+        send_user "We are in u-boot\n"
+        set where_are_we "uboot"
+    }
+    "Linux" {
+        send_user "We are in the kernel\n"
+        set where_are_we "kernel"
+    }
+    timeout {
+        case_fail $case_num
+        send_user "Can't tell if we are in u-boot or the kernel\n"
+    }
+}
+
+if { $where_are_we == "uboot" } {
+    set timeout 50
+    expect -re $uboot_prompt
+    send_user "sending reset\n"
+    send "reset\r"
+} else {
+    if { $where_are_we == "kernel" } {
+        set timeout 60
+        expect -re $kernel_prompt
+        send_user "sending reboot\n"
+        send "reboot\r"
+    } else {
+        set timeout 10
+        expect "*"
+        expect "*"
+        send_user "sending control-C\n"
+        send "\3"
+        sleep 1
+        send "\r"
+    }
+}
+
+while 1 {
+    expect {
+        "Hit any key " {
+            send "\r"
+        }
+        -re $uboot_prompt {
+            send_user "successful reset attemp\n"
+            break
+        }
+        timeout {
+            send_user "failed reset attemp\n"
+            case_fail $case_num
+        }
+    }
+}
+
+incr case_num
+set timeout 30
+send -s "tftpboot 0x1000000 $compressed_kernel_only_image\r"
+while 1 {
+    expect {
+        -re "Bytes transferred = \[0-9]+ \\\((\[0-9a-fA-F]+) hex\\\).*$uboot_prompt" {
+            set image_size 0x$expect_out(1,string)
+            send_user "Image size is $image_size\n"
+            case_pass $case_num
+            break
+        }
+        timeout {
+            send_user "ERROR: Uboot locked up during tftp\n"
+            case_fail $case_num
+        }
+    }
+}
+
+incr case_num
+set timeout 80
+send -s "protect off $kernel_start_addr $rootfs_end_addr\r"
+while 1 {
+    expect {
+        -re "Un-Protected.*$uboot_prompt" {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            send_user "ERROR: unprotect failed\n"
+            case_fail $case_num
+        }
+    }
+}
+
+incr case_num
+set timeout 240
+send -s "erase $kernel_start_addr $rootfs_end_addr\r"
+while 1 {
+    expect {
+        -re "Erased.*$uboot_prompt" {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            send_user "ERROR: erase failed\n"
+            case_fail $case_num
+        }
+    }
+}
+
+incr case_num
+set timeout 300
+send -s "cp.b 0x1000000 $kernel_start_addr $image_size\r"
+while 1 {
+    expect {
+        -re "done.*$uboot_prompt" {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            send_user "ERROR: cp failed\n"
+            case_fail $case_num
+        }
+    }
+}
+
+send "set bootargs $bootargs_param12\r"
+expect -re $uboot_prompt
+
+send "run addip\r"
+expect -re $uboot_prompt
+
+send "printenv bootargs\r"
+expect -re $uboot_prompt
+
+incr case_num
+set timeout 180
+send "bootm $kernel_start_addr\r"
+while 1 {
+    expect {
+        -re "Kernel panic|Hardware Trace:" {
+            expect -re $kernel_prompt
+            case_fail $case_num
+        }
+        -re $kernel_prompt {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+incr case_num
+set timeout 180
+send "version\r"
+while 1 {
+    expect {
+        -re $kernel_prompt {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+all_pass
+send_user "Ending $argv0\n"
+log_file

@@ -1,0 +1,7 @@
+div64.o: div64.c \
+  /data/dwesterg/nios2-linux/nios2-linux/u-boot/include/linux/types.h \
+  /data/dwesterg/nios2-linux/nios2-linux/u-boot/include/linux/config.h \
+  /data/dwesterg/nios2-linux/nios2-linux/u-boot/include/linux/posix_types.h \
+  /data/dwesterg/nios2-linux/nios2-linux/u-boot/include/linux/stddef.h \
+  /data/dwesterg/nios2-linux/nios2-linux/u-boot/include/asm/posix_types.h \
+  /data/dwesterg/nios2-linux/nios2-linux/u-boot/include/asm/types.h

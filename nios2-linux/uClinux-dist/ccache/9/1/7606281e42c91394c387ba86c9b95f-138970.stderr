@@ -1,0 +1,6 @@
+unix.c: In function 'UNSPEC_sprint':
+unix.c:57: warning: pointer targets in passing argument 1 of 'UNSPEC_print' differ in signedness
+unix.c: In function 'UNIX_print':
+unix.c:66: warning: pointer targets in return differ in signedness
+unix.c: In function 'UNIX_sprint':
+unix.c:77: warning: pointer targets in passing argument 1 of 'UNIX_print' differ in signedness

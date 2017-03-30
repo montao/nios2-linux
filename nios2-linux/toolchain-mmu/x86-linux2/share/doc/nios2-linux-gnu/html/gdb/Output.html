@@ -1,0 +1,98 @@
+<html lang="en">
+<head>
+<title>Output - Debugging with GDB</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="Debugging with GDB">
+<meta name="generator" content="makeinfo 4.8">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="up" href="Sequences.html#Sequences" title="Sequences">
+<link rel="prev" href="Command-Files.html#Command-Files" title="Command Files">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<p>
+<a name="Output"></a>
+Previous:&nbsp;<a rel="previous" accesskey="p" href="Command-Files.html#Command-Files">Command Files</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="Sequences.html#Sequences">Sequences</a>
+<hr>
+</div>
+
+<h3 class="section">21.4 Commands for Controlled Output</h3>
+
+<p>During the execution of a command file or a user-defined command, normal
+<span class="sc">gdb</span> output is suppressed; the only output that appears is what is
+explicitly printed by the commands in the definition.  This section
+describes three commands useful for generating exactly the output you
+want.
+
+     
+<a name="index-echo-1312"></a>
+<dl><dt><code>echo </code><var>text</var><dd><!-- I do not consider backslash-space a standard C escape sequence -->
+<!-- because it is not in ANSI. -->
+Print <var>text</var>.  Nonprinting characters can be included in
+<var>text</var> using C escape sequences, such as `<samp><span class="samp">\n</span></samp>' to print a
+newline.  <strong>No newline is printed unless you specify one.</strong>
+In addition to the standard C escape sequences, a backslash followed
+by a space stands for a space.  This is useful for displaying a
+string with spaces at the beginning or the end, since leading and
+trailing spaces are otherwise trimmed from all arguments. 
+To print `<samp><span class="samp">&nbsp;<!-- /@w -->and foo =&nbsp;<!-- /@w --></span></samp>', use the command
+`<samp><span class="samp">echo \&nbsp;<!-- /@w -->and foo = \&nbsp;<!-- /@w --></span></samp>'.
+
+     <p>A backslash at the end of <var>text</var> can be used, as in C, to continue
+the command onto subsequent lines.  For example,
+
+     <pre class="smallexample">          echo This is some text\n\
+          which is continued\n\
+          onto several lines.\n
+     </pre>
+     <p>produces the same output as
+
+     <pre class="smallexample">          echo This is some text\n
+          echo which is continued\n
+          echo onto several lines.\n
+     </pre>
+     <p><a name="index-output-1313"></a><br><dt><code>output </code><var>expression</var><dd>Print the value of <var>expression</var> and nothing but that value: no
+newlines, no `<samp><span class="samp">$</span><var>nn</var><span class="samp"> = </span></samp>'.  The value is not entered in the
+value history either.  See <a href="Expressions.html#Expressions">Expressions</a>, for more information
+on expressions.
+
+     <br><dt><code>output/</code><var>fmt</var> <var>expression</var><dd>Print the value of <var>expression</var> in format <var>fmt</var>.  You can use
+the same formats as for <code>print</code>.  See <a href="Output-Formats.html#Output-Formats">Output Formats</a>, for more information.
+
+     <p><a name="index-printf-1314"></a><br><dt><code>printf </code><var>string</var><code>, </code><var>expressions</var><code>...</code><dd>Print the values of the <var>expressions</var> under the control of
+<var>string</var>.  The <var>expressions</var> are separated by commas and may be
+either numbers or pointers.  Their values are printed as specified by
+<var>string</var>, exactly as if your program were to execute the C
+subroutine
+<!-- FIXME: the above implies that at least all ANSI C formats are -->
+<!-- supported, but it isn't true: %E and %G don't work (or so it seems). -->
+<!-- Either this is a bug, or the manual should document what formats are -->
+<!-- supported. -->
+
+     <pre class="smallexample">          printf (<var>string</var>, <var>expressions</var>...);
+     </pre>
+     <p>For example, you can print two values in hex like this:
+
+     <pre class="smallexample">          printf "foo, bar-foo = 0x%x, 0x%x\n", foo, bar-foo
+     </pre>
+     <p>The only backslash-escape sequences that you can use in the format
+string are the simple ones that consist of backslash followed by a
+letter. 
+</dl>
+
+   </body></html>
+

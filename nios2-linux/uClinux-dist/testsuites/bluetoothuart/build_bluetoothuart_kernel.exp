@@ -1,0 +1,134 @@
+#!/usr/bin/expect --
+
+#
+# Build Kernel for Bluetooth extender card
+#
+
+source ../kernel_config.exp
+log_file [log_file_name "$argv0"]
+send_user "Starting $argv0\n"
+
+cd $uclinux_path/testsuites
+step "Make config."
+source make_default_config.exp
+
+cd $uclinux_path
+set timeout 300
+spawn make config
+while 1 {
+    expect {
+        -re "Customize Kernel Settings.*DEFAULTS_KERNEL.*\\\[.*]" {
+            send "y\r"
+        }
+
+        -re "Customize Application/Library Settings.*DEFAULTS_VENDOR.*\\\[.*]" {
+            send "y\r"
+        }
+
+        -nocase -re "\\\[\[^\r]*] (\[ymn])|choice\\\[.*]: \[0-9]+\r" {
+            continue
+        }
+
+        -re "Networking support \\\(NET\\\).*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Bluetooth subsystem support.*BT.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "L2CAP protocol support.*BT_L2CAP.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "SCO links support.*BT_SCO.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "RFCOMM protocol support \\\(BT_RFCOMM\\\).*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "RFCOMM TTY support \\\(BT_RFCOMM_TTY\\\).*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "BNEP protocol support \\\(BT_BNEP\\\).*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Multicast filter support \\\(BT_BNEP_MC_FILTER\\\).*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Protocol filter support \\\(BT_BNEP_PROTO_FILTER\\\).*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "HIDP protocol support.*BT_HIDP.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "HCI UART driver \\\(BT_HCIUART\\\).*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "UART \\\(H4\\\) protocol support.*BT_HCIUART_H4.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "BCSP protocol support.*BT_HCIUART_BCSP.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "HCILL protocol support.*BT_HCIUART_LL.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "Enable UART1.*SERIAL_BFIN_UART1.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Bluez-utils.*USER_BLUEZ.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Bluez bccmd util.*USER_BLUEZ_BCCMD.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "BFBLUET-EZEXT Boot Mode Utility.*USER_BFBLUET_EZEXT_UTIL.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        "\\\(*) \\\[*]" {
+            sleep .01
+            send "\r"
+        }
+
+        -re "\[cC]hoice\\\[.*]:" {
+            send "\r"
+        }
+
+        eof {
+            puts "End of configuration"
+            break
+        }
+
+        timeout {
+            puts "\n\nFATAL ERROR: config prompt timeout in make config"
+            break
+        }
+    }
+}
+
+cd $uclinux_path/testsuites
+step "Make"
+source make_kernel.exp
+
+cd $uclinux_path/testsuites
+step "Copy linux"
+source copy_image.exp
+
+send_user "Ending $argv0\n"
+log_file

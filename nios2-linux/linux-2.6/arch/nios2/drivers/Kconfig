@@ -1,0 +1,42 @@
+# Platfrom drivers configuration
+
+menu "Additional Nios II Device Drivers"
+
+config AVALON_DMA
+	bool "Support for DMA controller with Avalon interface"
+	help
+	  Support the Altera DMA controller with Avalon interface, so drivers
+	  for DMA-able devices can use this interface.
+
+source "arch/nios2/drivers/pci/Kconfig"
+
+config ALTERA_REMOTE_UPDATE
+	bool "Remote update support"
+	depends on NIOS2
+	default N
+	help
+	  This driver provides support for automatic reconfiguration of a
+	  Cyclone III FPGA (Possibly others too).
+
+choice ALTERA_REMOTE_UPDATE_FLASH_WIDTH
+	prompt "FPGA configuration flash data width"
+	depends on ALTERA_REMOTE_UPDATE
+	default ALTERA_REMOTE_UPDATE_FLASH_WIDTH_16
+	help
+	  The ALTREMOTE_UPDATE megafunction requires that you only provide it
+	  the 22 highest-order bits of a 24-bit address offset.
+
+	  This options controls the value by which the address offset of the
+	  FPGA configuration image is shifted depending on the data width of
+	  the flash where your image is stored.
+
+	  EPCS flash data witdh is usually 8 bit
+	  CFI flash data width is usually 16 bit
+
+config ALTERA_REMOTE_UPDATE_FLASH_WIDTH_8
+	bool "8 bits (shift address by 2)"
+config ALTERA_REMOTE_UPDATE_FLASH_WIDTH_16
+	bool "16 bits (shift address by 3)"
+endchoice
+
+endmenu

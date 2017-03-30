@@ -1,0 +1,68 @@
+	Nios II Linux/uClinux Community Release 20090928
+
+Welcome to Nios II Community! This is the community supported version of 
+Nios II uClinux. This is package will work only on Linux. You will need 
+a virtual Linux to run it on Windows. This is GPL software, and come 
+with absolutely NO warrenty.
+
+Please follow the Nios WiKi to use this package,
+
+http://www.nioswiki.com/OperatingSystems/UClinux
+
+You can get support with the Nios forum, or the nios2-dev mailing list.
+
+http://www.alteraforum.com/forum/forumdisplay.php?f=50
+http://sopc.et.ntust.edu.tw/cgi-bin/mailman/listinfo/nios2-dev
+
+
+QUICK START
+
+1. Extract the source, excute "./checkout" .
+
+2. Install the binary toolchain as described in the WiKi.
+
+Or build the toolchain,
+
+cd toolchain-build
+make gcc elf2flt gdb-host
+cd ..
+
+Then add the PATH to your profile file, .bash_profile or .profile , like 
+this, PATH=$PATH:/home/hippo/nios2-linux/toolchain-build/build/nios2/bin
+
+3. Build the Linux image,
+
+cd uClinux-dist
+make menuconfig
+make vendor_hwselect SYSPTF=/your/path/to/the/system/ptf
+make
+
+4. Get source updates from community server.
+
+Normally you will use "git" protocol to get update from server if your PC
+is directly connected to the Internet. Then you may skip to step 5.
+
+Only if you are behind a proxy firewall and cannot use git protocol, 
+you can change the git to use ssh tunneling through port 443 to get updates
+from community server with this command, "./use_ssh443_for_update" .
+
+You should have ssh tunneling package installed, such as "corkscrew".
+Add the following 3 lines to your ~/.ssh/config, which should have no
+public access, "chmod og-rwx config". Replace <http_proxy_ip> <port>
+to that of your http proxy server.
+
+IdentityFile ~/.ssh/id_rsa
+IdentityFile ~/nios2-linux/sshkey/id_rsa
+ProxyCommand corkscrew <http_proxy_ip> <port> %h %p
+    
+If you failed to use ssh tunnling as above, you may try dumb http protocol
+with this command, "./use_http_for_update" . But this is very slow and not 
+recommended.
+
+You may revert to git protocol when there is no firewall blocking with this
+command, "./use_git_for_update" . 
+
+5. Now You can fetch updates from server with, "./update" .
+
+
+Enjoy!!

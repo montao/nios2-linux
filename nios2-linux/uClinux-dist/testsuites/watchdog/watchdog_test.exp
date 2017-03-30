@@ -1,0 +1,99 @@
+#!/usr/bin/expect
+
+source ../kernel_config.exp
+log_file [log_file_name "$argv0"]
+send_user "Starting $argv0\n"
+set TITLE [title "$argv0"]
+
+step "Start kermit."
+source ../spawn_kermit.exp
+
+step  "Reboot the kernel." 
+source ../reboot_kernel.exp
+
+step "Start testing."
+sleep 10
+set case_num 0
+incr case_num
+
+set timeout 8
+set flag 0
+
+send -s "cd /bin\r" 
+while 1 {
+   expect {
+      "bin>" {
+         set flag 1
+         break
+      }
+
+      timeout {
+                   
+            break
+         }
+     }
+}
+
+set timeout 50
+
+send -s  "./watchdogd\r" 
+while 1 {
+   expect {
+      "bin>" {
+                case_pass $case_num
+         break
+      }
+
+      timeout {
+                case_fail $case_num
+	exit
+         }
+     }
+}
+
+incr case_num
+send -s  "ps aux| grep watchdogd | head -1 \r" 
+while 1 {
+   expect {
+     -re " (\[0-9]+) root" {
+         set process_id $expect_out(1,string)
+	# puts "\nprocess_id: $process_id"
+                case_pass $case_num
+	 break
+	}
+
+      timeout {
+                case_fail $case_num
+	exit
+         }
+     }
+}
+
+incr case_num
+set timeout 100
+send -s  "kill -9 $process_id\r" 
+
+while 1 {    
+         expect {
+	 "Hit any key" {
+	        expect  -re $kernel_prompt
+                case_pass $case_num
+		break
+         }
+
+         timeout {
+                case_fail $case_num
+		exit
+         }
+	 }      
+}
+
+send_log "\n"
+send_log "\n$TITLE ............\[PASS\]\n"
+
+send_user "Ending $argv0\n"
+log_file
+ 
+
+
+

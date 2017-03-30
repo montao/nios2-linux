@@ -1,0 +1,236 @@
+#!/usr/bin/expect
+
+source ../kernel_config.exp
+
+set extra_config "normal"
+
+if { $argc < 1} {
+puts "Please input: board_type [extra_config] ."
+exit
+}
+if { $argc >= 2} {
+set extra_config [lindex $argv 1]
+}
+
+log_file [log_file_name $argv0.$extra_config ]
+
+set board_type [lindex $argv 0]
+send_log "\n#### board_type is $board_type\n"
+
+send_user "Starting $argv0\n"
+
+if { $extra_config == "in_buffer" || $extra_config == "normal" } {
+send_log "\n#### Extra config is $extra_config.\n"
+} else {
+send_log "\n#### This config $extra_config is not supported. Sorry.\n"
+exit
+}
+
+set test_time 600
+
+set TITLE [title "$argv0"]
+append TITLE " ($extra_config)"
+
+puts "\n##### TITLE $TITLE."
+
+cd $uclinux_path/testsuites/ethernet/
+
+step "Start kermit."
+source ../spawn_kermit.exp
+
+step "Reboot the kernel."
+source ../reboot_kernel.exp
+
+step "Start testing."
+
+set TransRate  0
+set Throughput  0
+set case_num 0
+
+incr case_num
+
+set timeout 8
+send "ifconfig eth0 $targetip\r" 
+while 1 {
+   sleep 3
+   expect {
+      -re $kernel_prompt {
+         puts "ifconfig set success.\n"
+         break
+      }
+
+      timeout {
+            puts "Fail ifconfig. "
+            break
+         }
+     }
+}
+sleep 10
+step "Untar netperf."
+
+cd  $uclinux_path/testsuites/ethernet/
+exec tar zxvf netperf.tar.gz
+
+spawn /bin/sh
+expect -re  $sh_prompt
+send -s "sudo ./netserver_x86 \r"
+while 1 {
+   expect {
+      -re "\[Pp\]assword" {
+         send -s "$password\r" 
+         expect "Starting netserver"
+         break
+      }
+
+      timeout {
+            break
+         }
+     }
+}
+
+expect -re  $sh_prompt 
+send -s  "ps aux| grep netserver_x86 | head -1 \r"
+expect "\r"
+while 1 {
+   expect {
+      "netserver" {
+         break
+      }
+
+      timeout {
+            break
+         }
+     }
+}
+
+expect -re  $sh_prompt
+set netserver_id $spawn_id
+
+set spawn_id $kermit_spawn_id
+
+send "cd /\r"
+expect    -re $kernel_prompt
+send  "netperf -H $serverip -t TCP_RR -l $test_time > netperf_tcp_rr \r"
+set timeout 2000
+while 1 {
+   expect {
+       -re $kernel_prompt {
+         break
+      }
+
+      timeout {
+            puts "Failed ethernet tcp_rr test."
+            break
+         }
+     }
+}
+
+send  "netperf -H $serverip -t TCP_STREAM -l $test_time  > netperf_tcp_stream \r"
+set timeout 2000
+while 1 {
+   expect {
+       -re $kernel_prompt {
+         break
+      }
+
+      timeout {
+            puts "Failed ethernet tcp_rr test."
+            break
+         }
+     }
+}
+
+
+send  "cat netperf_tcp_rr\r"
+set timeout 10
+while 1 {
+   expect {
+      -re "$test_time\\\.\[0-9]{2} +(\[0-9]+\\\.\[0-9]{2})" {   
+         set TransRate $expect_out(1,string)
+	 expect -re $kernel_prompt
+	 send_log "TransRate $expect_out(1,string)\n"
+         break
+      }
+
+      timeout {
+           case_fail $case_num
+           break
+         }
+     }
+}
+
+send  "cat netperf_tcp_stream\r"
+set timeout 10
+while 1 {
+   expect {
+     -re "$test_time\\\.\[0-9]{2} +(\[0-9]+\\\.\[0-9]{2})" {   
+         set Throughput $expect_out(1,string)
+	 expect -re $kernel_prompt
+	 send_log "Throughput $expect_out(1,string)\n"
+         break
+      }
+
+      timeout {
+           case_fail $case_num
+           break
+         }
+     }
+}
+
+if { $board_type == "BF537-STAMP" || $board_type == "BF548-EZKIT" } {
+    if { $TransRate > 4000 && $Throughput > 85 } {
+        case_pass $case_num
+    } else {
+        case_fail $case_num
+    }
+} elseif { [string match "BF527-EZKIT*" $board_type] } {
+    if { $TransRate > 3500 && $Throughput > 85 } {
+        case_pass $case_num
+    } else {
+        case_fail $case_num
+    }
+} elseif { $board_type == "BF533-STAMP" } {
+    if { $TransRate > 3500 && $Throughput > 50 } {
+        case_pass $case_num
+    } else {
+        case_fail $case_num
+    }
+} elseif { $board_type == "BF526-EZKIT" } {
+    if { $TransRate > 3000 && $Throughput > 60 } {
+        case_pass $case_num
+    } else {
+        case_fail $case_num
+    }
+} else {
+    if { $TransRate > 2500 && $Throughput > 50 } {
+        case_pass $case_num
+    } else {
+        case_fail $case_num
+    }
+}
+
+set spawn_id $netserver_id
+set timeout 3
+send -s "sudo pkill netserver_x86 \r"
+while 1 {
+   expect {
+     -re "\[Pp\]assword" {
+	send -s "$password\r" 
+        expect -re  $sh_prompt
+         break
+      }
+
+      timeout {
+            break
+         }
+     }
+}
+
+send_log "\n"
+send_log "\n$TITLE ............\[PASS\]\n"
+
+send_user "Ending $argv0\n"
+log_file
+
+
+

@@ -1,0 +1,5 @@
+conftest.c: In function 'main':
+conftest.c:13: warning: 'main' is normally a non-static function
+conftest.c: In function 'main':
+conftest.c:14: warning: initialization discards qualifiers from pointer target type
+conftest.c:14: warning: unused variable 's'

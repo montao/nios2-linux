@@ -1,0 +1,24 @@
+should make this fall back logic (try MAP_SHARED first then MAP_PRIVATE)
+
+--- mpg321-0.2.12-1/mad.c
++++ mpg321-0.2.12-1/mad.c
+@@ -648,7 +648,7 @@
+         buf->length -= 128; /* Correct for id3 tags */
+     }
+     
+-    fdm = mmap(0, buf->length, PROT_READ, MAP_SHARED, f, 0);
++    fdm = mmap(0, buf->length, PROT_READ, MAP_PRIVATE, f, 0);
+     if (fdm == MAP_FAILED)
+     {
+         mpg321_error(file);
+--- mpg321-0.2.12-1/mpg321.c
++++ mpg321-0.2.12-1/mpg321.c
+@@ -550,7 +550,7 @@
+             playbuf.frames = malloc((playbuf.num_frames + 1) * sizeof(void*));
+             playbuf.times = malloc((playbuf.num_frames + 1) * sizeof(mad_timer_t));
+     
+-            if((playbuf.buf = mmap(0, playbuf.length, PROT_READ, MAP_SHARED, fd, 0))
++            if((playbuf.buf = mmap(0, playbuf.length, PROT_READ, MAP_PRIVATE, fd, 0))
+                                 == MAP_FAILED)
+             {
+                 mpg321_error(currentfile);

@@ -1,0 +1,64 @@
+sh1.c: In function 'main':
+sh1.c:137: warning: array subscript has type 'char'
+sh1.c: In function 'setdash':
+sh1.c:196: warning: array subscript has type 'char'
+sh1.c: In function 'newfile':
+sh1.c:206: warning: type defaults to 'int' in declaration of 'f'
+sh1.c: In function 'onecommand':
+sh1.c:224: warning: type defaults to 'int' in declaration of 'i'
+sh1.c: In function 'quitenv':
+sh1.c:343: warning: type defaults to 'int' in declaration of 'fd'
+sh1.c: In function 'letter':
+sh1.c:441: warning: type defaults to 'int' in declaration of 'c'
+sh1.c: In function 'digit':
+sh1.c:448: warning: type defaults to 'int' in declaration of 'c'
+sh1.c: In function 'letnum':
+sh1.c:455: warning: type defaults to 'int' in declaration of 'c'
+sh1.c: In function 'getcell':
+sh1.c:874: warning: type defaults to 'int' in declaration of 'i'
+sh1.c:877: warning: implicit declaration of function 'puts'
+sh1.c: At top level:
+sh.h:417: warning: 'copyw' declared 'static' but never defined
+sh.h:418: warning: 'pattern' declared 'static' but never defined
+sh.h:419: warning: 'wordlist' declared 'static' but never defined
+sh.h:420: warning: 'blank' declared 'static' but never defined
+sh.h:423: warning: 'generate' declared 'static' but never defined
+sh.h:424: warning: 'tree' declared 'static' but never defined
+sh.h:425: warning: 'anyspcl' declared 'static' but never defined
+sh.h:426: warning: 'brkcontin' declared 'static' but never defined
+sh.h:427: warning: 'dollar' declared 'static' but never defined
+sh.h:428: warning: 'expand' declared 'static' but never defined
+sh.h:429: warning: 'forkexec' declared 'static' but never defined
+sh.h:430: warning: 'grave' declared 'static' but never defined
+sh.h:431: warning: 'synio' declared 'static' but never defined
+sh.h:432: warning: 'xstrcmp' declared 'static' but never defined
+sh.h:433: warning: 'xxchar' declared 'static' but never defined
+sh.h:434: warning: 'yylex' declared 'static' but never defined
+sh.h:435: warning: 'copyio' declared 'static' but never defined
+sh.h:436: warning: 'io' declared 'static' but never defined
+sh.h:437: warning: 'find1case' declared 'static' but never defined
+sh.h:438: warning: 'andor' declared 'static' but never defined
+sh.h:439: warning: 'block' declared 'static' but never defined
+sh.h:440: warning: 'c_list' declared 'static' but never defined
+sh.h:441: warning: 'caselist' declared 'static' but never defined
+sh.h:442: warning: 'casepart' declared 'static' but never defined
+sh.h:443: warning: 'command' declared 'static' but never defined
+sh.h:444: warning: 'dogroup' declared 'static' but never defined
+sh.h:445: warning: 'elsepart' declared 'static' but never defined
+sh.h:446: warning: 'findcase' declared 'static' but never defined
+sh.h:447: warning: 'list' declared 'static' but never defined
+sh.h:448: warning: 'namelist' declared 'static' but never defined
+sh.h:449: warning: 'nested' declared 'static' but never defined
+sh.h:450: warning: 'newtp' declared 'static' but never defined
+sh.h:451: warning: 'pipeline' declared 'static' but never defined
+sh.h:452: warning: 'simple' declared 'static' but never defined
+sh.h:453: warning: 'thenpart' declared 'static' but never defined
+sh.h:454: warning: 'badid' declared 'static' but never defined
+sh.h:455: warning: 'brkset' declared 'static' but never defined
+sh.h:456: warning: 'diag' declared 'static' but never defined
+sh.h:457: warning: 'echo' declared 'static' but never defined
+sh.h:458: warning: 'musthave' declared 'static' but never defined
+sh.h:459: warning: 'rdexp' declared 'static' but never defined
+sh.h:460: warning: 'readhere' declared 'static' but never defined
+sh.h:461: warning: 'word' declared 'static' but never defined
+sh.h:462: warning: 'zzerr' declared 'static' but never defined

@@ -1,0 +1,13 @@
+upstream CPPFLAGS build system has been rewritten so that this "just works"
+
+--- Makefile.in
++++ Makefile.in
+@@ -280,7 +280,7 @@
+ 
+ # flags to pass only to the C compiler (not to ld)
+ # because STTY can include whitespace and quotes, pass STTY separately
+-CPPFLAGS = -I. -I$(srcdir) $(TCLHDIRDASHI) $(TKHDIRDASHI) $(X11_CFLAGS) \
++CPPFLAGS += -I. -I$(srcdir) $(TCLHDIRDASHI) $(TKHDIRDASHI) $(X11_CFLAGS) \
+ 		-DEXP_VERSION=$(VERSION_FULL) \
+ 		-DSCRIPTDIR=\"$(SCRIPTDIR)\" \
+ 		-DEXECSCRIPTDIR=\"$(EXECSCRIPTDIR)\" \

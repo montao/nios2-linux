@@ -1,0 +1,137 @@
+<html lang="en">
+<head>
+<title>Overview - Debugging with GDB</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="Debugging with GDB">
+<meta name="generator" content="makeinfo 4.8">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="up" href="Remote-Protocol.html#Remote-Protocol" title="Remote Protocol">
+<link rel="next" href="Standard-Replies.html#Standard-Replies" title="Standard Replies">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<p>
+<a name="Overview"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="Standard-Replies.html#Standard-Replies">Standard Replies</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="Remote-Protocol.html#Remote-Protocol">Remote Protocol</a>
+<hr>
+</div>
+
+<h3 class="section">D.1 Overview</h3>
+
+<p>There may be occasions when you need to know something about the
+protocol&mdash;for example, if there is only one serial port to your target
+machine, you might want your program to do something special if it
+recognizes a packet meant for <span class="sc">gdb</span>.
+
+   <p>In the examples below, `<samp><span class="samp">-&gt;</span></samp>' and `<samp><span class="samp">&lt;-</span></samp>' are used to indicate
+transmitted and received data, respectively.
+
+   <p><a name="index-protocol_002c-_0040value_007bGDBN_007d-remote-serial-1704"></a><a name="index-serial-protocol_002c-_0040value_007bGDBN_007d-remote-1705"></a><a name="index-remote-serial-protocol-1706"></a>All <span class="sc">gdb</span> commands and responses (other than acknowledgments) are
+sent as a <var>packet</var>.  A <var>packet</var> is introduced with the character
+`<samp><span class="samp">$</span></samp>', the actual <var>packet-data</var>, and the terminating character
+`<samp><span class="samp">#</span></samp>' followed by a two-digit <var>checksum</var>:
+
+<pre class="smallexample">     <code>$</code><var>packet-data</var><code>#</code><var>checksum</var>
+</pre>
+   <p class="noindent"><a name="index-checksum_002c-for-_0040value_007bGDBN_007d-remote-1707"></a>The two-digit <var>checksum</var> is computed as the modulo 256 sum of all
+characters between the leading `<samp><span class="samp">$</span></samp>' and the trailing `<samp><span class="samp">#</span></samp>' (an
+eight bit unsigned checksum).
+
+   <p>Implementors should note that prior to <span class="sc">gdb</span> 5.0 the protocol
+specification also included an optional two-digit <var>sequence-id</var>:
+
+<pre class="smallexample">     <code>$</code><var>sequence-id</var><code>:</code><var>packet-data</var><code>#</code><var>checksum</var>
+</pre>
+   <p><a name="index-sequence_002did_002c-for-_0040value_007bGDBN_007d-remote-1708"></a>That <var>sequence-id</var> was appended to the acknowledgment.  <span class="sc">gdb</span>
+has never output <var>sequence-id</var>s.  Stubs that handle packets added
+since <span class="sc">gdb</span> 5.0 must not accept <var>sequence-id</var>.
+
+   <p><a name="index-acknowledgment_002c-for-_0040value_007bGDBN_007d-remote-1709"></a>When either the host or the target machine receives a packet, the first
+response expected is an acknowledgment: either `<samp><span class="samp">+</span></samp>' (to indicate
+the package was received correctly) or `<samp><span class="samp">-</span></samp>' (to request
+retransmission):
+
+<pre class="smallexample">     -&gt; <code>$</code><var>packet-data</var><code>#</code><var>checksum</var>
+     &lt;- <code>+</code>
+</pre>
+   <p class="noindent">The host (<span class="sc">gdb</span>) sends <var>command</var>s, and the target (the
+debugging stub incorporated in your program) sends a <var>response</var>.  In
+the case of step and continue <var>command</var>s, the response is only sent
+when the operation has completed (the target has again stopped).
+
+   <p><var>packet-data</var> consists of a sequence of characters with the
+exception of `<samp><span class="samp">#</span></samp>' and `<samp><span class="samp">$</span></samp>' (see `<samp><span class="samp">X</span></samp>' packet for additional
+exceptions).
+
+   <p><a name="index-remote-protocol_002c-field-separator-1710"></a>Fields within the packet should be separated using `<samp><span class="samp">,</span></samp>' `<samp><span class="samp">;</span></samp>' or
+`<samp><span class="samp">:</span></samp>'.  Except where otherwise noted all numbers are represented in
+<span class="sc">hex</span> with leading zeros suppressed.
+
+   <p>Implementors should note that prior to <span class="sc">gdb</span> 5.0, the character
+`<samp><span class="samp">:</span></samp>' could not appear as the third character in a packet (as it
+would potentially conflict with the <var>sequence-id</var>).
+
+   <p><a name="index-remote-protocol_002c-binary-data-1711"></a><a name="Binary-Data"></a>
+Binary data in most packets is encoded either as two hexadecimal
+digits per byte of binary data.  This allowed the traditional remote
+protocol to work over connections which were only seven-bit clean. 
+Some packets designed more recently assume an eight-bit clean
+connection, and use a more efficient encoding to send and receive
+binary data.
+
+   <p>The binary data representation uses <code>7d</code> (<span class="sc">ascii</span> `<samp><span class="samp">}</span></samp>')
+as an escape character.  Any escaped byte is transmitted as the escape
+character followed by the original character XORed with <code>0x20</code>. 
+For example, the byte <code>0x7d</code> would be transmitted as the two
+bytes <code>0x7d 0x5d</code>.  The bytes <code>0x23</code> (<span class="sc">ascii</span> `<samp><span class="samp">#</span></samp>'),
+<code>0x24</code> (<span class="sc">ascii</span> `<samp><span class="samp">$</span></samp>'), and <code>0x7d</code> (<span class="sc">ascii</span>
+`<samp><span class="samp">}</span></samp>') must always be escaped.  Responses sent by the stub
+must also escape <code>0x2a</code> (<span class="sc">ascii</span> `<samp><span class="samp">*</span></samp>'), so that it
+is not interpreted as the start of a run-length encoded sequence
+(described next).
+
+   <p>Response <var>data</var> can be run-length encoded to save space.  A `<samp><span class="samp">*</span></samp>'
+means that the next character is an <span class="sc">ascii</span> encoding giving a repeat count
+which stands for that many repetitions of the character preceding the
+`<samp><span class="samp">*</span></samp>'.  The encoding is <code>n+29</code>, yielding a printable character
+where <code>n &gt;=3</code> (which is where rle starts to win).  The printable
+characters `<samp><span class="samp">$</span></samp>', `<samp><span class="samp">#</span></samp>', `<samp><span class="samp">+</span></samp>' and `<samp><span class="samp">-</span></samp>' or with a numeric
+value greater than 126 should not be used.
+
+   <p>So:
+<pre class="smallexample">     "<code>0* </code>"
+</pre>
+   <p class="noindent">means the same as "0000".
+
+   <p>In describing packets (and responses), each description has a template
+showing the overall syntax, followed by an explanation of the packet's
+meaning.  We include spaces in some of the templates for clarity;
+these are not part of the packet's syntax.  No <span class="sc">gdb</span> packet
+uses spaces to separate its components.  For example, a template like
+`<samp><span class="samp">foo </span><var>bar</var> <var>baz</var></samp>' describes a packet beginning with the
+three ASCII bytes `<samp><span class="samp">foo</span></samp>', followed by a <var>bar</var>, followed
+directly by a <var>baz</var>.  <span class="sc">gdb</span> does not transmit a space
+character between the `<samp><span class="samp">foo</span></samp>' and the <var>bar</var>, or between the
+<var>bar</var> and the <var>baz</var>.
+
+   <p>We place optional portions of a packet in <span class="roman">[</span>square brackets<span class="roman">]</span>;
+for example, a template like `<samp><span class="samp">c [</span><var>addr</var><span class="samp">]</span></samp>' describes a
+packet beginning with the single ASCII character `<samp><span class="samp">c</span></samp>', possibly
+followed by an <var>addr</var>.
+
+   </body></html>
+

@@ -1,0 +1,61 @@
+this has been merged into DirectFB-1.4.3+
+
+--- a/config.h.in
++++ b/config.h.in
+@@ -47,6 +50,9 @@
+ /* Define to 1 if you have the <dlfcn.h> header file. */
+ #undef HAVE_DLFCN_H
+ 
++/* Define to 1 if you have the `fork' function. */
++#undef HAVE_FORK
++
+ /* Define to 1 if inb, outb and iopl are available. */
+ #undef HAVE_INB_OUTB_IOPL
+ 
+--- a/configure.in
++++ b/configure.in
+@@ -94,6 +94,7 @@ AC_C_BIGENDIAN
+ AC_CHECK_SIZEOF(int)
+ AC_CHECK_SIZEOF(long)
+ AC_CHECK_SIZEOF(long long)
++AC_CHECK_FUNCS(fork)
+ 
+ 
+ ## Work around libstuhl during cross build...
+--- a/tests/fusion_fork.c
++++ b/tests/fusion_fork.c
+@@ -49,6 +49,9 @@
+ #include <fusion/reactor.h>
+ #include <fusion/ref.h>
+ 
++#ifndef HAVE_FORK
++# define fork() -1
++#endif
+ 
+ #define MSG(x...)                       \
+ do {                                    \
+--- a/tests/fusion_reactor.c
++++ b/tests/fusion_reactor.c
+@@ -51,6 +51,9 @@
+ #include <fusion/reactor.h>
+ #include <fusion/ref.h>
+ 
++#ifndef HAVE_FORK
++# define fork() -1
++#endif
+ 
+ #if DIRECT_BUILD_DEBUGS
+ #define MSG(x...)                       \
+--- a/tests/fusion_stream.c
++++ b/tests/fusion_stream.c
+@@ -52,6 +52,10 @@
+ #include <fusion/fusion.h>
+ #include <fusion/shm/pool.h>
+ 
++#ifndef HAVE_FORK
++# define fork() -1
++#endif
++
+ #define MAX_NUM_BLOCKS 10000
+ 
+ #define SIZE_ALIGNMASK   0x3

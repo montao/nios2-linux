@@ -1,0 +1,55 @@
+<html lang="en">
+<head>
+<title>Inetd - The GNU C Library</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="The GNU C Library">
+<meta name="generator" content="makeinfo 4.8">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="up" href="Sockets.html#Sockets" title="Sockets">
+<link rel="prev" href="Datagrams.html#Datagrams" title="Datagrams">
+<link rel="next" href="Socket-Options.html#Socket-Options" title="Socket Options">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<p>
+<a name="Inetd"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="Socket-Options.html#Socket-Options">Socket Options</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="Datagrams.html#Datagrams">Datagrams</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="Sockets.html#Sockets">Sockets</a>
+<hr>
+</div>
+
+<h3 class="section">16.11 The <code>inetd</code> Daemon</h3>
+
+<p>We've explained above how to write a server program that does its own
+listening.  Such a server must already be running in order for anyone
+to connect to it.
+
+   <p>Another way to provide a service on an Internet port is to let the daemon
+program <code>inetd</code> do the listening.  <code>inetd</code> is a program that
+runs all the time and waits (using <code>select</code>) for messages on a
+specified set of ports.  When it receives a message, it accepts the
+connection (if the socket style calls for connections) and then forks a
+child process to run the corresponding server program.  You specify the
+ports and their programs in the file <samp><span class="file">/etc/inetd.conf</span></samp>.
+
+<ul class="menu">
+<li><a accesskey="1" href="Inetd-Servers.html#Inetd-Servers">Inetd Servers</a>
+<li><a accesskey="2" href="Configuring-Inetd.html#Configuring-Inetd">Configuring Inetd</a>
+</ul>
+
+   </body></html>
+

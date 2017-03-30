@@ -1,0 +1,107 @@
+Index: iproute2-2.6.29-1/misc/rtacct.c
+===================================================================
+--- iproute2-2.6.29-1/misc/rtacct.c	(revision 9104)
++++ iproute2-2.6.29-1/misc/rtacct.c	(working copy)
+@@ -393,7 +393,7 @@
+ 				pid_t pid;
+ 				if (children >= 5) {
+ 					close(clnt);
+-				} else if ((pid = fork()) != 0) {
++				} else if ((pid = vfork()) != 0) {
+ 					if (pid>0)
+ 						children++;
+ 					close(clnt);
+@@ -524,10 +524,7 @@
+ 			perror("rtacct: listen");
+ 			exit(-1);
+ 		}
+-		if (fork())
+-			exit(0);
+-		chdir("/");
+-		close(0); close(1); close(2); setsid();
++		daemon(0, 0);
+ 		signal(SIGPIPE, SIG_IGN);
+ 		signal(SIGCHLD, sigchild);
+ 		server_loop(fd);
+Index: iproute2-2.6.29-1/misc/arpd.c
+===================================================================
+--- iproute2-2.6.29-1/misc/arpd.c	(revision 9104)
++++ iproute2-2.6.29-1/misc/arpd.c	(working copy)
+@@ -776,26 +776,7 @@
+ 	load_initial_table();
+ 
+ 	if (1) {
+-		int fd;
+-		pid_t pid = fork();
+-
+-		if (pid > 0)
+-			_exit(0);
+-		if (pid < 0) {
+-			perror("arpd: fork");
+-			goto do_abort;
+-		}
+-
+-		chdir("/");
+-		fd = open("/dev/null", O_RDWR);
+-		if (fd >= 0) {
+-			dup2(fd, 0);
+-			dup2(fd, 1);
+-			dup2(fd, 2);
+-			if (fd > 2)
+-				close(fd);
+-		}
+-		setsid();
++		daemon(0, 0);
+ 	}
+ 
+ 	openlog("arpd", LOG_PID | LOG_CONS, LOG_DAEMON);
+Index: iproute2-2.6.29-1/misc/nstat.c
+===================================================================
+--- iproute2-2.6.29-1/misc/nstat.c	(revision 9104)
++++ iproute2-2.6.29-1/misc/nstat.c	(working copy)
+@@ -399,7 +399,7 @@
+ 				pid_t pid;
+ 				if (children >= 5) {
+ 					close(clnt);
+-				} else if ((pid = fork()) != 0) {
++				} else if ((pid = vfork()) != 0) {
+ 					if (pid>0)
+ 						children++;
+ 					close(clnt);
+@@ -513,10 +513,7 @@
+ 			perror("nstat: listen");
+ 			exit(-1);
+ 		}
+-		if (fork())
+-			exit(0);
+-		chdir("/");
+-		close(0); close(1); close(2); setsid();
++		daemon(0, 0);
+ 		signal(SIGPIPE, SIG_IGN);
+ 		signal(SIGCHLD, sigchild);
+ 		server_loop(fd);
+Index: iproute2-2.6.29-1/misc/ifstat.c
+===================================================================
+--- iproute2-2.6.29-1/misc/ifstat.c	(revision 9104)
++++ iproute2-2.6.29-1/misc/ifstat.c	(working copy)
+@@ -514,7 +514,7 @@
+ 				pid_t pid;
+ 				if (children >= 5) {
+ 					close(clnt);
+-				} else if ((pid = fork()) != 0) {
++				} else if ((pid = vfork()) != 0) {
+ 					if (pid>0)
+ 						children++;
+ 					close(clnt);
+@@ -663,10 +663,7 @@
+ 			perror("ifstat: listen");
+ 			exit(-1);
+ 		}
+-		if (fork())
+-			exit(0);
+-		chdir("/");
+-		close(0); close(1); close(2); setsid();
++		daemon(0, 0);
+ 		signal(SIGPIPE, SIG_IGN);
+ 		signal(SIGCHLD, sigchild);
+ 		server_loop(fd);

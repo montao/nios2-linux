@@ -1,0 +1,83 @@
+This is the GNU Inetutils package.
+This document describes the actions needed to build the pre-release
+or CVS version of the package. See end of file for copying conditions.
+
+* Introduction
+
+This is a *pre-release* version, and not ready for production use
+yet. If you are taking source from CVS, you will need to have several
+special tools to help contribute. See the file README-hacking for more
+information, See chapter `Building' for the detailed instructions on
+how to build the package.
+
+Please, note that the accompanying documentation may be inaccurate
+or incomplete. See ChangeLog for the list of recent changes.
+
+Report bugs to <bug-inetutils@gnu.org>
+
+If you see a problem that you've already reported, feel free to
+re-report it -- it won't bother us to get a reminder.  Besides, the
+more messages we get regarding a particular problem the sooner it'll
+be fixed -- usually.  If you sent a complete patch and nobody applied
+it or got back to you, please let us know!
+
+* Checking Out the Sources
+
+The following instructions apply if you wish to obtain sources from
+the CVS repository:
+
+  cvs -d:pserver:anoncvs@cvs.gnu.org:/cvsroot/inetutils co inetutils
+
+There is also a Git mirror of the CVS repository.  To obtain sources from
+Git use:
+
+  git clone git://git.sv.gnu.org/inetutils.git
+  
+Both ways will give you read-only access.  If you think you need write
+access, contact the mailing list.
+
+* Building
+
+Usual procedures apply:
+
+ ./configure
+ make
+ make install
+
+See INSTALL and README for the detailed instructions.
+
+* Development
+
+You can track the CVS process through the <commit-inetutils@gnu.org>
+mailing list.  This is a medium volume moderated list.
+
+Daily snapshots built from CVS are available from:
+
+  http://daily.josefsson.org/inetutils/
+
+Log outputs from building the daily snapshot on some systems are
+available from:
+
+  http://autobuild.josefsson.org/inetutils/
+
+* Copyright information:
+
+Copyright (C) 2008 Free Software Foundation, Inc.
+
+   Permission is granted to anyone to make or distribute verbatim copies
+   of this document as received, in any medium, provided that the
+   copyright notice and this permission notice are preserved,
+   thus giving the recipient permission to redistribute in turn.
+
+   Permission is granted to distribute modified versions
+   of this document, or of portions of it,
+   under the above conditions, provided also that they
+   carry prominent notices stating who last changed them.
+
+
+Local Variables:
+mode: outline
+paragraph-separate: "[ 	]*$"
+version-control: never
+End:
+  

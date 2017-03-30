@@ -1,0 +1,2 @@
+In file included from fstab.c:10:
+sundries.h:54: warning: type qualifiers ignored on function return type

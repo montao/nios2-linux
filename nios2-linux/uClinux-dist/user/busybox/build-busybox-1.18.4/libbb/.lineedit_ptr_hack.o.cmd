@@ -1,0 +1,8 @@
+cmd_libbb/lineedit_ptr_hack.o := nios2-linux-gnu-gcc -Wp,-MD,libbb/.lineedit_ptr_hack.o.d  -DEMBED -I/home/developer/altera/nios2-linux/uClinux-dist   -mhw-mul -mno-hw-mulx -mno-hw-div -std=gnu99 -Iinclude -Ilibbb -Iinclude2 -I/home/developer/altera/nios2-linux/uClinux-dist/user/busybox/busybox-1.18.4/include -I/home/developer/altera/nios2-linux/uClinux-dist/user/busybox/busybox-1.18.4/libbb -include include/autoconf.h -D_GNU_SOURCE -DNDEBUG -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 -D"BB_VER=KBUILD_STR(1.18.4)" -DBB_BT=AUTOCONF_TIMESTAMP -I/home/developer/altera/nios2-linux/uClinux-dist/user/busybox/busybox-1.18.4/libbb -Ilibbb -pipe -Wall -g -O2 -mhw-mul -mno-hw-mulx -mno-hw-div -Wall -Wshadow -Wwrite-strings -Wundef -Wstrict-prototypes -Wunused -Wunused-parameter -Wunused-function -Wunused-value -Wmissing-prototypes -Wmissing-declarations -Wdeclaration-after-statement -Wold-style-definition -fno-builtin-strlen -finline-limit=0 -fomit-frame-pointer -ffunction-sections -fdata-sections -fno-guess-branch-probability -funsigned-char -static-libgcc -falign-functions=1 -falign-jumps=1 -falign-labels=1 -falign-loops=1 -Os  -D"KBUILD_STR(s)=\#s" -D"KBUILD_BASENAME=KBUILD_STR(lineedit_ptr_hack)"  -D"KBUILD_MODNAME=KBUILD_STR(lineedit_ptr_hack)" -c -o libbb/lineedit_ptr_hack.o /home/developer/altera/nios2-linux/uClinux-dist/user/busybox/busybox-1.18.4/libbb/lineedit_ptr_hack.c
+
+deps_libbb/lineedit_ptr_hack.o := \
+  /home/developer/altera/nios2-linux/uClinux-dist/user/busybox/busybox-1.18.4/libbb/lineedit_ptr_hack.c \
+
+libbb/lineedit_ptr_hack.o: $(deps_libbb/lineedit_ptr_hack.o)
+
+$(deps_libbb/lineedit_ptr_hack.o):

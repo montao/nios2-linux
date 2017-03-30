@@ -1,0 +1,7 @@
+popen.c:58: warning: type defaults to 'int' in declaration of 'optind'
+popen.c: In function 'ftpd_popen':
+popen.c:87: warning: suggest parentheses around && within ||
+popen.c: In function 'ftpd_pclose':
+popen.c:194: warning: unused variable 'fdes'
+popen.c: At top level:
+popen.c:35: warning: 'sccsid' defined but not used

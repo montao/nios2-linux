@@ -1,0 +1,2 @@
+conftest.c: In function 'main':
+conftest.c:179: warning: null argument where non-null required (argument 3)

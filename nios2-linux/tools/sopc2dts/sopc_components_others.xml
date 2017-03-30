@@ -1,0 +1,17 @@
+<SOPC2DTS_COMPONENTLIB vendor="opencores">
+	<S2DComponent classname="eth_ocm" group="ethernet" compatDevice="ethoc">
+		<compatible name="opencores,ethoc"></compatible></S2DComponent>
+	<S2DComponent classname="opencores_i2c_master"
+		compatDevice="i2c-ocores" group="i2c">
+	<parameter dtsName="regstep"></parameter>
+	<parameter dtsName="clock-frequency"></parameter>
+	<compatible name="opencores,i2c-ocores"></compatible></S2DComponent>
+	<S2DComponent classname="tiny_spi" compatDevice="tiny-spi" group="spi">
+		<parameter dtsName="clock-frequency"></parameter>
+		<parameter dtsName="baud-width" sopcName="BAUD_WIDTH"></parameter>
+		<CompatibleVersion value="rtlsvn2"></CompatibleVersion></S2DComponent>
+	<S2DComponent classname="gpio" compatDevice="bit-gpio" group="gpio">
+		<CompatibleVersion value="rtlsvn2"></CompatibleVersion>
+		<parameter dtsName="bidir-width" sopcName="BIDIR_WIDTH"></parameter>
+		<parameter dtsName="input-width" sopcName="INPUT_WIDTH"></parameter>
+	</S2DComponent></SOPC2DTS_COMPONENTLIB>

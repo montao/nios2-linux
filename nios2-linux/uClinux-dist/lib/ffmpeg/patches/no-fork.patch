@@ -1,0 +1,39 @@
+--- ffmpeg/ffserver.c
++++ ffmpeg/ffserver.c
+@@ -406,7 +406,11 @@
+         if (feed->child_argv && !feed->pid) {
+             feed->pid_start = time(0);
+ 
++#if HAVE_FORK
+             feed->pid = fork();
++#else
++			feed->pid = vfork();
++#endif
+ 
+             if (feed->pid < 0) {
+                 http_log("Unable to create children\n");
+@@ -4530,6 +4534,7 @@
+ 
+     /* put the process in background and detach it from its TTY */
+     if (ffserver_daemon) {
++#if HAVE_FORK
+         int pid;
+ 
+         pid = fork();
+@@ -4551,6 +4556,16 @@
+             close(2);
+             dup(0);
+         }
++#else
++        int logfd = -1;
++        if (strcmp(logfilename, "-") == 0)
++            logfd = dup(1);
++        daemon(1, 0);
++        if (logfd != -1) {
++            dup2(logfd, 1);
++            close(logfd);
++        }
++#endif
+     }
+ 
+     /* signal init */

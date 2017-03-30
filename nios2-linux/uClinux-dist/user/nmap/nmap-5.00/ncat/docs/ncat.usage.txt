@@ -1,0 +1,46 @@
+Ncat 5.00 ( http://nmap.org/ncat )
+Usage: ncat [options] [hostname] [port]
+
+Options taking a time assume milliseconds, unless you append an 's'
+(seconds), 'm' (minutes), or 'h' (hours) to the value (e.g. 30s)
+  -4                         Use IPv4 only
+  -6                         Use IPv6 only
+  -C, --crlf                 Use CRLF for EOL sequence
+  -c, --sh-exec <command>    Executes specified command via /bin/sh
+  -e, --exec <command>       Executes specified command
+  -g hop1[,hop2,...]         Loose source routing hop points (8 max)
+  -G n                       Loose source routing hop pointer (4, 8, 12, ...)
+  -m, --max-conns n          Maximum n simultaneous connections
+  -h, --help                 Display this help screen
+  -d, --delay <time>         Wait between read/writes
+  -o, --output               Dump session data to a file
+  -x, --hex-dump             Dump session data as hex to a file
+  -i, --idle-timeout <time>  Idle read/write timeout
+  -p, --source-port port     Specify source port to use (doesn't affect -l)
+  -s, --source addr          Specify source address to use (doesn't affect -l)
+  -l, --listen               Bind and listen for incoming connections
+  -k, --keep-open            Accept multiple connections in listen mode
+  -n, --nodns                Do not resolve hostnames via DNS
+  -t, --telnet               Answer Telnet negotiations
+  -u, --udp                  Use UDP instead of default TCP
+  -v, --verbose              Set verbosity level (can be used up to 3 times)
+  -w, --wait <time>          Connect timeout
+      --send-only            Only send data, ignoring received; quit on EOF
+      --recv-only            Only receive data, never send anything
+      --allow                Allow specific hosts to connect to Ncat
+      --allowfile            A file of hosts allowed to connect to Ncat
+      --deny                 Hosts to be denied from connecting to Ncat
+      --denyfile             A file of hosts denied from connecting to Ncat
+      --broker               Enable Ncat's Connection Brokering mode
+      --chat                 Start a simple Ncat chat server
+      --proxy <addr[:port]>  Specify address of host to proxy through
+      --proxy-type <type>    Specify proxy type ("http" or "socks4")
+      --proxy-auth <auth>    Authenticate with HTTP or SOCKS proxy server
+      --ssl                  Connect or listen with SSL
+      --ssl-cert             Specify SSL certificate file (PEM) for listening
+      --ssl-key              Specify SSL private key (PEM) for listening
+      --ssl-verify           Verify trust and domain name of certificates
+      --ssl-trustfile        PEM file containing trusted SSL certificates
+      --version              Display Ncat's version information and exit
+
+See the ncat(1) manpage for full options, descriptions and usage examples

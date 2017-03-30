@@ -1,0 +1,1 @@
+cmd_kernel/sched/built-in.o :=  nios2-linux-gnu-ld  -mnios2elf   -r -o kernel/sched/built-in.o kernel/sched/core.o kernel/sched/clock.o kernel/sched/idle_task.o kernel/sched/fair.o kernel/sched/rt.o kernel/sched/stop_task.o kernel/sched/debug.o 

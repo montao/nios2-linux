@@ -1,0 +1,19 @@
+utilities.c: In function 'SetSockOpt':
+utilities.c:91: warning: implicit declaration of function 'setsockopt'
+utilities.c: In function 'Dump':
+utilities.c:137: warning: type defaults to 'int' in declaration of 'pettydump'
+utilities.c:137: warning: unused variable 'pettydump'
+utilities.c: In function 'printsub':
+utilities.c:752: warning: label 'def_case' defined but not used
+utilities.c:299: warning: unused variable 'buf'
+utilities.c: In function 'EmptyTerminal':
+utilities.c:816: warning: implicit declaration of function 'ttyflush'
+utilities.c: In function 'SetForExit':
+utilities.c:836: warning: implicit declaration of function 'telrcv'
+utilities.c: In function 'Exit':
+utilities.c:858: warning: implicit declaration of function 'exit'
+utilities.c:858: warning: incompatible implicit declaration of built-in function 'exit'
+utilities.c: In function 'ExitString':
+utilities.c:868: warning: incompatible implicit declaration of built-in function 'exit'
+utilities.c: At top level:
+utilities.c:35: warning: 'sccsid' defined but not used

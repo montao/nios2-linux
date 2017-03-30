@@ -1,0 +1,8 @@
+root:x:0:
+bin:x:1:
+daemon:x:2:
+sys:x:3:
+tty:x:4:
+nogroup:x:5:
+users:x:6:
+nobody:x:7:

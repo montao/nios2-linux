@@ -1,0 +1,192 @@
+.EXPORT_ALL_VARIABLES:
+
+include $(ROOTDIR)/vendors/config/common/config.arch
+
+############################################################################
+#
+# The makefiles need to know how to do things in different contexts
+# To save some pain we put it all here
+#
+# First settings we always want for all builds
+#
+
+MACHINE = bfin      # this is for uClibc
+ARCH    = blackfin  # this is for the kernel
+ENDIAN  = little
+
+ifeq ($(CONFIG_FMT_USE_FDPIC_ELF),y)
+CONFIGURE_HOST       := bfin-linux-uclibc
+CONFIGURE_SHARED_ENABLE := --enable-shared
+CONFIGURE_SHARED_WITH   := --with-shared
+else
+CONFIGURE_HOST       := bfin-uclinux
+CONFIGURE_SHARED_ENABLE := --disable-shared
+CONFIGURE_SHARED_WITH   := --without-shared
+endif
+CROSS_COMPILE_SHARED_ELF  := bfin-linux-uclibc-
+CROSS_COMPILE_SHARED_FLAT := bfin-uclinux-
+CROSS_COMPILE        := $(CONFIGURE_HOST)-
+CROSS                := $(CROSS_COMPILE)
+KERNEL_CROSS_COMPILE := bfin-uclinux-
+
+CC        = $(CROSS_COMPILE)gcc
+AS        = $(CROSS_COMPILE)as
+CXX       = $(CROSS_COMPILE)g++
+AR        = $(CROSS_COMPILE)ar
+LD        = $(CROSS_COMPILE)ld
+NM        = $(CROSS_COMPILE)nm
+OBJCOPY   = $(CROSS_COMPILE)objcopy
+OBJDUMP   = $(CROSS_COMPILE)objdump
+RANLIB    = $(CROSS_COMPILE)ranlib
+READELF   = $(CROSS_COMPILE)readelf
+ELF2FLT   = $(CROSS_COMPILE)elf2flt
+STRIPTOOL = $(CROSS_COMPILE)strip
+STRIP     = $(STRIPTOOL)
+CC_FOR_BUILD = gcc
+CONFIG_SITE = $(ROOTDIR)/vendors/config/config.site
+
+QMAKE     = $(CROSS_COMPILE)qmake
+
+MKIMAGE       = $(ROOTDIR)/$(LINUXDIR)/scripts/mkuboot.sh
+MKFS_CRAMFS   = $(ROOTDIR)/user/cramfs/host_build/mkcramfs
+MKFS_EXT2     = $(ROOTDIR)/user/genext2fs/build-host/genext2fs
+MKFS_JFFS2    = $(ROOTDIR)/user/mtd-utils/mkfs.jffs2
+MTD_SUMTOOL   = $(ROOTDIR)/user/mtd-utils/sumtool
+MKFS_ROMFS    = $(ROOTDIR)/user/genromfs/genromfs
+MKFS_SQUASHFS = $(ROOTDIR)/user/squashfs/build-host/mksquashfs
+MKFS_UBIFS    = $(ROOTDIR)/user/mtd-utils/mkfs.ubifs
+MKFS_YAFFS    = $(ROOTDIR)/user/yaffs-utils/mkfs.yaffs
+MKFS_YAFFS2   = $(ROOTDIR)/user/yaffs-utils/mkfs.yaffs2
+
+############################################################################
+#
+# Settings for configure / autotools
+#
+
+CONFIGURE_BUILD := $(shell sh $(ROOTDIR)/tools/config.guess)
+CONFIGURE_OPTS  := \
+	--host=$(CONFIGURE_HOST) \
+	--build=$(CONFIGURE_BUILD) \
+	--prefix=/usr \
+	--sysconfdir=/etc \
+	--datadir=/usr/share \
+	--mandir=/usr/share/man \
+	--infodir=/usr/share/info \
+	--localstatedir=/var/lib \
+	--disable-dependency-tracking \
+	--enable-fast-install
+ifneq ($(findstring s,$(MAKEFLAGS)),)
+CONFIGURE_OPTS += --quiet
+endif
+
+cpu-$(CONFIG_BF512) := bf512
+cpu-$(CONFIG_BF514) := bf514
+cpu-$(CONFIG_BF516) := bf516
+cpu-$(CONFIG_BF518) := bf518
+cpu-$(CONFIG_BF522) := bf522
+cpu-$(CONFIG_BF523) := bf523
+cpu-$(CONFIG_BF524) := bf524
+cpu-$(CONFIG_BF525) := bf525
+cpu-$(CONFIG_BF526) := bf526
+cpu-$(CONFIG_BF527) := bf527
+cpu-$(CONFIG_BF531) := bf531
+cpu-$(CONFIG_BF532) := bf532
+cpu-$(CONFIG_BF533) := bf533
+cpu-$(CONFIG_BF534) := bf534
+cpu-$(CONFIG_BF536) := bf536
+cpu-$(CONFIG_BF537) := bf537
+cpu-$(CONFIG_BF538) := bf538
+cpu-$(CONFIG_BF539) := bf539
+cpu-$(CONFIG_BF542) := bf542
+cpu-$(CONFIG_BF544) := bf544
+cpu-$(CONFIG_BF547) := bf547
+cpu-$(CONFIG_BF548) := bf548
+cpu-$(CONFIG_BF549) := bf549
+cpu-$(CONFIG_BF561) := bf561
+
+rev-$(CONFIG_BF_REV_0_0) := 0.0
+rev-$(CONFIG_BF_REV_0_1) := 0.1
+rev-$(CONFIG_BF_REV_0_2) := 0.2
+rev-$(CONFIG_BF_REV_0_3) := 0.3
+rev-$(CONFIG_BF_REV_0_4) := 0.4
+rev-$(CONFIG_BF_REV_0_5) := 0.5
+rev-$(CONFIG_BF_REV_0_6) := 0.6
+rev-$(CONFIG_BF_REV_ANY) := any
+rev-$(CONFIG_BF_REV_NONE) := none
+ifeq ($(rev-y),)
+$(warning )
+$(warning The Blackfin Silicon Revision you are targetting is not known.)
+$(warning Please file a bug report about this.)
+$(warning )
+rev-y := any
+endif
+
+ifeq ($(cpu-y),)
+$(warning )
+$(warning The Blackfin CPU you are targetting is not known.)
+$(warning Please file a bug report about this.)
+$(warning )
+else
+CPUFLAGS = -mcpu=$(cpu-y)-$(rev-y)
+endif
+
+############################################################################
+#
+# Set up all our fun CFLAGS/CPPFLAGS/LDFLAGS.  Normalize our
+# settings so we don't differentiate between user and lib.
+#
+
+ifneq ($(UCLINUX_BUILD_USER)$(UCLINUX_BUILD_LIB),)
+
+CFLAGS-y   := -pipe -Wall
+CXXFLAGS-y := -pipe -Wall
+CPPFLAGS-y := -DEMBED -D__uClinux__ -I$(ROOTDIR)
+LDFLAGS-y  := 
+FLTFLAGS-y := 
+
+CONFIG_ALL_DEBUG := n
+ifdef CONFIG_LIB_DEBUG
+	CONFIG_ALL_DEBUG := y
+endif
+ifdef CONFIG_USER_DEBUG
+	CONFIG_ALL_DEBUG := y
+endif
+
+ifeq ($(CONFIG_ALL_DEBUG),y)
+	CFLAGS-y   += -O0 -g
+	CXXFLAGS-y += -O0 -g
+	STRIPTOOL  := echo
+	STRIP      := $(STRIPTOOL)
+else
+	CFLAGS-y   += $(subst ",,$(strip $(CONFIG_USER_CFLAGS)))
+	CXXFLAGS-y += $(subst ",,$(strip $(CONFIG_USER_CFLAGS)))
+endif
+
+CFLAGS-$(CONFIG_BLACKFIN_CHECK_STACKFLOW) += -mstack-check-l1
+CXXFLAGS-$(CONFIG_BLACKFIN_CHECK_STACKFLOW) += -mstack-check-l1
+CFLAGS-$(CONFIG_BLACKFIN_CHECK_POINTER) += -fmudflap -lmudflap
+CXXFLAGS-$(CONFIG_BLACKFIN_CHECK_POINTER) += -fmudflap -lmudflap
+
+# These three lines can be removed since now -elf2flt is added default by
+# bfin-uclinux-gcc. But busybox Makefile looks for -Wl,-elf2flt to decide
+# if it's OK to strip the binary.
+LDFLAGS-$(CONFIG_FMT_USE_FLAT) += -Wl,-elf2flt
+LDFLAGS-$(CONFIG_FMT_USE_SHARED_FLAT) += -Wl,-elf2flt
+LDFLAGS-$(CONFIG_FMT_USE_SEP_DATA) += -Wl,-elf2flt
+
+CFLAGS-$(CONFIG_FMT_USE_SEP_DATA) += -msep-data
+CXXFLAGS-$(CONFIG_FMT_USE_SEP_DATA) += -msep-data
+LDFLAGS-$(CONFIG_FMT_USE_SEP_DATA) += -msep-data
+
+# Since we don't build shared libs in lib/, add -mshared-library-id=0 to save link time.
+CFLAGS-$(CONFIG_FMT_USE_SHARED_FLAT) += -mid-shared-library -mshared-library-id=0
+CXXFLAGS-$(CONFIG_FMT_USE_SHARED_FLAT) += -mid-shared-library -mshared-library-id=0
+LDFLAGS-$(CONFIG_FMT_USE_SHARED_FLAT) += -mid-shared-library -mshared-library-id=0
+
+CFLAGS   := $(CFLAGS-y)   $(VENDOR_CFLAGS)   $(CPUFLAGS)
+CXXFLAGS := $(CXXFLAGS-y) $(VENDOR_CXXFLAGS) $(CPUFLAGS)
+CPPFLAGS := $(CPPFLAGS-y) $(VENDOR_CPPFLAGS) $(CPUFLAGS)
+LDFLAGS  := $(LDFLAGS-y)  $(VENDOR_LDFLAGS)  $(CPUFLAGS)
+FLTFLAGS := $(FLTFLAGS-y) $(VENDOR_FLTFLAGS)
+
+endif

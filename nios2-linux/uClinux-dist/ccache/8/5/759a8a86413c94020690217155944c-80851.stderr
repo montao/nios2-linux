@@ -1,0 +1,19 @@
+main.c: In function 'tninit':
+main.c:65: warning: implicit declaration of function 'init_terminal'
+main.c:67: warning: implicit declaration of function 'init_network'
+main.c:69: warning: implicit declaration of function 'init_telnet'
+main.c:71: warning: implicit declaration of function 'init_sys'
+main.c: In function 'usage':
+main.c:101: warning: implicit declaration of function 'exit'
+main.c:101: warning: incompatible implicit declaration of built-in function 'exit'
+main.c: At top level:
+main.c:110: warning: return type defaults to 'int'
+main.c: In function 'main':
+main.c:128: warning: suggest parentheses around assignment used as truth value
+main.c:138: warning: implicit declaration of function 'getopt'
+main.c:189: warning: implicit declaration of function 'set_escape_char'
+main.c:301: warning: implicit declaration of function 'Exit'
+main.c:302: warning: implicit declaration of function 'tn'
+main.c: At top level:
+main.c:35: warning: 'copyright' defined but not used
+main.c:41: warning: 'sccsid' defined but not used

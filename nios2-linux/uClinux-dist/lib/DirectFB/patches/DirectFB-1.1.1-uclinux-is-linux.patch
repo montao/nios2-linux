@@ -1,0 +1,24 @@
+this has been merged into DirectFB-1.4.3+
+
+--- a/configure
++++ b/configure
+@@ -22573,7 +22573,7 @@ need_libdl=yes
+ want_ppcasm=yes
+ 
+ case "$target_or_host" in
+-  *-linux*)
++  *-*linux*)
+     have_linux=yes
+     ;;
+ 
+--- a/configure.in
++++ b/configure.in
+@@ -22573,7 +22573,7 @@ need_libdl=yes
+ want_ppcasm=yes
+ 
+ case "$target_or_host" in
+-  *-linux*)
++  *-*linux*)
+     have_linux=yes
+     ;;
+ 

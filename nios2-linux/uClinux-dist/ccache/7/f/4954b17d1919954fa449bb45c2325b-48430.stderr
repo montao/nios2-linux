@@ -1,0 +1,2 @@
+/home/developer/altera/nios2-linux/uClinux-dist/lib/lzo/lzo-2.03/src/lzo1b_c.ch: In function 'do_compress':
+/home/developer/altera/nios2-linux/uClinux-dist/lib/lzo/lzo-2.03/src/lzo1b_c.ch:138: warning: 'm_off' may be used uninitialized in this function

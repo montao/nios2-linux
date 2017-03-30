@@ -1,0 +1,496 @@
+# Libraries that are in Blackfin dist but not upstream
+
+comment "*** Additional Blackfin dist libs ***"
+
+config LIB_AGG
+	bool "Build agg"
+	help
+	  Anti-Grain Geometry - A High Quality Rendering Engine for C++
+
+	  http://antigrain.com/
+
+config LIB_ALSA_LIB
+	bool "Build ALSA lib"
+	depends on FMT_USE_FDPIC_ELF
+	help
+	  The Advanced Linux Sound Architecture (ALSA) provides audio and MIDI
+	  functionality to the Linux operating system.
+	  http://www.alsa-project.org
+if !FMT_USE_FDPIC_ELF
+comment "ALSA lib requires FDPIC ELF"
+endif
+
+config LIB_AVAHI
+	bool "Build avahi"
+	help
+	  Avahi is a system which facilitates service discovery on a local
+	  network. This means that you can plug your laptop or computer
+	  into a network and instantly be able to view other people who
+	  you can chat with, find printers to print to or find files being shared.
+	  http://avahi.org/
+
+config LIB_BFIN_GSM
+	bool "Build Blackfin optimized GSM library"
+
+config LIB_BLUEZ
+	bool "Build bluez-lib"
+	help
+	  BlueZ provides support for the core Bluetooth layers and protocols.
+	  Bluetooth wireless technology is a worldwide specification for a
+	  small-form factor, low-cost radio solution that provides links
+	  between mobile computers, mobile phones, other portable handheld
+	  devices, and connectivity to the Internet.
+	  http://www.bluez.org/
+
+config LIB_BOOST
+	bool "Build boost"
+	help
+	  Boost provides free peer-reviewed portable C++ source libraries.
+	  http://www.boost.org/
+
+config LIB_CGIC
+	bool "Build cgic"
+	help
+	  cgic is an ANSI C-language library for the creation of CGI-based
+	  World Wide Web applications.
+	  http://www.boutell.com/cgic/
+
+config LIB_CRYPTOPP
+	bool "Build Crypto++ Lib"
+	help
+	  Crypto++ Library is a free C++ class library of cryptographic schemes.
+	  http://www.cryptopp.com/
+
+config LIB_DIRAC
+	bool "Build dirac (video codec)"
+	help
+	  Dirac is an advanced royalty-free video compression format designed for a
+	  wide range of uses, from delivering low-resolution web content to
+	  broadcasting HD and beyond, to near-lossless studio editing.
+	  http://diracvideo.org/
+
+config LIB_DIRECTFB
+	bool "Build DirectFB"
+	depends on FMT_USE_FDPIC_ELF
+	help
+	  DirectFB is a thin library that provides hardware graphics
+	  acceleration, input device handling and abstraction, integrated
+	  windowing system with support for translucent windows and
+	  multiple display layers, not only on top of the Linux Framebuffer
+	  Device.
+	  http://www.directfb.org/
+if !FMT_USE_FDPIC_ELF
+comment "DirectFB requires FDPIC ELF"
+endif
+
+config LIB_DMALLOC
+	bool "Build dmalloc"
+
+config LIB_E2FSPROGS_LIBS
+	bool "Build e2fsprogs-libs"
+	help
+	  This builds libblkid, libcom_err, libss, and libuuid.
+	  http://e2fsprogs.sourceforge.net/
+
+config LIB_LIBEXOSIP
+	bool "Build eXosip"
+	select LIB_OSIP2
+	help
+	  eXosip is a library that hides the complexity of using the SIP
+	  protocol for mutlimedia session establishement. This protocol
+	  is mainly to be used by VoIP telephony applications (endpoints
+	  or conference server) but might be also usefull for any
+	  application that wish to establish sessions like multiplayer games. 
+	  http://savannah.nongnu.org/projects/exosip/
+
+config LIB_FAAC
+	bool "Build faac"
+	help
+	  FAAC is an open source MPEG-4 and MPEG-2 AAC encoder
+	  http://www.audiocoding.com/faac.html
+
+config LIB_FAAD2
+	bool "Build faad2"
+	help
+	  FAAD2 is an open source MPEG-4 and MPEG-2 AAC decoder
+	  http://www.audiocoding.com/faad2.html
+
+config LIB_FFMPEG
+	bool "Build ffmpeg"
+	help
+	  FFmpeg is a complete, cross-platform solution to record,
+	  convert and stream audio and video.
+	  http://www.ffmpeg.org/
+
+config LIB_FLAC
+	bool "Build flac"
+	help
+	  FLAC stands for Free Lossless Audio Codec, an audio format similar to
+	  MP3, but lossless, meaning that audio is compressed in FLAC without
+	  any loss in quality.
+	  http://flac.sourceforge.net/
+
+config LIB_FREETYPE
+	bool "Build freetype"
+	select LIB_ZLIB
+	help
+	  FreeType is a portable and highly efficient TrueType rendering engine,
+	  http://www.freetype.org/
+
+config LIB_FTPLIB
+	bool "Build ftplib"
+	help
+	  ftplib is a set of routines that implement the FTP protocol. They allow
+	  applications to create and access remote files through function calls
+	  instead of needing to fork and exec an interactive ftp client program.
+	  http://nbpfaus.net/~pfau/ftplib/
+
+config LIB_GIFLIB
+	bool "Build giflib"
+	help
+	  giflib is a library for reading and writing gif images.
+	  http://sourceforge.net/projects/giflib/
+
+config LIB_LIBGSASL
+	bool "Build libgsasl"
+	help
+	  GNU SASL is an implementation of the Simple Authentication and Security
+	  Layer framework and a few common SASL mechanisms. SASL is used by
+	  network servers (e.g., IMAP, SMTP) to request authentication from
+	  clients, and in clients to authenticate against servers.
+	  http://www.gnu.org/software/gsasl/
+
+config LIB_LIBGCRYPT
+	bool "Build libgcrypt"
+	select LIB_LIBGPG_ERROR
+	help
+	  The cryptography library used by GnuPG and related software.
+
+config LIB_LIBGPG_ERROR
+	bool "Build Libgpg-error"
+	help
+	  Libgpg-error is a small library with error codes and descriptions shared
+	  by most GnuPG related software.
+	  http://www.gnupg.org/related_software/libgpg-error.en.html
+
+config LIB_LIBAIO
+	bool "Build libaio"
+
+config LIB_LIBAO
+	bool "Build libao"
+	depends on FMT_USE_FDPIC_ELF
+	help
+	  Libao is a cross-platform audio library that allows programs to
+	  output audio using a simple API on a wide variety of platforms. 
+	  http://www.xiph.org/ao/
+if !FMT_USE_FDPIC_ELF
+comment "libao requires FDPIC ELF"
+endif
+
+config LIB_LIBAUDIO
+	bool "Build libaudio"
+	help
+	  The Audio File Library provides a uniform and elegant API for
+	  accessing a variety of audio file formats, such as AIFF/AIFF-C,
+	  WAVE, NeXT/Sun .snd/.au, Berkeley/IRCAM/CARL Sound File, Audio
+	  Visual Research, Amiga IFF/8SVX, and NIST SPHERE. Supported
+	  compression formats are currently G.711 mu-law and A-law and
+	  IMA and MS ADPCM. 
+	  http://www.68k.org/~michael/audiofile/
+
+config LIB_LIBBFGDOTS
+	bool "Build libbfgdots"
+
+config LIB_CONFUSE
+	bool "Build libConfuse"
+	help
+	  libConfuse is a configuration file parser library. 
+	  http://www.nongnu.org/confuse/
+
+config LIB_LIBICONV
+	bool "Build libiconv"
+	help
+	  This library provides an iconv() implementation, for use on systems
+	  which don't have one, or whose implementation cannot convert from/to
+	  Unicode. 
+	  http://www.gnu.org/software/libiconv/
+
+config LIB_LIBID3TAG
+	bool "Build libid3tag"
+	select LIB_ZLIB
+	help
+	  ID3 tag manipulation library
+	  http://www.underbit.com/products/mad/
+
+config LIB_LIBIPOD
+	bool "Build libipod"
+	help
+	  libipod is a lightweight library written in C for the management of
+	  the Apple iPod.
+	  http://libipod.sourceforge.net/
+
+config LIB_LIBMAD
+	bool "Build libmad"
+	help
+	  mp3 decoder library
+	  http://www.underbit.com/products/mad/
+
+config LIB_LIBMODBUS
+	bool "Build libmodbus"
+	help
+	  A Modbus library for Linux (and OSX) which supports RTU communication
+	  over a serial line or a TCP link.
+	  https://launchpad.net/libmodbus/
+
+config LIB_LIBMPEG2
+	bool "Build libmpeg2"
+	help
+	  a free MPEG-2 video stream decoder
+	  http://libmpeg2.sourceforge.net/
+
+config LIB_LIBSDL
+	bool "Build libSDL"
+	help
+	  Simple DirectMedia Layer is a cross-platform multimedia library
+	  designed to provide low level access to audio, keyboard, mouse,
+	  joystick, 3D hardware via OpenGL, and 2D video framebuffer.
+	  http://www.libsdl.org/
+
+config LIB_LIBTOOL
+	bool "Build libtool"
+	help
+	  GNU libtool is a generic library support script. Libtool hides the
+	  complexity of using shared libraries behind a consistent, portable
+	  interface.
+	  http://www.gnu.org/software/libtool/
+
+config LIB_LIBUIO
+	bool "Build libuio"
+	help
+	  Libuio is a lightweight library written in C to provide access to
+	  UIO devices from user level applications.
+	  git://git.linutronix.de/projects/libUIO.git
+
+config LIB_LIBUSB
+	bool "Build libusb"
+	help
+	  libusb's aim is to create a library for use by user level applications
+	  to access USB devices
+	  http://libusb.wiki.sourceforge.net/
+
+config LIB_LIVE
+	bool "Build live555"
+	help
+	  libraries for standards-based RTP/RTCP/RTSP/SIP multimedia streaming
+	  http://www.live555.com/
+
+config LIB_LIBMATRIX
+	bool "Build libmatrix"
+	help
+	  PeerSec Networks MatrixSSL is an embedded SSL implementation
+	  designed for small footprint applications and devices.
+	  http://www.matrixssl.org/download.html
+
+config LIB_MEDIASTREAMER
+	bool "Build mediastreamer"
+	select LIB_ORTP
+	help
+	  Mediastreamer2 is a powerful and lightweighted streaming engine
+	  specialized for voice/video telephony applications. 
+	  http://www.linphone.org/index.php/eng/code_review/mediastreamer2
+
+config LIB_MPFR
+	bool "Build mpfr"
+	select LIB_LIBGMP
+	help
+	  The MPFR library is a C library for multiple-precision floating-point
+	  computations with correct rounding.
+	  http://www.mpfr.org/
+
+config LIB_LIBOGG
+	bool "Build libogg"
+	help
+	  Ogg is a multimedia container format, and the native file and stream
+	  format for the Xiph.org multimedia codecs.
+	  http://www.xiph.org/ogg/
+
+config LIB_OPENOBEX
+	bool "Build openobex"
+	help
+	  Object Exchange (OBEX) protocol. OBEX is a session protocol and can
+	  best be described as a binary HTTP protocol. Common uses are for
+	  Bluetooth and IrDA.
+	  http://sourceforge.net/projects/openobex
+	  http://git.kernel.org/?p=bluetooth/openobex.git;a=tree
+
+config LIB_ORTP
+	bool "Build ortp"
+	help
+	  a Real-time Transport Protocol (RFC3550) stack
+	  http://www.linphone.org/index.php/eng/code_review/ortp
+
+config LIB_POPT
+	bool "Build popt"
+	help
+	  Popt is a C library for parsing command line parameters.
+	  http://freshmeat.net/projects/popt
+
+config LIB_QT
+	bool "Build QT"
+	select LIB_ZLIB
+
+config LIB_QT_WEBKIT
+	bool "Build WebKit"
+	depends on LIB_QT
+	help
+	  WebKit is the HTML rendering engine
+
+config LIB_QT_QVFB
+	bool "Build QT Virtual Framebuffer"
+	depends on LIB_QT
+
+config LIB_QT_EXAMPLES
+	bool "Build demos/examples"
+	depends on LIB_QT
+
+config LIB_READLINE
+	bool "Build readline"
+	select LIB_NCURSES
+	help
+	  The GNU Readline library provides a set of functions for use by
+	  applications that allow users to edit command lines as they are typed in.
+	  http://cnswww.cns.cwru.edu/php/chet/readline/rltop.html
+
+config LIB_LIBSAMPLERATE
+	bool "Build libsamplerate"
+	help
+	  libsamplerate is a Sample Rate Converter (SRC) for audio.
+	  http://www.mega-nerd.com/SRC/
+
+config LIB_SDL_GFX
+	bool "build SDL_gfx"
+	select LIB_LIBSDL
+	help
+	  SDL graphics drawing primitives and other support functions wrapped
+	  up in an addon library for the Simple Direct Media (SDL) cross
+	  platform API layer.
+	  http://www.ferzkopp.net/joomla/content/view/19/14/
+
+config LIB_SDL_IMAGE
+	bool "build SDL_image"
+	select LIB_LIBSDL
+	select LIB_LIBJPEG
+	select LIB_LIBPNG
+	select LIB_FREETYPE
+	help
+	  SDL_image is an image loading library that is used with the SDL
+	  library, and almost as portable. It allows a programmer to use
+	  multiple image formats without having to code all the loading
+	  and conversion algorithms themselves.
+	  http://www.libsdl.org/projects/SDL_image/
+
+config LIB_SDL_MIXER
+	bool "build SDL_mixer"
+	select LIB_LIBMAD
+	help
+	  SDL_mixer is a sound mixing library that is used with the SDL
+	  library, and almost as portable. It allows a programmer to use
+	  multiple samples along with music without having to code a
+	  mixing algorithm themselves
+	  http://www.libsdl.org/projects/SDL_mixer/
+
+config LIB_SDL_NET
+	bool "build SDL_net"
+	select LIB_LIBSDL
+	help
+	  SDL_net is a network library that is used with the SDL library,
+	  It allows a programmer to use network functionality without
+	  having to code different things for different platforms.
+	  http://www.libsdl.org/projects/SDL_net/
+
+config LIB_SDL_TTF
+	bool "build SDL_ttf"
+	select LIB_LIBSDL
+	select LIB_FREETYPE
+	help
+	  SDL_ttf is a TrueType font rendering library that is used with the SDL
+	  library. It depends on freetype2 to handle the TrueType font data. It
+	  allows a programmer to use multiple TrueType fonts without having to
+	  code a font rendering routine themselves.
+	  http://www.libsdl.org/projects/SDL_ttf/
+
+config LIB_LIBSNDFILE
+	bool "Build libsndfile"
+	help
+	  a library for reading and writing files containing sampled sound
+	  http://www.mega-nerd.com/libsndfile/
+
+config LIB_SPEEX
+	bool "Build speex"
+	help
+	  Speex is an Open Source/Free Software  patent-free audio compression
+	  format designed for speech.
+	  http://speex.org/
+
+config LIB_SPHINXBASE
+	bool "Build sphinxbase"
+	help
+	  http://cmusphinx.sourceforge.net/html/cmusphinx.php
+
+config LIB_SQLITE
+	bool "Build sqlite"
+	help
+	  SQLite is a software library that implements a self-contained,
+	  serverless, zero-configuration, transactional SQL database engine.
+	  SQLite is the most widely deployed SQL database engine in the world.
+	  http://www.sqlite.org/
+
+config LIB_TIFF
+	bool "Build libtiff"
+	help
+	  This software provides support for the Tag Image File Format (TIFF),
+	  a widely used format for storing image data. More info can be found
+	  at http://www.libtiff.org/
+
+config LIB_TIFF_EXAMPLES
+	bool "Install examples"
+	depends on LIB_TIFF
+	help
+	  Selecting this option will install a small collection of tools for
+	  doing simple manipulations of TIFF images
+
+config LIB_TREMOR
+	bool "Build tremor"
+	help
+	  Tremor is a fixed-point version of the Ogg Vorbis decoder for
+	  those platforms that can't do floating point math. 
+	  http://wiki.xiph.org/index.php/Tremor
+
+config LIB_TSLIB
+	bool "Build tslib"
+	depends on FMT_USE_FDPIC_ELF
+	help
+	  Tslib is an abstraction layer for touchscreen panel events, as well
+	  as a filter stack for the manipulation of those events.
+	  http://tslib.berlios.de/
+if !FMT_USE_FDPIC_ELF
+comment "tslib requires FDPIC ELF"
+endif
+
+config LIB_LIBVORBIS
+	bool "Build libvorbis"
+	select LIB_LIBOGG
+	help
+	  Ogg Vorbis is a fully open, non-proprietary, patent-and-royalty-free,
+	  general-purpose compressed audio format for mid to high quality
+	  (8kHz-48.0kHz, 16+ bit, polyphonic) audio and music at fixed
+	  and variable bitrates from 16 to 128 kbps/channel. 
+	  http://www.xiph.org/vorbis/
+config LIB_LIBMCAPI
+	bool "Build libmcapi"
+	help
+	 To better address the issue of proprietary Inter-Processor Communication (IPC),
+	 the Multicore Association (MCA) created an API-based standard called the Multicore
+	 Communication API (MCAPI). MCAPI is used in AMP configurations that require 
+	 communication and synchronization between multiple operating system instances.
+	 http://www.multicore-association.org

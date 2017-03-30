@@ -1,0 +1,57 @@
+# cpu_0
+set_global_assignment -name SDC_FILE [file join $::quartus(qip_path) cpu_0.sdc]
+set_global_assignment -name SOURCE_FILE [file join $::quartus(qip_path) cpu_0.ocp]
+# mobile_ddr_sdram
+set_global_assignment -name TCL_FILE [file join $::quartus(qip_path) ip/MTX_SDRAM/mtx_avalon_sdram/mtx_avalon_sdram_hw.tcl]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) ip/MTX_SDRAM/mtx_avalon_sdram/mtx_sdram_package.vhd]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) ip/MTX_SDRAM/mtx_avalon_sdram/mtx_sdram_controller.vhd]
+set_global_assignment -name SOURCE_FILE [file join $::quartus(qip_path) ip/MTX_SDRAM/mtx_avalon_sdram/mtx_sdram_controller.ocp]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) ip/MTX_SDRAM/mtx_avalon_sdram/mtx_sdram_controller_scheduler.vhd]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) ip/MTX_SDRAM/mtx_avalon_sdram/mtx_sdram_sdr_bidir.vhd]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) ip/MTX_SDRAM/mtx_avalon_sdram/mtx_sdram_ddr_bidir.vhd]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) ip/MTX_SDRAM/mtx_avalon_sdram/mtx_sdram_ddr_clk_ctrl.vhd]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) ip/MTX_SDRAM/mtx_avalon_sdram/mtx_sdram_ddr_output.vhd]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) ip/MTX_SDRAM/mtx_avalon_sdram/mtx_sdram_avalon_random.vhd]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) ip/MTX_SDRAM/mtx_avalon_sdram/mtx_sdram_avalon_burst.vhd]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) mobile_ddr_sdram.vhd]
+# sys_timer
+# led_pio
+# dipsw_pio
+# sysid
+# jtag_uart
+# slow_periph_bridge
+# user_pio_pushbtn
+# tse_mac
+set_global_assignment -name SDC_FILE [file join $::quartus(qip_path) tse_mac_constraints.sdc]
+set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) tse_mac.qip]
+# sgdma_tx
+# sgdma_rx
+# desc_offset_bridge
+# nENET_reg_reset
+# descriptor_memory
+# mobile_ddr_pipe2
+# ethernet_sd_bridge
+# fast_tlb_miss_memory
+# ext_clk_100
+# ext_clk_60
+# flash
+# product_info_0
+set_global_assignment -name TCL_FILE [file join $::quartus(qip_path) product_info_hw.tcl]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) product_info.vhd]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) product_info_0.v]
+# mmc_spi
+# remote_update_blk
+set_global_assignment -name TCL_FILE [file join $::quartus(ip_rootpath) altera/sopc_builder_ip/altera_avalon_remote_update_cycloneiii/altera_avalon_remote_update_cycloneiii_hw.tcl]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(ip_rootpath) altera/sopc_builder_ip/altera_avalon_remote_update_cycloneiii/altera_avalon_remote_update_cycloneiii.v]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) remote_update_blk.v]
+# epcs_flash_controller
+# ext_clk_30
+# EC_GPIO_1
+# EC_GPIO_2
+# EXP_PRESENT
+# nRESET_EXP
+# temp_sense_spi
+# null
+set_global_assignment -name SDC_FILE [file join $::quartus(ip_rootpath) altera/sopc_builder_ip/altera_avalon_clock_adapter/altera_avalon_clock_adapter.sdc]
+set_global_assignment -name SOPC_BUILDER_SIGNATURE_ID FE540044B7BD0000012E2BBBECC5 
+ 

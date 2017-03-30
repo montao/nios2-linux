@@ -1,0 +1,280 @@
+#!/usr/bin/expect
+
+source  ../kernel_config.exp
+
+log_file [log_file_name "$argv0"]
+send_user "Starting $argv0\n"
+
+if { $board_type == "BF548-EZKIT" } {
+    set env(EXT2_BLOCKS) "16384"
+} else {
+    set env(EXT2_BLOCKS) "8192"
+}
+
+cd $uclinux_path/testsuites
+step "Make clean."
+if { [source make_clean.exp] != 0 } {
+    send_user "\n\nFail to make clean. Exit!\n\n"
+    exit
+}
+
+cd $uclinux_path/testsuites
+step "Make config."
+source  make_default_config.exp
+
+# Following make specific configuration for this case.
+
+cd $uclinux_path
+set timeout 300
+set baud_rate_done_flag 0
+spawn make config
+
+#puts "Begin the interactive process of configuration"
+while 1 {
+    expect {
+        -re "Customize Kernel Settings.*DEFAULTS_KERNEL.*\\\[.*]" {
+            send "y\r"
+        }
+
+        -re "Customize Application/Library Settings.*DEFAULTS_VENDOR.*\\\[.*]" {
+            send "y\r"
+        }
+
+        -nocase -re "\\\[\[^\r]*] (\\\(new\\\) )?(\[ymn])|choice\\\[.*]: \[0-9]+\r" {
+            continue
+        }
+
+        -re "CPU.* (\[0-9]+). $cpu .*choice.*\\\[.*]" {
+            send "$expect_out(1,string)\r"
+        }
+
+        -re "Silicon Rev.* (\[0-9]+). $revision .*choice.*\\\[.*]" {
+            if { $revision == "default" } {
+                send  "\r"
+            } else {
+            send "$expect_out(1,string)\r"
+            }
+        }
+
+        -re "Choose SLAB allocator.*SLAB.*SLUB.*SLOB.*choice.*\\\[.*]" {
+            if { $allocator == "slab\(p2\)" } {
+                send "1\r"
+            } elseif { $allocator == "slob\(p2\)" } {
+                send "3\r"
+            } elseif { $allocator == "slub\(p2\)" } {
+                send "2\r"
+            }
+        }
+
+        -re "Kernel support for FDPIC ELF binaries.*BINFMT_ELF_FDPIC.*\\\[.*]" {
+            if { $binary_format == "elf" } {
+                send  "Y\r"
+            } elseif { $binary_format == "flat" } {
+                send  "\r"
+            } elseif { $binary_format == "shared-flat" } {
+                send  "\r"
+            }
+        }
+
+        -re "Kernel support for flat binaries.*BINFMT_FLAT.*\\\[.*]" {
+            if { $binary_format == "elf" } {
+                send "\r"
+            } elseif { $binary_format == "flat" } {
+                send "Y\r"
+            } elseif { $binary_format == "shared-flat" } {
+                send  "\r"
+            }
+        }
+
+        -re "Enable shared FLAT support.*BINFMT_SHARED_FLAT.*\\\[.*]" {
+            if { $binary_format == "elf" } {
+                send "\r"
+            } elseif { $binary_format == "flat" } {
+                send  "\r"
+            } elseif { $binary_format == "shared-flat" } {
+                send  "Y\r"
+            }
+        }
+
+        -re "Binary format.*FLAT.*Sep-Data.*Shared-FLAT.*FDPIC.*\\\[.*]" {
+            if { $binary_format == "flat" } {
+                send  "1\r"
+            } elseif { $binary_format == "elf" } {
+                send  "4\r"
+            } elseif { $binary_format == "shared-flat" } {
+                send  "3\r"
+            }
+        }
+
+
+        -re "Install ELF shared libraries.*INSTALL_ELF_SHARED_LIBS.*\\\[.*]" {
+            send  "\r"
+        }
+
+        -re "Install FLAT shared libraries.*INSTALL_FLAT_SHARED_LIBS.*\\\[.*]" {
+            send  "\r"
+        }
+
+#        -re "build with stack overflow checking.*CONFIG_BLACKFIN_CHECK_STACKFLOW.*\\\[.*]" {
+#            send -s "Y\r"
+#        }
+
+#        -re "Trace user apps.*turn off hwtrace in kernel.*DEBUG_BFIN_NO_KERN_HWTRACE.*\\\[.*]" {
+#            send  "Y\r"
+#        }
+
+        -re "Enable ICACHE.*BFIN_ICACHE.*\\\[.*]" {
+            if { $icache == "on" } {
+                send "Y\r"
+            } elseif { $icache == "off" } {
+                send "N\r"
+            }
+        }
+
+        -re "Enable DCACHE.*BFIN_DCACHE.*\\\[.*]" {
+            if { $dcache == "on" } {
+                send "Y\r"
+            } elseif { $dcache == "off" } {
+                send "N\r"
+            }
+        }
+
+        -re "\[Pp]olicy.*Write back.*BFIN_EXTMEM_WRITEBACK.*Write through.*BFIN_EXTMEM_WRITETHROUGH.*choice.*\\\[.*]" {
+            if { $policy == "write_through" } {
+                send "2\r"
+            } elseif { $policy == "write_back" } {
+                send "1\r"
+            }
+        }
+
+        -re "Distributed Switch Architecture support.*NET_DSA.*\\\[.*]" {
+            if { $board_type == "BF518F-EZBRD" } {
+                send -s "N\r"
+            } else {
+                send -s "\r"
+            }
+        }
+
+        -re "Blackfin serial port support.*SERIAL_BFIN.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "UART Mode.*DMA mode.*SERIAL_BFIN_DMA.*PIO mode.*SERIAL_BFIN_PIO.*choice\\\[.*]" {
+            if { $uart_mode == "dma" } {
+                send "1\r"
+            } elseif { $uart_mode == "pio" } {
+                send "2\r"
+            }
+        }
+
+        -re "USB support.*USB_SUPPORT.*\\\[.*]" {
+            sleep .05
+            send "N\r"
+            sleep .05
+        }
+
+        -re "Platform Glue Layer.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Platform Glue Layer.*Blackfin.*USB_MUSB_BLACKFIN.*choice\\\[.*]" {
+            send "1\r"
+        }
+
+        -re "Early printk.*EARLY_PRINTK.*\\\[.*]" {
+            send "Y\r"
+        }
+
+        -re "Virtual terminal.*VT.*\\\[.*]" {
+            send "N\r"
+        }
+
+       -re "Disable DMA.*always use PIO.*MUSB_PIO_ONLY.*\\\[.*]" {
+            if { ( $board_type == "BF526-EZBRD" || [string match "BF527-EZKIT*" $board_type] ) && ( $revision == "0.0" || $revision == "0.1") } {
+                send -s "Y\r"
+            } else {
+                send -s "\r"
+            }
+        }
+
+        -re "Symmetric multi-processing support.*SMP.*\\\[.*]" {
+            if { $smp == "on" } {
+                send "Y\r"
+            } elseif { $smp == "off" } {
+                send "N\r"
+            } else {
+                send "\r"
+            }
+        }
+
+        -re "Enable the memory protection unit.*MPU.*\\\[.*]" {
+            if { $mpu == "on" } {
+                send "Y\r"
+            } elseif { $mpu == "off" } {
+                send "N\r"
+            } else {
+                send "\r"
+            }
+        }
+
+        -re "Xenomai.*USER_XENOMAI.*\\\[.*]" {
+            if { $xenomai == "on" } {
+                send "Y\r"
+            } elseif { $xenomai == "off" } {
+                send "N\r"
+            } else {
+                send "\r"
+            }
+        }
+
+        -re "strace.*USER_STRACE_STRACE.*\\\[.*]" {
+            send "N\r"
+        }
+
+        -re "Second extended fs support \\\(EXT2_FS\\\) \\\[.*]" {
+            send "N\r"
+        }
+
+        -re "ALSA for SoC audio support \\\(SND_SOC\\\) \\\[.*]" {
+            send "N\r"
+        }
+
+        -re "$anomalous_option" {
+            send "\r"
+        }
+
+        "\\\(*) \\\[*]" {
+            sleep .05
+            send "\r"
+        }
+
+        -re "\[cC]hoice\\\[.*]:" {
+            send "\r"
+        }
+
+        eof {
+            puts "End of configuration"
+            break
+        }
+
+        timeout {
+            puts "\n\nFATAL ERROR: config prompt timeout in make config"
+            break
+        }
+    }
+}
+
+cd $uclinux_path/testsuites
+
+step "Make"
+
+source  make_kernel.exp
+
+cd $uclinux_path/testsuites
+
+step "Copy linux"
+
+source   copy_image.exp
+
+send_user "Ending $argv0\n"
+log_file

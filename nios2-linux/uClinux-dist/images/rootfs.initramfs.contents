@@ -1,0 +1,314 @@
+
+#####################
+# /home/developer/altera/nios2-linux/uClinux-dist/romfs
+# Last modified: 1490882499.9978166830
+
+slink /sbin bin 777 0 0
+dir /tmp 1777 0 0
+dir /usr 775 0 0
+dir /usr/sbin 775 0 0
+dir /usr/lib 775 0 0
+file /usr/lib/liblzo2.so.2 /home/developer/altera/nios2-linux/uClinux-dist/romfs/usr/lib/liblzo2.so.2 755 0 0
+dir /root 775 0 0
+dir /mnt 775 0 0
+dir /lib 775 0 0
+file /lib/libutil.so.1 /home/developer/altera/nios2-linux/uClinux-dist/romfs/lib/libutil.so.1 755 0 0
+file /lib/libdl.so.2 /home/developer/altera/nios2-linux/uClinux-dist/romfs/lib/libdl.so.2 755 0 0
+file /lib/libanl.so.1 /home/developer/altera/nios2-linux/uClinux-dist/romfs/lib/libanl.so.1 755 0 0
+dir /lib/modules 775 0 0
+dir /lib/modules/3.5.0-rc4-01329-ga227997-dirty 775 0 0
+dir /lib/modules/3.5.0-rc4-01329-ga227997-dirty/kernel 775 0 0
+file /lib/modules/3.5.0-rc4-01329-ga227997-dirty/modules.builtin /home/developer/altera/nios2-linux/uClinux-dist/romfs/lib/modules/3.5.0-rc4-01329-ga227997-dirty/modules.builtin 664 0 0
+file /lib/modules/3.5.0-rc4-01329-ga227997-dirty/modules.dep /home/developer/altera/nios2-linux/uClinux-dist/romfs/lib/modules/3.5.0-rc4-01329-ga227997-dirty/modules.dep 664 0 0
+file /lib/modules/3.5.0-rc4-01329-ga227997-dirty/modules.order /home/developer/altera/nios2-linux/uClinux-dist/romfs/lib/modules/3.5.0-rc4-01329-ga227997-dirty/modules.order 664 0 0
+file /lib/libc.so.6 /home/developer/altera/nios2-linux/uClinux-dist/romfs/lib/libc.so.6 755 0 0
+file /lib/libcidn.so.1 /home/developer/altera/nios2-linux/uClinux-dist/romfs/lib/libcidn.so.1 755 0 0
+file /lib/libstdc++.so.6 /home/developer/altera/nios2-linux/uClinux-dist/romfs/lib/libstdc++.so.6 755 0 0
+file /lib/libm.so.6 /home/developer/altera/nios2-linux/uClinux-dist/romfs/lib/libm.so.6 755 0 0
+file /lib/librt.so.1 /home/developer/altera/nios2-linux/uClinux-dist/romfs/lib/librt.so.1 755 0 0
+file /lib/libthread_db.so.1 /home/developer/altera/nios2-linux/uClinux-dist/romfs/lib/libthread_db.so.1 755 0 0
+file /lib/libz.so.1 /home/developer/altera/nios2-linux/uClinux-dist/romfs/lib/libz.so.1 775 0 0
+file /lib/libpthread.so.0 /home/developer/altera/nios2-linux/uClinux-dist/romfs/lib/libpthread.so.0 755 0 0
+file /lib/libnss_hesiod.so.2 /home/developer/altera/nios2-linux/uClinux-dist/romfs/lib/libnss_hesiod.so.2 755 0 0
+file /lib/libnsl.so.1 /home/developer/altera/nios2-linux/uClinux-dist/romfs/lib/libnsl.so.1 755 0 0
+file /lib/libnss_dns.so.2 /home/developer/altera/nios2-linux/uClinux-dist/romfs/lib/libnss_dns.so.2 755 0 0
+file /lib/libmemusage.so /home/developer/altera/nios2-linux/uClinux-dist/romfs/lib/libmemusage.so 755 0 0
+file /lib/libnss_compat.so.2 /home/developer/altera/nios2-linux/uClinux-dist/romfs/lib/libnss_compat.so.2 755 0 0
+file /lib/ld.so.1 /home/developer/altera/nios2-linux/uClinux-dist/romfs/lib/ld.so.1 755 0 0
+file /lib/libcrypt.so.1 /home/developer/altera/nios2-linux/uClinux-dist/romfs/lib/libcrypt.so.1 755 0 0
+file /lib/libnss_nis.so.2 /home/developer/altera/nios2-linux/uClinux-dist/romfs/lib/libnss_nis.so.2 755 0 0
+file /lib/libpcprofile.so /home/developer/altera/nios2-linux/uClinux-dist/romfs/lib/libpcprofile.so 755 0 0
+file /lib/libnss_nisplus.so.2 /home/developer/altera/nios2-linux/uClinux-dist/romfs/lib/libnss_nisplus.so.2 755 0 0
+file /lib/libBrokenLocale.so.1 /home/developer/altera/nios2-linux/uClinux-dist/romfs/lib/libBrokenLocale.so.1 755 0 0
+file /lib/libgcc_s.so.1 /home/developer/altera/nios2-linux/uClinux-dist/romfs/lib/libgcc_s.so.1 755 0 0
+file /lib/libSegFault.so /home/developer/altera/nios2-linux/uClinux-dist/romfs/lib/libSegFault.so 755 0 0
+file /lib/libresolv.so.2 /home/developer/altera/nios2-linux/uClinux-dist/romfs/lib/libresolv.so.2 755 0 0
+file /lib/libnss_files.so.2 /home/developer/altera/nios2-linux/uClinux-dist/romfs/lib/libnss_files.so.2 755 0 0
+dir /etc 775 0 0
+file /etc/rc /home/developer/altera/nios2-linux/uClinux-dist/romfs/etc/rc 644 0 0
+file /etc/passwd /home/developer/altera/nios2-linux/uClinux-dist/romfs/etc/passwd 644 0 0
+file /etc/mime.types /home/developer/altera/nios2-linux/uClinux-dist/romfs/etc/mime.types 644 0 0
+file /etc/modprobe.conf /home/developer/altera/nios2-linux/uClinux-dist/romfs/etc/modprobe.conf 644 0 0
+file /etc/group /home/developer/altera/nios2-linux/uClinux-dist/romfs/etc/group 644 0 0
+file /etc/nsswitch.conf /home/developer/altera/nios2-linux/uClinux-dist/romfs/etc/nsswitch.conf 644 0 0
+dir /etc/boa 775 0 0
+file /etc/boa.conf /home/developer/altera/nios2-linux/uClinux-dist/romfs/etc/boa.conf 644 0 0
+file /etc/motd /home/developer/altera/nios2-linux/uClinux-dist/romfs/etc/motd 644 0 0
+file /etc/hosts /home/developer/altera/nios2-linux/uClinux-dist/romfs/etc/hosts 644 0 0
+file /etc/services /home/developer/altera/nios2-linux/uClinux-dist/romfs/etc/services 644 0 0
+file /etc/profile /home/developer/altera/nios2-linux/uClinux-dist/romfs/etc/profile 644 0 0
+file /etc/host.conf /home/developer/altera/nios2-linux/uClinux-dist/romfs/etc/host.conf 644 0 0
+file /etc/inetd.conf /home/developer/altera/nios2-linux/uClinux-dist/romfs/etc/inetd.conf 644 0 0
+dir /etc/dhcpc 775 0 0
+file /etc/mdev.conf /home/developer/altera/nios2-linux/uClinux-dist/romfs/etc/mdev.conf 644 0 0
+file /etc/filesystems /home/developer/altera/nios2-linux/uClinux-dist/romfs/etc/filesystems 644 0 0
+file /etc/version /home/developer/altera/nios2-linux/uClinux-dist/romfs/etc/version 664 0 0
+file /etc/protocols /home/developer/altera/nios2-linux/uClinux-dist/romfs/etc/protocols 644 0 0
+file /etc/TZ /home/developer/altera/nios2-linux/uClinux-dist/romfs/etc/TZ 644 0 0
+dir /etc/config 775 0 0
+file /etc/issue /home/developer/altera/nios2-linux/uClinux-dist/romfs/etc/issue 644 0 0
+file /etc/inittab /home/developer/altera/nios2-linux/uClinux-dist/romfs/etc/inittab 644 0 0
+dir /var 775 0 0
+dir /var/lib 775 0 0
+dir /var/lib/misc 775 0 0
+dir /var/run 775 0 0
+dir /var/log 775 0 0
+dir /var/log/boa 775 0 0
+dir /home 775 0 0
+dir /home/httpd 775 0 0
+dir /home/httpd/cgi-bin 775 0 0
+file /home/httpd/cgi-bin/cgi_demo /home/developer/altera/nios2-linux/uClinux-dist/romfs/home/httpd/cgi-bin/cgi_demo 775 0 0
+file /home/httpd/boa.conf /home/developer/altera/nios2-linux/uClinux-dist/romfs/home/httpd/boa.conf 644 0 0
+file /home/httpd/index.html /home/developer/altera/nios2-linux/uClinux-dist/romfs/home/httpd/index.html 644 0 0
+file /home/httpd/favicon.ico /home/developer/altera/nios2-linux/uClinux-dist/romfs/home/httpd/favicon.ico 644 0 0
+dir /proc 775 0 0
+slink /linuxrc bin/busybox 777 0 0
+dir /bin 775 0 0
+slink /bin/sh busybox 777 0 0
+slink /bin/smemcap busybox 777 0 0
+file /bin/portmap /home/developer/altera/nios2-linux/uClinux-dist/romfs/bin/portmap 775 0 0
+file /bin/ftp /home/developer/altera/nios2-linux/uClinux-dist/romfs/bin/ftp 775 0 0
+slink /bin/ln busybox 777 0 0
+slink /bin/chown busybox 777 0 0
+slink /bin/uname busybox 777 0 0
+slink /bin/login busybox 777 0 0
+slink /bin/killall busybox 777 0 0
+slink /bin/grep busybox 777 0 0
+slink /bin/which busybox 777 0 0
+slink /bin/ping busybox 777 0 0
+slink /bin/netstat busybox 777 0 0
+file /bin/telnetd /home/developer/altera/nios2-linux/uClinux-dist/romfs/bin/telnetd 775 0 0
+slink /bin/flock busybox 777 0 0
+slink /bin/echo busybox 777 0 0
+slink /bin/cpio busybox 777 0 0
+slink /bin/ftpget busybox 777 0 0
+slink /bin/tty busybox 777 0 0
+slink /bin/modinfo ../bin/busybox 777 0 0
+slink /bin/awk busybox 777 0 0
+slink /bin/last busybox 777 0 0
+slink /bin/losetup ../bin/busybox 777 0 0
+slink /bin/date busybox 777 0 0
+file /bin/cxx_helloworld /home/developer/altera/nios2-linux/uClinux-dist/romfs/bin/cxx_helloworld 775 0 0
+slink /bin/tar busybox 777 0 0
+slink /bin/passwd busybox 777 0 0
+slink /bin/tee busybox 777 0 0
+slink /bin/df busybox 777 0 0
+slink /bin/xzcat busybox 777 0 0
+slink /bin/sort busybox 777 0 0
+slink /bin/uptime busybox 777 0 0
+slink /bin/modprobe ../bin/busybox 777 0 0
+slink /bin/time busybox 777 0 0
+file /bin/thdm /home/developer/altera/nios2-linux/uClinux-dist/romfs/bin/thdm 775 0 0
+slink /bin/cp busybox 777 0 0
+slink /bin/head busybox 777 0 0
+slink /bin/route ../bin/busybox 777 0 0
+slink /bin/hostname busybox 777 0 0
+slink /bin/traceroute busybox 777 0 0
+slink /bin/umount busybox 777 0 0
+slink /bin/md5sum busybox 777 0 0
+slink /bin/readlink busybox 777 0 0
+slink /bin/ifconfig ../bin/busybox 777 0 0
+slink /bin/dnsdomainname busybox 777 0 0
+file /bin/reboot /home/developer/altera/nios2-linux/uClinux-dist/romfs/bin/reboot 775 0 0
+slink /bin/wget busybox 777 0 0
+file /bin/boa /home/developer/altera/nios2-linux/uClinux-dist/romfs/bin/boa 775 0 0
+slink /bin/stty busybox 777 0 0
+slink /bin/rev busybox 777 0 0
+slink /bin/ftpput busybox 777 0 0
+slink /bin/pidof busybox 777 0 0
+slink /bin/tftp busybox 777 0 0
+file /bin/cxx_constructor /home/developer/altera/nios2-linux/uClinux-dist/romfs/bin/cxx_constructor 775 0 0
+slink /bin/du busybox 777 0 0
+slink /bin/mkfifo busybox 777 0 0
+file /bin/bcdm /home/developer/altera/nios2-linux/uClinux-dist/romfs/bin/bcdm 775 0 0
+slink /bin/insmod ../bin/busybox 777 0 0
+slink /bin/env busybox 777 0 0
+file /bin/cxx_exception /home/developer/altera/nios2-linux/uClinux-dist/romfs/bin/cxx_exception 775 0 0
+slink /bin/chroot ../bin/busybox 777 0 0
+file /bin/dhrystone /home/developer/altera/nios2-linux/uClinux-dist/romfs/bin/dhrystone 775 0 0
+slink /bin/vi busybox 777 0 0
+slink /bin/chmod busybox 777 0 0
+slink /bin/mount busybox 777 0 0
+slink /bin/diff busybox 777 0 0
+slink /bin/powertop busybox 777 0 0
+slink /bin/bzcat busybox 777 0 0
+slink /bin/free busybox 777 0 0
+slink /bin/bootchartd ../bin/busybox 777 0 0
+file /bin/mkfs.jffs2 /home/developer/altera/nios2-linux/uClinux-dist/romfs/bin/mkfs.jffs2 775 0 0
+slink /bin/watch busybox 777 0 0
+slink /bin/tail busybox 777 0 0
+slink /bin/sed busybox 777 0 0
+slink /bin/ls busybox 777 0 0
+slink /bin/nc busybox 777 0 0
+slink /bin/chgrp busybox 777 0 0
+slink /bin/logname busybox 777 0 0
+slink /bin/lsmod ../bin/busybox 777 0 0
+slink /bin/fgconsole busybox 777 0 0
+slink /bin/hwclock ../bin/busybox 777 0 0
+slink /bin/printf busybox 777 0 0
+slink /bin/getty ../bin/busybox 777 0 0
+slink /bin/dmesg busybox 777 0 0
+slink /bin/clear busybox 777 0 0
+slink /bin/rm busybox 777 0 0
+slink /bin/test busybox 777 0 0
+file /bin/inetd /home/developer/altera/nios2-linux/uClinux-dist/romfs/bin/inetd 775 0 0
+slink /bin/getopt busybox 777 0 0
+slink /bin/gzip busybox 777 0 0
+slink /bin/mkdir busybox 777 0 0
+slink /bin/usleep busybox 777 0 0
+file /bin/busybox /home/developer/altera/nios2-linux/uClinux-dist/romfs/bin/busybox 755 0 0
+slink /bin/find busybox 777 0 0
+slink /bin/[ busybox 777 0 0
+file /bin/cxx_iostream /home/developer/altera/nios2-linux/uClinux-dist/romfs/bin/cxx_iostream 775 0 0
+slink /bin/basename busybox 777 0 0
+file /bin/ftpd /home/developer/altera/nios2-linux/uClinux-dist/romfs/bin/ftpd 775 0 0
+slink /bin/blockdev ../bin/busybox 777 0 0
+slink /bin/true busybox 777 0 0
+slink /bin/top busybox 777 0 0
+slink /bin/ps busybox 777 0 0
+slink /bin/pmap busybox 777 0 0
+slink /bin/nslookup busybox 777 0 0
+slink /bin/sleep busybox 777 0 0
+slink /bin/dd busybox 777 0 0
+slink /bin/mknod busybox 777 0 0
+slink /bin/cat busybox 777 0 0
+slink /bin/pwd busybox 777 0 0
+slink /bin/mv busybox 777 0 0
+file /bin/init /home/developer/altera/nios2-linux/uClinux-dist/romfs/bin/init 775 0 0
+slink /bin/touch busybox 777 0 0
+slink /bin/cut busybox 777 0 0
+slink /bin/expr busybox 777 0 0
+slink /bin/xz busybox 777 0 0
+slink /bin/sync busybox 777 0 0
+slink /bin/base64 busybox 777 0 0
+slink /bin/rmmod ../bin/busybox 777 0 0
+slink /bin/[[ busybox 777 0 0
+slink /bin/vconfig ../bin/busybox 777 0 0
+slink /bin/rmdir busybox 777 0 0
+slink /bin/renice busybox 777 0 0
+slink /bin/false busybox 777 0 0
+slink /bin/zcat busybox 777 0 0
+file /bin/dhcpcd /home/developer/altera/nios2-linux/uClinux-dist/romfs/bin/dhcpcd 775 0 0
+slink /bin/cmp busybox 777 0 0
+file /bin/cxx_except /home/developer/altera/nios2-linux/uClinux-dist/romfs/bin/cxx_except 775 0 0
+slink /bin/yes busybox 777 0 0
+file /bin/version /home/developer/altera/nios2-linux/uClinux-dist/romfs/bin/version 775 0 0
+file /bin/telnet /home/developer/altera/nios2-linux/uClinux-dist/romfs/bin/telnet 775 0 0
+slink /bin/id busybox 777 0 0
+slink /bin/unxz busybox 777 0 0
+file /bin/whetstone /home/developer/altera/nios2-linux/uClinux-dist/romfs/bin/whetstone 775 0 0
+slink /bin/gunzip busybox 777 0 0
+slink /bin/whoami busybox 777 0 0
+slink /bin/kill busybox 777 0 0
+slink /bin/seq busybox 777 0 0
+slink /bin/hexdump busybox 777 0 0
+slink /bin/wc busybox 777 0 0
+slink /bin/tr busybox 777 0 0
+slink /bin/xargs busybox 777 0 0
+slink /bin/iostat busybox 777 0 0
+file /bin/mtdm /home/developer/altera/nios2-linux/uClinux-dist/romfs/bin/mtdm 775 0 0
+slink /bin/nbd-client ../bin/busybox 777 0 0
+slink /bin/adduser busybox 777 0 0
+slink /bin/hush busybox 777 0 0
+slink /bin/more busybox 777 0 0
+slink /bin/bunzip2 busybox 777 0 0
+file /bin/agetty /home/developer/altera/nios2-linux/uClinux-dist/romfs/bin/agetty 775 0 0
+slink /bin/uniq busybox 777 0 0
+slink /bin/mpstat busybox 777 0 0
+dir /sys 775 0 0
+dir /dev 755 0 0
+dir /dev/input 755 0 0
+dir /dev/usb 755 0 0
+nod /dev/mtd0 640 0 0 c 90 0
+nod /dev/mtd1 640 0 0 c 90 2
+nod /dev/mtd2 640 0 0 c 90 4
+nod /dev/mtd3 640 0 0 c 90 6
+nod /dev/mtdblock0 640 0 0 b 31 0
+nod /dev/mtdblock1 640 0 0 b 31 1
+nod /dev/mtdblock2 640 0 0 b 31 2
+nod /dev/fb0 600 0 0 c 29 0
+nod /dev/vout0 600 0 0 c 81 192
+nod /dev/mem 640 0 0 c 1 1
+nod /dev/kmem 640 0 0 c 1 2
+nod /dev/null 666 0 0 c 1 3
+nod /dev/zero 666 0 0 c 1 5
+nod /dev/random 666 0 0 c 1 8
+nod /dev/urandom 666 0 0 c 1 9
+nod /dev/tty 666 0 0 c 5 0
+nod /dev/ptyp0 666 0 0 c 2 0
+dir /dev/pts 755 0 0
+nod /dev/ttyp0 666 0 0 c 3 0
+nod /dev/tty0 666 0 0 c 4 0
+nod /dev/tty1 666 0 0 c 4 1
+nod /dev/tty2 666 0 0 c 4 2
+nod /dev/tty3 666 0 0 c 4 3
+nod /dev/tty4 666 0 0 c 4 4
+nod /dev/tty5 666 0 0 c 4 5
+nod /dev/tty6 666 0 0 c 4 6
+nod /dev/console 600 0 0 c 5 1
+nod /dev/ram0 777 0 0 b 1 0
+nod /dev/ram1 644 0 0 b 1 1
+nod /dev/nfs 777 0 0 b 0 255
+nod /dev/ptmx 666 0 0 c 5 2
+nod /dev/ttyS0 755 0 0 c 4 64
+nod /dev/ttyJ0 755 0 0 c 204 186
+nod /dev/ttyAL0 755 0 0 c 204 213
+nod /dev/ttyUSB0 664 0 0 c 188 0
+nod /dev/psaux 640 0 0 c 10 1
+nod /dev/rtc0 640 0 0 c 254 0
+nod /dev/dsp 664 0 0 c 14 3
+nod /dev/mixer 664 0 0 c 14 0
+dir /dev/snd 755 0 0
+nod /dev/snd/controlC0 664 0 0 c 116 0
+nod /dev/snd/pcmC0D0c 664 0 0 c 116 24
+nod /dev/snd/pcmC0D0p 664 0 0 c 116 16
+nod /dev/snd/timer 664 0 0 c 116 33
+nod /dev/i2c-0 664 0 0 c 89 0
+nod /dev/spi 664 0 0 c 252 0
+nod /dev/input/event0 664 0 0 c 13 64
+nod /dev/usb/mouse0 664 0 0 c 180 16
+nod /dev/ppi0 664 0 0 c 241 0
+nod /dev/time 664 0 0 c 10 101
+nod /dev/watchdog 664 0 0 c 10 130
+nod /dev/sda 640 0 0 b 8 0
+nod /dev/sda1 640 0 0 b 8 1
+nod /dev/sda2 640 0 0 b 8 2
+nod /dev/sda3 640 0 0 b 8 3
+nod /dev/sda4 640 0 0 b 8 4
+nod /dev/sda5 640 0 0 b 8 5
+nod /dev/sda6 640 0 0 b 8 6
+nod /dev/sda7 640 0 0 b 8 7
+nod /dev/sda8 640 0 0 b 8 8
+nod /dev/sda9 640 0 0 b 8 9
+nod /dev/sda10 640 0 0 b 8 10
+nod /dev/sda11 640 0 0 b 8 11
+nod /dev/sda12 640 0 0 b 8 12
+nod /dev/sda13 640 0 0 b 8 13
+nod /dev/sda14 640 0 0 b 8 14
+nod /dev/sda15 640 0 0 b 8 15
+nod /dev/sg0 640 0 0 c 21 0
+nod /dev/mmcblk0 640 0 0 b 179 0
+nod /dev/mmcblk0p1 640 0 0 b 179 1
+nod /dev/mmcblk0p2 640 0 0 b 179 2
+nod /dev/mmcblk0p3 640 0 0 b 179 3
+slink /init /sbin/init 0755 0 0

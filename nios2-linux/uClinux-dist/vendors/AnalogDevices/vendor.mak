@@ -1,0 +1,490 @@
+############################################################################
+#
+# Allow people to quickly sync their staging directory with the actual
+# toolchain as this will allow them to transparently build external apps
+# against libraries from uClinux-dist.  Maybe hook in tools/autotools.mk to
+# mung pkgconfig/-config/*.la/etc... paths ?
+#
+
+SYSROOT_LIBDIR = $(shell $(CONFIGURE_HOST)-gcc $(CPUFLAGS) -print-file-name=libc.a | sed 's:/usr/lib/libc.a$$::')
+SYSROOT_BINDIR = $(dir $(shell which $(CONFIGURE_HOST)-gccbug))
+SYSROOT_PKGCFG = $(SYSROOT_BINDIR)/$(CONFIGURE_HOST)-pkg-config
+vendor_staging_install:
+ifeq ($(SYSROOT_LIBDIR),)
+	@echo "SYSROOT_LIBDIR is not set -- toolchain problem ?"
+	@false
+else
+	cp -a $(STAGEDIR)/* $(SYSROOT_LIBDIR)/
+
+	cp $(ROOTDIR)/tools/cross-pkg-config $(SYSROOT_PKGCFG)
+	$(SYSROOT_PKGCFG) --cross-pkg-config-install $(SYSROOT_LIBDIR)
+
+	$(ROOTDIR)/tools/cross-fix-root $(SYSROOT_LIBDIR) $(SYSROOT_BINDIR) $(CONFIGURE_HOST)-
+endif
+
+############################################################################
+#
+# Copy the FDPIC ELF and Shared FLAT libraries as requested/needed according
+# to the user configuration options
+#
+
+CROSS_COMPILE_SHARED_ELF  ?= $(CROSS_COMPILE)
+CROSS_COMPILE_SHARED_FLAT ?= $(CROSS_COMPILE)
+romfs.shared.libs:
+ifeq ($(CONFIG_INSTALL_ELF_SHARED_LIBS),y)
+	set -e; \
+	t=`$(CROSS_COMPILE_SHARED_ELF)gcc $(CPUFLAGS) -print-file-name=libc.a`; \
+	t=`dirname $$t`/../..; \
+	for i in $$t/lib/*so*; do \
+		i=`readlink -f "$$i"`; \
+		soname=`$(CROSS_COMPILE_SHARED_ELF)readelf -d "$$i" | sed -n '/(SONAME)/s:.*[[]\(.*\)[]].*:\1:p'`; \
+		case $${i##*/} in \
+			libthread_db*) opts="-S";; \
+			*) opts="";; \
+		esac; \
+		$(ROMFSINST) $$opts -d -p 755 $$i /lib/$$soname; \
+	done; \
+	if [ "$(CONFIG_INSTALL_ELF_TRIM_LIBS)" = "y" ] ; then \
+		$(ROOTDIR)/vendors/AnalogDevices/trim-libs.sh; \
+	fi; \
+	if type $(CROSS_COMPILE_SHARED_ELF)ldconfig >/dev/null 2>&1; then \
+		$(CROSS_COMPILE_SHARED_ELF)ldconfig -r $(ROMFSDIR); \
+	fi
+endif
+ifeq ($(CONFIG_INSTALL_FLAT_SHARED_LIBS),y)
+	set -e; \
+	t=`$(CROSS_COMPILE_SHARED_FLAT)gcc $(CPUFLAGS) -mid-shared-library -print-file-name=libc`; \
+	if [ -f $$t -a ! -h $$t ] ; then \
+		$(ROMFSINST) -p 755 $$t /lib/lib1.so; \
+	fi
+endif
+
+############################################################################
+#
+# Random helper targets
+#
+
+ifeq ($(CONFIG_USER_LOGIN_LOGIN)$(CONFIG_USER_BUSYBOX_LOGIN),)
+LOGIN_SHELL = -/bin/sh
+else
+LOGIN_SHELL = /bin/login -f root
+endif
+romfs.config.shells:
+	$(ROMFSINST) -E CONFIG_USER_INIT_CONSOLE_SH -a "console:linux:$(LOGIN_SHELL)" /etc/inittab
+	$(ROMFSINST) -e CONFIG_VT -a "tty0:linux:$(LOGIN_SHELL)" /etc/inittab
+
+############################################################################
+#
+# File system targets
+#
+
+IMAGE_ROMFS_BASE = $(IMAGEDIR)/rootfs
+
+.PHONY: image.rootfs.cramfs image.rootfs.cramfs.force
+MKFS_CRAMFS_FLAGS ?= -z
+image.rootfs.cramfs.force:
+	$(MKFS_CRAMFS) $(MKFS_CRAMFS_FLAGS) -D $(DEVICE_TABLE) $(ROMFSDIR) $(IMAGE_ROMFS_BASE).cramfs
+ifeq ($(CONFIG_CRAMFS),y)
+image.rootfs.cramfs: image.rootfs.cramfs.force
+endif
+
+.PHONY: image.rootfs.ext2 image.rootfs.ext2.force
+EXT2_BLOCKS ?= 8192 # Blocks must be a multiple of 1024
+EXT2_INODES ?= 1024
+MKFS_EXT2_FLAGS ?= -m 0 -i $(EXT2_INODES) -b $(EXT2_BLOCKS)
+image.rootfs.ext2.force:
+	$(MKFS_EXT2) $(MKFS_EXT2_FLAGS) -d $(ROMFSDIR) -D $(DEVICE_TABLE) $(IMAGE_ROMFS_BASE).ext2
+ifeq ($(CONFIG_EXT2_FS),y)
+image.rootfs.ext2: image.rootfs.ext2.force
+endif
+
+.PHONY: image.rootfs.initramfs image.rootfs.initramfs.force
+image.rootfs.initramfs.force:
+	/bin/bash $(ROOTDIR)/$(LINUXSRC)/scripts/gen_initramfs_list.sh -u squash -g squash $(ROMFSDIR) > $(IMAGE_ROMFS_BASE).initramfs.contents
+	awk -f $(ROOTDIR)/tools/dev-table-to-cpio.awk $(DEVICE_TABLE) >> $(IMAGE_ROMFS_BASE).initramfs.contents
+	echo "slink /init /sbin/init 0755 0 0" >> $(IMAGE_ROMFS_BASE).initramfs.contents
+	$(ROOTDIR)/$(LINUXDIR)/usr/gen_init_cpio $(IMAGE_ROMFS_BASE).initramfs.contents > $(IMAGE_ROMFS_BASE).initramfs
+ifneq ($(CONFIG_MTD_UCLINUX),y)
+ifeq ($(CONFIG_BLK_DEV_INITRD),y)
+image.rootfs.initramfs: image.rootfs.initramfs.force
+endif
+endif
+
+.PHONY: image.rootfs.initramfs.bz2 image.rootfs.initramfs.bz2.force
+image.rootfs.initramfs.bz2.force: image.rootfs.initramfs.force
+	bzip2 -c -9 $(IMAGE_ROMFS_BASE).initramfs > $(IMAGE_ROMFS_BASE).initramfs.bz2
+ifeq ($(CONFIG_RD_BZIP2),y)
+image.rootfs.initramfs.bz2: image.rootfs.initramfs.bz2.force
+endif
+
+.PHONY: image.rootfs.initramfs.gz image.rootfs.initramfs.gz.force
+image.rootfs.initramfs.gz.force: image.rootfs.initramfs.force
+	gzip -c -9 $(IMAGE_ROMFS_BASE).initramfs > $(IMAGE_ROMFS_BASE).initramfs.gz
+ifeq ($(CONFIG_RD_GZIP),y)
+image.rootfs.initramfs.gz: image.rootfs.initramfs.gz.force
+endif
+
+.PHONY: image.rootfs.initramfs.lzma image.rootfs.initramfs.lzma.force
+image.rootfs.initramfs.lzma.force: image.rootfs.initramfs.force
+	lzma -c -9 $(IMAGE_ROMFS_BASE).initramfs > $(IMAGE_ROMFS_BASE).initramfs.lzma
+ifeq ($(CONFIG_RD_LZMA),y)
+image.rootfs.initramfs.lzma: image.rootfs.initramfs.lzma.force
+endif
+
+.PHONY: image.rootfs.initramfs.lzo image.rootfs.initramfs.lzo.force
+image.rootfs.initramfs.lzo.force: image.rootfs.initramfs.force
+	lzop -c -9 $(IMAGE_ROMFS_BASE).initramfs > $(IMAGE_ROMFS_BASE).initramfs.lzo
+ifeq ($(CONFIG_RD_LZO),y)
+image.rootfs.initramfs.lzo: image.rootfs.initramfs.lzo.force
+endif
+
+.PHONY: image.rootfs.jffs2 image.rootfs.jffs2.force
+MKFS_JFFS2_FLAGS ?= -l -p
+image.rootfs.jffs2.force:
+	$(MKFS_JFFS2) $(MKFS_JFFS2_FLAGS) -d $(ROMFSDIR) -D $(DEVICE_TABLE) -o $(IMAGE_ROMFS_BASE).jffs2
+ifeq ($(CONFIG_JFFS2_FS),y)
+image.rootfs.jffs2: image.rootfs.jffs2.force
+endif
+
+.PHONY: image.rootfs-summary.jffs2 image.rootfs-summary.jffs2.force
+MTD_SUMTOOL_FLAGS ?= -l -p
+image.rootfs-summary.jffs2.force:
+	$(MTD_SUMTOOL) $(MTD_SUMTOOL_FLAGS) -i $(IMAGE_ROMFS_BASE).jffs2 -o $(IMAGE_ROMFS_BASE)-summary.jffs2
+ifeq ($(CONFIG_JFFS2_SUMMARY),y)
+image.rootfs-summary.jffs2: image.rootfs-summary.jffs2.force 
+endif
+
+.PHONY: image.rootfs.romfs image.rootfs.romfs.force 
+MKFS_ROMFS_FLAGS ?=
+image.rootfs.romfs.force:
+	set -e ; \
+	$(ROOTDIR)/tools/mkdevdir-genromfs.sh $(ROMFSDIR) $(DEVICE_TABLE); \
+	$(MKFS_ROMFS) $(MKFS_ROMFS_FLAGS) -f $(IMAGE_ROMFS_BASE).romfs -d $(ROMFSDIR); \
+	rm -rf $(ROMFSDIR)/dev/*
+ifeq ($(CONFIG_ROMFS_FS),y)
+image.rootfs.romfs: image.rootfs.romfs.force
+endif
+
+.PHONY: image.rootfs.squashfs image.rootfs.squashfs.force
+MKFS_SQUASHFS_FLAGS ?= -all-root -noappend
+image.rootfs.squashfs.force:
+	$(MKFS_SQUASHFS) $(ROMFSDIR) $(IMAGE_ROMFS_BASE).squashfs $(MKFS_SQUASHFS_FLAGS) -pf $(DEVICE_TABLE)
+ifeq ($(CONFIG_SQUASHFS),y)
+image.rootfs.squashfs: image.rootfs.squashfs.force
+endif
+
+.PHONY: image.rootfs.ubifs image.rootfs.ubifs.force
+UBIFS_MIN_IO_SIZE ?= 2048
+UBIFS_LEB_SIZE    ?= 204800
+UBIFS_MAX_LEB_CNT ?= 1024
+MKFS_UBIFS_FLAGS ?= --squash-uids -m $(UBIFS_MIN_IO_SIZE) -e $(UBIFS_LEB_SIZE) -c $(UBIFS_MAX_LEB_CNT)
+image.rootfs.ubifs.force:
+	$(MKFS_UBIFS) $(MKFS_UBIFS_FLAGS) -d $(ROMFSDIR) -D $(DEVICE_TABLE) -o $(IMAGE_ROMFS_BASE).ubifs
+ifeq ($(CONFIG_UBIFS_FS),y)
+image.rootfs.ubifs: image.rootfs.ubifs.force
+endif
+
+.PHONY: image.rootfs.yaffs image.rootfs.yaffs.force
+MKFS_YAFFS_FLAGS ?=
+image.rootfs.yaffs.force:
+	$(MKFS_YAFFS) $(MKFS_YAFFS_FLAGS) $(ROMFSDIR) $(IMAGE_ROMFS_BASE).yaffs > /dev/null
+ifeq ($(CONFIG_YAFFS_FS),y)
+image.rootfs.yaffs: image.rootfs.yaffs.force
+endif
+
+.PHONY: image.rootfs.yaffs2 image.rootfs.yaffs2.force
+MKFS_YAFFS2_FLAGS ?=
+image.rootfs.yaffs2.force:
+	$(MKFS_YAFFS2) $(MKFS_YAFFS2_FLAGS) $(ROMFSDIR) $(IMAGE_ROMFS_BASE).yaffs2 > /dev/null
+ifeq ($(CONFIG_YAFFS_FS),y)
+image.rootfs.yaffs2: image.rootfs.yaffs2.force
+endif
+
+.PHONY: image.rootfs.all
+image.rootfs.all: \
+	image.rootfs.cramfs \
+	image.rootfs.ext2 \
+	image.rootfs.initramfs \
+	image.rootfs.initramfs.bz2 \
+	image.rootfs.initramfs.gz \
+	image.rootfs.initramfs.lzma \
+	image.rootfs.initramfs.lzo \
+	image.rootfs.jffs2 \
+	image.rootfs-summary.jffs2 \
+	image.rootfs.romfs \
+	image.rootfs.squashfs \
+	image.rootfs.ubifs \
+	image.rootfs.yaffs \
+	image.rootfs.yaffs2
+
+############################################################################
+#
+# Kernel targets (ELF)
+#
+
+SOURCE_KERNEL     = $(ROOTDIR)/$(LINUXDIR)/vmlinux
+IMAGE_KERNEL      = $(IMAGEDIR)/vmlinux
+IMAGE_KERNEL_BASE = $(IMAGEDIR)/linux
+GET_KERNEL_SYMBOL = $(READELF) -s $(SOURCE_KERNEL) | awk '$$NF == "$(1)" {print "0x"$$2}'
+ROMFS_ADDR        = $$($(call GET_KERNEL_SYMBOL,__end))
+MAKE_KERNEL       = CPPFLAGS="" CFLAGS="" LDFLAGS="" $(MAKEARCH_KERNEL) -j$(HOST_NCPU) -C $(ROOTDIR)/$(LINUXSRC)
+MAKE_KERNEL_ROMFS = \
+	$(OBJCOPY) --add-section .romfs=$(IMAGE_ROMFS_BASE).$(1) \
+		--adjust-section-vma .romfs=$(ROMFS_ADDR) --no-adjust-warnings \
+		--set-section-flags .romfs=alloc,load,data $(IMAGE_KERNEL) $(IMAGE_KERNEL_BASE).$(1)
+
+.PHONY: image.kernel.cramfs image.kernel.cramfs.force
+image.kernel.cramfs.force: image.kernel.vmlinux
+	$(call MAKE_KERNEL_ROMFS,cramfs)
+ifeq ($(CONFIG_CRAMFS),y)
+image.kernel.cramfs: image.kernel.cramfs.force
+endif
+
+.PHONY: image.kernel.ext2 image.kernel.ext2.force
+image.kernel.ext2.force: image.kernel.vmlinux
+	$(call MAKE_KERNEL_ROMFS,ext2)
+ifeq ($(CONFIG_EXT2_FS),y)
+image.kernel.ext2: image.kernel.ext2.force
+endif
+
+.PHONY: image.kernel.romfs image.kernel.romfs.force
+image.kernel.romfs.force: image.kernel.vmlinux
+	$(call MAKE_KERNEL_ROMFS,romfs)
+ifeq ($(CONFIG_ROMFS_FS),y)
+image.kernel.romfs: image.kernel.romfs.force
+endif
+
+.PHONY: image.kernel.vmlinux image.kernel.vmlinux.force
+image.kernel.vmlinux.force:
+	rm -f $(ROOTDIR)/$(LINUXDIR)/usr/initramfs_data.cpio
+	$(MAKE_KERNEL) vmlinux vmImage
+$(SOURCE_KERNEL):
+	$(MAKE) image.kernel.vmlinux.force
+$(IMAGE_KERNEL): $(SOURCE_KERNEL)
+	# only rebuild bare kernel images if needed
+	if test $$($(CROSS_COMPILE)size $(ROOTDIR)/$(LINUXDIR)/usr/initramfs_data.o | sed 1d | awk '{print $$1}') -gt 512 ; then \
+		$(MAKE) image.kernel.vmlinux.force || exit $$? ; \
+	fi
+	cp $< $@
+	$(STRIP) -g $@
+image.kernel.vmlinux: $(IMAGE_KERNEL)
+
+.PHONY: image.kernel.all
+ifeq ($(CONFIG_MTD_UCLINUX),y)
+image.kernel.all: \
+	image.kernel.cramfs \
+	image.kernel.ext2 \
+	image.kernel.romfs
+image.kernel.all:
+# create default "linux" symlink
+	for fs in cramfs ext2 romfs ; do \
+		if [ -e "$(IMAGE_KERNEL_BASE).$$fs" ] ; then \
+			ln -sf "linux.$$fs" "$(IMAGE_KERNEL_BASE)" ; \
+		fi ; \
+	done
+endif
+image.kernel.all: \
+	image.kernel.vmlinux
+
+############################################################################
+#
+# Kernel targets (uImage/zImage)
+#
+
+LINUXBOOTDIR = $(ROOTDIR)/$(LINUXDIR)/arch/$(ARCH)/boot
+IMAGE_UIMAGE_BASE = $(IMAGEDIR)/uImage
+KERNEL_ENTRY = $$($(call GET_KERNEL_SYMBOL,__start))
+MAKE_UIMAGE_ROMFS = \
+	set -e; \
+	$(OBJCOPY) -O binary -S $(IMAGE_KERNEL_BASE).$(1) $(IMAGE_KERNEL_BASE).bin; \
+	gzip -f9 $(IMAGE_KERNEL_BASE).bin; \
+	$(MKIMAGE) -A $(ARCH) -O linux -T kernel \
+		-C gzip -a $(CONFIG_BOOT_LOAD) -e $(call KERNEL_ENTRY,$(1)) -n "Linux Kernel and $(1)" \
+		-d $(IMAGE_KERNEL_BASE).bin.gz $(IMAGE_UIMAGE_BASE).$(1); \
+	rm $(IMAGE_KERNEL_BASE).bin.gz
+
+.PHONY: image.uimage.cramfs image.uimage.cramfs.force
+image.uimage.cramfs.force:
+	$(call MAKE_UIMAGE_ROMFS,cramfs)
+ifeq ($(CONFIG_CRAMFS),y)
+image.uimage.cramfs: image.uimage.cramfs.force
+endif
+
+.PHONY: image.uimage.ext2 image.uimage.ext2.force
+image.uimage.ext2.force:
+	$(call MAKE_UIMAGE_ROMFS,ext2)
+ifeq ($(CONFIG_EXT2_FS),y)
+image.uimage.ext2: image.uimage.ext2.force
+endif
+
+define MAKE_KERNEL_IMAGE
+	cp $(IMAGE_ROMFS_BASE).initramfs$(COMP_ROOTFS) $(ROOTDIR)/$(LINUXDIR)/usr/initramfs_data.cpio
+	$(MAKE_KERNEL) $(1)$(COMP_KERN)
+	cp $(LINUXBOOTDIR)/$(1)$(COMP_KERN) $(IMAGEDIR)/$(2)$(COMP_KERN).initramfs$(COMP_ROOTFS)
+	cp $(ROOTDIR)/$(LINUXDIR)/System.map $(IMAGEDIR)/System.map$(COMP_KERN).initramfs$(COMP_ROOTFS)
+	cp $(SOURCE_KERNEL) $(IMAGE_KERNEL_BASE).initramfs$(COMP_ROOTFS)
+	$(STRIP) -g $(IMAGE_KERNEL_BASE).initramfs$(COMP_ROOTFS)
+	ln -sf $(2)$(COMP_KERN).initramfs$(COMP_ROOTFS) $(IMAGEDIR)/$(2)
+endef
+
+.PHONY: image.zimage.initramfs image.zimage.initramfs.force
+image.zimage.initramfs.force:
+	$(call MAKE_KERNEL_IMAGE,zImage,zImage)
+	$(STRIP) -g $(IMAGEDIR)/zImage$(COMP_KERN).initramfs$(COMP_ROOTFS)
+
+.PHONY: image.zimage.initramfs.bz2 image.zimage.initramfs.bz2.force
+image.zimage.initramfs.bz2.force:
+	$(MAKE) image.zimage.initramfs.force COMP_KERN= COMP_ROOTFS=.bz2
+ifeq ($(CONFIG_RD_BZIP2),y)
+image.zimage.initramfs.bz2: image.zimage.initramfs.bz2.force
+endif
+
+.PHONY: image.zimage.initramfs.gz image.zimage.initramfs.gz.force
+image.zimage.initramfs.gz.force:
+	$(MAKE) image.zimage.initramfs.force COMP_KERN= COMP_ROOTFS=.gz
+ifeq ($(CONFIG_RD_GZIP),y)
+image.zimage.initramfs.gz: image.zimage.initramfs.gz.force
+endif
+
+.PHONY: image.zimage.initramfs.lzma image.zimage.initramfs.lzma.force
+image.zimage.initramfs.lzma.force:
+	$(MAKE) image.zimage.initramfs.force COMP_KERN= COMP_ROOTFS=.lzma
+ifeq ($(CONFIG_RD_LZMA),y)
+image.zimage.initramfs.lzma: image.zimage.initramfs.lzma.force
+endif
+
+.PHONY: image.zimage.initramfs.lzo image.zimage.initramfs.lzo.force
+image.zimage.initramfs.lzo.force:
+	$(MAKE) image.zimage.initramfs.force COMP_KERN= COMP_ROOTFS=.lzo
+ifeq ($(CONFIG_RD_LZO),y)
+image.zimage.initramfs.lzo: image.zimage.initramfs.lzo.force
+endif
+
+.PHONY: image.uimage.initramfs image.uimage.initramfs.force
+image.uimage.initramfs.force:
+	$(call MAKE_KERNEL_IMAGE,vmImage,uImage)
+
+.PHONY: image.uimage.bz2.initramfs image.uimage.bz2.initramfs.force
+image.uimage.bz2.initramfs.force:
+	$(MAKE) image.uimage.initramfs.force COMP_KERN=.bz2 COMP_ROOTFS=
+ifeq ($(CONFIG_KERNEL_BZIP2),y)
+image.uimage.bz2.initramfs: image.uimage.bz2.initramfs.force
+endif
+
+.PHONY: image.uimage.gz.initramfs image.uimage.gz.initramfs.force
+image.uimage.gz.initramfs.force:
+	$(MAKE) image.uimage.initramfs.force COMP_KERN=.gz COMP_ROOTFS=
+ifeq ($(CONFIG_KERNEL_GZIP),y)
+image.uimage.gz.initramfs: image.uimage.gz.initramfs.force
+endif
+
+.PHONY: image.uimage.lzma.initramfs image.uimage.lzma.initramfs.force
+image.uimage.lzma.initramfs.force:
+	$(MAKE) image.uimage.initramfs.force COMP_KERN=.lzma COMP_ROOTFS=
+ifeq ($(CONFIG_KERNEL_LZMA),y)
+image.uimage.lzma.initramfs: image.uimage.lzma.initramfs.force
+endif
+
+.PHONY: image.uimage.lzo.initramfs image.uimage.lzo.initramfs.force
+image.uimage.lzo.initramfs.force:
+	$(MAKE) image.uimage.initramfs.force COMP_KERN=.lzo COMP_ROOTFS=
+ifeq ($(CONFIG_KERNEL_LZO),y)
+image.uimage.lzo.initramfs: image.uimage.lzo.initramfs.force
+endif
+
+.PHONY: image.uimage.initramfs.bz2 image.uimage.initramfs.bz2.force
+image.uimage.initramfs.bz2.force:
+	$(MAKE) image.uimage.initramfs.force COMP_KERN= COMP_ROOTFS=.bz2
+ifeq ($(CONFIG_RD_BZIP2),y)
+image.uimage.initramfs.bz2: image.uimage.initramfs.bz2.force
+endif
+
+.PHONY: image.uimage.initramfs.gz image.uimage.initramfs.gz.force
+image.uimage.initramfs.gz.force:
+	$(MAKE) image.uimage.initramfs.force COMP_KERN= COMP_ROOTFS=.gz
+ifeq ($(CONFIG_RD_GZIP),y)
+image.uimage.initramfs.gz: image.uimage.initramfs.gz.force
+endif
+
+.PHONY: image.uimage.initramfs.lzma image.uimage.initramfs.lzma.force
+image.uimage.initramfs.lzma.force:
+	$(MAKE) image.uimage.initramfs.force COMP_KERN= COMP_ROOTFS=.lzma
+ifeq ($(CONFIG_RD_LZMA),y)
+image.uimage.initramfs.lzma: image.uimage.initramfs.lzma.force
+endif
+
+.PHONY: image.uimage.initramfs.lzo image.uimage.initramfs.lzo.force
+image.uimage.initramfs.lzo.force:
+	$(MAKE) image.uimage.initramfs.force COMP_KERN= COMP_ROOTFS=.lzo
+ifeq ($(CONFIG_RD_LZO),y)
+image.uimage.initramfs.lzo: image.uimage.initramfs.lzo.force
+endif
+
+.PHONY: image.uimage.romfs image.uimage.romfs.force
+image.uimage.romfs.force:
+	$(call MAKE_UIMAGE_ROMFS,romfs)
+ifeq ($(CONFIG_ROMFS_FS),y)
+image.uimage.romfs: image.uimage.romfs.force
+endif
+
+# this should be handled by the kernel build already ...
+# but in case something failed, let's help the user out
+$(LINUXBOOTDIR)/vmImage:
+	@printf "\nYour kernel directory '$(LINUXDIR)' lacks a vmImage file:\n"; \
+	 printf "\t$@\n"; \
+	 printf "This usually means your toolchain lacks u-boot tools.  Please check your\n"; \
+	 printf "toolchain installation.  The file is generated when running 'make linux'.\n\n"; \
+	 false
+
+.PHONY: image.uimage.vmimage
+$(IMAGEDIR)/vmImage: $(LINUXBOOTDIR)/vmImage $(IMAGE_KERNEL)
+	cp $< $@
+image.uimage.vmimage: $(IMAGEDIR)/vmImage
+
+.PHONY: image.uimage.all
+image.uimage.all: \
+	image.uimage.vmimage
+ifeq ($(CONFIG_MTD_UCLINUX),y)
+image.uimage.all: \
+	image.uimage.cramfs \
+	image.uimage.ext2 \
+	image.uimage.romfs
+image.uimage.all:
+# create default "uImage" symlink
+	for fs in cramfs ext2 romfs ; do \
+		if [ -e "$(IMAGE_UIMAGE_BASE).$$fs" ] ; then \
+			ln -sf "uImage.$$fs" "$(IMAGE_UIMAGE_BASE)" ; \
+		fi ; \
+	done
+else
+ifeq ($(CONFIG_BLK_DEV_INITRD),y)
+image.uimage.all: \
+	image.uimage.initramfs \
+	image.uimage.bz2.initramfs \
+	image.uimage.gz.initramfs \
+	image.uimage.lzma.initramfs \
+	image.uimage.lzo.initramfs
+image.zimage.all: \
+	image.zimage.initramfs \
+	image.zimage.initramfs.bz2 \
+	image.zimage.initramfs.gz \
+	image.zimage.initramfs.lzma \
+	image.zimage.initramfs.lzo
+endif
+endif
+
+############################################################################
+#
+# Allow people to hit any of these vendor targets via "vendor_" prefix
+#
+
+vendor_%:
+	$(MAKE) $(patsubst vendor_%,%,$@)
+
+############################################################################
+#
+# Allow people to create custom rules in vendor/AnalogDevices/<board>/
+# without having to change the Makefile in the dist
+#
+
+-include Makefile.local

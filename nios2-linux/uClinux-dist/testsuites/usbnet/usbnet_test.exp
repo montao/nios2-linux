@@ -1,0 +1,194 @@
+#!/usr/bin/expect
+
+#
+# This usbnet test script is for BF561-EZKIT and BF537-STAMP boards
+# A auto test case with Linux PC
+#
+
+source  ../kernel_config.exp
+log_file [log_file_name "$argv0"]
+send_user "Starting $argv0\n"
+
+set TITLE [title "$argv0"]
+
+step "Spawn kermit"
+source ../spawn_kermit.exp
+
+step "Reboot the kernel."
+# To add following line here to indicate that if the bootargs is different,
+# it could be set here. If the bootargs value is 0, it needn't be stated,
+# for it is the default value.
+# set bootargs  $bootargs_param0
+source ../reboot_kernel.exp
+
+step "Start testing."
+set case_num 0
+set count 5
+set boardip 192.168.7.1
+set hostip 192.168.7.2
+
+sleep 5
+send "\r"
+expect ">"
+
+incr case_num
+set timeout 5
+send "dmesg|grep net2272\r"
+while 1 {
+    expect {
+        -re "net2272: version.*$kernel_prompt" {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+incr case_num
+set timeout 5
+send "ifconfig -a\r"
+while 1 {
+    expect {
+        -re "usb0.*$kernel_prompt" {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+incr case_num
+set timeout 5
+send "ifconfig usb0 $boardip\r"
+while 1 {
+    expect {
+        -re $kernel_prompt {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+puts "**For the first time to run this case, unplug USB cable first**\r"
+puts "Connect the board to Linux Host PC with a USB cable!\r"
+set timeout 60
+while 1 {
+    expect {
+        -re "usb0: high speed config #1: 100 mA, Ethernet Gadget, using CDC Ethernet" {
+            break
+        }
+        timeout {
+            break
+        }
+    }
+}
+
+#config Linux host pc
+spawn /bin/bash
+set shell_spawn_id $spawn_id
+
+
+sleep 2
+incr case_num
+set timeout 15
+send "su\r"
+while 1 {
+    expect {
+        -re "\[pP]assword:" {
+            sleep 1
+            send "$password\r"
+            continue
+        }
+        -re "\[eE]rror|\[fF]ail" {
+            case_fail $case_num
+        }
+        -re "#" {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+incr case_num
+set timeout 10
+send "ifconfig -a\r"
+while 1 {
+    expect {
+        -re "usb0.*#" {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+incr case_num
+set timeout 5
+send "ifconfig usb0 $hostip\r"
+while 1 {
+    expect {
+        -re "#" {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+sleep 2
+incr case_num
+set timeout 20
+send "ping $boardip -c $count\r"
+while 1 {
+    expect {
+        -re "$count packets transmitted, $count received, 0% packet loss.*#" {
+            send_user "Ping from Linux host pc to board pass!\r"
+            case_pass $case_num
+            break
+        }
+        timeout {
+            send_user "Ping from Linux host pc to board failed!\r"
+            case_fail $case_num
+        }
+    }
+}
+
+set spawn_id $kermit_spawn_id
+
+incr case_num
+set timeout 20
+send "ping $hostip -c $count\r"
+while 1 {
+    expect {
+        -re "$count packets transmitted, $count packets received, 0% packet loss.*$kernel_prompt" {
+            send_user "Ping from board to host pc pass!\r"
+            case_pass $case_num
+            break
+        }
+        timeout {
+            send_user "Ping from board to host pc failed!\r"
+            case_fail $case_num
+        }
+    }
+}
+
+send_log "\n"
+send_log "\n$TITLE ............\[PASS\]\n" 
+
+send_user "Ending $argv0\n"
+
+log_file

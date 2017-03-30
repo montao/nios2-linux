@@ -1,0 +1,3 @@
+brctl_cmd.c: In function 'br_cmd_show':
+brctl_cmd.c:241: warning: implicit declaration of function 'br_make_bridge_list'
+brctl_cmd.c:257: warning: implicit declaration of function 'br_nuke_bridge'

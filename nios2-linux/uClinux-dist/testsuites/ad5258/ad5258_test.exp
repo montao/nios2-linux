@@ -1,0 +1,124 @@
+#!/usr/bin/expect
+
+source  ../kernel_config.exp
+log_file [log_file_name "$argv0"]
+send_user "Starting $argv0\n"
+set TITLE [title "$argv0"]
+
+step "Spawn kermit"
+source ../spawn_kermit.exp
+
+step "Reboot the kernel."
+# To add following line here to indicate that if the bootargs is different,
+# it could be set here. If the bootargs value is 0, it needn't be stated,
+# for it is the default value.
+# set bootargs  $bootargs_param0
+source ../reboot_kernel.exp
+
+step "Start testing."
+set case_num 0
+sleep 5
+
+set timeout 8
+incr case_num
+send "ls /sys/bus/i2c/devices\r"
+while 1 {
+    expect {
+        -re "(\[0-9]-0018).*$kernel_prompt" {
+            set subfolder $expect_out(1,string)
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+incr case_num
+send "cat /sys/bus/i2c/devices/$subfolder/eeprom0\r"
+while 1 {
+    expect {
+        -re "\[0-9]+.*$kernel_prompt" {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+incr case_num
+send "echo 32 > /sys/bus/i2c/devices/$subfolder/eeprom0\r"
+while 1 {
+    expect {
+        -re $kernel_prompt {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+incr case_num
+send "cat /sys/bus/i2c/devices/$subfolder/eeprom0\r"
+while 1 {
+    expect {
+        -re "32.*$kernel_prompt" {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+incr case_num
+send "cat /sys/bus/i2c/devices/$subfolder/rdac0\r"
+while 1 {
+    expect {
+        -re "\[0-9]+.*$kernel_prompt" {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+incr case_num
+send "echo 30 > /sys/bus/i2c/devices/$subfolder/rdac0\r"
+while 1 {
+    expect {
+        -re $kernel_prompt {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+incr case_num
+send "cat /sys/bus/i2c/devices/$subfolder/rdac0\r"
+while 1 {
+    expect {
+        -re "30.*$kernel_prompt" {
+            case_pass $case_num
+            break
+        }
+        timeout {
+            case_fail $case_num
+        }
+    }
+}
+
+all_pass
+send_user "Ending $argv0\n"
+log_file

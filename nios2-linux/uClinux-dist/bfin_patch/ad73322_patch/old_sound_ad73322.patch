@@ -1,0 +1,2581 @@
+Index: sound/Kconfig
+===================================================================
+--- sound/Kconfig	(revision 9081)
++++ sound/Kconfig	(working copy)
+@@ -107,6 +107,8 @@
+ 
+ source "sound/soc/Kconfig"
+ 
++source "sound/blackfin/Kconfig"
++
+ endif # SND
+ 
+ menuconfig SOUND_PRIME
+Index: sound/Makefile
+===================================================================
+--- sound/Makefile	(revision 9081)
++++ sound/Makefile	(working copy)
+@@ -6,7 +6,7 @@
+ obj-$(CONFIG_SOUND_PRIME) += oss/
+ obj-$(CONFIG_DMASOUND) += oss/
+ obj-$(CONFIG_SND) += core/ i2c/ drivers/ isa/ pci/ ppc/ arm/ sh/ synth/ usb/ \
+-	firewire/ sparc/ spi/ parisc/ pcmcia/ mips/ soc/ atmel/
++	firewire/ sparc/ spi/ parisc/ pcmcia/ mips/ soc/ atmel/ blackfin/
+ obj-$(CONFIG_SND_AOA) += aoa/
+ 
+ # This one must be compilable even if sound is configured out
+Index: sound/blackfin/Kconfig
+===================================================================
+--- sound/blackfin/Kconfig	(revision 0)
++++ sound/blackfin/Kconfig	(revision 0)
+@@ -0,0 +1,51 @@
++# ALSA Blackfin drivers
++menu "ALSA Blackfin devices"
++	depends on SND && BLACKFIN
++
++config SND_BFIN_AD73322
++	tristate "Cascaded AD73322 Audio support for BF53x"
++	depends on SND && BLACKFIN
++	select SND_PCM
++	help
++	  Select this if you have AD73322 connected in cascade mode connected to SPORT ports
++
++	  To compile this driver as a module, choose M here: the
++	  module will be called snd-ad73322.
++
++	  If unsure, say N.
++
++config SND_BF5XX_SPORT_NUM
++	int "Blackfin Audio SPORT port"
++	depends on SND_BFIN_AD73322
++	default 1
++	help
++	  Enter the Blackfin SPORT port to which your sound chip is connected
++	  acceptable values are 0 ,1 or 2.
++	  Input 0 or 1 if you have one card on SPORT0 or SPORT1,
++	  Input 2 if you have two card on SPORT0 and SPORT1. 	
++
++config SND_BFIN_AD73322_SPORT0_SE
++	int "PF pin for AD73322 Chip Select on SPORT0"
++	depends on SND_BFIN_AD73322
++	default 10
++	help
++	  Enter the GPIO used to control AD73322's SE pin. Acceptable
++	  values are depend on your soundcard borad.
++
++config SND_BFIN_AD73322_SPORT1_SE
++	int "PF pin for AD73322 Chip Select on SPORT1"
++	depends on SND_BFIN_AD73322
++	default 14
++	help
++	  Enter the GPIO used to control AD73322's SE pin. Acceptable
++	  values are depend on your soundcard borad.
++
++config SND_BFIN_AD73322_RESET
++	int "PF pin for AD73322 Chip Reset"
++	depends on SND_BFIN_AD73322
++	default 12
++	help
++	  Enter the GPIO used to control AD73322's RESET pin. Acceptable
++	  values are depend on your soundcard borad.
++endmenu
++
+Index: sound/blackfin/Makefile
+===================================================================
+--- sound/blackfin/Makefile	(revision 0)
++++ sound/blackfin/Makefile	(revision 0)
+@@ -0,0 +1,7 @@
++#
++# Makefile for the blackfin 5xx sport connected ad73322
++#
++
++snd-ad73322-objs := bf5xx-sport.o ad73322.o
++
++obj-$(CONFIG_SND_BFIN_AD73322)	+= snd-ad73322.o
+Index: sound/blackfin/ad73322.c
+===================================================================
+--- sound/blackfin/ad73322.c	(revision 0)
++++ sound/blackfin/ad73322.c	(revision 0)
+@@ -0,0 +1,1082 @@
++/*
++ * File:         sound/blackfin/ad73322.c
++ * Based on:	 sound/blackfin/ad73311.c
++ * Author:       Cliff Cai <Cliff.Cai@analog.com>
++ *               Bob Liu   <lliubbo@gmail.com>
++ *
++ * Created:      Tue May 06 2008
++ * Description:  Driver for AD73322 sound chip connected to bf5xx sport
++ *
++ * Rev:          $Id: ad73322.c 4104 2008-05-06 06:51:48Z cliff $
++ *
++ * Modified:
++ *               Copyright 2008 Analog Devices Inc.
++ *
++ * Bugs:         Enter bugs at http://blackfin.uclinux.org/
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, see the file COPYING, or write
++ * to the Free Software Foundation, Inc.,
++ * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++ */
++
++/*
++ *This driver supports up to 4 AD73322 connected in cascade mode.
++ */
++
++#include <linux/init.h>
++#include <linux/slab.h>
++#include <linux/spinlock.h>
++#include <linux/dma-mapping.h>
++#include <linux/delay.h>
++#include <linux/platform_device.h>
++#include <linux/module.h>
++#include <linux/moduleparam.h>
++#include <asm/blackfin.h>
++#include <asm/cacheflush.h>
++#include <asm/irq.h>
++#include <asm/gpio.h>
++#include <sound/initval.h>
++#include <sound/core.h>
++#include <sound/pcm.h>
++#include <sound/pcm_params.h>
++
++#include "ad73322.h"
++#include "bf5xx-sport.h"
++
++#ifdef CONFIG_SND_DEBUG
++#define snd_printk_marker() snd_printk(KERN_INFO "%s\n", __FUNCTION__)
++#else
++#define snd_printk_marker()
++#endif
++
++#define _GPIO_PF_VAL(val)	(GPIO_PF##val)
++#define GPIO_PF_VAL(val)	_GPIO_PF_VAL(val)
++#define GPIO_SPORT0_SE GPIO_PF_VAL(CONFIG_SND_BFIN_AD73322_SPORT0_SE)
++#define GPIO_SPORT1_SE GPIO_PF_VAL(CONFIG_SND_BFIN_AD73322_SPORT1_SE)
++#define GPIO_RESET     GPIO_PF_VAL(CONFIG_SND_BFIN_AD73322_RESET)
++
++#if CONFIG_SND_BF5XX_SPORT_NUM == 2
++#define CARD_NUM 2
++#else
++#define CARD_NUM 1
++#if CONFIG_SND_BF5XX_SPORT_NUM == 0
++#define bfin_write_SPORT_TCR1	bfin_write_SPORT0_TCR1
++#define bfin_read_SPORT_TCR1	bfin_read_SPORT0_TCR1
++#define bfin_write_SPORT_TCR2	bfin_write_SPORT0_TCR2
++#define bfin_write_SPORT_TX16	bfin_write_SPORT0_TX16
++#define bfin_read_SPORT_STAT	bfin_read_SPORT0_STAT
++#else
++#define bfin_write_SPORT_TCR1	bfin_write_SPORT1_TCR1
++#define bfin_read_SPORT_TCR1	bfin_read_SPORT1_TCR1
++#define bfin_write_SPORT_TCR2	bfin_write_SPORT1_TCR2
++#define bfin_write_SPORT_TX16	bfin_write_SPORT1_TX16
++#define bfin_read_SPORT_STAT	bfin_read_SPORT1_STAT
++#endif
++#endif
++
++#undef CONFIG_SND_DEBUG_CURRPTR  /* causes output every frame! */
++#define AD73322_BUF_SZ 0x40000
++#define PCM_BUFFER_MAX	0x10000	 /* 64KB */
++#define FRAGMENT_SIZE_MIN	1024
++#define FRAGMENTS_MIN	2
++#define FRAGMENTS_MAX	16
++#define WORD_LENGTH	2
++
++#define DMA_PERIOD_BYTES	(FRAGMENT_SIZE_MIN * 4)
++#define DMA_PERIODS		(AD73322_BUF_SZ / DMA_PERIOD_BYTES)
++#define DMA_FRAME_BYTES		(NUM_DEVICES_CHAIN * 2)
++#define DMA_BUFFER_FRAMES	(AD73322_BUF_SZ/DMA_FRAME_BYTES)
++#define DMA_PERIOD_FRAMES	(DMA_PERIOD_BYTES/DMA_FRAME_BYTES)
++
++#define DRIVER_NAME "AD73322"
++#define CHIP_NAME "Analog Devices AD73322"
++
++static struct platform_device *device[CARD_NUM];
++static char *pcm_name[8] = { "AD73322PCM0", "AD73322PCM1", "AD73322PCM2",
++	"AD73322PCM3","AD73322PCM4", "AD73322PCM5", "AD73322PCM6", "AD73322PCM7"
++	};
++
++static unsigned int input_gain = 0x2;
++module_param(input_gain, uint, 0);
++MODULE_PARM_DESC(input_gain, "Input gain setting (0 <= input_gain <= 7)");
++
++static unsigned int output_gain = 0x2;
++module_param(output_gain, uint, 0);
++MODULE_PARM_DESC(output_gain, "Output gain setting (0 <= output_gain <= 7)");
++
++static int index[SNDRV_CARDS] = SNDRV_DEFAULT_IDX;
++module_param_array(index, int, NULL, 0444);
++MODULE_PARM_DESC(index, "Index value for the AD73322 soundcard.");
++
++static char *id[SNDRV_CARDS] = SNDRV_DEFAULT_STR;
++module_param_array(id, charp, NULL, 0444);
++MODULE_PARM_DESC(id, "ID string for the AD73322 soundcard.");
++
++static int enable[SNDRV_CARDS] = SNDRV_DEFAULT_ENABLE_PNP;
++module_param_array(enable, bool, NULL, 0444);
++MODULE_PARM_DESC(enable, "Enable AD73322 soundcard.");
++
++static void snd_ad73322_startup(int index);
++static void snd_ad73322_stop(int index);
++
++static inline int get_cap_slotindex(int index)
++{
++	int slot_index = 6;
++	switch (index) {
++		case 0:
++			slot_index = 6;
++			break;
++		case 1:
++			slot_index = 7;
++			break;
++		case 2:
++			slot_index = 4;
++			break;
++		case 3:
++			slot_index = 5;
++			break;
++		case 4:
++			slot_index = 2;
++			break;
++		case 5:
++			slot_index = 3;
++			break;
++		case 6:
++			slot_index = 0;
++			break;
++		case 7:
++			slot_index = 1;
++			break;
++	}
++	return slot_index;
++}
++
++/*************************************************************
++ *                pcm methods
++ *************************************************************/
++
++static struct snd_pcm_hardware snd_ad73322_play_hw = {
++	.info = (SNDRV_PCM_INFO_INTERLEAVED | SNDRV_PCM_INFO_BLOCK_TRANSFER
++			| SNDRV_PCM_INFO_RESUME),
++	.formats =          SNDRV_PCM_FMTBIT_S16_LE,
++	.rates =            SNDRV_PCM_RATE_8000,
++	.rate_min =         8000,
++	.rate_max =         8000,
++	.channels_min =     1,
++	.channels_max =     1,
++	.buffer_bytes_max = PCM_BUFFER_MAX,
++	.period_bytes_min = FRAGMENT_SIZE_MIN,
++	.period_bytes_max = PCM_BUFFER_MAX/2,
++	.periods_min =      FRAGMENTS_MIN,
++	.periods_max =      FRAGMENTS_MAX,
++};
++static struct snd_pcm_hardware snd_ad73322_cap_hw = {
++	.info = (SNDRV_PCM_INFO_INTERLEAVED | SNDRV_PCM_INFO_BLOCK_TRANSFER
++			| SNDRV_PCM_INFO_RESUME),
++	.formats =          SNDRV_PCM_FMTBIT_S16_LE,
++	.rates =            SNDRV_PCM_RATE_8000,
++	.rate_min =         8000,
++	.rate_max =         8000,
++	.channels_min =     1,
++	.channels_max =     1,
++	.buffer_bytes_max = PCM_BUFFER_MAX,
++	.period_bytes_min = FRAGMENT_SIZE_MIN,
++	.period_bytes_max = PCM_BUFFER_MAX/2,
++	.periods_min =      FRAGMENTS_MIN,
++	.periods_max =      FRAGMENTS_MAX,
++};
++
++static int snd_ad73322_play_open(struct snd_pcm_substream *substream)
++{
++	ad73322_t *chip = snd_pcm_substream_chip(substream);
++	int index = substream->pcm->device;
++	/*device index from 0 to 7*/
++	if (snd_BUG_ON(index < 0 || index > NUM_DEVICES_CHAIN - 1))
++		return -EINVAL;
++	snd_printk_marker();
++	substream->runtime->hw = snd_ad73322_play_hw;
++	chip->tx_substreams[index].substream = substream;
++
++	return 0;
++}
++
++static int snd_ad73322_cap_open(struct snd_pcm_substream *substream)
++{
++	ad73322_t *chip = snd_pcm_substream_chip(substream);
++	int index = substream->pcm->device;
++
++	if (snd_BUG_ON(index < 0 || index > NUM_DEVICES_CHAIN -1 ))
++		return -EINVAL;
++	snd_printk_marker();
++	substream->runtime->hw = snd_ad73322_cap_hw;
++	chip->rx_substreams[index].substream = substream;
++
++	return 0;
++}
++
++static int snd_ad73322_play_close(struct snd_pcm_substream *substream)
++{
++	ad73322_t *chip = snd_pcm_substream_chip(substream);
++	int i, slot_index;
++	int index = substream->pcm->device;
++	substream_info_t *sub_info = (substream_info_t *)&(chip->
++			tx_substreams[substream->pcm->device]);
++	slot_index = NUM_DEVICES_CHAIN-(index+1);
++	snd_printk_marker();
++	if (index >= 0 && index <= NUM_DEVICES_CHAIN - 1) {
++		sub_info->substream = NULL;
++		for (i=0; i < DMA_BUFFER_FRAMES; i++)
++			*((unsigned short *)chip->tx_dma_buf +
++					i*NUM_DEVICES_CHAIN + slot_index) = 0;
++	}
++	return 0;
++}
++
++static int snd_ad73322_cap_close(struct snd_pcm_substream *substream)
++{
++	ad73322_t *chip = snd_pcm_substream_chip(substream);
++	int slot_index, i;
++	int index = substream->pcm->device;
++	substream_info_t *sub_info = (substream_info_t *)&(chip->
++			rx_substreams[substream->pcm->device]);
++	slot_index  = get_cap_slotindex(index);
++	snd_printk_marker();
++	if (index >= 0 && index <= NUM_DEVICES_CHAIN - 1) {
++		sub_info->substream = NULL;
++		for (i=0; i < DMA_BUFFER_FRAMES; i++)
++			*((unsigned short *)chip->rx_dma_buf +
++					i*NUM_DEVICES_CHAIN + slot_index) = 0;
++	}
++	return 0;
++}
++
++static int snd_ad73322_hw_params(struct snd_pcm_substream *substream,
++		struct snd_pcm_hw_params* hwparams)
++{
++	ad73322_t *chip = snd_pcm_substream_chip(substream);
++	snd_printk_marker();
++	if (substream->stream == SNDRV_PCM_STREAM_PLAYBACK) {
++		substream->runtime->dma_area = chip->tx_dma_buf;
++		substream->runtime->dma_addr = (unsigned int)chip->tx_dma_buf;
++		substream->runtime->dma_bytes = AD73322_BUF_SZ;
++	} else {
++		substream->runtime->dma_area = chip->rx_dma_buf;
++		substream->runtime->dma_addr = (unsigned int)chip->rx_dma_buf;
++		substream->runtime->dma_bytes = AD73322_BUF_SZ;
++	}
++	return 0;
++}
++
++static int snd_ad73322_hw_free(struct snd_pcm_substream *substream)
++{
++	snd_printk_marker();
++	substream->runtime->dma_area = NULL;
++	substream->runtime->dma_addr = 0;
++	substream->runtime->dma_bytes = 0;
++
++	return 0;
++}
++
++static int snd_ad73322_play_pre(struct snd_pcm_substream *substream)
++{
++	ad73322_t *chip = snd_pcm_substream_chip(substream);
++	struct snd_pcm_runtime *runtime = substream->runtime;
++	substream_info_t *sub_info = (substream_info_t *)&(chip->
++			tx_substreams[substream->pcm->device]);
++	int index = substream->pcm->device;
++
++	if (snd_BUG_ON(index < 0 || index > NUM_DEVICES_CHAIN - 1 || !sub_info))
++		return -EINVAL;
++	sub_info->period_frames = runtime->period_size;
++	sub_info->periods = runtime->periods;
++	sub_info->buffer_frames = runtime->buffer_size;
++	sub_info->frame_bytes = runtime->frame_bits / 8;
++	sub_info->dma_inter_pos = 0;
++	sub_info->dma_last_pos = 0;
++	sub_info->dma_pos_base = 0;
++	sub_info->next_inter_pos = sub_info->period_frames;
++	sub_info->data_count = 0;
++	sub_info->data_pos_base = 0;
++	sub_info->boundary = DMA_BUFFER_FRAMES * sub_info->buffer_frames;
++
++
++	while (sub_info->boundary * 2 <= (LONG_MAX - DMA_BUFFER_FRAMES * \
++				sub_info->buffer_frames)) {
++		sub_info->boundary *= 2;
++	}
++	sub_info->dma_offset = 0;
++
++	return 0;
++}
++
++static int snd_ad73322_cap_pre(struct snd_pcm_substream *substream)
++{
++
++	ad73322_t *chip = snd_pcm_substream_chip(substream);
++	struct snd_pcm_runtime *runtime = substream->runtime;
++	substream_info_t *sub_info = (substream_info_t *)&(chip->
++			rx_substreams[substream->pcm->device]);
++	int index = substream->pcm->device;
++
++	if (snd_BUG_ON(index < 0 || index > NUM_DEVICES_CHAIN -1  || !sub_info))
++		return -EINVAL;
++	sub_info->period_frames = runtime->period_size;
++	sub_info->periods = runtime->periods;
++	sub_info->buffer_frames = runtime->buffer_size;
++	sub_info->frame_bytes = runtime->frame_bits / 8;
++	sub_info->dma_inter_pos = 0;
++	sub_info->dma_last_pos = 0;
++	sub_info->dma_pos_base = 0;
++	sub_info->next_inter_pos = sub_info->period_frames;
++	sub_info->data_count = 0;
++	sub_info->data_pos_base = 0;
++	sub_info->boundary = DMA_BUFFER_FRAMES * sub_info->buffer_frames;
++
++	while (sub_info->boundary * 2 <= (LONG_MAX - DMA_BUFFER_FRAMES * \
++				sub_info->buffer_frames)) {
++		sub_info->boundary *= 2;
++	}
++	sub_info->dma_offset = 0;
++	return 0;
++}
++
++static int snd_ad73322_play_trigger(struct snd_pcm_substream *substream,
++		int cmd)
++{
++	ad73322_t *chip = snd_pcm_substream_chip(substream);
++	substream_info_t *sub_info = (substream_info_t *)&(chip->
++			tx_substreams[substream->pcm->device]);
++	int index = substream->pcm->device;
++
++	if (snd_BUG_ON(index < 0 || index > NUM_DEVICES_CHAIN - 1 || !sub_info))
++		return -EINVAL;
++
++	spin_lock(&chip->ad73322_lock);
++	switch (cmd) {
++		case SNDRV_PCM_TRIGGER_START:
++		case SNDRV_PCM_TRIGGER_RESUME:
++			if (!chip->tx_dma_started) {
++				chip->tx_dma_pos = 0;
++				sport_tx_start(chip->sport);
++				if (!(chip->rx_status & RUN_TX_ALL))
++					snd_ad73322_startup(chip->card_index);
++				chip->tx_dma_started = 1;
++			}
++			sub_info->dma_offset = chip->tx_dma_pos;
++			chip->tx_status |= (1 << index);
++			break;
++		case SNDRV_PCM_TRIGGER_STOP:
++		case SNDRV_PCM_TRIGGER_SUSPEND:
++			chip->tx_status &= ~ (1 << index);
++			if (!(chip->tx_status & RUN_TX_ALL)) {
++				chip->tx_dma_started = 0;
++				sport_tx_stop(chip->sport);
++				if (!(chip->rx_status & RUN_TX_ALL))
++					snd_ad73322_stop(chip->card_index);
++			}
++			break;
++		default:
++			spin_unlock(&chip->ad73322_lock);
++			return -EINVAL;
++	}
++	spin_unlock(&chip->ad73322_lock);
++
++	snd_printd(KERN_INFO "cmd:%s\n", cmd ? "start" : "stop");
++	return 0;
++}
++
++static int snd_ad73322_cap_trigger(struct snd_pcm_substream *substream, int cmd)
++{
++	ad73322_t *chip = snd_pcm_substream_chip(substream);
++	substream_info_t *sub_info = (substream_info_t *)&(chip->
++			rx_substreams[substream->pcm->device]);
++	int index = substream->pcm->device;
++
++	if (snd_BUG_ON(index < 0 || index > NUM_DEVICES_CHAIN -1  || !sub_info))
++		return -EINVAL;
++
++	spin_lock(&chip->ad73322_lock);
++	switch (cmd) {
++		case SNDRV_PCM_TRIGGER_START:
++		case SNDRV_PCM_TRIGGER_RESUME:
++			if (!chip->rx_dma_started) {
++				chip->rx_dma_pos = 0;
++				sport_rx_start(chip->sport);
++				if (!(chip->tx_status & RUN_TX_ALL))
++					snd_ad73322_startup(chip->card_index);
++				chip->rx_dma_started = 1;
++			}
++			sub_info->dma_offset = chip->rx_dma_pos;
++			chip->rx_status |= (1 << index);
++			break;
++		case SNDRV_PCM_TRIGGER_STOP:
++		case SNDRV_PCM_TRIGGER_SUSPEND:
++			chip->rx_status &= ~ (1 << index);
++			if (!(chip->rx_status & RUN_TX_ALL)) {
++				chip->rx_dma_started = 0;
++				sport_rx_stop(chip->sport);
++				if (!(chip->tx_status & RUN_TX_ALL))
++					snd_ad73322_stop(chip->card_index);
++			}
++			break;
++		default:
++			spin_unlock(&chip->ad73322_lock);
++			return -EINVAL;
++	}
++	spin_unlock(&chip->ad73322_lock);
++
++	snd_printd(KERN_INFO "cmd:%s\n", cmd ? "start" : "stop");
++	return 0;
++}
++
++static snd_pcm_uframes_t snd_ad73322_play_ptr(
++		struct snd_pcm_substream *substream)
++{
++	ad73322_t *chip = snd_pcm_substream_chip(substream);
++	substream_info_t *sub_info = (substream_info_t *)&(chip->
++			tx_substreams[substream->pcm->device]);
++	unsigned long diff = sport_curr_offset_tx(chip->sport);
++	unsigned long bytes_per_frame = DMA_FRAME_BYTES;
++	size_t frames = diff / bytes_per_frame;
++	frames = (frames + DMA_BUFFER_FRAMES - sub_info->dma_offset) % \
++		DMA_BUFFER_FRAMES;
++
++	if (sub_info->dma_last_pos > frames) {
++		sub_info->dma_pos_base += DMA_BUFFER_FRAMES;
++		if (sub_info->dma_pos_base >= sub_info->boundary)
++			sub_info->dma_pos_base -= sub_info->boundary;
++	}
++	sub_info->dma_last_pos = frames;
++	frames = (frames + sub_info->dma_pos_base) % sub_info->buffer_frames;
++	return frames;
++}
++
++static snd_pcm_uframes_t snd_ad73322_cap_ptr(
++		struct snd_pcm_substream *substream)
++{
++	ad73322_t *chip = snd_pcm_substream_chip(substream);
++	substream_info_t *sub_info = (substream_info_t *)&(chip->
++			rx_substreams[substream->pcm->device]);
++	unsigned long diff = sport_curr_offset_rx(chip->sport);
++	unsigned long bytes_per_frame = DMA_FRAME_BYTES;
++	size_t frames = diff / bytes_per_frame;
++	frames = (frames + DMA_BUFFER_FRAMES - sub_info->dma_offset) % \
++		DMA_BUFFER_FRAMES;
++
++	if (sub_info->dma_last_pos > frames) {
++		sub_info->dma_pos_base += DMA_BUFFER_FRAMES;
++		if (sub_info->dma_pos_base >= sub_info->boundary)
++			sub_info->dma_pos_base -= sub_info->boundary;
++	}
++	sub_info->dma_last_pos = frames;
++	frames = (frames + sub_info->dma_pos_base) % sub_info->buffer_frames;
++	return frames;
++}
++
++static int snd_ad73322_play_copy(struct snd_pcm_substream *substream,
++		int channel,snd_pcm_uframes_t pos, void *src,
++		snd_pcm_uframes_t count)
++{
++	ad73322_t *chip = snd_pcm_substream_chip(substream);
++	unsigned short *isrc = (unsigned short *)src;
++	unsigned short *dst = (unsigned short *)chip->tx_dma_buf;
++	substream_info_t *sub_info = (substream_info_t *)&(chip->
++			tx_substreams[substream->pcm->device]);
++	int index = substream->pcm->device;
++	snd_pcm_uframes_t start, temp_count, temp2_count;
++	int slot_index = NUM_DEVICES_CHAIN-(index + 1);
++
++	start = (sub_info->data_pos_base + pos + sub_info->dma_offset) % \
++		DMA_BUFFER_FRAMES;
++	if (start + count > DMA_BUFFER_FRAMES) {
++		temp_count = DMA_BUFFER_FRAMES - start;
++		temp2_count = start + count - DMA_BUFFER_FRAMES;
++	} else {
++		temp_count = count;
++		temp2_count = 0;
++	}
++	dst += start * NUM_DEVICES_CHAIN;
++	while (temp_count--) {
++		*(dst + slot_index) = *isrc++;
++		dst += NUM_DEVICES_CHAIN;
++	}
++
++	if (temp2_count) {
++		dst = (unsigned short *)chip->tx_dma_buf;
++		while (temp2_count--) {
++			*(dst + slot_index) = *isrc++;
++			dst += NUM_DEVICES_CHAIN;
++		}
++	}
++	sub_info->data_count += count;
++	if (sub_info->data_count >= sub_info->buffer_frames) {
++		sub_info->data_count -= sub_info->buffer_frames;
++		sub_info->data_pos_base += sub_info->buffer_frames;
++		if (sub_info->data_pos_base >= sub_info->boundary)
++			sub_info->data_pos_base -= sub_info->boundary;
++	}
++	return 0;
++}
++
++static int snd_ad73322_cap_copy(struct snd_pcm_substream *substream,
++		int channel, snd_pcm_uframes_t pos, void *dst,
++		snd_pcm_uframes_t count)
++{
++	ad73322_t *chip = snd_pcm_substream_chip(substream);
++	unsigned short *idst = (unsigned short *)dst;
++	unsigned short *src = (unsigned short *)chip->rx_dma_buf;
++	substream_info_t *sub_info = (substream_info_t *)&(chip->
++			rx_substreams[substream->pcm->device]);
++	int index = substream->pcm->device;
++	snd_pcm_uframes_t start, temp_count, temp2_count;
++	int slot_index = get_cap_slotindex(index);
++
++	start = (sub_info->data_pos_base + pos + sub_info->dma_offset) % \
++		DMA_BUFFER_FRAMES;
++	if (start + count > DMA_BUFFER_FRAMES) {
++		temp_count = DMA_BUFFER_FRAMES - start;
++		temp2_count = start + count - DMA_BUFFER_FRAMES;
++	} else {
++		temp_count = count;
++		temp2_count = 0;
++	}
++	src += start * NUM_DEVICES_CHAIN;
++	while (temp_count--) {
++		*idst++ = *(src + slot_index);
++		src += NUM_DEVICES_CHAIN;
++	}
++
++	if (temp2_count) {
++		src = (unsigned short *)chip->rx_dma_buf;
++		while (temp2_count--) {
++			*idst++ = *(src + slot_index);
++			src += NUM_DEVICES_CHAIN;
++		}
++	}
++	sub_info->data_count += count;
++	if (sub_info->data_count >= sub_info->buffer_frames) {
++		sub_info->data_count -= sub_info->buffer_frames;
++		sub_info->data_pos_base += sub_info->buffer_frames;
++		if (sub_info->data_pos_base >= sub_info->boundary)
++			sub_info->data_pos_base -= sub_info->boundary;
++	}
++	return 0;
++}
++
++/* pcm method tables */
++static struct snd_pcm_ops snd_ad73322_play_ops = {
++	.open      = snd_ad73322_play_open,
++	.close     = snd_ad73322_play_close,
++	.ioctl     = snd_pcm_lib_ioctl,
++	.hw_params = snd_ad73322_hw_params,
++	.hw_free   = snd_ad73322_hw_free,
++	.prepare   = snd_ad73322_play_pre,
++	.trigger   = snd_ad73322_play_trigger,
++	.pointer   = snd_ad73322_play_ptr,
++	.copy	   = snd_ad73322_play_copy,
++};
++
++
++static struct snd_pcm_ops snd_ad73322_cap_ops = {
++	.open  = snd_ad73322_cap_open,
++	.close = snd_ad73322_cap_close,
++	.ioctl = snd_pcm_lib_ioctl,
++	.hw_params = snd_ad73322_hw_params,
++	.hw_free   = snd_ad73322_hw_free,
++	.prepare   = snd_ad73322_cap_pre,
++	.trigger   = snd_ad73322_cap_trigger,
++	.pointer   = snd_ad73322_cap_ptr,
++	.copy	   = snd_ad73322_cap_copy,
++};
++
++static inline void snd_ad73322_update(substream_info_t *sub_info)
++{
++	sub_info->dma_inter_pos += DMA_PERIOD_FRAMES;
++	if (sub_info->dma_inter_pos >= sub_info->boundary)
++		sub_info->dma_inter_pos -= sub_info->boundary;
++
++	if (sub_info->dma_inter_pos >= sub_info->next_inter_pos) {
++		snd_pcm_period_elapsed(sub_info->substream);
++		sub_info->next_inter_pos += sub_info->period_frames;
++		if (sub_info->next_inter_pos >= sub_info->boundary)
++			sub_info->next_inter_pos -= sub_info->boundary;
++	}
++}
++
++static void snd_ad73322_dma_rx(void *data)
++{
++	struct snd_ad73322 *ad73322 = data;
++	int index;
++	substream_info_t *sub_info = NULL;
++	ad73322->rx_dma_pos = (ad73322->rx_dma_pos + DMA_PERIOD_FRAMES) % \
++				DMA_BUFFER_FRAMES;
++	for (index = 0; index < NUM_DEVICES_CHAIN; index++) {
++		sub_info = &ad73322->rx_substreams[index];
++		if (sub_info->substream && ad73322->rx_status & (1<<index)) {
++			snd_ad73322_update(sub_info);
++		}
++	}
++}
++
++static void snd_ad73322_dma_tx(void *data)
++{
++	struct snd_ad73322 *ad73322 = data;
++	int index;
++	substream_info_t *sub_info = NULL;
++	ad73322->tx_dma_pos = (ad73322->tx_dma_pos + DMA_PERIOD_FRAMES) % \
++				DMA_BUFFER_FRAMES;
++	for (index = 0; index < NUM_DEVICES_CHAIN; index++) {
++		sub_info = &ad73322->tx_substreams[index];
++		if (sub_info->substream && ad73322->tx_status & (1<<index)) {
++			snd_ad73322_update(sub_info);
++		}
++	}
++}
++
++static void snd_ad73322_sport_err(void *data)
++{
++	printk(KERN_ERR "%s: error happened on sport\n", __FUNCTION__);
++}
++
++/*************************************************************
++ *      card and device
++ *************************************************************/
++static void snd_ad73322_startup(int index)
++{
++	snd_printd(KERN_INFO "%s is called\n", __FUNCTION__);
++	if (index == 0)
++		gpio_direction_output(GPIO_SPORT0_SE, 1);
++	else
++		gpio_direction_output(GPIO_SPORT1_SE, 1);
++}
++
++static void snd_ad73322_stop(int index)
++{
++	snd_printd(KERN_INFO "%s is called\n", __FUNCTION__);
++	/* Pull down SE pin on AD73322 */
++	if (index == 0)
++		gpio_direction_output(GPIO_SPORT0_SE, 0);
++	else
++		gpio_direction_output(GPIO_SPORT1_SE, 0);
++}
++
++static void snd_ad73322_reset(void)
++{
++	snd_printd(KERN_INFO "%s is called\n", __FUNCTION__);
++
++	/* Pull down GPIO_RESET pin on AD73322 */
++	gpio_direction_output(GPIO_RESET, 0);
++	udelay(200);
++	gpio_direction_output(GPIO_RESET, 1);
++
++}
++
++/*************************************************************
++ *                 ALSA Card Level
++ *************************************************************/
++static int snd_ad73322_configure(int index, struct sport_device *sport)
++{
++	short ctrl_regs[8];
++	short dev_addr,reg_addr;
++	int i, j;
++	unsigned short status = 0;
++	short ctrl_buffer[NUM_DEVICES_CHAIN*8];
++	short *pctrl_buffer;
++
++	/*regs configuration */
++	ctrl_regs[7] = (NUM_DEVICES_CHAIN-1)<<4 | MODE_DATA;
++	ctrl_regs[0] = MCDIV(0) | SCDIV(0) | DIRATE(0);
++	ctrl_regs[1] = PUDEV | PUADC | PUDAC | PUREF | REFUSE ;
++	ctrl_regs[2] = 0;
++	ctrl_regs[3] = DA(0);
++	ctrl_regs[4] = SEEN;
++	ctrl_regs[5] = 0;
++	ctrl_regs[6] = 0;
++
++	pctrl_buffer = &ctrl_buffer[0];
++	reg_addr = 1;
++	for (i = 0; i < 8; i++)
++	{
++		dev_addr = NUM_DEVICES_CHAIN - 1;
++		for (j=0; j<NUM_DEVICES_CHAIN; j++)
++		{
++			*pctrl_buffer++ = ctrl_regs[i] | (dev_addr<<11) |
++				(reg_addr<<8) | AD_CONTROL;
++			dev_addr--;
++		}
++		reg_addr++;
++		if(reg_addr == 8) reg_addr = 0;
++
++	}
++	snd_ad73322_reset();
++	local_irq_disable();
++	udelay(1);
++#if CONFIG_SND_BF5XX_SPORT_NUM == 2
++	bfin_write_SPORT0_TCR1(TFSR);
++	bfin_write_SPORT0_TCR2(0xF);
++	SSYNC();
++	for (i = 0; i < 8; i++) {
++		for (j = 0; j < NUM_DEVICES_CHAIN; j++)
++			bfin_write_SPORT0_TX16(ctrl_buffer[8*i+j]);
++		bfin_write_SPORT0_TCR1(bfin_read_SPORT0_TCR1() | TSPEN);
++		SSYNC();
++		status = bfin_read_SPORT0_STAT();
++		while (!(status & TUVF)) {
++			udelay(1);
++			status = bfin_read_SPORT0_STAT();
++			SSYNC();
++		}
++		bfin_write_SPORT0_TCR1(bfin_read_SPORT0_TCR1() & ~TSPEN);
++		SSYNC();
++	}
++	SSYNC();
++	snd_ad73322_stop(0);
++	bfin_write_SPORT1_TCR1(TFSR);
++	bfin_write_SPORT1_TCR2(0xF);
++	SSYNC();
++	for (i = 0; i < 8; i++) {
++		for (j = 0; j < NUM_DEVICES_CHAIN; j++)
++			bfin_write_SPORT1_TX16(ctrl_buffer[8*i+j]);
++		bfin_write_SPORT1_TCR1(bfin_read_SPORT1_TCR1() | TSPEN);
++		SSYNC();
++		status = bfin_read_SPORT1_STAT();
++		while (!(status & TUVF)) {
++			udelay(1);
++			status = bfin_read_SPORT1_STAT();
++			SSYNC();
++		}
++		bfin_write_SPORT1_TCR1(bfin_read_SPORT1_TCR1() & ~TSPEN);
++		SSYNC();
++	}
++	SSYNC();
++	snd_ad73322_stop(1);
++#else
++	bfin_write_SPORT_TCR1(TFSR);
++	bfin_write_SPORT_TCR2(0xF);
++	SSYNC();
++
++	for (i = 0; i < 8; i++) {
++		for (j=0; j<NUM_DEVICES_CHAIN; j++) {
++			bfin_write_SPORT_TX16(ctrl_buffer[8*i+j]);
++		}
++		bfin_write_SPORT_TCR1(bfin_read_SPORT_TCR1() | TSPEN);
++		status = bfin_read_SPORT_STAT();
++		while (!(status & TUVF)){
++			udelay(1);
++			status = bfin_read_SPORT_STAT();
++			SSYNC();
++		}
++		bfin_write_SPORT_TCR1(bfin_read_SPORT_TCR1() & ~TSPEN);
++	}
++	SSYNC();
++	snd_ad73322_stop(index);
++#endif
++	local_irq_enable();
++	return 0;
++}
++
++static int __devinit snd_ad73322_pcm(struct snd_ad73322 *ad73322, int dev)
++{
++	int err = 0;
++	struct snd_pcm *pcm;
++
++	/* 1 playback and 1 capture substream */
++	if ((err = snd_pcm_new(ad73322->card, pcm_name[dev], dev, 1, 1, &pcm)))
++		return err;
++
++	ad73322->pcm[dev] = pcm;
++	strcpy(pcm->name, pcm_name[dev]);
++	snd_pcm_set_ops(pcm, SNDRV_PCM_STREAM_PLAYBACK,
++			&snd_ad73322_play_ops);
++	snd_pcm_set_ops(pcm, SNDRV_PCM_STREAM_CAPTURE,
++			&snd_ad73322_cap_ops);
++	pcm->private_data = ad73322;
++	pcm->info_flags = 0;
++	snd_printk_marker();
++	return 0;
++}
++
++static int __devinit snd_ad73322_probe(struct platform_device *pdev)
++{
++	int err;
++	struct snd_card *card = NULL;
++	struct snd_ad73322 *ad73322 = NULL;
++	struct sport_device *sport = NULL;
++	int i;
++	dma_addr_t addr;
++#if CONFIG_SND_BF5XX_SPORT_NUM != 0
++	unsigned short tmp_reg;
++#endif
++	if (pdev->id == 0) {
++#if CONFIG_SND_BF5XX_SPORT_NUM == 0
++		if (gpio_request(GPIO_SPORT0_SE, "AD73322")) {
++			printk(KERN_ERR "%s: Failed ro request GPIO_%d\n",
++					__FUNCTION__, GPIO_SPORT0_SE);
++			return -EBUSY;
++		}
++		gpio_direction_output(GPIO_SPORT0_SE, 1);
++#elif CONFIG_SND_BF5XX_SPORT_NUM == 1
++		if (gpio_request(GPIO_SPORT1_SE, "AD73322")) {
++			printk(KERN_ERR "%s: Failed ro request GPIO_%d\n",
++					__FUNCTION__, GPIO_SPORT1_SE);
++			return -EBUSY;
++		}
++		gpio_direction_output(GPIO_SPORT1_SE, 1);
++#elif CONFIG_SND_BF5XX_SPORT_NUM == 2
++		if (gpio_request(GPIO_SPORT0_SE, "AD73322")) {
++			printk(KERN_ERR "%s: Failed ro request GPIO_%d\n",
++					__FUNCTION__, GPIO_SPORT0_SE);
++			return -EBUSY;
++		}
++		if (gpio_request(GPIO_SPORT1_SE, "AD73322")) {
++			printk(KERN_ERR "%s: Failed ro request GPIO_%d\n",
++					__FUNCTION__, GPIO_SPORT1_SE);
++			return -EBUSY;
++		}
++		gpio_direction_output(GPIO_SPORT0_SE, 1);
++		gpio_direction_output(GPIO_SPORT1_SE, 1);
++#endif
++		if (gpio_request(GPIO_RESET, "AD73322RST")) {
++			printk(KERN_ERR "%s: Failed ro request GPIO_12\n",
++					__FUNCTION__);
++			return -EBUSY;
++		}
++		gpio_direction_output(GPIO_RESET, 0);
++	}
++
++	snd_card_create(-1, NULL, THIS_MODULE, sizeof(struct snd_ad73322),
++			&card);
++	if (card == NULL)
++		return -ENOMEM;
++	ad73322 = card->private_data;
++	ad73322->card = card;
++
++#if CONFIG_SND_BF5XX_SPORT_NUM == 2
++	ad73322->card_index = pdev->id;
++#else
++	ad73322->card_index = CONFIG_SND_BF5XX_SPORT_NUM;
++#endif
++
++	ad73322->tx_dma_buf = dma_alloc_coherent(NULL, AD73322_BUF_SZ, &addr,
++			GFP_KERNEL);
++	if (!ad73322->tx_dma_buf) {
++		printk(KERN_ERR "Failed to allocate dma memory\n");
++		return -ENOMEM;
++	}
++	ad73322->rx_dma_buf = dma_alloc_coherent(NULL, AD73322_BUF_SZ, &addr,
++			GFP_KERNEL);
++	if (!ad73322->rx_dma_buf) {
++		dma_free_coherent(NULL, AD73322_BUF_SZ, ad73322->tx_dma_buf, 0);
++		printk(KERN_ERR "Failed to allocate dma memory\n");
++		return -ENOMEM;
++	}
++#if CONFIG_SND_BF5XX_SPORT_NUM == 2
++	if (pdev->id == 0) {
++		sport = sport_init(0, 2, 2, NULL);
++		if (sport == NULL) {
++			err = -ENODEV;
++			goto __sport_err;
++		}
++	} else if (pdev->id == 1) {
++		sport = sport_init(1, 2, 2, NULL);
++		if (sport == NULL) {
++			err = -ENODEV;
++			goto __sport_err;
++		}
++	}
++#else
++	sport = sport_init(CONFIG_SND_BF5XX_SPORT_NUM, 2, 2, NULL);
++	if (sport == NULL) {
++		err = -ENODEV;
++		goto __sport_err;
++	}
++#endif
++	/*Only need to initialize CODECS once*/
++	if (pdev->id == 0) {
++		if ((err = snd_ad73322_configure(ad73322->card_index, sport))
++				< 0)
++			return -EFAULT;
++	}
++
++	sport_set_tx_callback(sport, snd_ad73322_dma_tx, ad73322);
++	sport_set_rx_callback(sport, snd_ad73322_dma_rx, ad73322);
++	sport_set_err_callback(sport, snd_ad73322_sport_err,ad73322);
++
++	ad73322->sport = sport;
++	for (i = 0; i < NUM_DEVICES_CHAIN; i++) {
++		if ((err = snd_ad73322_pcm(ad73322, i)) < 0)
++			goto __nodev;
++	}
++	sport_config_rx(sport, RFSR, 0xF, 0, 0);
++	sport_config_tx(sport, TFSR, 0xF, 0, 0);
++	sport_set_multichannel(sport, 1, 0x1F,1);
++	sport_config_rx_dma(sport, ad73322->rx_dma_buf,
++			DMA_PERIODS, DMA_PERIOD_BYTES);
++	sport_config_tx_dma(sport, ad73322->tx_dma_buf,
++			DMA_PERIODS, DMA_PERIOD_BYTES);
++	strcpy(card->driver, DRIVER_NAME);
++	strcpy(card->shortname, CHIP_NAME);
++	snd_card_set_dev(card, (&pdev->dev));
++
++	if ((err = snd_card_register(card)) < 0) {
++		goto __nodev;
++	}
++
++	platform_set_drvdata(pdev, card);
++#if CONFIG_SND_BF5XX_SPORT_NUM == 2
++	if (pdev->id == 0) {
++		sprintf(card->longname, "%s at PF%d SPORT%d",
++			card->shortname,
++			GPIO_SPORT0_SE,
++			0);
++	} else if (pdev->id == 1) {
++		sprintf(card->longname, "%s at PF%d SPORT%d",
++			card->shortname,
++			GPIO_SPORT1_SE,
++			1);
++	}
++#elif CONFIG_SND_BF5XX_SPORT_NUM == 1
++	sprintf(card->longname, "%s at PF%d SPORT%d",
++		card->shortname,
++		GPIO_SPORT1_SE,
++		CONFIG_SND_BF5XX_SPORT_NUM);
++#else
++	sprintf(card->longname, "%s at PF%d SPORT%d",
++		card->shortname,
++		GPIO_SPORT0_SE,
++		CONFIG_SND_BF5XX_SPORT_NUM);
++#endif
++
++	return 0;
++
++__nodev:
++	sport_done(sport);
++__sport_err:
++	dma_free_coherent(NULL, AD73322_BUF_SZ, ad73322->tx_dma_buf, 0);
++	dma_free_coherent(NULL, AD73322_BUF_SZ, ad73322->rx_dma_buf, 0);
++	snd_card_free(card);
++	return err;
++}
++
++static int __devexit snd_ad73322_remove(struct platform_device *pdev)
++{
++	struct snd_card *card;
++	struct snd_ad73322 *ad73322;
++
++	card = platform_get_drvdata(pdev);
++	ad73322 = card->private_data;
++	dma_free_coherent(NULL, AD73322_BUF_SZ, ad73322->tx_dma_buf, 0);
++	dma_free_coherent(NULL, AD73322_BUF_SZ, ad73322->rx_dma_buf, 0);
++	snd_ad73322_stop(ad73322->card_index);
++	sport_done(ad73322->sport);
++	/*only release it once*/
++	if (pdev->id == 0)
++		gpio_free(GPIO_RESET);
++	if (ad73322->card_index == 0)
++		gpio_free(GPIO_SPORT0_SE);
++	else
++		gpio_free(GPIO_SPORT1_SE);
++	snd_card_free(card);
++	platform_set_drvdata(pdev, NULL);
++
++	return 0;
++}
++
++#ifdef CONFIG_PM
++static int snd_ad73322_suspend(struct platform_device *pdev, pm_message_t state)
++{
++	struct snd_card *card = platform_get_drvdata(pdev);
++	struct snd_ad73322 *ad73322 = card->private_data;
++	int i;
++
++	snd_power_change_state(card, SNDRV_CTL_POWER_D3hot);
++	for (i = 0; i < NUM_DEVICES_CHAIN; i++)
++		snd_pcm_suspend_all(ad73322->pcm[i]);
++
++	return 0;
++}
++static int snd_ad73322_resume(struct platform_device *pdev)
++{
++	int err = 0;
++	struct snd_card *card = platform_get_drvdata(pdev);
++	struct snd_ad73322 *ad73322 = card->private_data;
++	err = sport_config_rx(ad73322->sport, RFSR, 0xF, 0, 0);
++	err = err || sport_config_tx(ad73322->sport, TFSR, 0xF, 0, 0);
++	if (err)
++		snd_printk(KERN_ERR "Unable to set sport configuration\n");
++	snd_power_change_state(card, SNDRV_CTL_POWER_D0);
++
++	return 0;
++}
++#endif
++
++static struct platform_driver snd_ad73322_driver = {
++	.probe		= snd_ad73322_probe,
++	.remove		= __devexit_p(snd_ad73322_remove),
++#ifdef CONFIG_PM
++	.suspend	= snd_ad73322_suspend,
++	.resume		= snd_ad73322_resume,
++#endif
++	.driver		= {
++		.name = DRIVER_NAME,
++	},
++};
++
++static int __init snd_ad73322_init(void)
++{
++	int err, i;
++
++	if (input_gain > NUM_DEVICES_CHAIN -1 ) {
++		printk(KERN_NOTICE ": valid input_gain values are 0 \
++				to 7 inclusive\n");
++		return -EINVAL;
++	}
++
++	if (output_gain > NUM_DEVICES_CHAIN -1 ) {
++		printk(KERN_NOTICE ": valid output_gain values are 0 \
++				to 7 inclusive\n");
++		return -EINVAL;
++	}
++
++	if ((err = platform_driver_register(&snd_ad73322_driver))<0)
++		return err;
++
++	for (i = 0; i < CARD_NUM; i++) {
++		device[i] = platform_device_register_simple(DRIVER_NAME, i,
++				NULL, 0);
++		if (IS_ERR(device[i])) {
++			err = PTR_ERR(device[i]);
++			platform_driver_unregister(&snd_ad73322_driver);
++			return err;
++		}
++	}
++
++	return err;
++}
++
++static void __exit snd_ad73322_exit(void)
++{
++	int i;
++
++	for (i = 0; i < CARD_NUM; i++)
++		platform_device_unregister(device[i]);
++	platform_driver_unregister(&snd_ad73322_driver);
++}
++
++MODULE_AUTHOR("Cliff Cai <Cliff.Cai@analog.com>");
++MODULE_DESCRIPTION("Blackfin/ADI AD73322");
++MODULE_LICENSE("GPL");
++
++module_init(snd_ad73322_init);
++module_exit(snd_ad73322_exit);
+Index: sound/blackfin/bf5xx-sport.c
+===================================================================
+--- sound/blackfin/bf5xx-sport.c	(revision 0)
++++ sound/blackfin/bf5xx-sport.c	(revision 0)
+@@ -0,0 +1,1079 @@
++/*
++ * File:         bf5xx_sport.c
++ * Based on:
++ * Author:       Roy Huang <roy.huang@analog.com>
++ *
++ * Created:      Tue Sep 21 10:52:42 CEST 2004
++ * Description:
++ *               Blackfin SPORT Driver
++ *
++ *               Copyright 2004-2007 Analog Devices Inc.
++ *
++ * Bugs:         Enter bugs at http://blackfin.uclinux.org/
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, see the file COPYING, or write
++ * to the Free Software Foundation, Inc.,
++ * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++ */
++
++#include <linux/kernel.h>
++#include <linux/slab.h>
++#include <linux/delay.h>
++#include <linux/dma-mapping.h>
++#include <linux/gpio.h>
++#include <linux/bug.h>
++#include <asm/portmux.h>
++#include <asm/dma.h>
++#include <asm/blackfin.h>
++#include <asm/cacheflush.h>
++
++#include "bf5xx-sport.h"
++
++/*
++ * Setting the TFS pin selector for SPORT 0 based on whether the selected
++ * port id F or G. If the port is F then no conflict should exist for the
++ * TFS. When Port G is selected and EMAC then there is a conflict between
++ * the PHY interrupt line and TFS.  Current settings prevent the conflict
++ * by ignoring the TFS pin when Port G is selected. This allows both
++ * codecs and EMAC using Port G concurrently.
++ */
++#ifdef CONFIG_BF527_SPORT0_PORTG
++#define LOCAL_SPORT0_TFS (0)
++#else
++#define LOCAL_SPORT0_TFS (P_SPORT0_TFS)
++#endif
++
++#define SPORT_REQ(x) \
++	[x] = {P_SPORT##x##_TFS, P_SPORT##x##_DTPRI, P_SPORT##x##_TSCLK, \
++		P_SPORT##x##_RFS, P_SPORT##x##_DRPRI, P_SPORT##x##_RSCLK, 0}
++
++static u16 sport_req[][7] = {
++#ifdef SPORT0_TCR1
++	{P_SPORT0_DTPRI, P_SPORT0_TSCLK, P_SPORT0_RFS,
++		P_SPORT0_DRPRI, P_SPORT0_RSCLK, LOCAL_SPORT0_TFS, 0},
++#endif
++#ifdef SPORT1_TCR1
++	SPORT_REQ(1),
++#endif
++#ifdef SPORT2_TCR1
++	SPORT_REQ(2),
++#endif
++#ifdef SPORT3_TCR1
++	SPORT_REQ(3),
++#endif
++};
++
++#define SPORT_PARAMS(x) \
++	[x] = { \
++		.dma_rx_chan = CH_SPORT##x##_RX, \
++		.dma_tx_chan = CH_SPORT##x##_TX, \
++		.err_irq     = IRQ_SPORT##x##_ERROR, \
++		.regs        = (struct sport_register *)SPORT##x##_TCR1, \
++	}
++static struct sport_param sport_params[4] = {
++#ifdef SPORT0_TCR1
++	SPORT_PARAMS(0),
++#endif
++#ifdef SPORT1_TCR1
++	SPORT_PARAMS(1),
++#endif
++#ifdef SPORT2_TCR1
++	SPORT_PARAMS(2),
++#endif
++#ifdef SPORT3_TCR1
++	SPORT_PARAMS(3),
++#endif
++};
++
++/* delay between frame sync pulse and first data bit in multichannel mode */
++#define FRAME_DELAY (1<<12)
++
++/* note: multichannel is in units of 8 channels,
++ * tdm_count is # channels NOT / 8 ! */
++int sport_set_multichannel(struct sport_device *sport,
++		int tdm_count, u32 mask, int packed)
++{
++	pr_debug("%s tdm_count=%d mask:0x%08x packed=%d\n", __func__,
++			tdm_count, mask, packed);
++
++	if ((sport->regs->tcr1 & TSPEN) || (sport->regs->rcr1 & RSPEN))
++		return -EBUSY;
++
++	if (tdm_count & 0x7)
++		return -EINVAL;
++
++	if (tdm_count > 32)
++		return -EINVAL; /* Only support less than 32 channels now */
++
++	if (tdm_count) {
++		sport->regs->mcmc1 = ((tdm_count>>3)-1) << 12;
++		sport->regs->mcmc2 = FRAME_DELAY | MCMEN | \
++					(packed ? (MCDTXPE|MCDRXPE) : 0);
++
++		sport->regs->mtcs0 = mask;
++		sport->regs->mrcs0 = mask;
++		sport->regs->mtcs1 = 0;
++		sport->regs->mrcs1 = 0;
++		sport->regs->mtcs2 = 0;
++		sport->regs->mrcs2 = 0;
++		sport->regs->mtcs3 = 0;
++		sport->regs->mrcs3 = 0;
++	} else {
++		sport->regs->mcmc1 = 0;
++		sport->regs->mcmc2 = 0;
++
++		sport->regs->mtcs0 = 0;
++		sport->regs->mrcs0 = 0;
++	}
++
++	sport->regs->mtcs1 = 0; sport->regs->mtcs2 = 0; sport->regs->mtcs3 = 0;
++	sport->regs->mrcs1 = 0; sport->regs->mrcs2 = 0; sport->regs->mrcs3 = 0;
++
++	SSYNC();
++
++	return 0;
++}
++EXPORT_SYMBOL(sport_set_multichannel);
++
++int sport_config_rx(struct sport_device *sport, unsigned int rcr1,
++		unsigned int rcr2, unsigned int clkdiv, unsigned int fsdiv)
++{
++	if ((sport->regs->tcr1 & TSPEN) || (sport->regs->rcr1 & RSPEN))
++		return -EBUSY;
++
++	sport->regs->rcr1 = rcr1;
++	sport->regs->rcr2 = rcr2;
++	sport->regs->rclkdiv = clkdiv;
++	sport->regs->rfsdiv = fsdiv;
++
++	SSYNC();
++
++	return 0;
++}
++EXPORT_SYMBOL(sport_config_rx);
++
++int sport_config_tx(struct sport_device *sport, unsigned int tcr1,
++		unsigned int tcr2, unsigned int clkdiv, unsigned int fsdiv)
++{
++	if ((sport->regs->tcr1 & TSPEN) || (sport->regs->rcr1 & RSPEN))
++		return -EBUSY;
++
++	sport->regs->tcr1 = tcr1;
++	sport->regs->tcr2 = tcr2;
++	sport->regs->tclkdiv = clkdiv;
++	sport->regs->tfsdiv = fsdiv;
++
++	SSYNC();
++
++	return 0;
++}
++EXPORT_SYMBOL(sport_config_tx);
++
++static void setup_desc(struct dmasg *desc, void *buf, int fragcount,
++		size_t fragsize, unsigned int cfg,
++		unsigned int x_count, unsigned int ycount, size_t wdsize)
++{
++
++	int i;
++
++	for (i = 0; i < fragcount; ++i) {
++		desc[i].next_desc_addr  = &(desc[i + 1]);
++		desc[i].start_addr = (unsigned long)buf + i*fragsize;
++		desc[i].cfg = cfg;
++		desc[i].x_count = x_count;
++		desc[i].x_modify = wdsize;
++		desc[i].y_count = ycount;
++		desc[i].y_modify = wdsize;
++	}
++
++	/* make circular */
++	desc[fragcount-1].next_desc_addr = desc;
++
++	pr_debug("setup desc: desc0=%p, next0=%p, desc1=%p,"
++			"next1=%p\nx_count=%x,y_count=%x,addr=0x%lx,cfs=0x%x\n",
++			desc, desc[0].next_desc_addr,
++			desc+1, desc[1].next_desc_addr,
++			desc[0].x_count, desc[0].y_count,
++			desc[0].start_addr, desc[0].cfg);
++}
++
++static int sport_start(struct sport_device *sport)
++{
++	enable_dma(sport->dma_rx_chan);
++	enable_dma(sport->dma_tx_chan);
++	sport->regs->rcr1 |= RSPEN;
++	sport->regs->tcr1 |= TSPEN;
++	SSYNC();
++
++	return 0;
++}
++
++static int sport_stop(struct sport_device *sport)
++{
++	sport->regs->tcr1 &= ~TSPEN;
++	sport->regs->rcr1 &= ~RSPEN;
++	SSYNC();
++
++	disable_dma(sport->dma_rx_chan);
++	disable_dma(sport->dma_tx_chan);
++	return 0;
++}
++
++static inline int sport_hook_rx_dummy(struct sport_device *sport)
++{
++	struct dmasg *desc, temp_desc;
++	unsigned long flags;
++
++	BUG_ON(sport->dummy_rx_desc == NULL);
++	BUG_ON(sport->curr_rx_desc == sport->dummy_rx_desc);
++
++	/* Maybe the dummy buffer descriptor ring is damaged */
++	sport->dummy_rx_desc->next_desc_addr = sport->dummy_rx_desc + 1;
++
++	local_irq_save(flags);
++	desc = get_dma_next_desc_ptr(sport->dma_rx_chan);
++	/* Copy the descriptor which will be damaged to backup */
++	temp_desc = *desc;
++	desc->x_count = sport->dummy_count / 2;
++	desc->y_count = 0;
++	desc->next_desc_addr = sport->dummy_rx_desc;
++	local_irq_restore(flags);
++	/* Waiting for dummy buffer descriptor is already hooked*/
++	while ((get_dma_curr_desc_ptr(sport->dma_rx_chan) -
++				sizeof(struct dmasg)) != sport->dummy_rx_desc)
++		continue;
++	sport->curr_rx_desc = sport->dummy_rx_desc;
++	/* Restore the damaged descriptor */
++	*desc = temp_desc;
++
++	return 0;
++}
++
++static inline int sport_rx_dma_start(struct sport_device *sport, int dummy)
++{
++	if (dummy) {
++		sport->dummy_rx_desc->next_desc_addr = sport->dummy_rx_desc;
++		sport->curr_rx_desc = sport->dummy_rx_desc;
++	} else
++		sport->curr_rx_desc = sport->dma_rx_desc;
++
++	set_dma_next_desc_addr(sport->dma_rx_chan, sport->curr_rx_desc);
++	set_dma_x_count(sport->dma_rx_chan, 0);
++	set_dma_x_modify(sport->dma_rx_chan, 0);
++	set_dma_config(sport->dma_rx_chan, (DMAFLOW_LARGE | NDSIZE_9 | \
++				WDSIZE_32 | WNR));
++	set_dma_curr_addr(sport->dma_rx_chan, sport->curr_rx_desc->start_addr);
++	SSYNC();
++
++	return 0;
++}
++
++static inline int sport_tx_dma_start(struct sport_device *sport, int dummy)
++{
++	if (dummy) {
++		sport->dummy_tx_desc->next_desc_addr = sport->dummy_tx_desc;
++		sport->curr_tx_desc = sport->dummy_tx_desc;
++	} else
++		sport->curr_tx_desc = sport->dma_tx_desc;
++
++	set_dma_next_desc_addr(sport->dma_tx_chan, sport->curr_tx_desc);
++	set_dma_x_count(sport->dma_tx_chan, 0);
++	set_dma_x_modify(sport->dma_tx_chan, 0);
++	set_dma_config(sport->dma_tx_chan,
++			(DMAFLOW_LARGE | NDSIZE_9 | WDSIZE_32));
++	set_dma_curr_addr(sport->dma_tx_chan, sport->curr_tx_desc->start_addr);
++	SSYNC();
++
++	return 0;
++}
++
++int sport_rx_start(struct sport_device *sport)
++{
++	unsigned long flags;
++	pr_debug("%s enter\n", __func__);
++	if (sport->rx_run)
++		return -EBUSY;
++	if (sport->tx_run) {
++		/* tx is running, rx is not running */
++		BUG_ON(sport->dma_rx_desc == NULL);
++		BUG_ON(sport->curr_rx_desc != sport->dummy_rx_desc);
++		local_irq_save(flags);
++		while ((get_dma_curr_desc_ptr(sport->dma_rx_chan) -
++				sizeof(struct dmasg)) != sport->dummy_rx_desc)
++			continue;
++		sport->dummy_rx_desc->next_desc_addr = sport->dma_rx_desc;
++		local_irq_restore(flags);
++		sport->curr_rx_desc = sport->dma_rx_desc;
++	} else {
++		sport_tx_dma_start(sport, 1);
++		sport_rx_dma_start(sport, 0);
++		sport_start(sport);
++	}
++
++	sport->rx_run = 1;
++
++	return 0;
++}
++EXPORT_SYMBOL(sport_rx_start);
++
++int sport_rx_stop(struct sport_device *sport)
++{
++	pr_debug("%s enter\n", __func__);
++
++	if (!sport->rx_run)
++		return 0;
++	if (sport->tx_run) {
++		/* TX dma is still running, hook the dummy buffer */
++		sport_hook_rx_dummy(sport);
++	} else {
++		/* Both rx and tx dma will be stopped */
++		sport_stop(sport);
++		sport->curr_rx_desc = NULL;
++		sport->curr_tx_desc = NULL;
++	}
++
++	sport->rx_run = 0;
++
++	return 0;
++}
++EXPORT_SYMBOL(sport_rx_stop);
++
++static inline int sport_hook_tx_dummy(struct sport_device *sport)
++{
++	struct dmasg *desc, temp_desc;
++	unsigned long flags;
++
++	BUG_ON(sport->dummy_tx_desc == NULL);
++	BUG_ON(sport->curr_tx_desc == sport->dummy_tx_desc);
++
++	sport->dummy_tx_desc->next_desc_addr = sport->dummy_tx_desc + 1;
++
++	/* Shorten the time on last normal descriptor */
++	local_irq_save(flags);
++	desc = get_dma_next_desc_ptr(sport->dma_tx_chan);
++	/* Store the descriptor which will be damaged */
++	temp_desc = *desc;
++	desc->x_count = sport->dummy_count / 2;
++	desc->y_count = 0;
++	desc->next_desc_addr = sport->dummy_tx_desc;
++	local_irq_restore(flags);
++	/* Waiting for dummy buffer descriptor is already hooked*/
++	while ((get_dma_curr_desc_ptr(sport->dma_tx_chan) - \
++				sizeof(struct dmasg)) != sport->dummy_tx_desc)
++		continue;
++	sport->curr_tx_desc = sport->dummy_tx_desc;
++	/* Restore the damaged descriptor */
++	*desc = temp_desc;
++
++	return 0;
++}
++
++int sport_tx_start(struct sport_device *sport)
++{
++	unsigned long flags;
++	pr_debug("%s: tx_run:%d, rx_run:%d\n", __func__,
++			sport->tx_run, sport->rx_run);
++	if (sport->tx_run)
++		return -EBUSY;
++	if (sport->rx_run) {
++		BUG_ON(sport->dma_tx_desc == NULL);
++		BUG_ON(sport->curr_tx_desc != sport->dummy_tx_desc);
++		/* Hook the normal buffer descriptor */
++		local_irq_save(flags);
++		while ((get_dma_curr_desc_ptr(sport->dma_tx_chan) -
++				sizeof(struct dmasg)) != sport->dummy_tx_desc)
++			continue;
++		sport->dummy_tx_desc->next_desc_addr = sport->dma_tx_desc;
++		local_irq_restore(flags);
++		sport->curr_tx_desc = sport->dma_tx_desc;
++	} else {
++
++		sport_tx_dma_start(sport, 0);
++		/* Let rx dma run the dummy buffer */
++		sport_rx_dma_start(sport, 1);
++		sport_start(sport);
++	}
++	sport->tx_run = 1;
++	return 0;
++}
++EXPORT_SYMBOL(sport_tx_start);
++
++int sport_tx_stop(struct sport_device *sport)
++{
++	if (!sport->tx_run)
++		return 0;
++	if (sport->rx_run) {
++		/* RX is still running, hook the dummy buffer */
++		sport_hook_tx_dummy(sport);
++	} else {
++		/* Both rx and tx dma stopped */
++		sport_stop(sport);
++		sport->curr_rx_desc = NULL;
++		sport->curr_tx_desc = NULL;
++	}
++
++	sport->tx_run = 0;
++
++	return 0;
++}
++EXPORT_SYMBOL(sport_tx_stop);
++
++static inline int compute_wdsize(size_t wdsize)
++{
++	switch (wdsize) {
++		case 1:
++			return WDSIZE_8;
++		case 2:
++			return WDSIZE_16;
++		case 4:
++		default:
++			return WDSIZE_32;
++	}
++}
++
++int sport_config_rx_dma(struct sport_device *sport, void *buf,
++		int fragcount, size_t fragsize)
++{
++	unsigned int x_count;
++	unsigned int y_count;
++	unsigned int cfg;
++	dma_addr_t addr;
++
++	pr_debug("%s buf:%p, frag:%d, fragsize:0x%lx\n", __func__, \
++			buf, fragcount, fragsize);
++
++	x_count = fragsize / sport->wdsize;
++	y_count = 0;
++
++	/* for fragments larger than 64k words we use 2d dma,
++	 * denote fragecount as two numbers' mutliply and both of them
++	 * are less than 64k.*/
++	if (x_count >= 0x10000) {
++		int i, count = x_count;
++
++		for (i = 16; i > 0; i--) {
++			x_count = 1 << i;
++			if ((count & (x_count - 1)) == 0) {
++				y_count = count >> i;
++				if (y_count < 0x10000)
++					break;
++			}
++		}
++		if (i == 0)
++			return -EINVAL;
++	}
++	pr_debug("%s(x_count:0x%x, y_count:0x%x)\n", __func__,
++			x_count, y_count);
++
++	if (sport->dma_rx_desc)
++		dma_free_coherent(NULL, sport->rx_desc_bytes,
++				sport->dma_rx_desc, 0);
++
++	/* Allocate a new descritor ring as current one. */
++	sport->dma_rx_desc = dma_alloc_coherent(NULL, \
++			fragcount * sizeof(struct dmasg), &addr, 0);
++	sport->rx_desc_bytes = fragcount * sizeof(struct dmasg);
++
++	if (!sport->dma_rx_desc) {
++		pr_err("Failed to allocate memory for rx desc\n");
++		return -ENOMEM;
++	}
++
++	sport->rx_buf = buf;
++	sport->rx_fragsize = fragsize;
++	sport->rx_frags = fragcount;
++
++	cfg = 0x7000 | DI_EN | compute_wdsize(sport->wdsize) | WNR | \
++			(DESC_ELEMENT_COUNT << 8); /* large descriptor mode */
++
++	if (y_count != 0)
++		cfg |= DMA2D;
++
++	setup_desc(sport->dma_rx_desc, buf, fragcount, fragsize,
++			cfg|DMAEN, x_count, y_count, sport->wdsize);
++
++	return 0;
++}
++EXPORT_SYMBOL(sport_config_rx_dma);
++
++int sport_config_tx_dma(struct sport_device *sport, void *buf, \
++		int fragcount, size_t fragsize)
++{
++	unsigned int x_count;
++	unsigned int y_count;
++	unsigned int cfg;
++	dma_addr_t addr;
++
++	pr_debug("%s buf:%p, fragcount:%d, fragsize:0x%lx\n",
++			__func__, buf, fragcount, fragsize);
++
++	x_count = fragsize/sport->wdsize;
++	y_count = 0;
++
++	/* for fragments larger than 64k words we use 2d dma,
++	 * denote fragecount as two numbers' mutliply and both of them
++	 * are less than 64k.*/
++	if (x_count >= 0x10000) {
++		int i, count = x_count;
++
++		for (i = 16; i > 0; i--) {
++			x_count = 1 << i;
++			if ((count & (x_count - 1)) == 0) {
++				y_count = count >> i;
++				if (y_count < 0x10000)
++					break;
++			}
++		}
++		if (i == 0)
++			return -EINVAL;
++	}
++	pr_debug("%s x_count:0x%x, y_count:0x%x\n", __func__,
++			x_count, y_count);
++
++
++	if (sport->dma_tx_desc) {
++		dma_free_coherent(NULL, sport->tx_desc_bytes, \
++				sport->dma_tx_desc, 0);
++	}
++
++	sport->dma_tx_desc = dma_alloc_coherent(NULL, \
++			fragcount * sizeof(struct dmasg), &addr, 0);
++	sport->tx_desc_bytes = fragcount * sizeof(struct dmasg);
++	if (!sport->dma_tx_desc) {
++		pr_err("Failed to allocate memory for tx desc\n");
++		return -ENOMEM;
++	}
++
++	sport->tx_buf = buf;
++	sport->tx_fragsize = fragsize;
++	sport->tx_frags = fragcount;
++	cfg = 0x7000 | DI_EN | compute_wdsize(sport->wdsize) | \
++			(DESC_ELEMENT_COUNT << 8); /* large descriptor mode */
++
++	if (y_count != 0)
++		cfg |= DMA2D;
++
++	setup_desc(sport->dma_tx_desc, buf, fragcount, fragsize,
++			cfg|DMAEN, x_count, y_count, sport->wdsize);
++
++	return 0;
++}
++EXPORT_SYMBOL(sport_config_tx_dma);
++
++/* setup dummy dma descriptor ring, which don't generate interrupts,
++ * the x_modify is set to 0 */
++static int sport_config_rx_dummy(struct sport_device *sport)
++{
++	struct dmasg *desc;
++	unsigned config;
++
++	pr_debug("%s entered\n", __func__);
++	if (L1_DATA_A_LENGTH)
++		desc = l1_data_sram_zalloc(2 * sizeof(*desc));
++	else {
++		dma_addr_t addr;
++		desc = dma_alloc_coherent(NULL, 2 * sizeof(*desc), &addr, 0);
++		memset(desc, 0, 2 * sizeof(*desc));
++	}
++	if (desc == NULL) {
++		pr_err("Failed to allocate memory for dummy rx desc\n");
++		return -ENOMEM;
++	}
++	sport->dummy_rx_desc = desc;
++	desc->start_addr = (unsigned long)sport->dummy_buf;
++	config = DMAFLOW_LARGE | NDSIZE_9 | compute_wdsize(sport->wdsize)
++		| WNR | DMAEN;
++	desc->cfg = config;
++	desc->x_count = sport->dummy_count/sport->wdsize;
++	desc->x_modify = sport->wdsize;
++	desc->y_count = 0;
++	desc->y_modify = 0;
++	memcpy(desc+1, desc, sizeof(*desc));
++	desc->next_desc_addr = desc + 1;
++	desc[1].next_desc_addr = desc;
++	return 0;
++}
++
++static int sport_config_tx_dummy(struct sport_device *sport)
++{
++	struct dmasg *desc;
++	unsigned int config;
++
++	pr_debug("%s entered\n", __func__);
++
++	if (L1_DATA_A_LENGTH)
++		desc = l1_data_sram_zalloc(2 * sizeof(*desc));
++	else {
++		dma_addr_t addr;
++		desc = dma_alloc_coherent(NULL, 2 * sizeof(*desc), &addr, 0);
++		memset(desc, 0, 2 * sizeof(*desc));
++	}
++	if (!desc) {
++		pr_err("Failed to allocate memory for dummy tx desc\n");
++		return -ENOMEM;
++	}
++	sport->dummy_tx_desc = desc;
++	desc->start_addr = (unsigned long)sport->dummy_buf + \
++				sport->dummy_count;
++	config = DMAFLOW_LARGE | NDSIZE_9 |
++		compute_wdsize(sport->wdsize) | DMAEN;
++	desc->cfg = config;
++	desc->x_count = sport->dummy_count/sport->wdsize;
++	desc->x_modify = sport->wdsize;
++	desc->y_count = 0;
++	desc->y_modify = 0;
++	memcpy(desc+1, desc, sizeof(*desc));
++	desc->next_desc_addr = desc + 1;
++	desc[1].next_desc_addr = desc;
++	return 0;
++}
++
++unsigned long sport_curr_offset_rx(struct sport_device *sport)
++{
++	unsigned long curr = get_dma_curr_addr(sport->dma_rx_chan);
++
++	return (unsigned char *)curr - sport->rx_buf;
++}
++EXPORT_SYMBOL(sport_curr_offset_rx);
++
++unsigned long sport_curr_offset_tx(struct sport_device *sport)
++{
++	unsigned long curr = get_dma_curr_addr(sport->dma_tx_chan);
++
++	return (unsigned char *)curr - sport->tx_buf;
++}
++EXPORT_SYMBOL(sport_curr_offset_tx);
++
++void sport_incfrag(struct sport_device *sport, int *frag, int tx)
++{
++	++(*frag);
++	if (tx == 1 && *frag == sport->tx_frags)
++		*frag = 0;
++
++	if (tx == 0 && *frag == sport->rx_frags)
++		*frag = 0;
++}
++EXPORT_SYMBOL(sport_incfrag);
++
++void sport_decfrag(struct sport_device *sport, int *frag, int tx)
++{
++	--(*frag);
++	if (tx == 1 && *frag == 0)
++		*frag = sport->tx_frags;
++
++	if (tx == 0 && *frag == 0)
++		*frag = sport->rx_frags;
++}
++EXPORT_SYMBOL(sport_decfrag);
++
++static int sport_check_status(struct sport_device *sport,
++		unsigned int *sport_stat,
++		unsigned int *rx_stat,
++		unsigned int *tx_stat)
++{
++	int status = 0;
++
++	if (sport_stat) {
++		SSYNC();
++		status = sport->regs->stat;
++		if (status & (TOVF|TUVF|ROVF|RUVF))
++			sport->regs->stat = (status & (TOVF|TUVF|ROVF|RUVF));
++		SSYNC();
++		*sport_stat = status;
++	}
++
++	if (rx_stat) {
++		SSYNC();
++		status = get_dma_curr_irqstat(sport->dma_rx_chan);
++		if (status & (DMA_DONE|DMA_ERR))
++			clear_dma_irqstat(sport->dma_rx_chan);
++		SSYNC();
++		*rx_stat = status;
++	}
++
++	if (tx_stat) {
++		SSYNC();
++		status = get_dma_curr_irqstat(sport->dma_tx_chan);
++		if (status & (DMA_DONE|DMA_ERR))
++			clear_dma_irqstat(sport->dma_tx_chan);
++		SSYNC();
++		*tx_stat = status;
++	}
++
++	return 0;
++}
++
++int  sport_dump_stat(struct sport_device *sport, char *buf, size_t len)
++{
++	int ret;
++
++	ret = snprintf(buf, len,
++			"sts: 0x%04x\n"
++			"rx dma %d sts: 0x%04x tx dma %d sts: 0x%04x\n",
++			sport->regs->stat,
++			sport->dma_rx_chan,
++			get_dma_curr_irqstat(sport->dma_rx_chan),
++			sport->dma_tx_chan,
++			get_dma_curr_irqstat(sport->dma_tx_chan));
++	buf += ret;
++	len -= ret;
++
++	ret += snprintf(buf, len,
++			"curr_rx_desc:0x%p, curr_tx_desc:0x%p\n"
++			"dma_rx_desc:0x%p, dma_tx_desc:0x%p\n"
++			"dummy_rx_desc:0x%p, dummy_tx_desc:0x%p\n",
++			sport->curr_rx_desc, sport->curr_tx_desc,
++			sport->dma_rx_desc, sport->dma_tx_desc,
++			sport->dummy_rx_desc, sport->dummy_tx_desc);
++
++	return ret;
++}
++
++static irqreturn_t rx_handler(int irq, void *dev_id)
++{
++	unsigned int rx_stat;
++	struct sport_device *sport = dev_id;
++
++	pr_debug("%s enter\n", __func__);
++	sport_check_status(sport, NULL, &rx_stat, NULL);
++	if (!(rx_stat & DMA_DONE))
++		pr_err("rx dma is already stopped\n");
++
++	if (sport->rx_callback) {
++		sport->rx_callback(sport->rx_data);
++		return IRQ_HANDLED;
++	}
++
++	return IRQ_NONE;
++}
++
++static irqreturn_t tx_handler(int irq, void *dev_id)
++{
++	unsigned int tx_stat;
++	struct sport_device *sport = dev_id;
++	pr_debug("%s enter\n", __func__);
++	sport_check_status(sport, NULL, NULL, &tx_stat);
++	if (!(tx_stat & DMA_DONE)) {
++		pr_err("tx dma is already stopped\n");
++		return IRQ_HANDLED;
++	}
++	if (sport->tx_callback) {
++		sport->tx_callback(sport->tx_data);
++		return IRQ_HANDLED;
++	}
++
++	return IRQ_NONE;
++}
++
++static irqreturn_t err_handler(int irq, void *dev_id)
++{
++	unsigned int status = 0;
++	struct sport_device *sport = dev_id;
++
++	pr_debug("%s\n", __func__);
++	if (sport_check_status(sport, &status, NULL, NULL)) {
++		pr_err("error checking status ??");
++		return IRQ_NONE;
++	}
++
++	if (status & (TOVF|TUVF|ROVF|RUVF)) {
++		pr_info("sport status error:%s%s%s%s\n",
++				status & TOVF ? " TOVF" : "",
++				status & TUVF ? " TUVF" : "",
++				status & ROVF ? " ROVF" : "",
++				status & RUVF ? " RUVF" : "");
++		if (status & TOVF || status & TUVF) {
++			disable_dma(sport->dma_tx_chan);
++			if (sport->tx_run)
++				sport_tx_dma_start(sport, 0);
++			else
++				sport_tx_dma_start(sport, 1);
++			enable_dma(sport->dma_tx_chan);
++		} else {
++			disable_dma(sport->dma_rx_chan);
++			if (sport->rx_run)
++				sport_rx_dma_start(sport, 0);
++			else
++				sport_rx_dma_start(sport, 1);
++			enable_dma(sport->dma_rx_chan);
++		}
++	}
++	status = sport->regs->stat;
++	if (status & (TOVF|TUVF|ROVF|RUVF))
++		sport->regs->stat = (status & (TOVF|TUVF|ROVF|RUVF));
++	SSYNC();
++
++	if (sport->err_callback)
++		sport->err_callback(sport->err_data);
++
++	return IRQ_HANDLED;
++}
++
++int sport_set_rx_callback(struct sport_device *sport,
++		void (*rx_callback)(void *), void *rx_data)
++{
++	BUG_ON(rx_callback == NULL);
++	sport->rx_callback = rx_callback;
++	sport->rx_data = rx_data;
++
++	return 0;
++}
++EXPORT_SYMBOL(sport_set_rx_callback);
++
++int sport_set_tx_callback(struct sport_device *sport,
++		void (*tx_callback)(void *), void *tx_data)
++{
++	BUG_ON(tx_callback == NULL);
++	sport->tx_callback = tx_callback;
++	sport->tx_data = tx_data;
++
++	return 0;
++}
++EXPORT_SYMBOL(sport_set_tx_callback);
++
++int sport_set_err_callback(struct sport_device *sport,
++		void (*err_callback)(void *), void *err_data)
++{
++	BUG_ON(err_callback == NULL);
++	sport->err_callback = err_callback;
++	sport->err_data = err_data;
++
++	return 0;
++}
++EXPORT_SYMBOL(sport_set_err_callback);
++
++struct sport_device *sport_init(int num, unsigned wdsize,
++		unsigned dummy_count, void *private_data)
++{
++	int ret;
++	struct sport_device *sport;
++	pr_debug("%s enter\n", __func__);
++	BUG_ON(num >= ARRAY_SIZE(sport_params));
++	BUG_ON(wdsize == 0 || dummy_count == 0);
++
++	if (peripheral_request_list(&sport_req[num][0], "soc-audio")) {
++		pr_err("Requesting Peripherals failed\n");
++		return NULL;
++	}
++
++	sport = kmalloc(sizeof(struct sport_device), GFP_KERNEL);
++	if (!sport) {
++		pr_err("Failed to allocate for sport device\n");
++		goto __init_err0;
++	}
++
++	memset(sport, 0, sizeof(struct sport_device));
++	sport->num = num;
++	sport->dma_rx_chan = sport_params[num].dma_rx_chan;
++	sport->dma_tx_chan = sport_params[num].dma_tx_chan;
++	sport->err_irq = sport_params[num].err_irq;
++	sport->regs = sport_params[num].regs;
++	sport->pin_req = sport_req[num];
++	sport->private_data = private_data;
++
++	if (request_dma(sport->dma_rx_chan, "SPORT RX Data") == -EBUSY) {
++		pr_err("Failed to request RX dma %d\n", \
++				sport->dma_rx_chan);
++		goto __init_err1;
++	}
++	if (set_dma_callback(sport->dma_rx_chan, rx_handler, sport) != 0) {
++		pr_err("Failed to request RX irq %d\n", \
++				sport->dma_rx_chan);
++		goto __init_err2;
++	}
++
++	if (request_dma(sport->dma_tx_chan, "SPORT TX Data") == -EBUSY) {
++		pr_err("Failed to request TX dma %d\n", \
++				sport->dma_tx_chan);
++		goto __init_err2;
++	}
++
++	if (set_dma_callback(sport->dma_tx_chan, tx_handler, sport) != 0) {
++		pr_err("Failed to request TX irq %d\n", \
++				sport->dma_tx_chan);
++		goto __init_err3;
++	}
++
++	if (request_irq(sport->err_irq, err_handler, IRQF_SHARED, "SPORT err",
++				sport) < 0) {
++		pr_err("Failed to request err irq:%d\n", \
++				sport->err_irq);
++		goto __init_err3;
++	}
++
++	pr_err("dma rx:%d tx:%d, err irq:%d, regs:%p\n",
++			sport->dma_rx_chan, sport->dma_tx_chan,
++			sport->err_irq, sport->regs);
++
++	sport->wdsize = wdsize;
++	sport->dummy_count = dummy_count;
++
++	if (L1_DATA_A_LENGTH)
++		sport->dummy_buf = l1_data_sram_zalloc(dummy_count * 2);
++	else
++		sport->dummy_buf = kzalloc(dummy_count * 2, GFP_KERNEL);
++	if (sport->dummy_buf == NULL) {
++		pr_err("Failed to allocate dummy buffer\n");
++		goto __error;
++	}
++
++	ret = sport_config_rx_dummy(sport);
++	if (ret) {
++		pr_err("Failed to config rx dummy ring\n");
++		goto __error;
++	}
++	ret = sport_config_tx_dummy(sport);
++	if (ret) {
++		pr_err("Failed to config tx dummy ring\n");
++		goto __error;
++	}
++
++	return sport;
++__error:
++	free_irq(sport->err_irq, sport);
++__init_err3:
++	free_dma(sport->dma_tx_chan);
++__init_err2:
++	free_dma(sport->dma_rx_chan);
++__init_err1:
++	kfree(sport);
++__init_err0:
++	peripheral_free_list(&sport_req[num][0]);
++	return NULL;
++}
++EXPORT_SYMBOL(sport_init);
++
++void sport_done(struct sport_device *sport)
++{
++	if (sport == NULL)
++		return;
++
++	sport_stop(sport);
++	if (sport->dma_rx_desc)
++		dma_free_coherent(NULL, sport->rx_desc_bytes,
++				sport->dma_rx_desc, 0);
++	if (sport->dma_tx_desc)
++		dma_free_coherent(NULL, sport->tx_desc_bytes,
++				sport->dma_tx_desc, 0);
++
++#if L1_DATA_A_LENGTH != 0
++	l1_data_sram_free(sport->dummy_rx_desc);
++	l1_data_sram_free(sport->dummy_tx_desc);
++	l1_data_sram_free(sport->dummy_buf);
++#else
++	dma_free_coherent(NULL, 2*sizeof(struct dmasg),
++			sport->dummy_rx_desc, 0);
++	dma_free_coherent(NULL, 2*sizeof(struct dmasg),
++			sport->dummy_tx_desc, 0);
++	kfree(sport->dummy_buf);
++#endif
++	free_dma(sport->dma_rx_chan);
++	free_dma(sport->dma_tx_chan);
++	free_irq(sport->err_irq, sport);
++
++	peripheral_free_list(&sport_req[sport->num][0]);
++	kfree(sport);
++}
++EXPORT_SYMBOL(sport_done);
++
++/*
++ * It is only used to send several bytes when dma is not enabled
++ * sport controller is configured but not enabled.
++ * Multichannel cannot works with pio mode */
++/* Used by ac97 to write and read codec register */
++int sport_send_and_recv(struct sport_device *sport, u8 *out_data, \
++		u8 *in_data, int len)
++{
++	unsigned short dma_config;
++	unsigned short status;
++	unsigned long flags;
++	unsigned long wait = 0;
++
++	pr_debug("%s enter, out_data:%p, in_data:%p len:%d\n", \
++			__func__, out_data, in_data, len);
++	pr_debug("tcr1:0x%04x, tcr2:0x%04x, tclkdiv:0x%04x, tfsdiv:0x%04x\n"
++			"mcmc1:0x%04x, mcmc2:0x%04x\n",
++			sport->regs->tcr1, sport->regs->tcr2,
++			sport->regs->tclkdiv, sport->regs->tfsdiv,
++			sport->regs->mcmc1, sport->regs->mcmc2);
++	flush_dcache_range((unsigned)out_data, (unsigned)(out_data + len));
++
++	/* Enable tx dma */
++	dma_config = (RESTART | WDSIZE_16 | DI_EN);
++	set_dma_start_addr(sport->dma_tx_chan, (unsigned long)out_data);
++	set_dma_x_count(sport->dma_tx_chan, len/2);
++	set_dma_x_modify(sport->dma_tx_chan, 2);
++	set_dma_config(sport->dma_tx_chan, dma_config);
++	enable_dma(sport->dma_tx_chan);
++
++	if (in_data != NULL) {
++		invalidate_dcache_range((unsigned)in_data, \
++				(unsigned)(in_data + len));
++		/* Enable rx dma */
++		dma_config = (RESTART | WDSIZE_16 | WNR | DI_EN);
++		set_dma_start_addr(sport->dma_rx_chan, (unsigned long)in_data);
++		set_dma_x_count(sport->dma_rx_chan, len/2);
++		set_dma_x_modify(sport->dma_rx_chan, 2);
++		set_dma_config(sport->dma_rx_chan, dma_config);
++		enable_dma(sport->dma_rx_chan);
++	}
++
++	local_irq_save(flags);
++	sport->regs->tcr1 |= TSPEN;
++	sport->regs->rcr1 |= RSPEN;
++	SSYNC();
++
++	status = get_dma_curr_irqstat(sport->dma_tx_chan);
++	while (status & DMA_RUN) {
++		udelay(1);
++		status = get_dma_curr_irqstat(sport->dma_tx_chan);
++		pr_debug("DMA status:0x%04x\n", status);
++		if (wait++ > 100)
++			goto __over;
++	}
++	status = sport->regs->stat;
++	wait = 0;
++
++	while (!(status & TXHRE)) {
++		pr_debug("sport status:0x%04x\n", status);
++		udelay(1);
++		status = *(unsigned short *)&sport->regs->stat;
++		if (wait++ > 1000)
++			goto __over;
++	}
++	/* Wait for the last byte sent out */
++	udelay(20);
++	pr_debug("sport status:0x%04x\n", status);
++
++__over:
++	sport->regs->tcr1 &= ~TSPEN;
++	sport->regs->rcr1 &= ~RSPEN;
++	SSYNC();
++	disable_dma(sport->dma_tx_chan);
++	/* Clear the status */
++	clear_dma_irqstat(sport->dma_tx_chan);
++	if (in_data != NULL) {
++		disable_dma(sport->dma_rx_chan);
++		clear_dma_irqstat(sport->dma_rx_chan);
++	}
++	SSYNC();
++	local_irq_restore(flags);
++
++	return 0;
++}
++EXPORT_SYMBOL(sport_send_and_recv);
++
++MODULE_AUTHOR("Roy Huang");
++MODULE_DESCRIPTION("SPORT driver for ADI Blackfin");
++MODULE_LICENSE("GPL");
+Index: sound/blackfin/ad73322.h
+===================================================================
+--- sound/blackfin/ad73322.h	(revision 0)
++++ sound/blackfin/ad73322.h	(revision 0)
+@@ -0,0 +1,135 @@
++/*
++ * File:         sound/blackfin/ad73322.c
++ * Based on:	 sound/blackfin/ad73311.c
++ * Author:       Cliff Cai <Cliff.Cai@analog.com>
++ *
++ * Created:      Tue May 06 2008
++ * Description:  Driver for AD73322 sound chip connected to bf53x sport
++ *
++ * Rev:          $Id: ad73322.c 4104 2008-05-06 06:51:48Z cliff $
++ *
++ * Modified:
++ *               Copyright 2008 Analog Devices Inc.
++ *
++ * Bugs:         Enter bugs at http://blackfin.uclinux.org/
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, see the file COPYING, or write
++ * to the Free Software Foundation, Inc.,
++ * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++ */
++
++#ifndef __AD73322_H__
++#define __AD73322_H__
++
++/*8 means 4 AD73322 is connected in cascade mode,since every AD73322 has 2
++ *DAC/ADC pairs
++ */
++#define NUM_DEVICES_CHAIN (8)
++
++#define RUN_TX_ALL 0xff
++#define RUN_RX_ALL 0xff
++
++#define AD_CONTROL	0x8000
++#define AD_DATA		0x0000
++#define AD_READ		0x4000
++#define AD_WRITE	0x0000
++
++/* Control register A */
++#define CTRL_REG_A	(0 << 8)
++
++#define MODE_PRO	0x00
++#define MODE_DATA	0x01
++#define MODE_MIXED	0x03
++#define DLB		0x04
++#define SLB		0x08
++#define DEVC(x)		((x & 0x7) << 4)
++#define RESET		0x80
++
++/* Control register B */
++#define CTRL_REG_B	(1 << 8)
++
++#define DIRATE(x)	(x & 0x3)
++#define SCDIV(x)	((x & 0x3) << 2)
++#define MCDIV(x)	((x & 0x7) << 4)
++#define CEE		(1 << 7)
++
++/* Control register C */
++#define CTRL_REG_C	(2 << 8)
++
++#define PUDEV		( 1 << 0 )
++#define PUADC		( 1 << 3 )
++#define PUDAC		( 1 << 4 )
++#define PUREF		( 1 << 5 )
++#define REFUSE		( 1 << 6 )
++
++/* Control register D */
++#define CTRL_REG_D	(3 << 8)
++
++#define IGS(x)		(x & 0x7)
++#define RMOD		( 1 << 3 )
++#define OGS(x)		((x & 0x7) << 4)
++#define MUTE		(1 << 7)
++
++/* Control register E */
++#define CTRL_REG_E	(4 << 8)
++
++#define DA(x)		(x & 0x1f)
++#define IBYP		( 1 << 5 )
++
++/* Control register F */
++#define CTRL_REG_F	(5 << 8)
++
++#define SEEN		( 1 << 5 )
++#define INV		( 1 << 6 )
++#define ALB		( 1 << 7 )
++
++
++typedef struct {
++	struct snd_pcm_substream*	substream;
++	snd_pcm_uframes_t	dma_offset;
++	snd_pcm_uframes_t	buffer_frames;
++	snd_pcm_uframes_t	period_frames;
++	unsigned int		periods;
++	unsigned int		frame_bytes;
++	/* Information about DMA */
++	snd_pcm_uframes_t	dma_inter_pos;
++	snd_pcm_uframes_t	dma_last_pos;
++	snd_pcm_uframes_t	dma_pos_base;
++	/* Information on virtual buffer */
++	snd_pcm_uframes_t	next_inter_pos;
++	snd_pcm_uframes_t	data_count;
++	snd_pcm_uframes_t	data_pos_base;
++	snd_pcm_uframes_t	boundary;
++} substream_info_t;
++
++typedef struct snd_ad73322 {
++	struct snd_card	*card;
++	struct sport_device	*sport;
++	spinlock_t    ad73322_lock;
++	struct snd_pcm	*pcm[NUM_DEVICES_CHAIN];
++	int	tx_dma_started;
++	int	tx_status;
++	int	rx_dma_started;
++	int	rx_status;
++
++	snd_pcm_uframes_t	tx_dma_pos;
++	snd_pcm_uframes_t	rx_dma_pos;
++	substream_info_t	tx_substreams[NUM_DEVICES_CHAIN];
++	substream_info_t	rx_substreams[NUM_DEVICES_CHAIN];
++	unsigned char *tx_dma_buf;
++	unsigned char *rx_dma_buf;
++	int card_index;
++} ad73322_t;
++
++#endif
+Index: sound/blackfin/bf5xx-sport.h
+===================================================================
+--- sound/blackfin/bf5xx-sport.h	(revision 0)
++++ sound/blackfin/bf5xx-sport.h	(revision 0)
+@@ -0,0 +1,171 @@
++/*
++ * File:         bf5xx_ac97_sport.h
++ * Based on:
++ * Author:       Roy Huang <roy.huang@analog.com>
++ *
++ * Created:
++ * Description:
++ *
++ *               Copyright 2004-2007 Analog Devices Inc.
++ *
++ * Bugs:         Enter bugs at http://blackfin.uclinux.org/
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, see the file COPYING, or write
++ * to the Free Software Foundation, Inc.,
++ * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++ */
++
++
++#ifndef __BF5XX_SPORT_H__
++#define __BF5XX_SPORT_H__
++
++#include <linux/types.h>
++#include <linux/wait.h>
++#include <linux/workqueue.h>
++#include <asm/dma.h>
++#include <asm/bfin_sport.h>
++
++#define DESC_ELEMENT_COUNT 9
++
++struct sport_device {
++	int num;
++	int dma_rx_chan;
++	int dma_tx_chan;
++	int err_irq;
++	unsigned short *pin_req;
++	struct sport_register *regs;
++
++	unsigned char *rx_buf;
++	unsigned char *tx_buf;
++	unsigned int rx_fragsize;
++	unsigned int tx_fragsize;
++	unsigned int rx_frags;
++	unsigned int tx_frags;
++	unsigned int wdsize;
++
++	/* for dummy dma transfer */
++	void *dummy_buf;
++	unsigned int dummy_count;
++
++	/* DMA descriptor ring head of current audio stream*/
++	struct dmasg *dma_rx_desc;
++	struct dmasg *dma_tx_desc;
++	unsigned int rx_desc_bytes;
++	unsigned int tx_desc_bytes;
++
++	unsigned int rx_run:1; /* rx is running */
++	unsigned int tx_run:1; /* tx is running */
++
++	struct dmasg *dummy_rx_desc;
++	struct dmasg *dummy_tx_desc;
++
++	struct dmasg *curr_rx_desc;
++	struct dmasg *curr_tx_desc;
++
++	int rx_curr_frag;
++	int tx_curr_frag;
++
++	unsigned int rcr1;
++	unsigned int rcr2;
++	int rx_tdm_count;
++
++	unsigned int tcr1;
++	unsigned int tcr2;
++	int tx_tdm_count;
++
++	void (*rx_callback)(void *data);
++	void *rx_data;
++	void (*tx_callback)(void *data);
++	void *tx_data;
++	void (*err_callback)(void *data);
++	void *err_data;
++	unsigned char *tx_dma_buf;
++	unsigned char *rx_dma_buf;
++#ifdef CONFIG_SND_BF5XX_MMAP_SUPPORT
++	dma_addr_t tx_dma_phy;
++	dma_addr_t rx_dma_phy;
++	int tx_pos;/*pcm sample count*/
++	int rx_pos;
++	unsigned int tx_buffer_size;
++	unsigned int rx_buffer_size;
++	int tx_delay_pos;
++	int once;
++#endif
++	void *private_data;
++};
++
++extern struct sport_device *sport_handle;
++
++struct sport_param {
++	int dma_rx_chan;
++	int dma_tx_chan;
++	int err_irq;
++	struct sport_register *regs;
++};
++
++struct sport_device *sport_init(int num, unsigned wdsize,
++		unsigned dummy_count, void *private_data);
++
++void sport_done(struct sport_device *sport);
++
++/* first use these ...*/
++
++/* note: multichannel is in units of 8 channels, tdm_count is number of channels
++ *  NOT / 8 ! all channels are enabled by default */
++int sport_set_multichannel(struct sport_device *sport, int tdm_count,
++		u32 mask, int packed);
++
++int sport_config_rx(struct sport_device *sport,
++		unsigned int rcr1, unsigned int rcr2,
++		unsigned int clkdiv, unsigned int fsdiv);
++
++int sport_config_tx(struct sport_device *sport,
++		unsigned int tcr1, unsigned int tcr2,
++		unsigned int clkdiv, unsigned int fsdiv);
++
++/* ... then these: */
++
++/* buffer size (in bytes) == fragcount * fragsize_bytes */
++
++/* this is not a very general api, it sets the dma to 2d autobuffer mode */
++
++int sport_config_rx_dma(struct sport_device *sport, void *buf,
++		int fragcount, size_t fragsize_bytes);
++
++int sport_config_tx_dma(struct sport_device *sport, void *buf,
++		int fragcount, size_t fragsize_bytes);
++
++int sport_tx_start(struct sport_device *sport);
++int sport_tx_stop(struct sport_device *sport);
++int sport_rx_start(struct sport_device *sport);
++int sport_rx_stop(struct sport_device *sport);
++
++/* for use in interrupt handler */
++unsigned long sport_curr_offset_rx(struct sport_device *sport);
++unsigned long sport_curr_offset_tx(struct sport_device *sport);
++
++void sport_incfrag(struct sport_device *sport, int *frag, int tx);
++void sport_decfrag(struct sport_device *sport, int *frag, int tx);
++
++int sport_set_rx_callback(struct sport_device *sport,
++		void (*rx_callback)(void *), void *rx_data);
++int sport_set_tx_callback(struct sport_device *sport,
++		void (*tx_callback)(void *), void *tx_data);
++int sport_set_err_callback(struct sport_device *sport,
++		void (*err_callback)(void *), void *err_data);
++
++int sport_send_and_recv(struct sport_device *sport, u8 *out_data, \
++		u8 *in_data, int len);
++
++#endif /* BF53X_SPORT_H */

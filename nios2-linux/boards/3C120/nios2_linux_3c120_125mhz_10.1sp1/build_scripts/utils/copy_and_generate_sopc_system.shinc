@@ -1,0 +1,127 @@
+#
+#   This script is an error checking wrapper for the subsequent TCL script that
+#   it executes in sopc_builder.
+#
+#   Script:
+#       
+#       copy_and_generate_sopc_system.shinc
+#   
+#   Input Arguments:
+#   
+#       SYSTEM_NAME     : the name of the sopc system.  There should be a file called
+#                         <SYSTEM_NAME>.sopc in the build src directory.
+#
+#   Output Results:
+#   
+#       script returns a status of success if the SOPC Builder system is
+#       created and generated successfully, otherwise it returns a status of 
+#       error
+#
+#   Return Status:
+#       
+#       success         : 0
+#       error           : 1
+#       bad argument    : no return, exits with status 1
+#
+#   Required Environment Variables
+#   
+#       ABS_PATH_TO_PROJECT_DIR     : this is a path to the quartus project
+#                                     directory
+#       ABS_PATH_TO_BUILD_SRC_DIR   : this is a path to the build script src
+#                                     directory
+#
+
+copy_and_generate_sopc_system () {
+    
+    #
+    # validate the input arguments
+    #
+    if [ $# -ne 1 ] ; then
+        
+        echo ""
+        echo "ERROR: wrong number of arguments passed into this function"
+        echo "Expected 1 arguments, but got $#"
+        echo ""
+        echo "USAGE: copy_and_generate_sopc_system <SYSTEM_NAME>"
+        echo ""
+        
+        exit 1
+        
+    fi
+    
+    #
+    # validate the required environment variables
+    #
+    PATH_2_PROJECT_DIR=${ABS_PATH_TO_PROJECT_DIR:?environment variable is required...}
+    PATH_2_BUILD_SRC_DIR=${ABS_PATH_TO_BUILD_SRC_DIR:?environment variable is required...}
+    
+    #
+    # extract the input arguments that we need
+    #
+    SYSTEM_NAME=${1}
+    
+    #
+    # validate that the .sopc file exists in our src directory
+    #
+    if [ ! -e "${PATH_2_BUILD_SRC_DIR}/${SYSTEM_NAME}.sopc" ] ; then
+        
+        echo ""
+        echo "ERROR: Cannot locate .sopc file \"${PATH_2_BUILD_SRC_DIR}/${SYSTEM_NAME}.sopc\""
+        echo ""
+        exit 1
+        
+    fi
+
+    #
+    # check for evidence of an existing system in the project directory
+    #
+    if [ -e "${PATH_2_PROJECT_DIR}/${SYSTEM_NAME}.sopc" ] ; then
+        
+        echo ""
+        echo "SOPC Builder system already exisits..."
+        echo ""
+        echo "Please remove all of the previously generated files created for the existing"
+        echo "system, and rerun this script."
+        echo ""
+        return 1
+        
+    fi
+
+    echo ""
+    echo "Attempting to run the SOPC Builder script \"${SYSTEM_SCRIPT}\""
+    echo ""
+    
+    #
+    # copy the .sopc file into the project directory
+    #
+    cp ${PATH_2_BUILD_SRC_DIR}/${SYSTEM_NAME}.sopc ${PATH_2_PROJECT_DIR}/
+
+    #
+    # execute the sopc builder TCL script
+    #
+    pushd ${PATH_2_PROJECT_DIR} >> /dev/null
+        sopc_builder  --generate
+    popd >> /dev/null
+    
+    #
+    # check for evidence of success, look for a <system>.v or <system>.vhd
+    # source file which would indicate that the system was generated
+    #
+    if [ -e "${PATH_2_PROJECT_DIR}/${SYSTEM_NAME}.v" -o -e "${PATH_2_PROJECT_DIR}/${SYSTEM_NAME}.vhd" ] ; then
+        
+        echo ""
+        echo "SOPC Builder system was generated successfully..."
+        echo ""
+        
+    else
+        
+        echo ""
+        echo "SOPC Builder system was NOT generated successfully..."
+        echo ""
+        return 1
+        
+    fi
+    
+    return 0
+    
+}

@@ -1,0 +1,96 @@
+#
+#   This script is an error checking wrapper for a call to grep.
+#
+#   Script:
+#       
+#       check_critical_warning.shinc
+#   
+#   Input Arguments:
+#   
+#       REPORT_FILE : report file to search for critical-warning indications
+#
+#   Output Results:
+#   
+#       script returns an exit status of error if the REPORT_FILE contains
+#       critical-warning conditions, otherwise the script returns success.
+#
+#   Return Status:
+#       
+#       success         : 0
+#       error           : 1
+#       bad argument    : no return, exits with status 1
+#
+#   Required Environment Variables
+#   
+#       ABS_PATH_TO_PROJECT_DIR     : this is a path to the quartus project
+#                                     directory
+#
+
+check_critical_warning () {
+    
+    #
+    # validate the input arguments
+    #
+    if [ $# -ne 1 ] ; then
+        
+        echo ""
+        echo "ERROR: wrong number of arguments passed into this function"
+        echo "Expected 1 argument, but got $#"
+        echo ""
+        echo "USAGE: check_critical_warning <REPORT_FILE>"
+        echo ""
+        
+        exit 1
+        
+    fi
+    
+    #
+    # validate the required environment variables
+    #
+    PATH_2_PROJECT_DIR=${ABS_PATH_TO_PROJECT_DIR:?environment variable is required...}
+    
+    #
+    # extract the input arguments that we need
+    #
+    REPORT_FILE=${1}
+    
+    #
+    # validate that the report file exists
+    #
+    if [ ! -e "${PATH_2_PROJECT_DIR}/${REPORT_FILE}" ] ; then
+    
+        echo ""
+        echo "ERROR: Cannot locate report file \"${PATH_2_PROJECT_DIR}/${REPORT_FILE}\""
+        echo ""
+        exit 1
+    
+    fi
+
+    echo ""
+    echo "Scanning report file \"${REPORT_FILE}\" for \"critical-warning\" indications..."
+    echo ""
+    
+    #
+    # scan the report file for the string of interest
+    #
+    grep -i "Critical Warning" ${PATH_2_PROJECT_DIR}/${REPORT_FILE}
+    
+    if [ $? -eq 0 ] ; then
+    
+        echo ""
+        echo "Found matches to search string..."
+        echo ""
+        
+        return 1
+        
+    else
+    
+        echo ""
+        echo "No matches to search string found..."
+        echo ""
+        
+        return 0
+
+    fi
+
+}

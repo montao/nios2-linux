@@ -1,0 +1,9 @@
+terminal.c: In function 'init_terminal':
+terminal.c:95: warning: implicit declaration of function 'exit'
+terminal.c:95: warning: incompatible implicit declaration of built-in function 'exit'
+terminal.c:98: warning: incompatible implicit declaration of built-in function 'exit'
+terminal.c:100: warning: implicit declaration of function 'TerminalAutoFlush'
+terminal.c: In function 'ttyflush':
+terminal.c:127: warning: implicit declaration of function 'TerminalWrite'
+terminal.c: At top level:
+terminal.c:35: warning: 'sccsid' defined but not used

@@ -1,0 +1,4 @@
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/drivers/tty/serial/kgdboc.c: In function 'kgdboc_pre_exp_handler':
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/drivers/tty/serial/kgdboc.c:278: warning: statement with no effect
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/drivers/tty/serial/kgdboc.c: In function 'kgdboc_post_exp_handler':
+/data/dwesterg/nios2-linux/nios2-linux/linux-2.6/drivers/tty/serial/kgdboc.c:292: warning: statement with no effect
